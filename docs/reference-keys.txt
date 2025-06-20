@@ -1,3 +1,10 @@
 choosing-the-right-bayesian-model
-the-pool-of-tears
-a-caucus-race-and-a-long-tale
+bayesian-modeling-in-r-and-stan
+what-is-stan
+model-file
+fit-the-model
+mcmc-diagnostics
+parting-thoughts
+conclusions-summary
+references
+a-part-3
