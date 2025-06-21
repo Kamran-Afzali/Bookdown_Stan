@@ -2,7 +2,7 @@
 
 The aim of this post is to provide a quick overview and introduction to fitting Bayesian models using STAN and R. For this, I strongly recommend installing Rstudio, an integrated development environment that allows a "user-friendly" interaction with R.
 
-### What is STAN?
+## What is STAN?
 
 STAN is a tool for analysing Bayesian models using Markov Chain Monte Carlo (MCMC) methods. MCMC is a sampling method for estimating a probability distribution without knowing all of the features of the distribution. STAN is a probabilistic programming language and free software for specifying statistical models utilising Hamiltonian Monte Carlo methods (HMC), a type of MCMC algorithm. Stan works with the most widely used data-analysis languages including R and Python. In this quick overview, we'll focus on the rstan package and demonstrate how to fit STAN models with it. 
 
@@ -90,7 +90,7 @@ head(data)%>%kableExtra::kable()
 
 
 
-### Model file
+## Model file
 
 STAN models are written in an imperative programming language, which means the order in which you write the elements in your model file matters, i.e. you must first define your variables (e.g. integers, vectors, matrices, etc.), then the constraints that define the range of values your variable can take (e.g. only positive values for standard deviations), and finally the relationship between the variables. 
 
@@ -153,7 +153,7 @@ cat(stan_mod)
 ```
 
 
-### Fit the model
+## Fit the model
 
 We'll need to organise the information into a list for Stan. This list should contain everything we defined in the data block of our Stan code. Then it is possible to run the model with the stan function.
 
@@ -210,7 +210,7 @@ fit_rstan
 
 
 
-### MCMC diagnostics
+## MCMC diagnostics
 
 For Bayesian analysis, it is required to investigate the properties of the MCMC chains and the sampler in general, in addition to the standard model diagnostic checks (such as residual plots). Remember that the goal of MCMC sampling is to reproduce the posterior distribution of the model likelihood and priors by formulating a probability distribution. This method reliable, only if the MCMC samples accurately reflect the posterior. For each parameter, traceplots show the MCMC sample values after each iteration along the chain. Bad chain mixing (any pattern) indicates that the MCMC sample chains may not have spanned all aspects of the posterior distribution and that further iterations are needed to ensure that the distribution is accurately represented. Each parameter's autocorrelation graphic shows the degree of correlation between MCMC samples separated by different lags. The degree of correlation between each MCMC sample and itself, for example, is represented by a lag of (obviously this will be a correlation of ). The MCMC samples should be independent in order to obtain unbiased parameter estimations (uncorrelated). For each parameter, the potential scale reduction factor (Rhat) statistic offers a measure of sampling efficiency/effectiveness. All values should, in theory, be less than 1, if the sampler has values of or greater than 1, it is likely that it was not particularly efficient or effective. A misspecified model or extremely unclear priors that lead to misspecified parameter space might lead to this. We should have looked at the convergence diagnostics before looking at the summaries. For the effects model, we utilise the package mcmcplots to generate density and trace graphs. It's crucial to evaluate if the chains have converged when using MCMC to fit a model. To visually inspect MCMC diagnostics, we propose the bayesplot software. The bayesplot package includes routines for displaying MCMC diagnostics and supports model objects from both rstan and rstanarm. We'll show how to make a trace plot with the mcmc_trace() function and a plot of Rhat values with the mcmc rhat() function. By printing the model fit, we can examine the parameters in the console. For each parameter, we derive posterior means, standard errors, and quantiles. n eff and Rhat are two other terms we use. These are the results of Stan's engine's exploration of the parameter space. For the time being, it's enough to know that when Rhat is 1, everything is well.
 
@@ -235,12 +235,12 @@ fit_rstan %>%
 
 
 
-### Parting thoughts
+## Parting thoughts
 
 
 To finish this post, I'd like to point out that the rstanarm package makes it possible to fit STAN models without having to write them down and instead using standard R syntax, such as that found in a glm(). So, what's the point of learning all this STAN jargon? It depends: if you're merely fitting "classical" models to your data with no fanfare, just use rstanarm; it'll save you time and the models in this package are unquestionably better parametrized (i.e. faster) than the one I presented here. Learning STAN, on the other hand, is a good approach to get into a very flexible and strong language that will continue to evolve if you believe you will need to fit your own models one day. rstanarm is a package that acts as a user interface for Stan on the front end, and enables R users to create Bayesian models without needing to learn how to code in Stan. Using the standard formula and data, you can fit a model in rstanarm. If you want to use rstan to fit a different model type, you'll have to code it yourself. The prefix *stan_* precedes the model fitting functions and is followed by the model type. stan glm() and stan glmer() are two examples. A complete list of rstanarm functions can be found on Cran's package guide.
 
-### Conclusions Summary
+## Conclusions 
 
 This tutorial provided only a quick overview of how to fit simple linear regression models with the Bayesian software STAN and the rstan library and how to get a collection of useful summaries from the models. This is just a taste of the many models that STAN can fit; in future postings, we'll look at generalised linear models, as well as non-normal models with various link functions and hierarchical models. The STAN model as provided here is quite adaptable and able to accommodate datasets of various sizes. Although this may appear to be a more difficult technique than just fitting a linear model in a frequentist framework, the real benefits of Bayesian methods become apparent as the analysis becomes more sophisticated (which is often the case in real applications), the flexibility of Bayesian modelling makes it very simple to account for increasingly complicated models.
 

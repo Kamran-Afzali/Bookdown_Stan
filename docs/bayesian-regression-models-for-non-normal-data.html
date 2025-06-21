@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 3 Bayesian Regression Models for Non-Normal Data | Stan Bookdown</title>
+  <meta name="description" content="Chapter 3 Bayesian Regression Models for Non-Normal Data | Stan Bookdown" />
+  <meta name="generator" content="bookdown 0.43 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 3 Bayesian Regression Models for Non-Normal Data | Stan Bookdown" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 3 Bayesian Regression Models for Non-Normal Data | Stan Bookdown" />
+  
+  
+  
+
+<meta name="author" content="Kamran Afzali" />
+
+
+<meta name="date" content="2025-06-20" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="bayesian-modeling-in-r-and-stan.html"/>
+<link rel="next" href="appendix.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Stan</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Choosing the Right Bayesian Model</a></li>
+<li class="chapter" data-level="2" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html"><i class="fa fa-check"></i><b>2</b> Bayesian Modeling in R and Stan</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#what-is-stan"><i class="fa fa-check"></i><b>2.1</b> What is STAN?</a></li>
+<li class="chapter" data-level="2.2" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#model-file"><i class="fa fa-check"></i><b>2.2</b> Model file</a></li>
+<li class="chapter" data-level="2.3" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#fit-the-model"><i class="fa fa-check"></i><b>2.3</b> Fit the model</a></li>
+<li class="chapter" data-level="2.4" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#mcmc-diagnostics"><i class="fa fa-check"></i><b>2.4</b> MCMC diagnostics</a></li>
+<li class="chapter" data-level="2.5" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#parting-thoughts"><i class="fa fa-check"></i><b>2.5</b> Parting thoughts</a></li>
+<li class="chapter" data-level="2.6" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#conclusions"><i class="fa fa-check"></i><b>2.6</b> Conclusions</a></li>
+<li class="chapter" data-level="2.7" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#references"><i class="fa fa-check"></i><b>2.7</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="bayesian-regression-models-for-non-normal-data.html"><a href="bayesian-regression-models-for-non-normal-data.html"><i class="fa fa-check"></i><b>3</b> Bayesian Regression Models for Non-Normal Data</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="bayesian-regression-models-for-non-normal-data.html"><a href="bayesian-regression-models-for-non-normal-data.html#logistic-regression"><i class="fa fa-check"></i><b>3.1</b> Logistic Regression</a></li>
+<li class="chapter" data-level="3.2" data-path="bayesian-regression-models-for-non-normal-data.html"><a href="bayesian-regression-models-for-non-normal-data.html#negative-binomial"><i class="fa fa-check"></i><b>3.2</b> Negative Binomial</a></li>
+<li class="chapter" data-level="3.3" data-path="bayesian-regression-models-for-non-normal-data.html"><a href="bayesian-regression-models-for-non-normal-data.html#conclusion"><i class="fa fa-check"></i><b>3.3</b> Conclusion</a></li>
+<li class="chapter" data-level="3.4" data-path="bayesian-regression-models-for-non-normal-data.html"><a href="bayesian-regression-models-for-non-normal-data.html#references-1"><i class="fa fa-check"></i><b>3.4</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="appendix.html"><a href="appendix.html"><i class="fa fa-check"></i><b>4</b> Appendix</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="appendix.html"><a href="appendix.html#main-stan-distributions-cheatsheet"><i class="fa fa-check"></i><b>4.1</b> Main Stan Distributions Cheatsheet</a></li>
+<li class="chapter" data-level="4.2" data-path="appendix.html"><a href="appendix.html#main-stan-functions-cheatsheet"><i class="fa fa-check"></i><b>4.2</b> Main Stan Functions Cheatsheet</a></li>
+<li class="chapter" data-level="4.3" data-path="appendix.html"><a href="appendix.html#why-non-distribution-functions"><i class="fa fa-check"></i><b>4.3</b> Why Non-Distribution Functions?</a></li>
+<li class="chapter" data-level="4.4" data-path="appendix.html"><a href="appendix.html#stan-functions-cheatsheet"><i class="fa fa-check"></i><b>4.4</b> Stan Functions Cheatsheet</a>
+<ul>
+<li class="chapter" data-level="4.4.1" data-path="appendix.html"><a href="appendix.html#mathematical-functions"><i class="fa fa-check"></i><b>4.4.1</b> 1. Mathematical Functions</a></li>
+<li class="chapter" data-level="4.4.2" data-path="appendix.html"><a href="appendix.html#transformation-functions"><i class="fa fa-check"></i><b>4.4.2</b> 2. Transformation Functions</a></li>
+<li class="chapter" data-level="4.4.3" data-path="appendix.html"><a href="appendix.html#matrix-and-vector-operations"><i class="fa fa-check"></i><b>4.4.3</b> 3. Matrix and Vector Operations</a></li>
+<li class="chapter" data-level="4.4.4" data-path="appendix.html"><a href="appendix.html#utility-functions"><i class="fa fa-check"></i><b>4.4.4</b> 4. Utility Functions</a></li>
+<li class="chapter" data-level="4.4.5" data-path="appendix.html"><a href="appendix.html#specialized-solvers"><i class="fa fa-check"></i><b>4.4.5</b> 5. Specialized Solvers</a></li>
+</ul></li>
+<li class="chapter" data-level="4.5" data-path="appendix.html"><a href="appendix.html#example-hierarchical-linear-regression"><i class="fa fa-check"></i><b>4.5</b> Example: Hierarchical Linear Regression</a></li>
+<li class="chapter" data-level="4.6" data-path="appendix.html"><a href="appendix.html#tips-for-using-stan-functions"><i class="fa fa-check"></i><b>4.6</b> Tips for Using Stan Functions</a></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Stan Bookdown</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="bayesian-regression-models-for-non-normal-data" class="section level1 hasAnchor" number="3">
+<h1><span class="header-section-number">Chapter 3</span> Bayesian Regression Models for Non-Normal Data<a href="bayesian-regression-models-for-non-normal-data.html#bayesian-regression-models-for-non-normal-data" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>Our last post covered how to do bayesian regression for normally distributed data in R using STAN. In this post, we’ll take a look at how to fit a regression model adapted to non-normal model in STAN using two common distributions seen in empirical data, namely, binomial and negative-binomial. As mentioned before in Bayesian modelling we use a set of sampling methods known as Markov Chain Monte Carlo (MCMC), we define a statistical model and find probabilistic estimates for the parameters.</p>
+<div id="logistic-regression" class="section level2 hasAnchor" number="3.1">
+<h2><span class="header-section-number">3.1</span> Logistic Regression<a href="bayesian-regression-models-for-non-normal-data.html#logistic-regression" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The likelihood of a binary outcome, such as pass or fail, is estimated using logistic models (but this model can be extended to include more than two outcomes). This is accomplished by using the logit function to convert a standard regression. The main parameter that we focus on here describes odds of the outcome derived from probabilities and transformed using a logit function. The following is the code for a logistic regression model with one predictor and an intercept.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="bayesian-regression-models-for-non-normal-data.html#cb10-1" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="bayesian-regression-models-for-non-normal-data.html#cb11-1" tabindex="-1"></a><span class="fu">library</span>(kableExtra)</span>
+<span id="cb11-2"><a href="bayesian-regression-models-for-non-normal-data.html#cb11-2" tabindex="-1"></a><span class="fu">library</span>(arm) </span>
+<span id="cb11-3"><a href="bayesian-regression-models-for-non-normal-data.html#cb11-3" tabindex="-1"></a><span class="fu">library</span>(emdbook) </span>
+<span id="cb11-4"><a href="bayesian-regression-models-for-non-normal-data.html#cb11-4" tabindex="-1"></a><span class="fu">library</span>(rstan)</span>
+<span id="cb11-5"><a href="bayesian-regression-models-for-non-normal-data.html#cb11-5" tabindex="-1"></a><span class="fu">library</span>(rstanarm) </span>
+<span id="cb11-6"><a href="bayesian-regression-models-for-non-normal-data.html#cb11-6" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="bayesian-regression-models-for-non-normal-data.html#cb11-7" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb11-8"><a href="bayesian-regression-models-for-non-normal-data.html#cb11-8" tabindex="-1"></a> x1 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">10000</span>)           </span>
+<span id="cb11-9"><a href="bayesian-regression-models-for-non-normal-data.html#cb11-9" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="bayesian-regression-models-for-non-normal-data.html#cb11-10" tabindex="-1"></a> z <span class="ot">=</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span><span class="sc">*</span>x1       </span>
+<span id="cb11-11"><a href="bayesian-regression-models-for-non-normal-data.html#cb11-11" tabindex="-1"></a> pr <span class="ot">=</span> <span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>z))         </span>
+<span id="cb11-12"><a href="bayesian-regression-models-for-non-normal-data.html#cb11-12" tabindex="-1"></a> y <span class="ot">=</span> <span class="fu">rbinom</span>(<span class="dv">10000</span>,<span class="dv">1</span>,pr)     </span>
+<span id="cb11-13"><a href="bayesian-regression-models-for-non-normal-data.html#cb11-13" tabindex="-1"></a></span>
+<span id="cb11-14"><a href="bayesian-regression-models-for-non-normal-data.html#cb11-14" tabindex="-1"></a> df <span class="ot">=</span> <span class="fu">data.frame</span>(<span class="at">y=</span>y,<span class="at">x1=</span>x1)</span>
+<span id="cb11-15"><a href="bayesian-regression-models-for-non-normal-data.html#cb11-15" tabindex="-1"></a> </span>
+<span id="cb11-16"><a href="bayesian-regression-models-for-non-normal-data.html#cb11-16" tabindex="-1"></a></span>
+<span id="cb11-17"><a href="bayesian-regression-models-for-non-normal-data.html#cb11-17" tabindex="-1"></a> </span>
+<span id="cb11-18"><a href="bayesian-regression-models-for-non-normal-data.html#cb11-18" tabindex="-1"></a><span class="fu">head</span>(df)<span class="sc">%&gt;%</span>kableExtra<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th style="text-align:right;">
+y
+</th>
+<th style="text-align:right;">
+x1
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+-1.2070657
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.2774292
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1.0844412
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+-2.3456977
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0.4291247
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0.5060559
+</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="bayesian-regression-models-for-non-normal-data.html#cb12-1" tabindex="-1"></a> <span class="fu">glm</span>( y<span class="sc">~</span>x1,<span class="at">data=</span>df,<span class="at">family=</span><span class="st">&quot;binomial&quot;</span>)<span class="sc">%&gt;%</span><span class="fu">summary</span>()<span class="sc">%&gt;%</span><span class="fu">pluck</span>(coefficients)<span class="sc">%&gt;%</span>kableExtra<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+Estimate
+</th>
+<th style="text-align:right;">
+Std. Error
+</th>
+<th style="text-align:right;">
+z value
+</th>
+<th style="text-align:right;">
+Pr(&gt;|z|)
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+1.036922
+</td>
+<td style="text-align:right;">
+0.0294863
+</td>
+<td style="text-align:right;">
+35.16621
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+x1
+</td>
+<td style="text-align:right;">
+1.979352
+</td>
+<td style="text-align:right;">
+0.0417219
+</td>
+<td style="text-align:right;">
+47.44162
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="bayesian-regression-models-for-non-normal-data.html#cb13-1" tabindex="-1"></a>   model_stan <span class="ot">=</span> <span class="st">&quot;</span></span>
+<span id="cb13-2"><a href="bayesian-regression-models-for-non-normal-data.html#cb13-2" tabindex="-1"></a><span class="st">   data {</span></span>
+<span id="cb13-3"><a href="bayesian-regression-models-for-non-normal-data.html#cb13-3" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; N;</span></span>
+<span id="cb13-4"><a href="bayesian-regression-models-for-non-normal-data.html#cb13-4" tabindex="-1"></a><span class="st">  vector[N] x;</span></span>
+<span id="cb13-5"><a href="bayesian-regression-models-for-non-normal-data.html#cb13-5" tabindex="-1"></a><span class="st">  int&lt;lower=0,upper=1&gt; y[N];</span></span>
+<span id="cb13-6"><a href="bayesian-regression-models-for-non-normal-data.html#cb13-6" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb13-7"><a href="bayesian-regression-models-for-non-normal-data.html#cb13-7" tabindex="-1"></a><span class="st">parameters {</span></span>
+<span id="cb13-8"><a href="bayesian-regression-models-for-non-normal-data.html#cb13-8" tabindex="-1"></a><span class="st">  real alpha;</span></span>
+<span id="cb13-9"><a href="bayesian-regression-models-for-non-normal-data.html#cb13-9" tabindex="-1"></a><span class="st">  real beta;</span></span>
+<span id="cb13-10"><a href="bayesian-regression-models-for-non-normal-data.html#cb13-10" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb13-11"><a href="bayesian-regression-models-for-non-normal-data.html#cb13-11" tabindex="-1"></a><span class="st">model {</span></span>
+<span id="cb13-12"><a href="bayesian-regression-models-for-non-normal-data.html#cb13-12" tabindex="-1"></a><span class="st">  y ~ bernoulli_logit(alpha + beta * x);</span></span>
+<span id="cb13-13"><a href="bayesian-regression-models-for-non-normal-data.html#cb13-13" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb13-14"><a href="bayesian-regression-models-for-non-normal-data.html#cb13-14" tabindex="-1"></a><span class="st">   &quot;</span></span>
+<span id="cb13-15"><a href="bayesian-regression-models-for-non-normal-data.html#cb13-15" tabindex="-1"></a><span class="fu">writeLines</span>(model_stan, <span class="at">con =</span> <span class="st">&quot;model_stan.stan&quot;</span>)</span>
+<span id="cb13-16"><a href="bayesian-regression-models-for-non-normal-data.html#cb13-16" tabindex="-1"></a>   <span class="fu">cat</span>(model_stan)</span></code></pre></div>
+<pre><code>## 
+##    data {
+##   int&lt;lower=0&gt; N;
+##   vector[N] x;
+##   int&lt;lower=0,upper=1&gt; y[N];
+## }
+## parameters {
+##   real alpha;
+##   real beta;
+## }
+## model {
+##   y ~ bernoulli_logit(alpha + beta * x);
+## }
+## </code></pre>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="bayesian-regression-models-for-non-normal-data.html#cb15-1" tabindex="-1"></a>stan_data <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb15-2"><a href="bayesian-regression-models-for-non-normal-data.html#cb15-2" tabindex="-1"></a>  <span class="at">N =</span> <span class="dv">10000</span>,</span>
+<span id="cb15-3"><a href="bayesian-regression-models-for-non-normal-data.html#cb15-3" tabindex="-1"></a>  <span class="at">x =</span> df<span class="sc">$</span>x1,</span>
+<span id="cb15-4"><a href="bayesian-regression-models-for-non-normal-data.html#cb15-4" tabindex="-1"></a>  <span class="at">y =</span> df<span class="sc">$</span>y</span>
+<span id="cb15-5"><a href="bayesian-regression-models-for-non-normal-data.html#cb15-5" tabindex="-1"></a>)</span>
+<span id="cb15-6"><a href="bayesian-regression-models-for-non-normal-data.html#cb15-6" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="bayesian-regression-models-for-non-normal-data.html#cb15-7" tabindex="-1"></a>fit_rstan <span class="ot">&lt;-</span> rstan<span class="sc">::</span><span class="fu">stan</span>(</span>
+<span id="cb15-8"><a href="bayesian-regression-models-for-non-normal-data.html#cb15-8" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">&quot;model_stan.stan&quot;</span>,</span>
+<span id="cb15-9"><a href="bayesian-regression-models-for-non-normal-data.html#cb15-9" tabindex="-1"></a>  <span class="at">data =</span> stan_data</span>
+<span id="cb15-10"><a href="bayesian-regression-models-for-non-normal-data.html#cb15-10" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="bayesian-regression-models-for-non-normal-data.html#cb16-1" tabindex="-1"></a>fit_rstan</span></code></pre></div>
+<pre><code>## Inference for Stan model: anon_model.
+## 4 chains, each with iter=2000; warmup=1000; thin=1; 
+## post-warmup draws per chain=1000, total post-warmup draws=4000.
+## 
+##           mean se_mean   sd     2.5%      25%      50%      75%    97.5% n_eff
+## alpha     1.04    0.00 0.03     0.98     1.02     1.04     1.06     1.10  1936
+## beta      1.98    0.00 0.04     1.90     1.95     1.98     2.01     2.06  1804
+## lp__  -4339.45    0.03 1.05 -4342.29 -4339.80 -4339.12 -4338.74 -4338.49  1479
+##       Rhat
+## alpha    1
+## beta     1
+## lp__     1
+## 
+## Samples were drawn using NUTS(diag_e) at Tue Jun 21 14:03:59 2022.
+## For each parameter, n_eff is a crude measure of effective sample size,
+## and Rhat is the potential scale reduction factor on split chains (at 
+## convergence, Rhat=1).</code></pre>
+<p>This also can be expanded to several predictors. Below you can find the code as well as some recommendations for making sense of priors.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="bayesian-regression-models-for-non-normal-data.html#cb18-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb18-2"><a href="bayesian-regression-models-for-non-normal-data.html#cb18-2" tabindex="-1"></a> x1 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">10000</span>)           </span>
+<span id="cb18-3"><a href="bayesian-regression-models-for-non-normal-data.html#cb18-3" tabindex="-1"></a> x2 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">10000</span>)</span>
+<span id="cb18-4"><a href="bayesian-regression-models-for-non-normal-data.html#cb18-4" tabindex="-1"></a> x3 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">10000</span>)</span>
+<span id="cb18-5"><a href="bayesian-regression-models-for-non-normal-data.html#cb18-5" tabindex="-1"></a> z <span class="ot">=</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span><span class="sc">*</span>x1 <span class="sc">+</span> <span class="dv">3</span><span class="sc">*</span>x2 <span class="sc">-</span> <span class="dv">1</span><span class="sc">*</span>x3       </span>
+<span id="cb18-6"><a href="bayesian-regression-models-for-non-normal-data.html#cb18-6" tabindex="-1"></a> pr <span class="ot">=</span> <span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>z))         </span>
+<span id="cb18-7"><a href="bayesian-regression-models-for-non-normal-data.html#cb18-7" tabindex="-1"></a> y <span class="ot">=</span> <span class="fu">rbinom</span>(<span class="dv">10000</span>,<span class="dv">1</span>,pr)     </span>
+<span id="cb18-8"><a href="bayesian-regression-models-for-non-normal-data.html#cb18-8" tabindex="-1"></a></span>
+<span id="cb18-9"><a href="bayesian-regression-models-for-non-normal-data.html#cb18-9" tabindex="-1"></a> df2 <span class="ot">=</span> <span class="fu">data.frame</span>(<span class="at">y=</span>y,<span class="at">x1=</span>x1,<span class="at">x2=</span>x2,<span class="at">x3=</span>x3)</span>
+<span id="cb18-10"><a href="bayesian-regression-models-for-non-normal-data.html#cb18-10" tabindex="-1"></a> </span>
+<span id="cb18-11"><a href="bayesian-regression-models-for-non-normal-data.html#cb18-11" tabindex="-1"></a></span>
+<span id="cb18-12"><a href="bayesian-regression-models-for-non-normal-data.html#cb18-12" tabindex="-1"></a> </span>
+<span id="cb18-13"><a href="bayesian-regression-models-for-non-normal-data.html#cb18-13" tabindex="-1"></a><span class="fu">head</span>(df2)<span class="sc">%&gt;%</span>kableExtra<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th style="text-align:right;">
+y
+</th>
+<th style="text-align:right;">
+x1
+</th>
+<th style="text-align:right;">
+x2
+</th>
+<th style="text-align:right;">
+x3
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+-1.2070657
+</td>
+<td style="text-align:right;">
+-1.8168975
+</td>
+<td style="text-align:right;">
+-1.6878627
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0.2774292
+</td>
+<td style="text-align:right;">
+0.6271668
+</td>
+<td style="text-align:right;">
+-0.9552011
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1.0844412
+</td>
+<td style="text-align:right;">
+0.5180921
+</td>
+<td style="text-align:right;">
+-0.6480572
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+-2.3456977
+</td>
+<td style="text-align:right;">
+0.1409218
+</td>
+<td style="text-align:right;">
+0.2610342
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0.4291247
+</td>
+<td style="text-align:right;">
+1.4572719
+</td>
+<td style="text-align:right;">
+-1.2196940
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0.5060559
+</td>
+<td style="text-align:right;">
+-0.4935965
+</td>
+<td style="text-align:right;">
+-1.5501888
+</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="bayesian-regression-models-for-non-normal-data.html#cb19-1" tabindex="-1"></a> <span class="fu">glm</span>( y<span class="sc">~</span>x1<span class="sc">+</span>x2<span class="sc">+</span>x3,<span class="at">data=</span>df2,<span class="at">family=</span><span class="st">&quot;binomial&quot;</span>)<span class="sc">%&gt;%</span><span class="fu">summary</span>()<span class="sc">%&gt;%</span><span class="fu">pluck</span>(coefficients)<span class="sc">%&gt;%</span>kableExtra<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+Estimate
+</th>
+<th style="text-align:right;">
+Std. Error
+</th>
+<th style="text-align:right;">
+z value
+</th>
+<th style="text-align:right;">
+Pr(&gt;|z|)
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+1.0108545
+</td>
+<td style="text-align:right;">
+0.0367817
+</td>
+<td style="text-align:right;">
+27.48253
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+x1
+</td>
+<td style="text-align:right;">
+1.9471836
+</td>
+<td style="text-align:right;">
+0.0494298
+</td>
+<td style="text-align:right;">
+39.39289
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+x2
+</td>
+<td style="text-align:right;">
+2.9598129
+</td>
+<td style="text-align:right;">
+0.0641890
+</td>
+<td style="text-align:right;">
+46.11088
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+x3
+</td>
+<td style="text-align:right;">
+-0.9448316
+</td>
+<td style="text-align:right;">
+0.0372918
+</td>
+<td style="text-align:right;">
+-25.33619
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="bayesian-regression-models-for-non-normal-data.html#cb20-1" tabindex="-1"></a>model_stan2 <span class="ot">=</span><span class="st">&quot;</span></span>
+<span id="cb20-2"><a href="bayesian-regression-models-for-non-normal-data.html#cb20-2" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="bayesian-regression-models-for-non-normal-data.html#cb20-3" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="bayesian-regression-models-for-non-normal-data.html#cb20-4" tabindex="-1"></a><span class="st">data {</span></span>
+<span id="cb20-5"><a href="bayesian-regression-models-for-non-normal-data.html#cb20-5" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; N;   // number of observations</span></span>
+<span id="cb20-6"><a href="bayesian-regression-models-for-non-normal-data.html#cb20-6" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; K;   // number of predictors</span></span>
+<span id="cb20-7"><a href="bayesian-regression-models-for-non-normal-data.html#cb20-7" tabindex="-1"></a><span class="st">  matrix[N, K] X;   // predictor matrix</span></span>
+<span id="cb20-8"><a href="bayesian-regression-models-for-non-normal-data.html#cb20-8" tabindex="-1"></a><span class="st">  int&lt;lower=0,upper=1&gt; y[N];      // outcome vector</span></span>
+<span id="cb20-9"><a href="bayesian-regression-models-for-non-normal-data.html#cb20-9" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb20-10"><a href="bayesian-regression-models-for-non-normal-data.html#cb20-10" tabindex="-1"></a><span class="st">parameters {</span></span>
+<span id="cb20-11"><a href="bayesian-regression-models-for-non-normal-data.html#cb20-11" tabindex="-1"></a><span class="st">  real alpha;           // intercept</span></span>
+<span id="cb20-12"><a href="bayesian-regression-models-for-non-normal-data.html#cb20-12" tabindex="-1"></a><span class="st">  vector[K] beta;       // coefficients for predictors</span></span>
+<span id="cb20-13"><a href="bayesian-regression-models-for-non-normal-data.html#cb20-13" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb20-14"><a href="bayesian-regression-models-for-non-normal-data.html#cb20-14" tabindex="-1"></a><span class="st">model {</span></span>
+<span id="cb20-15"><a href="bayesian-regression-models-for-non-normal-data.html#cb20-15" tabindex="-1"></a><span class="st">  y ~ bernoulli_logit(alpha + X * beta); </span></span>
+<span id="cb20-16"><a href="bayesian-regression-models-for-non-normal-data.html#cb20-16" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb20-17"><a href="bayesian-regression-models-for-non-normal-data.html#cb20-17" tabindex="-1"></a></span>
+<span id="cb20-18"><a href="bayesian-regression-models-for-non-normal-data.html#cb20-18" tabindex="-1"></a><span class="st">&quot;</span></span>
+<span id="cb20-19"><a href="bayesian-regression-models-for-non-normal-data.html#cb20-19" tabindex="-1"></a></span>
+<span id="cb20-20"><a href="bayesian-regression-models-for-non-normal-data.html#cb20-20" tabindex="-1"></a><span class="fu">writeLines</span>(model_stan2, <span class="at">con =</span> <span class="st">&quot;model_stan2.stan&quot;</span>)</span>
+<span id="cb20-21"><a href="bayesian-regression-models-for-non-normal-data.html#cb20-21" tabindex="-1"></a><span class="fu">cat</span>(model_stan2)</span></code></pre></div>
+<pre><code>## 
+## 
+## 
+## data {
+##   int&lt;lower=0&gt; N;   // number of observations
+##   int&lt;lower=0&gt; K;   // number of predictors
+##   matrix[N, K] X;   // predictor matrix
+##   int&lt;lower=0,upper=1&gt; y[N];      // outcome vector
+## }
+## parameters {
+##   real alpha;           // intercept
+##   vector[K] beta;       // coefficients for predictors
+## }
+## model {
+##   y ~ bernoulli_logit(alpha + X * beta); 
+## }</code></pre>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="bayesian-regression-models-for-non-normal-data.html#cb22-1" tabindex="-1"></a>predictors <span class="ot">&lt;-</span> df2[,<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>]</span>
+<span id="cb22-2"><a href="bayesian-regression-models-for-non-normal-data.html#cb22-2" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="bayesian-regression-models-for-non-normal-data.html#cb22-3" tabindex="-1"></a>stan_data2 <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb22-4"><a href="bayesian-regression-models-for-non-normal-data.html#cb22-4" tabindex="-1"></a>  <span class="at">N =</span> <span class="dv">10000</span>,</span>
+<span id="cb22-5"><a href="bayesian-regression-models-for-non-normal-data.html#cb22-5" tabindex="-1"></a>  <span class="at">K =</span> <span class="dv">3</span>,</span>
+<span id="cb22-6"><a href="bayesian-regression-models-for-non-normal-data.html#cb22-6" tabindex="-1"></a>  <span class="at">X =</span> predictors,</span>
+<span id="cb22-7"><a href="bayesian-regression-models-for-non-normal-data.html#cb22-7" tabindex="-1"></a>  <span class="at">y =</span> df2<span class="sc">$</span>y</span>
+<span id="cb22-8"><a href="bayesian-regression-models-for-non-normal-data.html#cb22-8" tabindex="-1"></a>)</span>
+<span id="cb22-9"><a href="bayesian-regression-models-for-non-normal-data.html#cb22-9" tabindex="-1"></a></span>
+<span id="cb22-10"><a href="bayesian-regression-models-for-non-normal-data.html#cb22-10" tabindex="-1"></a></span>
+<span id="cb22-11"><a href="bayesian-regression-models-for-non-normal-data.html#cb22-11" tabindex="-1"></a>fit_rstan2 <span class="ot">&lt;-</span> rstan<span class="sc">::</span><span class="fu">stan</span>(</span>
+<span id="cb22-12"><a href="bayesian-regression-models-for-non-normal-data.html#cb22-12" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">&quot;model_stan2.stan&quot;</span>,</span>
+<span id="cb22-13"><a href="bayesian-regression-models-for-non-normal-data.html#cb22-13" tabindex="-1"></a>  <span class="at">data =</span> stan_data2</span>
+<span id="cb22-14"><a href="bayesian-regression-models-for-non-normal-data.html#cb22-14" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## Trying to compile a simple C file</code></pre>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="bayesian-regression-models-for-non-normal-data.html#cb24-1" tabindex="-1"></a>fit_rstan2</span></code></pre></div>
+<pre><code>## Inference for Stan model: anon_model.
+## 4 chains, each with iter=2000; warmup=1000; thin=1; 
+## post-warmup draws per chain=1000, total post-warmup draws=4000.
+## 
+##             mean se_mean   sd     2.5%      25%      50%      75%    97.5%
+## alpha       1.01    0.00 0.04     0.94     0.99     1.01     1.04     1.08
+## beta[1]     1.95    0.00 0.05     1.85     1.92     1.95     1.98     2.05
+## beta[2]     2.96    0.00 0.06     2.84     2.92     2.96     3.00     3.09
+## beta[3]    -0.95    0.00 0.04    -1.02    -0.97    -0.95    -0.92    -0.87
+## lp__    -3006.39    0.03 1.38 -3009.82 -3007.07 -3006.08 -3005.37 -3004.68
+##         n_eff Rhat
+## alpha    2845    1
+## beta[1]  2338    1
+## beta[2]  2221    1
+## beta[3]  2160    1
+## lp__     1788    1
+## 
+## Samples were drawn using NUTS(diag_e) at Tue Jun 21 14:05:38 2022.
+## For each parameter, n_eff is a crude measure of effective sample size,
+## and Rhat is the potential scale reduction factor on split chains (at 
+## convergence, Rhat=1).</code></pre>
+</div>
+<div id="negative-binomial" class="section level2 hasAnchor" number="3.2">
+<h2><span class="header-section-number">3.2</span> Negative Binomial<a href="bayesian-regression-models-for-non-normal-data.html#negative-binomial" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The Poisson distribution, which assumes that the variance is equal to the mean, is a popular choice for modelling count data. The data are said to be overdispersed when the variance exceeds the mean, the Negative Binomial distribution can be used in this case. Note that the negative binomial distribution is a probability distribution of discrete random variables.</p>
+<p>Let’s say we have a response variable y that has a negative binomial distribution and is influenced by a collection of k explanatory variables X. The negative binomial distribution to model this data has two parameters:
+The μ or the expected value that need to be positive so a log link function can be used to map the linear predictor (the explanatory variables times the regression parameters) and ϕ which is the overdispersion parameter, where a small value means a large deviation from a Poisson distribution, as ϕ gets larger the negative binomial looks more and more like a Poisson distribution.</p>
+<p>Let’s simulate some data and fit a STAN model to them:</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="bayesian-regression-models-for-non-normal-data.html#cb26-1" tabindex="-1"></a>N<span class="ot">&lt;-</span><span class="dv">100000</span></span>
+<span id="cb26-2"><a href="bayesian-regression-models-for-non-normal-data.html#cb26-2" tabindex="-1"></a>df3 <span class="ot">&lt;-</span><span class="fu">data.frame</span>(<span class="at">x1=</span><span class="fu">runif</span>(N,<span class="sc">-</span><span class="dv">2</span>,<span class="dv">2</span>),<span class="at">x2=</span><span class="fu">runif</span>(N,<span class="sc">-</span><span class="dv">2</span>,<span class="dv">2</span>))</span>
+<span id="cb26-3"><a href="bayesian-regression-models-for-non-normal-data.html#cb26-3" tabindex="-1"></a><span class="co">#the model</span></span>
+<span id="cb26-4"><a href="bayesian-regression-models-for-non-normal-data.html#cb26-4" tabindex="-1"></a>X<span class="ot">&lt;-</span><span class="fu">model.matrix</span>(<span class="sc">~</span>x1<span class="sc">*</span>x2,df3)</span>
+<span id="cb26-5"><a href="bayesian-regression-models-for-non-normal-data.html#cb26-5" tabindex="-1"></a>K<span class="ot">&lt;-</span><span class="fu">dim</span>(X)[<span class="dv">2</span>] <span class="co">#number of regression params</span></span>
+<span id="cb26-6"><a href="bayesian-regression-models-for-non-normal-data.html#cb26-6" tabindex="-1"></a><span class="co">#the regression slopes</span></span>
+<span id="cb26-7"><a href="bayesian-regression-models-for-non-normal-data.html#cb26-7" tabindex="-1"></a>betas<span class="ot">&lt;-</span><span class="fu">runif</span>(K,<span class="sc">-</span><span class="dv">1</span>,<span class="dv">1</span>)</span>
+<span id="cb26-8"><a href="bayesian-regression-models-for-non-normal-data.html#cb26-8" tabindex="-1"></a><span class="co">#the overdispersion for the simulated data</span></span>
+<span id="cb26-9"><a href="bayesian-regression-models-for-non-normal-data.html#cb26-9" tabindex="-1"></a>phi<span class="ot">&lt;-</span><span class="dv">5</span></span>
+<span id="cb26-10"><a href="bayesian-regression-models-for-non-normal-data.html#cb26-10" tabindex="-1"></a><span class="co">#simulate the response</span></span>
+<span id="cb26-11"><a href="bayesian-regression-models-for-non-normal-data.html#cb26-11" tabindex="-1"></a>y_nb<span class="ot">&lt;-</span><span class="fu">rnbinom</span>(N,<span class="at">size=</span>phi,<span class="at">mu=</span><span class="fu">exp</span>(X<span class="sc">%*%</span>betas))</span>
+<span id="cb26-12"><a href="bayesian-regression-models-for-non-normal-data.html#cb26-12" tabindex="-1"></a><span class="fu">hist</span>(y_nb)</span></code></pre></div>
+<p><img src="/images/stan2_hist-1.png" /></p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="bayesian-regression-models-for-non-normal-data.html#cb27-1" tabindex="-1"></a>MASS<span class="sc">::</span><span class="fu">glm.nb</span>(y_nb <span class="sc">~</span> X[,<span class="dv">2</span><span class="sc">:</span>K])<span class="sc">%&gt;%</span><span class="fu">summary</span>()<span class="sc">%&gt;%</span><span class="fu">pluck</span>(coefficients)<span class="sc">%&gt;%</span>kableExtra<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+Estimate
+</th>
+<th style="text-align:right;">
+Std. Error
+</th>
+<th style="text-align:right;">
+z value
+</th>
+<th style="text-align:right;">
+Pr(&gt;|z|)
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+0.0788902
+</td>
+<td style="text-align:right;">
+0.0039192
+</td>
+<td style="text-align:right;">
+20.12938
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X[, 2:K]x1
+</td>
+<td style="text-align:right;">
+-0.0815968
+</td>
+<td style="text-align:right;">
+0.0032703
+</td>
+<td style="text-align:right;">
+-24.95109
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X[, 2:K]x2
+</td>
+<td style="text-align:right;">
+0.7941334
+</td>
+<td style="text-align:right;">
+0.0031740
+</td>
+<td style="text-align:right;">
+250.20341
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X[, 2:K]x1:x2
+</td>
+<td style="text-align:right;">
+0.4301282
+</td>
+<td style="text-align:right;">
+0.0026264
+</td>
+<td style="text-align:right;">
+163.77308
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+</tbody>
+</table>
+<pre><code>data {
+  int N; //the number of observations
+  int K; //the number of columns in the model matrix
+  int y[N]; //the response
+  matrix[N,K] X; //the model matrix
+}
+parameters {
+  vector[K] beta; //the regression parameters
+  real phi; //the overdispersion parameters
+}
+transformed parameters {
+  vector[N] mu;//the linear predictor
+  mu &lt;- exp(X*beta); //using the log link 
+}
+model {  
+  beta[1] ~ cauchy(0,10); //prior for the intercept following Gelman 2008
+
+  for(i in 2:K)
+   beta[i] ~ cauchy(0,2.5);//prior for the slopes following Gelman 2008
+  
+  y ~ neg_binomial_2(mu,phi);
+}
+generated quantities {
+ vector[N] y_rep;
+ for(n in 1:N){
+  y_rep[n] &lt;- neg_binomial_2_rng(mu[n],phi); //posterior draws to get posterior predictive checks
+ }
+}
+</code></pre>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="bayesian-regression-models-for-non-normal-data.html#cb29-1" tabindex="-1"></a>stan_mod <span class="ot">=</span> <span class="st">&quot;data {</span></span>
+<span id="cb29-2"><a href="bayesian-regression-models-for-non-normal-data.html#cb29-2" tabindex="-1"></a><span class="st">  int N; //the number of observations</span></span>
+<span id="cb29-3"><a href="bayesian-regression-models-for-non-normal-data.html#cb29-3" tabindex="-1"></a><span class="st">  int K; //the number of columns in the model matrix</span></span>
+<span id="cb29-4"><a href="bayesian-regression-models-for-non-normal-data.html#cb29-4" tabindex="-1"></a><span class="st">  int y[N]; //the response</span></span>
+<span id="cb29-5"><a href="bayesian-regression-models-for-non-normal-data.html#cb29-5" tabindex="-1"></a><span class="st">  matrix[N,K] X; //the model matrix</span></span>
+<span id="cb29-6"><a href="bayesian-regression-models-for-non-normal-data.html#cb29-6" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb29-7"><a href="bayesian-regression-models-for-non-normal-data.html#cb29-7" tabindex="-1"></a><span class="st">parameters {</span></span>
+<span id="cb29-8"><a href="bayesian-regression-models-for-non-normal-data.html#cb29-8" tabindex="-1"></a><span class="st">  vector[K] beta; //the regression parameters</span></span>
+<span id="cb29-9"><a href="bayesian-regression-models-for-non-normal-data.html#cb29-9" tabindex="-1"></a><span class="st">  real phi; //the overdispersion parameters</span></span>
+<span id="cb29-10"><a href="bayesian-regression-models-for-non-normal-data.html#cb29-10" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb29-11"><a href="bayesian-regression-models-for-non-normal-data.html#cb29-11" tabindex="-1"></a><span class="st">transformed parameters {</span></span>
+<span id="cb29-12"><a href="bayesian-regression-models-for-non-normal-data.html#cb29-12" tabindex="-1"></a><span class="st">  vector[N] mu;//the linear predictor</span></span>
+<span id="cb29-13"><a href="bayesian-regression-models-for-non-normal-data.html#cb29-13" tabindex="-1"></a><span class="st">  mu &lt;- exp(X*beta); //using the log link </span></span>
+<span id="cb29-14"><a href="bayesian-regression-models-for-non-normal-data.html#cb29-14" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb29-15"><a href="bayesian-regression-models-for-non-normal-data.html#cb29-15" tabindex="-1"></a><span class="st">model {  </span></span>
+<span id="cb29-16"><a href="bayesian-regression-models-for-non-normal-data.html#cb29-16" tabindex="-1"></a><span class="st">  beta[1] ~ cauchy(0,10); //prior for the intercept following Gelman 2008</span></span>
+<span id="cb29-17"><a href="bayesian-regression-models-for-non-normal-data.html#cb29-17" tabindex="-1"></a></span>
+<span id="cb29-18"><a href="bayesian-regression-models-for-non-normal-data.html#cb29-18" tabindex="-1"></a><span class="st">  for(i in 2:K)</span></span>
+<span id="cb29-19"><a href="bayesian-regression-models-for-non-normal-data.html#cb29-19" tabindex="-1"></a><span class="st">   beta[i] ~ cauchy(0,2.5);//prior for the slopes following Gelman 2008</span></span>
+<span id="cb29-20"><a href="bayesian-regression-models-for-non-normal-data.html#cb29-20" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb29-21"><a href="bayesian-regression-models-for-non-normal-data.html#cb29-21" tabindex="-1"></a><span class="st">  y ~ neg_binomial_2(mu,phi);</span></span>
+<span id="cb29-22"><a href="bayesian-regression-models-for-non-normal-data.html#cb29-22" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb29-23"><a href="bayesian-regression-models-for-non-normal-data.html#cb29-23" tabindex="-1"></a><span class="st">&quot;</span></span>
+<span id="cb29-24"><a href="bayesian-regression-models-for-non-normal-data.html#cb29-24" tabindex="-1"></a><span class="fu">writeLines</span>(stan_mod, <span class="at">con =</span> <span class="st">&quot;stan_mod.stan&quot;</span>)</span>
+<span id="cb29-25"><a href="bayesian-regression-models-for-non-normal-data.html#cb29-25" tabindex="-1"></a></span>
+<span id="cb29-26"><a href="bayesian-regression-models-for-non-normal-data.html#cb29-26" tabindex="-1"></a><span class="fu">cat</span>(stan_mod)</span></code></pre></div>
+<pre><code>## data {
+##   int N; //the number of observations
+##   int K; //the number of columns in the model matrix
+##   int y[N]; //the response
+##   matrix[N,K] X; //the model matrix
+## }
+## parameters {
+##   vector[K] beta; //the regression parameters
+##   real phi; //the overdispersion parameters
+## }
+## transformed parameters {
+##   vector[N] mu;//the linear predictor
+##   mu &lt;- exp(X*beta); //using the log link 
+## }
+## model {  
+##   beta[1] ~ cauchy(0,10); //prior for the intercept following Gelman 2008
+## 
+##   for(i in 2:K)
+##    beta[i] ~ cauchy(0,2.5);//prior for the slopes following Gelman 2008
+##   
+##   y ~ neg_binomial_2(mu,phi);
+## }</code></pre>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="bayesian-regression-models-for-non-normal-data.html#cb31-1" tabindex="-1"></a>stan_data3 <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb31-2"><a href="bayesian-regression-models-for-non-normal-data.html#cb31-2" tabindex="-1"></a>  <span class="at">N =</span> N,</span>
+<span id="cb31-3"><a href="bayesian-regression-models-for-non-normal-data.html#cb31-3" tabindex="-1"></a>  <span class="at">K =</span> K,</span>
+<span id="cb31-4"><a href="bayesian-regression-models-for-non-normal-data.html#cb31-4" tabindex="-1"></a>  <span class="at">X =</span> X,</span>
+<span id="cb31-5"><a href="bayesian-regression-models-for-non-normal-data.html#cb31-5" tabindex="-1"></a>  <span class="at">y =</span> y_nb</span>
+<span id="cb31-6"><a href="bayesian-regression-models-for-non-normal-data.html#cb31-6" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="bayesian-regression-models-for-non-normal-data.html#cb32-1" tabindex="-1"></a>fit_rstan3 <span class="ot">&lt;-</span> rstan<span class="sc">::</span><span class="fu">stan</span>(</span>
+<span id="cb32-2"><a href="bayesian-regression-models-for-non-normal-data.html#cb32-2" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">&quot;stan_mod.stan&quot;</span>,</span>
+<span id="cb32-3"><a href="bayesian-regression-models-for-non-normal-data.html#cb32-3" tabindex="-1"></a>  <span class="at">data =</span> stan_data3</span>
+<span id="cb32-4"><a href="bayesian-regression-models-for-non-normal-data.html#cb32-4" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="bayesian-regression-models-for-non-normal-data.html#cb33-1" tabindex="-1"></a>fit_rstan3<span class="sc">%&gt;%</span><span class="fu">summary</span>()</span></code></pre></div>
+<pre><code>## $summary
+##                     mean      se_mean           sd          2.5%           25%
+## beta[1]     7.899069e-02 6.825217e-05 0.0039010484  7.162531e-02  7.635923e-02
+## beta[2]    -8.157657e-02 5.689044e-05 0.0032236243 -8.786688e-02 -8.376046e-02
+## beta[3]     7.941039e-01 5.618629e-05 0.0031476117  7.880475e-01  7.919520e-01
+## beta[4]     4.301036e-01 4.552321e-05 0.0026265744  4.248578e-01  4.283603e-01
+## phi         4.908958e+00 2.039012e-03 0.0831883094  4.745765e+00  4.854542e+00
+</code></pre>
+</div>
+<div id="conclusion" class="section level2 hasAnchor" number="3.3">
+<h2><span class="header-section-number">3.3</span> Conclusion<a href="bayesian-regression-models-for-non-normal-data.html#conclusion" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>This tutorial provided only a quick overview of how to fit logistic and negative binomial regression models with the Bayesian software STAN using the rstan library/API and to extract a collection of useful summaries from the models. Future postings will address the question of outliers and the use of robust linear models.</p>
+</div>
+<div id="references-1" class="section level2 hasAnchor" number="3.4">
+<h2><span class="header-section-number">3.4</span> References<a href="bayesian-regression-models-for-non-normal-data.html#references-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<ul>
+<li><p><a href="https://mc-stan.org/docs/2_18/functions-reference/">Stan Functions Reference</a></p></li>
+<li><p><a href="https://mc-stan.org/docs/2_29/stan-users-guide/index.html#overview">Stan Users Guide</a></p></li>
+<li><p><a href="https://www.alexpghayes.com/blog/some-things-ive-learned-about-stan/">Some things i’ve learned about stan</a></p></li>
+<li><p><a href="https://rpruim.github.io/StanWorkshop/">Stan (+R) Workshop</a></p></li>
+</ul>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="bayesian-modeling-in-r-and-stan.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="appendix.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+  "sharing": {
+    "github": false,
+    "facebook": true,
+    "twitter": true,
+    "linkedin": false,
+    "weibo": false,
+    "instapaper": false,
+    "vk": false,
+    "whatsapp": false,
+    "all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+  },
+  "fontsettings": {
+    "theme": "white",
+    "family": "sans",
+    "size": 2
+  },
+  "edit": {
+    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/edit/main/03-race.Rmd",
+    "text": "Edit"
+  },
+  "history": {
+    "link": null,
+    "text": null
+  },
+  "view": {
+    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/blob/main/03-race.Rmd",
+    "text": null
+  },
+  "download": null,
+  "search": {
+    "engine": "fuse",
+    "options": null
+  },
+  "toc": {
+    "collapse": "subsection"
+  }
+});
+});
+</script>
+
+</body>
+
+</html>
