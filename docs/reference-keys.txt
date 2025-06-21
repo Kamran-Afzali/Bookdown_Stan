@@ -17,6 +17,14 @@ motivation
 concepts-and-code
 conclusion-1
 references-2
+bayesian-regularized-regression
+introduction
+regularized-regression
+bayesian-ridge-regression
+bayesian-lasso-regression
+hierarchical-shrinkage
+conclusion-2
+references-3
 appendix
 main-stan-distributions-cheatsheet
 main-stan-functions-cheatsheet
