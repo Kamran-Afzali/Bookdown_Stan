@@ -1,0 +1,2282 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 4 Robust t-regression | Stan Bookdown</title>
+  <meta name="description" content="Chapter 4 Robust t-regression | Stan Bookdown" />
+  <meta name="generator" content="bookdown 0.43 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 4 Robust t-regression | Stan Bookdown" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 4 Robust t-regression | Stan Bookdown" />
+  
+  
+  
+
+<meta name="author" content="Kamran Afzali" />
+
+
+<meta name="date" content="2025-06-20" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="bayesian-regression-models-for-non-normal-data.html"/>
+<link rel="next" href="appendix.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Stan</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Choosing the Right Bayesian Model</a></li>
+<li class="chapter" data-level="2" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html"><i class="fa fa-check"></i><b>2</b> Bayesian Modeling in R and Stan</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#what-is-stan"><i class="fa fa-check"></i><b>2.1</b> What is STAN?</a></li>
+<li class="chapter" data-level="2.2" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#model-file"><i class="fa fa-check"></i><b>2.2</b> Model file</a></li>
+<li class="chapter" data-level="2.3" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#fit-the-model"><i class="fa fa-check"></i><b>2.3</b> Fit the model</a></li>
+<li class="chapter" data-level="2.4" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#mcmc-diagnostics"><i class="fa fa-check"></i><b>2.4</b> MCMC diagnostics</a></li>
+<li class="chapter" data-level="2.5" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#parting-thoughts"><i class="fa fa-check"></i><b>2.5</b> Parting thoughts</a></li>
+<li class="chapter" data-level="2.6" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#conclusions"><i class="fa fa-check"></i><b>2.6</b> Conclusions</a></li>
+<li class="chapter" data-level="2.7" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#references"><i class="fa fa-check"></i><b>2.7</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="bayesian-regression-models-for-non-normal-data.html"><a href="bayesian-regression-models-for-non-normal-data.html"><i class="fa fa-check"></i><b>3</b> Bayesian Regression Models for Non-Normal Data</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="bayesian-regression-models-for-non-normal-data.html"><a href="bayesian-regression-models-for-non-normal-data.html#logistic-regression"><i class="fa fa-check"></i><b>3.1</b> Logistic Regression</a></li>
+<li class="chapter" data-level="3.2" data-path="bayesian-regression-models-for-non-normal-data.html"><a href="bayesian-regression-models-for-non-normal-data.html#negative-binomial"><i class="fa fa-check"></i><b>3.2</b> Negative Binomial</a></li>
+<li class="chapter" data-level="3.3" data-path="bayesian-regression-models-for-non-normal-data.html"><a href="bayesian-regression-models-for-non-normal-data.html#conclusion"><i class="fa fa-check"></i><b>3.3</b> Conclusion</a></li>
+<li class="chapter" data-level="3.4" data-path="bayesian-regression-models-for-non-normal-data.html"><a href="bayesian-regression-models-for-non-normal-data.html#references-1"><i class="fa fa-check"></i><b>3.4</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="robust-t-regression.html"><a href="robust-t-regression.html"><i class="fa fa-check"></i><b>4</b> Robust t-regression</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="robust-t-regression.html"><a href="robust-t-regression.html#motivation"><i class="fa fa-check"></i><b>4.1</b> Motivation</a></li>
+<li class="chapter" data-level="4.2" data-path="robust-t-regression.html"><a href="robust-t-regression.html#concepts-and-code"><i class="fa fa-check"></i><b>4.2</b> Concepts and code</a></li>
+<li class="chapter" data-level="4.3" data-path="robust-t-regression.html"><a href="robust-t-regression.html#conclusion-1"><i class="fa fa-check"></i><b>4.3</b> Conclusion</a></li>
+<li class="chapter" data-level="4.4" data-path="robust-t-regression.html"><a href="robust-t-regression.html#references-2"><i class="fa fa-check"></i><b>4.4</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="appendix.html"><a href="appendix.html"><i class="fa fa-check"></i><b>5</b> Appendix</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="appendix.html"><a href="appendix.html#main-stan-distributions-cheatsheet"><i class="fa fa-check"></i><b>5.1</b> Main Stan Distributions Cheatsheet</a></li>
+<li class="chapter" data-level="5.2" data-path="appendix.html"><a href="appendix.html#main-stan-functions-cheatsheet"><i class="fa fa-check"></i><b>5.2</b> Main Stan Functions Cheatsheet</a></li>
+<li class="chapter" data-level="5.3" data-path="appendix.html"><a href="appendix.html#why-non-distribution-functions"><i class="fa fa-check"></i><b>5.3</b> Why Non-Distribution Functions?</a></li>
+<li class="chapter" data-level="5.4" data-path="appendix.html"><a href="appendix.html#stan-functions-cheatsheet"><i class="fa fa-check"></i><b>5.4</b> Stan Functions Cheatsheet</a>
+<ul>
+<li class="chapter" data-level="5.4.1" data-path="appendix.html"><a href="appendix.html#mathematical-functions"><i class="fa fa-check"></i><b>5.4.1</b> 1. Mathematical Functions</a></li>
+<li class="chapter" data-level="5.4.2" data-path="appendix.html"><a href="appendix.html#transformation-functions"><i class="fa fa-check"></i><b>5.4.2</b> 2. Transformation Functions</a></li>
+<li class="chapter" data-level="5.4.3" data-path="appendix.html"><a href="appendix.html#matrix-and-vector-operations"><i class="fa fa-check"></i><b>5.4.3</b> 3. Matrix and Vector Operations</a></li>
+<li class="chapter" data-level="5.4.4" data-path="appendix.html"><a href="appendix.html#utility-functions"><i class="fa fa-check"></i><b>5.4.4</b> 4. Utility Functions</a></li>
+<li class="chapter" data-level="5.4.5" data-path="appendix.html"><a href="appendix.html#specialized-solvers"><i class="fa fa-check"></i><b>5.4.5</b> 5. Specialized Solvers</a></li>
+</ul></li>
+<li class="chapter" data-level="5.5" data-path="appendix.html"><a href="appendix.html#example-hierarchical-linear-regression"><i class="fa fa-check"></i><b>5.5</b> Example: Hierarchical Linear Regression</a></li>
+<li class="chapter" data-level="5.6" data-path="appendix.html"><a href="appendix.html#tips-for-using-stan-functions"><i class="fa fa-check"></i><b>5.6</b> Tips for Using Stan Functions</a></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Stan Bookdown</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="robust-t-regression" class="section level1 hasAnchor" number="4">
+<h1><span class="header-section-number">Chapter 4</span> Robust t-regression<a href="robust-t-regression.html#robust-t-regression" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="motivation" class="section level2 hasAnchor" number="4.1">
+<h2><span class="header-section-number">4.1</span> Motivation<a href="robust-t-regression.html#motivation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Simple linear regression is a widely used method for estimating the linear relation between two (or more) variables and for predicting the value of one variable (the response variable) based on the value of the other (the explanatory variable). The explanatory variable is typically represented on the x-axis and the response variable on the y-axis for visualising the results of linear regression.</p>
+<p>The regression coefficients can be distorted by outlying data points. Due to the normality assumption used by traditional regression techniques, noisy or outlier data can greatly affect their accuracy. Since the normal distribution must move to a new place in the parameter space to best accommodate the outliers in the data, this frequently leads to an underestimate of the relationship between the variables. In a frequentist framework, creating a linear regression model that is resistant to outliers necessitates the use of very complex statistical techniques; however, in a Bayesian framework, we can achieve robustness by simply using the t-distribution. in this context, <strong>Robust Regression</strong> refers to regression methods which are less sensitive to outliers. Bayesian robust regression uses distributions with wider tails than the normal. This means that outliers will have less of an affect on the models and the regression line would need to move less incorporate those observations since the error distribution will not consider them as unusual.</p>
+<p>Utilizing Student’s t density with an unidentified degrees of freedom parameter is a well-liked substitution for normal errors in regression investigations. The Student’s t distribution has heavier tails than the normal for low degrees of freedom, but it leans toward the normal as the degrees of freedom parameter rises. A check on the suitability of the normal is thus made possible by treating the degrees of freedom parameter as an unknown quantity that must be approximated. The degrees of freedom, or parameter ν, of this probability distribution determines how close to normal the distribution is: Low small values of produce a distribution with thicker tails (that is, a greater spread around the mean) than the normal distribution, but big values of (approximately &gt; 30) give a distribution that is quite similar to the normal distribution. As a result, we can allow the distribution of the regression line to be as normal or non-normal as the data imply while still capturing the underlying relationship between the variables by substituting the normal distribution above with a t-distribution and adding as an extra parameter to the model.</p>
+</div>
+<div id="concepts-and-code" class="section level2 hasAnchor" number="4.2">
+<h2><span class="header-section-number">4.2</span> Concepts and code<a href="robust-t-regression.html#concepts-and-code" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The standard approach to linear regression is defining the equation for a straight line that represents the relationship between the variables as accurately as possible. The equation for the line defines y (the response variable) as a linear function of x (the explanatory variable):</p>
+<p align="center">
+𝑦 = 𝛼 + 𝛽𝑥 + 𝜀
+</p>
+<p>In this equation, ε represents the error in the linear relationship: if no noise were allowed, then the paired x- and y-values would need to be arranged in a perfect straight line (for example, as in y = 2x + 1). Because we assume that the relationship between x and y is truly linear, any variation observed around the regression line must be random noise, and therefore normally distributed. From a probabilistic standpoint, such relationship between the variables could be formalised as</p>
+<p align="center">
+𝑦 ~ 𝓝(𝛼 + 𝛽𝑥, 𝜎)
+</p>
+<p>That is, the response variable follows a normal distribution with mean equal to the regression line, and some standard deviation σ. Such a probability distribution of the regression line is illustrated in the figure below.</p>
+<p>The formulation of the robust simple linear regression Bayesian model is given below. We define a t likelihood for the response variable, y, and suitable vague priors on all the model parameters: normal for α and β, half-normal for σ and gamma for ν.</p>
+<p align="center">
+𝑦 ~ 𝓣(𝛼 + 𝛽𝑥, 𝜎, 𝜈)
+</p>
+<p align="center">
+𝛼, 𝛽 ~ 𝓝(0, 1000)
+</p>
+<p align="center">
+𝜎 ~ 𝓗𝓝(0, 1000)
+</p>
+<p align="center">
+𝜈 ~ 𝚪(2, 0.1)
+</p>
+<p>Below you can find R and Stan code for a simple Bayesian t-regression model with nu unknown.</p>
+<p>First let’s create data with and without ourliers</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="robust-t-regression.html#cb35-1" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<span id="cb35-2"><a href="robust-t-regression.html#cb35-2" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb35-3"><a href="robust-t-regression.html#cb35-3" tabindex="-1"></a><span class="fu">library</span>(gridExtra)</span>
+<span id="cb35-4"><a href="robust-t-regression.html#cb35-4" tabindex="-1"></a><span class="fu">library</span>(kableExtra)</span>
+<span id="cb35-5"><a href="robust-t-regression.html#cb35-5" tabindex="-1"></a><span class="fu">library</span>(arm) </span>
+<span id="cb35-6"><a href="robust-t-regression.html#cb35-6" tabindex="-1"></a><span class="fu">library</span>(emdbook) </span>
+<span id="cb35-7"><a href="robust-t-regression.html#cb35-7" tabindex="-1"></a><span class="fu">library</span>(rstan)</span>
+<span id="cb35-8"><a href="robust-t-regression.html#cb35-8" tabindex="-1"></a><span class="fu">library</span>(rstanarm) </span>
+<span id="cb35-9"><a href="robust-t-regression.html#cb35-9" tabindex="-1"></a><span class="fu">library</span>(brms) </span></code></pre></div>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="robust-t-regression.html#cb36-1" tabindex="-1"></a>s <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, .<span class="dv">8</span>, </span>
+<span id="cb36-2"><a href="robust-t-regression.html#cb36-2" tabindex="-1"></a>              .<span class="dv">8</span>, <span class="dv">1</span>), </span>
+<span id="cb36-3"><a href="robust-t-regression.html#cb36-3" tabindex="-1"></a>            <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
+<span id="cb36-4"><a href="robust-t-regression.html#cb36-4" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">3</span>)</span>
+<span id="cb36-5"><a href="robust-t-regression.html#cb36-5" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb36-6"><a href="robust-t-regression.html#cb36-6" tabindex="-1"></a></span>
+<span id="cb36-7"><a href="robust-t-regression.html#cb36-7" tabindex="-1"></a>data_n <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">mvrnorm</span>(<span class="at">n =</span> <span class="dv">100</span>, <span class="at">mu =</span> m, <span class="at">Sigma =</span> s) <span class="sc">%&gt;%</span></span>
+<span id="cb36-8"><a href="robust-t-regression.html#cb36-8" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb36-9"><a href="robust-t-regression.html#cb36-9" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">y =</span> V1, <span class="at">x =</span> V2)</span></code></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="robust-t-regression.html#cb37-1" tabindex="-1"></a>data_n <span class="ot">&lt;-</span></span>
+<span id="cb37-2"><a href="robust-t-regression.html#cb37-2" tabindex="-1"></a>  data_n <span class="sc">%&gt;%</span></span>
+<span id="cb37-3"><a href="robust-t-regression.html#cb37-3" tabindex="-1"></a>  <span class="fu">arrange</span>(x)</span>
+<span id="cb37-4"><a href="robust-t-regression.html#cb37-4" tabindex="-1"></a></span>
+<span id="cb37-5"><a href="robust-t-regression.html#cb37-5" tabindex="-1"></a><span class="fu">head</span>(data_n)<span class="sc">%&gt;%</span>kableExtra<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th style="text-align:right;">
+y
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+0.9335732
+</td>
+<td style="text-align:right;">
+0.6157783
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1.0317982
+</td>
+<td style="text-align:right;">
+0.8318674
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1.9763140
+</td>
+<td style="text-align:right;">
+0.9326985
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2.3439117
+</td>
+<td style="text-align:right;">
+1.1117327
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1.4059413
+</td>
+<td style="text-align:right;">
+1.1673553
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2.0360302
+</td>
+<td style="text-align:right;">
+1.3253002
+</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="robust-t-regression.html#cb38-1" tabindex="-1"></a>data_o <span class="ot">&lt;-</span> data_n</span>
+<span id="cb38-2"><a href="robust-t-regression.html#cb38-2" tabindex="-1"></a>data_o[<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>), <span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">7.5</span>, <span class="fl">8.5</span>)</span>
+<span id="cb38-3"><a href="robust-t-regression.html#cb38-3" tabindex="-1"></a></span>
+<span id="cb38-4"><a href="robust-t-regression.html#cb38-4" tabindex="-1"></a><span class="fu">head</span>(data_o)<span class="sc">%&gt;%</span>kableExtra<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th style="text-align:right;">
+y
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+7.500000
+</td>
+<td style="text-align:right;">
+0.6157783
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+8.500000
+</td>
+<td style="text-align:right;">
+0.8318674
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1.976314
+</td>
+<td style="text-align:right;">
+0.9326985
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2.343912
+</td>
+<td style="text-align:right;">
+1.1117327
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1.405941
+</td>
+<td style="text-align:right;">
+1.1673553
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2.036030
+</td>
+<td style="text-align:right;">
+1.3253002
+</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="robust-t-regression.html#cb39-1" tabindex="-1"></a>ols_n <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="at">data =</span> data_n, y <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> x)</span>
+<span id="cb39-2"><a href="robust-t-regression.html#cb39-2" tabindex="-1"></a>ols_o <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="at">data =</span> data_o, y <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> x)</span>
+<span id="cb39-3"><a href="robust-t-regression.html#cb39-3" tabindex="-1"></a></span>
+<span id="cb39-4"><a href="robust-t-regression.html#cb39-4" tabindex="-1"></a></span>
+<span id="cb39-5"><a href="robust-t-regression.html#cb39-5" tabindex="-1"></a>p1 <span class="ot">&lt;-</span></span>
+<span id="cb39-6"><a href="robust-t-regression.html#cb39-6" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="at">data =</span> data_n, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)) <span class="sc">+</span></span>
+<span id="cb39-7"><a href="robust-t-regression.html#cb39-7" tabindex="-1"></a>  <span class="fu">stat_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="at">color =</span> <span class="st">&quot;grey92&quot;</span>, <span class="at">fill =</span> <span class="st">&quot;grey67&quot;</span>, <span class="at">alpha =</span> <span class="dv">1</span>, <span class="at">fullrange =</span> T) <span class="sc">+</span></span>
+<span id="cb39-8"><a href="robust-t-regression.html#cb39-8" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">1</span>, <span class="at">alpha =</span> <span class="dv">3</span><span class="sc">/</span><span class="dv">4</span>) <span class="sc">+</span></span>
+<span id="cb39-9"><a href="robust-t-regression.html#cb39-9" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">9</span>)) <span class="sc">+</span></span>
+<span id="cb39-10"><a href="robust-t-regression.html#cb39-10" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">9</span>), </span>
+<span id="cb39-11"><a href="robust-t-regression.html#cb39-11" tabindex="-1"></a>                  <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">9</span>)) <span class="sc">+</span></span>
+<span id="cb39-12"><a href="robust-t-regression.html#cb39-12" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;No Outliers&quot;</span>) <span class="sc">+</span></span>
+<span id="cb39-13"><a href="robust-t-regression.html#cb39-13" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">panel.grid =</span> <span class="fu">element_blank</span>())</span>
+<span id="cb39-14"><a href="robust-t-regression.html#cb39-14" tabindex="-1"></a></span>
+<span id="cb39-15"><a href="robust-t-regression.html#cb39-15" tabindex="-1"></a><span class="co"># the data with two outliers</span></span>
+<span id="cb39-16"><a href="robust-t-regression.html#cb39-16" tabindex="-1"></a>p2 <span class="ot">&lt;-</span></span>
+<span id="cb39-17"><a href="robust-t-regression.html#cb39-17" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="at">data =</span> data_o, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">color =</span> y <span class="sc">&gt;</span> <span class="dv">7</span>)) <span class="sc">+</span></span>
+<span id="cb39-18"><a href="robust-t-regression.html#cb39-18" tabindex="-1"></a>  <span class="fu">stat_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="at">color =</span> <span class="st">&quot;grey92&quot;</span>, <span class="at">fill =</span> <span class="st">&quot;grey67&quot;</span>, <span class="at">alpha =</span> <span class="dv">1</span>, <span class="at">fullrange =</span> T) <span class="sc">+</span></span>
+<span id="cb39-19"><a href="robust-t-regression.html#cb39-19" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">1</span>, <span class="at">alpha =</span> <span class="dv">3</span><span class="sc">/</span><span class="dv">4</span>) <span class="sc">+</span></span>
+<span id="cb39-20"><a href="robust-t-regression.html#cb39-20" tabindex="-1"></a>  <span class="fu">scale_color_viridis_d</span>(<span class="at">option =</span> <span class="st">&quot;A&quot;</span>, <span class="at">end =</span> <span class="dv">4</span><span class="sc">/</span><span class="dv">7</span>) <span class="sc">+</span></span>
+<span id="cb39-21"><a href="robust-t-regression.html#cb39-21" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">9</span>)) <span class="sc">+</span></span>
+<span id="cb39-22"><a href="robust-t-regression.html#cb39-22" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">9</span>), </span>
+<span id="cb39-23"><a href="robust-t-regression.html#cb39-23" tabindex="-1"></a>                  <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">9</span>)) <span class="sc">+</span></span>
+<span id="cb39-24"><a href="robust-t-regression.html#cb39-24" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Two Outliers&quot;</span>) <span class="sc">+</span></span>
+<span id="cb39-25"><a href="robust-t-regression.html#cb39-25" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">panel.grid =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb39-26"><a href="robust-t-regression.html#cb39-26" tabindex="-1"></a>        <span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span>
+<span id="cb39-27"><a href="robust-t-regression.html#cb39-27" tabindex="-1"></a><span class="fu">grid.arrange</span>(p1 ,p2)</span></code></pre></div>
+<pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
+<pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
+<p><img src="/images/RobReg-1-1.png" /></p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="robust-t-regression.html#cb42-1" tabindex="-1"></a>model_stan <span class="ot">=</span> <span class="st">&quot;</span></span>
+<span id="cb42-2"><a href="robust-t-regression.html#cb42-2" tabindex="-1"></a><span class="st">   data {</span></span>
+<span id="cb42-3"><a href="robust-t-regression.html#cb42-3" tabindex="-1"></a><span class="st">    int&lt;lower=1&gt; N;    </span></span>
+<span id="cb42-4"><a href="robust-t-regression.html#cb42-4" tabindex="-1"></a><span class="st">    int&lt;lower=0&gt; M;    </span></span>
+<span id="cb42-5"><a href="robust-t-regression.html#cb42-5" tabindex="-1"></a><span class="st">    int&lt;lower=0&gt; P;    </span></span>
+<span id="cb42-6"><a href="robust-t-regression.html#cb42-6" tabindex="-1"></a><span class="st">    vector[N] x;       </span></span>
+<span id="cb42-7"><a href="robust-t-regression.html#cb42-7" tabindex="-1"></a><span class="st">    vector[N] y;       </span></span>
+<span id="cb42-8"><a href="robust-t-regression.html#cb42-8" tabindex="-1"></a><span class="st">    vector[M] x_cred;  </span></span>
+<span id="cb42-9"><a href="robust-t-regression.html#cb42-9" tabindex="-1"></a><span class="st">    vector[P] x_pred;  </span></span>
+<span id="cb42-10"><a href="robust-t-regression.html#cb42-10" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb42-11"><a href="robust-t-regression.html#cb42-11" tabindex="-1"></a></span>
+<span id="cb42-12"><a href="robust-t-regression.html#cb42-12" tabindex="-1"></a><span class="st">parameters {</span></span>
+<span id="cb42-13"><a href="robust-t-regression.html#cb42-13" tabindex="-1"></a><span class="st">    real alpha;           </span></span>
+<span id="cb42-14"><a href="robust-t-regression.html#cb42-14" tabindex="-1"></a><span class="st">    real beta;            </span></span>
+<span id="cb42-15"><a href="robust-t-regression.html#cb42-15" tabindex="-1"></a><span class="st">    real&lt;lower=0&gt; sigma;  </span></span>
+<span id="cb42-16"><a href="robust-t-regression.html#cb42-16" tabindex="-1"></a><span class="st">    real&lt;lower=1&gt; nu;     </span></span>
+<span id="cb42-17"><a href="robust-t-regression.html#cb42-17" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb42-18"><a href="robust-t-regression.html#cb42-18" tabindex="-1"></a></span>
+<span id="cb42-19"><a href="robust-t-regression.html#cb42-19" tabindex="-1"></a><span class="st">transformed parameters {</span></span>
+<span id="cb42-20"><a href="robust-t-regression.html#cb42-20" tabindex="-1"></a><span class="st">    vector[N] mu = alpha + beta * x;            </span></span>
+<span id="cb42-21"><a href="robust-t-regression.html#cb42-21" tabindex="-1"></a><span class="st">    vector[M] mu_cred = alpha + beta * x_cred;  </span></span>
+<span id="cb42-22"><a href="robust-t-regression.html#cb42-22" tabindex="-1"></a><span class="st">    vector[P] mu_pred = alpha + beta * x_pred;  </span></span>
+<span id="cb42-23"><a href="robust-t-regression.html#cb42-23" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb42-24"><a href="robust-t-regression.html#cb42-24" tabindex="-1"></a></span>
+<span id="cb42-25"><a href="robust-t-regression.html#cb42-25" tabindex="-1"></a><span class="st">model {</span></span>
+<span id="cb42-26"><a href="robust-t-regression.html#cb42-26" tabindex="-1"></a><span class="st">    y ~ student_t(nu, mu, sigma);</span></span>
+<span id="cb42-27"><a href="robust-t-regression.html#cb42-27" tabindex="-1"></a><span class="st">    alpha ~ normal(0, 1000);</span></span>
+<span id="cb42-28"><a href="robust-t-regression.html#cb42-28" tabindex="-1"></a><span class="st">    beta ~ normal(0, 1000);</span></span>
+<span id="cb42-29"><a href="robust-t-regression.html#cb42-29" tabindex="-1"></a><span class="st">    sigma ~ normal(0, 1000);</span></span>
+<span id="cb42-30"><a href="robust-t-regression.html#cb42-30" tabindex="-1"></a><span class="st">    nu ~ gamma(2, 0.1);</span></span>
+<span id="cb42-31"><a href="robust-t-regression.html#cb42-31" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb42-32"><a href="robust-t-regression.html#cb42-32" tabindex="-1"></a></span>
+<span id="cb42-33"><a href="robust-t-regression.html#cb42-33" tabindex="-1"></a><span class="st">generated quantities {</span></span>
+<span id="cb42-34"><a href="robust-t-regression.html#cb42-34" tabindex="-1"></a><span class="st">    real y_pred[P];</span></span>
+<span id="cb42-35"><a href="robust-t-regression.html#cb42-35" tabindex="-1"></a><span class="st">    for (p in 1:P) {</span></span>
+<span id="cb42-36"><a href="robust-t-regression.html#cb42-36" tabindex="-1"></a><span class="st">        y_pred[p] = student_t_rng(nu, mu_pred[p], sigma);</span></span>
+<span id="cb42-37"><a href="robust-t-regression.html#cb42-37" tabindex="-1"></a><span class="st">    }</span></span>
+<span id="cb42-38"><a href="robust-t-regression.html#cb42-38" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb42-39"><a href="robust-t-regression.html#cb42-39" tabindex="-1"></a><span class="st">   &quot;</span></span>
+<span id="cb42-40"><a href="robust-t-regression.html#cb42-40" tabindex="-1"></a><span class="fu">writeLines</span>(model_stan, <span class="at">con =</span> <span class="st">&quot;model_stan.stan&quot;</span>)</span>
+<span id="cb42-41"><a href="robust-t-regression.html#cb42-41" tabindex="-1"></a>   <span class="fu">cat</span>(model_stan)</span></code></pre></div>
+<pre><code>## 
+##    data {
+##     int&lt;lower=1&gt; N;    
+##     int&lt;lower=0&gt; M;    
+##     int&lt;lower=0&gt; P;    
+##     vector[N] x;       
+##     vector[N] y;       
+##     vector[M] x_cred;  
+##     vector[P] x_pred;  
+## }
+## 
+## parameters {
+##     real alpha;           
+##     real beta;            
+##     real&lt;lower=0&gt; sigma;  
+##     real&lt;lower=1&gt; nu;     
+## }
+## 
+## transformed parameters {
+##     vector[N] mu = alpha + beta * x;            
+##     vector[M] mu_cred = alpha + beta * x_cred;  
+##     vector[P] mu_pred = alpha + beta * x_pred;  
+## }
+## 
+## model {
+##     y ~ student_t(nu, mu, sigma);
+##     alpha ~ normal(0, 1000);
+##     beta ~ normal(0, 1000);
+##     sigma ~ normal(0, 1000);
+##     nu ~ gamma(2, 0.1);
+## }
+## 
+## generated quantities {
+##     real y_pred[P];
+##     for (p in 1:P) {
+##         y_pred[p] = student_t_rng(nu, mu_pred[p], sigma);
+##     }
+## }
+## </code></pre>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="robust-t-regression.html#cb44-1" tabindex="-1"></a>stan_data <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">x=</span>data_o<span class="sc">$</span>x,</span>
+<span id="cb44-2"><a href="robust-t-regression.html#cb44-2" tabindex="-1"></a>     <span class="at">y=</span>data_o<span class="sc">$</span>y,</span>
+<span id="cb44-3"><a href="robust-t-regression.html#cb44-3" tabindex="-1"></a>     <span class="at">N=</span><span class="fu">length</span>(data_o<span class="sc">$</span>y),</span>
+<span id="cb44-4"><a href="robust-t-regression.html#cb44-4" tabindex="-1"></a>     <span class="at">M=</span><span class="dv">0</span>, <span class="at">P=</span><span class="dv">0</span>, <span class="at">x_cred=</span><span class="fu">numeric</span>(<span class="dv">0</span>), <span class="at">x_pred=</span><span class="fu">numeric</span>(<span class="dv">0</span>))</span>
+<span id="cb44-5"><a href="robust-t-regression.html#cb44-5" tabindex="-1"></a></span>
+<span id="cb44-6"><a href="robust-t-regression.html#cb44-6" tabindex="-1"></a></span>
+<span id="cb44-7"><a href="robust-t-regression.html#cb44-7" tabindex="-1"></a></span>
+<span id="cb44-8"><a href="robust-t-regression.html#cb44-8" tabindex="-1"></a>fit_rstan <span class="ot">&lt;-</span> rstan<span class="sc">::</span><span class="fu">stan</span>(</span>
+<span id="cb44-9"><a href="robust-t-regression.html#cb44-9" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">&quot;model_stan.stan&quot;</span>,</span>
+<span id="cb44-10"><a href="robust-t-regression.html#cb44-10" tabindex="-1"></a>  <span class="at">data =</span> stan_data</span>
+<span id="cb44-11"><a href="robust-t-regression.html#cb44-11" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## Trying to compile a simple C file</code></pre>
+<pre><code>## Running /Library/Frameworks/R.framework/Resources/bin/R CMD SHLIB foo.c
+## clang -mmacosx-version-min=10.13 -I&quot;/Library/Frameworks/R.framework/Resources/include&quot; -DNDEBUG   -I&quot;/Library/Frameworks/R.framework/Versions/4.0/Resources/library/Rcpp/include/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.0/Resources/library/RcppEigen/include/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.0/Resources/library/RcppEigen/include/unsupported&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.0/Resources/library/BH/include&quot; -I&quot;/Library/Frameworks/R.framework/Versions/4.0/Resources/library/StanHeaders/include/src/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.0/Resources/library/StanHeaders/include/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.0/Resources/library/RcppParallel/include/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.0/Resources/library/rstan/include&quot; -DEIGEN_NO_DEBUG  -DBOOST_DISABLE_ASSERTS  -DBOOST_PENDING_INTEGER_LOG2_HPP  -DSTAN_THREADS  -DUSE_STANC3 -DSTRICT_R_HEADERS  -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION  -DBOOST_NO_AUTO_PTR  -include &#39;/Library/Frameworks/R.framework/Versions/4.0/Resources/library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp&#39;  -D_REENTRANT -DRCPP_PARALLEL_USE_TBB=1   -I/usr/local/include   -fPIC  -Wall -g -O2  -c foo.c -o foo.o
+## In file included from &lt;built-in&gt;:1:
+## In file included from /Library/Frameworks/R.framework/Versions/4.0/Resources/library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp:22:
+## In file included from /Library/Frameworks/R.framework/Versions/4.0/Resources/library/RcppEigen/include/Eigen/Dense:1:
+## In file included from /Library/Frameworks/R.framework/Versions/4.0/Resources/library/RcppEigen/include/Eigen/Core:88:
+## /Library/Frameworks/R.framework/Versions/4.0/Resources/library/RcppEigen/include/Eigen/src/Core/util/Macros.h:628:1: error: unknown type name &#39;namespace&#39;
+## namespace Eigen {
+## ^
+## /Library/Frameworks/R.framework/Versions/4.0/Resources/library/RcppEigen/include/Eigen/src/Core/util/Macros.h:628:16: error: expected &#39;;&#39; after top level declarator
+## namespace Eigen {
+##                ^
+##                ;
+## In file included from &lt;built-in&gt;:1:
+## In file included from /Library/Frameworks/R.framework/Versions/4.0/Resources/library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp:22:
+## In file included from /Library/Frameworks/R.framework/Versions/4.0/Resources/library/RcppEigen/include/Eigen/Dense:1:
+## /Library/Frameworks/R.framework/Versions/4.0/Resources/library/RcppEigen/include/Eigen/Core:96:10: fatal error: &#39;complex&#39; file not found
+## #include &lt;complex&gt;
+##          ^~~~~~~~~
+## 3 errors generated.
+## make: *** [foo.o] Error 1
+## 
+## SAMPLING FOR MODEL &#39;anon_model&#39; NOW (CHAIN 1).
+## Chain 1: 
+## Chain 1: Gradient evaluation took 3.9e-05 seconds
+## Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 0.39 seconds.
+## Chain 1: Adjust your expectations accordingly!
+## Chain 1: 
+## Chain 1: 
+## Chain 1: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 1: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 1: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 1: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 1: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 1: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 1: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 1: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 1: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 1: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 1: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 1: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 1: 
+## Chain 1:  Elapsed Time: 0.114 seconds (Warm-up)
+## Chain 1:                0.122 seconds (Sampling)
+## Chain 1:                0.236 seconds (Total)
+## Chain 1: 
+## 
+## SAMPLING FOR MODEL &#39;anon_model&#39; NOW (CHAIN 2).
+## Chain 2: 
+## Chain 2: Gradient evaluation took 1.3e-05 seconds
+## Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 0.13 seconds.
+## Chain 2: Adjust your expectations accordingly!
+## Chain 2: 
+## Chain 2: 
+## Chain 2: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 2: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 2: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 2: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 2: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 2: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 2: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 2: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 2: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 2: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 2: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 2: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 2: 
+## Chain 2:  Elapsed Time: 0.126 seconds (Warm-up)
+## Chain 2:                0.11 seconds (Sampling)
+## Chain 2:                0.236 seconds (Total)
+## Chain 2: 
+## 
+## SAMPLING FOR MODEL &#39;anon_model&#39; NOW (CHAIN 3).
+## Chain 3: 
+## Chain 3: Gradient evaluation took 9e-06 seconds
+## Chain 3: 1000 transitions using 10 leapfrog steps per transition would take 0.09 seconds.
+## Chain 3: Adjust your expectations accordingly!
+## Chain 3: 
+## Chain 3: 
+## Chain 3: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 3: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 3: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 3: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 3: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 3: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 3: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 3: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 3: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 3: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 3: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 3: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 3: 
+## Chain 3:  Elapsed Time: 0.122 seconds (Warm-up)
+## Chain 3:                0.111 seconds (Sampling)
+## Chain 3:                0.233 seconds (Total)
+## Chain 3: 
+## 
+## SAMPLING FOR MODEL &#39;anon_model&#39; NOW (CHAIN 4).
+## Chain 4: 
+## Chain 4: Gradient evaluation took 1.1e-05 seconds
+## Chain 4: 1000 transitions using 10 leapfrog steps per transition would take 0.11 seconds.
+## Chain 4: Adjust your expectations accordingly!
+## Chain 4: 
+## Chain 4: 
+## Chain 4: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 4: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 4: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 4: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 4: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 4: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 4: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 4: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 4: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 4: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 4: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 4: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 4: 
+## Chain 4:  Elapsed Time: 0.134 seconds (Warm-up)
+## Chain 4:                0.113 seconds (Sampling)
+## Chain 4:                0.247 seconds (Total)
+## Chain 4:</code></pre>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="robust-t-regression.html#cb47-1" tabindex="-1"></a>trace <span class="ot">&lt;-</span> <span class="fu">stan_trace</span>(fit_rstan, <span class="at">pars=</span><span class="fu">c</span>(<span class="st">&quot;alpha&quot;</span>, <span class="st">&quot;beta&quot;</span>, <span class="st">&quot;sigma&quot;</span>, <span class="st">&quot;nu&quot;</span>))</span>
+<span id="cb47-2"><a href="robust-t-regression.html#cb47-2" tabindex="-1"></a>trace <span class="sc">+</span> <span class="fu">scale_color_brewer</span>(<span class="at">type =</span> <span class="st">&quot;div&quot;</span>) <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span></code></pre></div>
+<pre><code>## Scale for &#39;colour&#39; is already present. Adding another scale for &#39;colour&#39;,
+## which will replace the existing scale.</code></pre>
+<p><img src="/images/RobReg-4-1.png" /></p>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="robust-t-regression.html#cb49-1" tabindex="-1"></a><span class="fu">stan_dens</span>(fit_rstan, <span class="at">pars=</span><span class="fu">c</span>(<span class="st">&quot;alpha&quot;</span>, <span class="st">&quot;beta&quot;</span>, <span class="st">&quot;sigma&quot;</span>, <span class="st">&quot;nu&quot;</span>), <span class="at">fill =</span> <span class="st">&quot;skyblue&quot;</span>)</span></code></pre></div>
+<p><img src="/images/RobReg-5-1.png" /></p>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="robust-t-regression.html#cb50-1" tabindex="-1"></a><span class="fu">stan_plot</span>(fit_rstan, <span class="at">pars=</span><span class="fu">c</span>(<span class="st">&quot;alpha&quot;</span>, <span class="st">&quot;beta&quot;</span>, <span class="st">&quot;sigma&quot;</span>, <span class="st">&quot;nu&quot;</span>), <span class="at">show_density =</span> <span class="cn">TRUE</span>, <span class="at">fill_color =</span> <span class="st">&quot;maroon&quot;</span>)</span></code></pre></div>
+<pre><code>## ci_level: 0.8 (80% intervals)</code></pre>
+<pre><code>## outer_level: 0.95 (95% intervals)</code></pre>
+<p><img src="/images/RobReg-6-1.png" /></p>
+<p>Bayesian regression models can be used to estimate highest posterior density or credible intervals (intervals of the distribution of the regression linefor), and prediction values, through predictive posterior distributions. More specifically, the prediction intervals are obtained by first drawing samples of the mean response at specific x-values of interest and then, for each of these samples, randomly selecting a y-value from a t-distribution with location mu pred. In contrast, the credible intervals are obtained by drawing MCMC samples of the mean response at regularly spaced points along the x-axis. The distributions of mu cred and y pred are represented, respectively, by the credible and prediction intervals.</p>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="robust-t-regression.html#cb53-1" tabindex="-1"></a>x.cred <span class="ot">=</span> <span class="fu">seq</span>(<span class="at">from=</span><span class="fu">min</span>(data_o<span class="sc">$</span>x),</span>
+<span id="cb53-2"><a href="robust-t-regression.html#cb53-2" tabindex="-1"></a>             <span class="at">to=</span><span class="fu">max</span>(data_o<span class="sc">$</span>x),</span>
+<span id="cb53-3"><a href="robust-t-regression.html#cb53-3" tabindex="-1"></a>             <span class="at">length.out=</span><span class="dv">50</span>)</span>
+<span id="cb53-4"><a href="robust-t-regression.html#cb53-4" tabindex="-1"></a></span>
+<span id="cb53-5"><a href="robust-t-regression.html#cb53-5" tabindex="-1"></a></span>
+<span id="cb53-6"><a href="robust-t-regression.html#cb53-6" tabindex="-1"></a>x.pred <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">8</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="robust-t-regression.html#cb54-1" tabindex="-1"></a>stan_data2 <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">x=</span>data_o<span class="sc">$</span>x,</span>
+<span id="cb54-2"><a href="robust-t-regression.html#cb54-2" tabindex="-1"></a>                  <span class="at">y=</span>data_o<span class="sc">$</span>y,</span>
+<span id="cb54-3"><a href="robust-t-regression.html#cb54-3" tabindex="-1"></a>                  <span class="at">N=</span><span class="fu">length</span>(data_o<span class="sc">$</span>y),</span>
+<span id="cb54-4"><a href="robust-t-regression.html#cb54-4" tabindex="-1"></a>                  <span class="at">x_cred=</span>x.cred,</span>
+<span id="cb54-5"><a href="robust-t-regression.html#cb54-5" tabindex="-1"></a>                  <span class="at">x_pred=</span>x.pred,</span>
+<span id="cb54-6"><a href="robust-t-regression.html#cb54-6" tabindex="-1"></a>                  <span class="at">M=</span><span class="fu">length</span>(x.cred),</span>
+<span id="cb54-7"><a href="robust-t-regression.html#cb54-7" tabindex="-1"></a>                  <span class="at">P=</span><span class="fu">length</span>(x.pred))</span></code></pre></div>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="robust-t-regression.html#cb55-1" tabindex="-1"></a>fit_rstan2 <span class="ot">&lt;-</span> rstan<span class="sc">::</span><span class="fu">stan</span>(</span>
+<span id="cb55-2"><a href="robust-t-regression.html#cb55-2" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">&quot;model_stan.stan&quot;</span>,</span>
+<span id="cb55-3"><a href="robust-t-regression.html#cb55-3" tabindex="-1"></a>  <span class="at">data =</span> stan_data2</span>
+<span id="cb55-4"><a href="robust-t-regression.html#cb55-4" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## 
+## SAMPLING FOR MODEL &#39;anon_model&#39; NOW (CHAIN 1).
+## Chain 1: 
+## Chain 1: Gradient evaluation took 2.6e-05 seconds
+## Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 0.26 seconds.
+## Chain 1: Adjust your expectations accordingly!
+## Chain 1: 
+## Chain 1: 
+## Chain 1: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 1: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 1: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 1: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 1: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 1: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 1: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 1: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 1: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 1: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 1: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 1: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 1: 
+## Chain 1:  Elapsed Time: 0.157 seconds (Warm-up)
+## Chain 1:                0.134 seconds (Sampling)
+## Chain 1:                0.291 seconds (Total)
+## Chain 1: 
+## 
+## SAMPLING FOR MODEL &#39;anon_model&#39; NOW (CHAIN 2).
+## Chain 2: 
+## Chain 2: Gradient evaluation took 1e-05 seconds
+## Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 0.1 seconds.
+## Chain 2: Adjust your expectations accordingly!
+## Chain 2: 
+## Chain 2: 
+## Chain 2: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 2: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 2: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 2: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 2: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 2: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 2: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 2: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 2: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 2: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 2: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 2: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 2: 
+## Chain 2:  Elapsed Time: 0.148 seconds (Warm-up)
+## Chain 2:                0.101 seconds (Sampling)
+## Chain 2:                0.249 seconds (Total)
+## Chain 2: 
+## 
+## SAMPLING FOR MODEL &#39;anon_model&#39; NOW (CHAIN 3).
+## Chain 3: 
+## Chain 3: Gradient evaluation took 1.4e-05 seconds
+## Chain 3: 1000 transitions using 10 leapfrog steps per transition would take 0.14 seconds.
+## Chain 3: Adjust your expectations accordingly!
+## Chain 3: 
+## Chain 3: 
+## Chain 3: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 3: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 3: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 3: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 3: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 3: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 3: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 3: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 3: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 3: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 3: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 3: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 3: 
+## Chain 3:  Elapsed Time: 0.165 seconds (Warm-up)
+## Chain 3:                0.132 seconds (Sampling)
+## Chain 3:                0.297 seconds (Total)
+## Chain 3: 
+## 
+## SAMPLING FOR MODEL &#39;anon_model&#39; NOW (CHAIN 4).
+## Chain 4: 
+## Chain 4: Gradient evaluation took 1.2e-05 seconds
+## Chain 4: 1000 transitions using 10 leapfrog steps per transition would take 0.12 seconds.
+## Chain 4: Adjust your expectations accordingly!
+## Chain 4: 
+## Chain 4: 
+## Chain 4: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 4: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 4: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 4: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 4: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 4: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 4: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 4: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 4: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 4: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 4: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 4: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 4: 
+## Chain 4:  Elapsed Time: 0.151 seconds (Warm-up)
+## Chain 4:                0.145 seconds (Sampling)
+## Chain 4:                0.296 seconds (Total)
+## Chain 4:</code></pre>
+<p>For each value in x.cred, the mu cred parameter’s MCMC samples are contained in a separate column of mu.cred. In a similar manner, the columns of y.pred include the MCMC samples of the posterior expected response values (y pred values) for the x-values in x.pred.</p>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb57-1"><a href="robust-t-regression.html#cb57-1" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">extract</span>(fit_rstan2, <span class="st">&quot;mu_cred&quot;</span>)[[<span class="dv">1</span>]])<span class="sc">%&gt;%</span>kableExtra<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+V1
+</th>
+<th style="text-align:left;">
+V2
+</th>
+<th style="text-align:left;">
+V3
+</th>
+<th style="text-align:left;">
+V4
+</th>
+<th style="text-align:left;">
+V5
+</th>
+<th style="text-align:left;">
+V6
+</th>
+<th style="text-align:left;">
+V7
+</th>
+<th style="text-align:left;">
+V8
+</th>
+<th style="text-align:left;">
+V9
+</th>
+<th style="text-align:left;">
+V10
+</th>
+<th style="text-align:left;">
+V11
+</th>
+<th style="text-align:left;">
+V12
+</th>
+<th style="text-align:left;">
+V13
+</th>
+<th style="text-align:left;">
+V14
+</th>
+<th style="text-align:left;">
+V15
+</th>
+<th style="text-align:left;">
+V16
+</th>
+<th style="text-align:left;">
+V17
+</th>
+<th style="text-align:left;">
+V18
+</th>
+<th style="text-align:left;">
+V19
+</th>
+<th style="text-align:left;">
+V20
+</th>
+<th style="text-align:left;">
+V21
+</th>
+<th style="text-align:left;">
+V22
+</th>
+<th style="text-align:left;">
+V23
+</th>
+<th style="text-align:left;">
+V24
+</th>
+<th style="text-align:left;">
+V25
+</th>
+<th style="text-align:left;">
+V26
+</th>
+<th style="text-align:left;">
+V27
+</th>
+<th style="text-align:left;">
+V28
+</th>
+<th style="text-align:left;">
+V29
+</th>
+<th style="text-align:left;">
+V30
+</th>
+<th style="text-align:left;">
+V31
+</th>
+<th style="text-align:left;">
+V32
+</th>
+<th style="text-align:left;">
+V33
+</th>
+<th style="text-align:left;">
+V34
+</th>
+<th style="text-align:left;">
+V35
+</th>
+<th style="text-align:left;">
+V36
+</th>
+<th style="text-align:left;">
+V37
+</th>
+<th style="text-align:left;">
+V38
+</th>
+<th style="text-align:left;">
+V39
+</th>
+<th style="text-align:left;">
+V40
+</th>
+<th style="text-align:left;">
+V41
+</th>
+<th style="text-align:left;">
+V42
+</th>
+<th style="text-align:left;">
+V43
+</th>
+<th style="text-align:left;">
+V44
+</th>
+<th style="text-align:left;">
+V45
+</th>
+<th style="text-align:left;">
+V46
+</th>
+<th style="text-align:left;">
+V47
+</th>
+<th style="text-align:left;">
+V48
+</th>
+<th style="text-align:left;">
+V49
+</th>
+<th style="text-align:left;">
+V50
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Min. :0.4535
+</td>
+<td style="text-align:left;">
+Min. :0.553
+</td>
+<td style="text-align:left;">
+Min. :0.6525
+</td>
+<td style="text-align:left;">
+Min. :0.752
+</td>
+<td style="text-align:left;">
+Min. :0.8515
+</td>
+<td style="text-align:left;">
+Min. :0.951
+</td>
+<td style="text-align:left;">
+Min. :1.051
+</td>
+<td style="text-align:left;">
+Min. :1.150
+</td>
+<td style="text-align:left;">
+Min. :1.250
+</td>
+<td style="text-align:left;">
+Min. :1.349
+</td>
+<td style="text-align:left;">
+Min. :1.449
+</td>
+<td style="text-align:left;">
+Min. :1.548
+</td>
+<td style="text-align:left;">
+Min. :1.642
+</td>
+<td style="text-align:left;">
+Min. :1.734
+</td>
+<td style="text-align:left;">
+Min. :1.826
+</td>
+<td style="text-align:left;">
+Min. :1.918
+</td>
+<td style="text-align:left;">
+Min. :2.010
+</td>
+<td style="text-align:left;">
+Min. :2.102
+</td>
+<td style="text-align:left;">
+Min. :2.194
+</td>
+<td style="text-align:left;">
+Min. :2.285
+</td>
+<td style="text-align:left;">
+Min. :2.377
+</td>
+<td style="text-align:left;">
+Min. :2.458
+</td>
+<td style="text-align:left;">
+Min. :2.531
+</td>
+<td style="text-align:left;">
+Min. :2.603
+</td>
+<td style="text-align:left;">
+Min. :2.675
+</td>
+<td style="text-align:left;">
+Min. :2.747
+</td>
+<td style="text-align:left;">
+Min. :2.820
+</td>
+<td style="text-align:left;">
+Min. :2.892
+</td>
+<td style="text-align:left;">
+Min. :2.964
+</td>
+<td style="text-align:left;">
+Min. :3.037
+</td>
+<td style="text-align:left;">
+Min. :3.109
+</td>
+<td style="text-align:left;">
+Min. :3.181
+</td>
+<td style="text-align:left;">
+Min. :3.245
+</td>
+<td style="text-align:left;">
+Min. :3.297
+</td>
+<td style="text-align:left;">
+Min. :3.349
+</td>
+<td style="text-align:left;">
+Min. :3.401
+</td>
+<td style="text-align:left;">
+Min. :3.453
+</td>
+<td style="text-align:left;">
+Min. :3.505
+</td>
+<td style="text-align:left;">
+Min. :3.557
+</td>
+<td style="text-align:left;">
+Min. :3.609
+</td>
+<td style="text-align:left;">
+Min. :3.661
+</td>
+<td style="text-align:left;">
+Min. :3.713
+</td>
+<td style="text-align:left;">
+Min. :3.765
+</td>
+<td style="text-align:left;">
+Min. :3.817
+</td>
+<td style="text-align:left;">
+Min. :3.869
+</td>
+<td style="text-align:left;">
+Min. :3.921
+</td>
+<td style="text-align:left;">
+Min. :3.973
+</td>
+<td style="text-align:left;">
+Min. :4.025
+</td>
+<td style="text-align:left;">
+Min. :4.077
+</td>
+<td style="text-align:left;">
+Min. :4.129
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+1st Qu.:0.9464
+</td>
+<td style="text-align:left;">
+1st Qu.:1.029
+</td>
+<td style="text-align:left;">
+1st Qu.:1.1113
+</td>
+<td style="text-align:left;">
+1st Qu.:1.193
+</td>
+<td style="text-align:left;">
+1st Qu.:1.2762
+</td>
+<td style="text-align:left;">
+1st Qu.:1.359
+</td>
+<td style="text-align:left;">
+1st Qu.:1.441
+</td>
+<td style="text-align:left;">
+1st Qu.:1.524
+</td>
+<td style="text-align:left;">
+1st Qu.:1.605
+</td>
+<td style="text-align:left;">
+1st Qu.:1.688
+</td>
+<td style="text-align:left;">
+1st Qu.:1.769
+</td>
+<td style="text-align:left;">
+1st Qu.:1.851
+</td>
+<td style="text-align:left;">
+1st Qu.:1.931
+</td>
+<td style="text-align:left;">
+1st Qu.:2.012
+</td>
+<td style="text-align:left;">
+1st Qu.:2.093
+</td>
+<td style="text-align:left;">
+1st Qu.:2.174
+</td>
+<td style="text-align:left;">
+1st Qu.:2.254
+</td>
+<td style="text-align:left;">
+1st Qu.:2.335
+</td>
+<td style="text-align:left;">
+1st Qu.:2.415
+</td>
+<td style="text-align:left;">
+1st Qu.:2.495
+</td>
+<td style="text-align:left;">
+1st Qu.:2.574
+</td>
+<td style="text-align:left;">
+1st Qu.:2.654
+</td>
+<td style="text-align:left;">
+1st Qu.:2.733
+</td>
+<td style="text-align:left;">
+1st Qu.:2.810
+</td>
+<td style="text-align:left;">
+1st Qu.:2.888
+</td>
+<td style="text-align:left;">
+1st Qu.:2.966
+</td>
+<td style="text-align:left;">
+1st Qu.:3.043
+</td>
+<td style="text-align:left;">
+1st Qu.:3.119
+</td>
+<td style="text-align:left;">
+1st Qu.:3.195
+</td>
+<td style="text-align:left;">
+1st Qu.:3.270
+</td>
+<td style="text-align:left;">
+1st Qu.:3.344
+</td>
+<td style="text-align:left;">
+1st Qu.:3.419
+</td>
+<td style="text-align:left;">
+1st Qu.:3.493
+</td>
+<td style="text-align:left;">
+1st Qu.:3.569
+</td>
+<td style="text-align:left;">
+1st Qu.:3.644
+</td>
+<td style="text-align:left;">
+1st Qu.:3.717
+</td>
+<td style="text-align:left;">
+1st Qu.:3.792
+</td>
+<td style="text-align:left;">
+1st Qu.:3.867
+</td>
+<td style="text-align:left;">
+1st Qu.:3.942
+</td>
+<td style="text-align:left;">
+1st Qu.:4.015
+</td>
+<td style="text-align:left;">
+1st Qu.:4.089
+</td>
+<td style="text-align:left;">
+1st Qu.:4.163
+</td>
+<td style="text-align:left;">
+1st Qu.:4.237
+</td>
+<td style="text-align:left;">
+1st Qu.:4.311
+</td>
+<td style="text-align:left;">
+1st Qu.:4.386
+</td>
+<td style="text-align:left;">
+1st Qu.:4.460
+</td>
+<td style="text-align:left;">
+1st Qu.:4.534
+</td>
+<td style="text-align:left;">
+1st Qu.:4.608
+</td>
+<td style="text-align:left;">
+1st Qu.:4.681
+</td>
+<td style="text-align:left;">
+1st Qu.:4.753
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Median :1.0605
+</td>
+<td style="text-align:left;">
+Median :1.138
+</td>
+<td style="text-align:left;">
+Median :1.2165
+</td>
+<td style="text-align:left;">
+Median :1.295
+</td>
+<td style="text-align:left;">
+Median :1.3724
+</td>
+<td style="text-align:left;">
+Median :1.450
+</td>
+<td style="text-align:left;">
+Median :1.528
+</td>
+<td style="text-align:left;">
+Median :1.606
+</td>
+<td style="text-align:left;">
+Median :1.684
+</td>
+<td style="text-align:left;">
+Median :1.762
+</td>
+<td style="text-align:left;">
+Median :1.840
+</td>
+<td style="text-align:left;">
+Median :1.918
+</td>
+<td style="text-align:left;">
+Median :1.996
+</td>
+<td style="text-align:left;">
+Median :2.074
+</td>
+<td style="text-align:left;">
+Median :2.152
+</td>
+<td style="text-align:left;">
+Median :2.230
+</td>
+<td style="text-align:left;">
+Median :2.308
+</td>
+<td style="text-align:left;">
+Median :2.386
+</td>
+<td style="text-align:left;">
+Median :2.463
+</td>
+<td style="text-align:left;">
+Median :2.542
+</td>
+<td style="text-align:left;">
+Median :2.619
+</td>
+<td style="text-align:left;">
+Median :2.698
+</td>
+<td style="text-align:left;">
+Median :2.775
+</td>
+<td style="text-align:left;">
+Median :2.853
+</td>
+<td style="text-align:left;">
+Median :2.931
+</td>
+<td style="text-align:left;">
+Median :3.010
+</td>
+<td style="text-align:left;">
+Median :3.087
+</td>
+<td style="text-align:left;">
+Median :3.165
+</td>
+<td style="text-align:left;">
+Median :3.243
+</td>
+<td style="text-align:left;">
+Median :3.322
+</td>
+<td style="text-align:left;">
+Median :3.400
+</td>
+<td style="text-align:left;">
+Median :3.478
+</td>
+<td style="text-align:left;">
+Median :3.557
+</td>
+<td style="text-align:left;">
+Median :3.634
+</td>
+<td style="text-align:left;">
+Median :3.713
+</td>
+<td style="text-align:left;">
+Median :3.790
+</td>
+<td style="text-align:left;">
+Median :3.868
+</td>
+<td style="text-align:left;">
+Median :3.947
+</td>
+<td style="text-align:left;">
+Median :4.024
+</td>
+<td style="text-align:left;">
+Median :4.102
+</td>
+<td style="text-align:left;">
+Median :4.180
+</td>
+<td style="text-align:left;">
+Median :4.257
+</td>
+<td style="text-align:left;">
+Median :4.335
+</td>
+<td style="text-align:left;">
+Median :4.413
+</td>
+<td style="text-align:left;">
+Median :4.491
+</td>
+<td style="text-align:left;">
+Median :4.569
+</td>
+<td style="text-align:left;">
+Median :4.647
+</td>
+<td style="text-align:left;">
+Median :4.726
+</td>
+<td style="text-align:left;">
+Median :4.803
+</td>
+<td style="text-align:left;">
+Median :4.881
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Mean :1.0605
+</td>
+<td style="text-align:left;">
+Mean :1.138
+</td>
+<td style="text-align:left;">
+Mean :1.2164
+</td>
+<td style="text-align:left;">
+Mean :1.294
+</td>
+<td style="text-align:left;">
+Mean :1.3723
+</td>
+<td style="text-align:left;">
+Mean :1.450
+</td>
+<td style="text-align:left;">
+Mean :1.528
+</td>
+<td style="text-align:left;">
+Mean :1.606
+</td>
+<td style="text-align:left;">
+Mean :1.684
+</td>
+<td style="text-align:left;">
+Mean :1.762
+</td>
+<td style="text-align:left;">
+Mean :1.840
+</td>
+<td style="text-align:left;">
+Mean :1.918
+</td>
+<td style="text-align:left;">
+Mean :1.996
+</td>
+<td style="text-align:left;">
+Mean :2.074
+</td>
+<td style="text-align:left;">
+Mean :2.152
+</td>
+<td style="text-align:left;">
+Mean :2.230
+</td>
+<td style="text-align:left;">
+Mean :2.308
+</td>
+<td style="text-align:left;">
+Mean :2.386
+</td>
+<td style="text-align:left;">
+Mean :2.464
+</td>
+<td style="text-align:left;">
+Mean :2.542
+</td>
+<td style="text-align:left;">
+Mean :2.619
+</td>
+<td style="text-align:left;">
+Mean :2.697
+</td>
+<td style="text-align:left;">
+Mean :2.775
+</td>
+<td style="text-align:left;">
+Mean :2.853
+</td>
+<td style="text-align:left;">
+Mean :2.931
+</td>
+<td style="text-align:left;">
+Mean :3.009
+</td>
+<td style="text-align:left;">
+Mean :3.087
+</td>
+<td style="text-align:left;">
+Mean :3.165
+</td>
+<td style="text-align:left;">
+Mean :3.243
+</td>
+<td style="text-align:left;">
+Mean :3.321
+</td>
+<td style="text-align:left;">
+Mean :3.399
+</td>
+<td style="text-align:left;">
+Mean :3.477
+</td>
+<td style="text-align:left;">
+Mean :3.555
+</td>
+<td style="text-align:left;">
+Mean :3.633
+</td>
+<td style="text-align:left;">
+Mean :3.711
+</td>
+<td style="text-align:left;">
+Mean :3.789
+</td>
+<td style="text-align:left;">
+Mean :3.867
+</td>
+<td style="text-align:left;">
+Mean :3.945
+</td>
+<td style="text-align:left;">
+Mean :4.023
+</td>
+<td style="text-align:left;">
+Mean :4.101
+</td>
+<td style="text-align:left;">
+Mean :4.178
+</td>
+<td style="text-align:left;">
+Mean :4.256
+</td>
+<td style="text-align:left;">
+Mean :4.334
+</td>
+<td style="text-align:left;">
+Mean :4.412
+</td>
+<td style="text-align:left;">
+Mean :4.490
+</td>
+<td style="text-align:left;">
+Mean :4.568
+</td>
+<td style="text-align:left;">
+Mean :4.646
+</td>
+<td style="text-align:left;">
+Mean :4.724
+</td>
+<td style="text-align:left;">
+Mean :4.802
+</td>
+<td style="text-align:left;">
+Mean :4.880
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+3rd Qu.:1.1739
+</td>
+<td style="text-align:left;">
+3rd Qu.:1.247
+</td>
+<td style="text-align:left;">
+3rd Qu.:1.3213
+</td>
+<td style="text-align:left;">
+3rd Qu.:1.394
+</td>
+<td style="text-align:left;">
+3rd Qu.:1.4688
+</td>
+<td style="text-align:left;">
+3rd Qu.:1.543
+</td>
+<td style="text-align:left;">
+3rd Qu.:1.616
+</td>
+<td style="text-align:left;">
+3rd Qu.:1.691
+</td>
+<td style="text-align:left;">
+3rd Qu.:1.766
+</td>
+<td style="text-align:left;">
+3rd Qu.:1.840
+</td>
+<td style="text-align:left;">
+3rd Qu.:1.915
+</td>
+<td style="text-align:left;">
+3rd Qu.:1.989
+</td>
+<td style="text-align:left;">
+3rd Qu.:2.063
+</td>
+<td style="text-align:left;">
+3rd Qu.:2.137
+</td>
+<td style="text-align:left;">
+3rd Qu.:2.212
+</td>
+<td style="text-align:left;">
+3rd Qu.:2.286
+</td>
+<td style="text-align:left;">
+3rd Qu.:2.362
+</td>
+<td style="text-align:left;">
+3rd Qu.:2.436
+</td>
+<td style="text-align:left;">
+3rd Qu.:2.512
+</td>
+<td style="text-align:left;">
+3rd Qu.:2.587
+</td>
+<td style="text-align:left;">
+3rd Qu.:2.663
+</td>
+<td style="text-align:left;">
+3rd Qu.:2.740
+</td>
+<td style="text-align:left;">
+3rd Qu.:2.817
+</td>
+<td style="text-align:left;">
+3rd Qu.:2.895
+</td>
+<td style="text-align:left;">
+3rd Qu.:2.973
+</td>
+<td style="text-align:left;">
+3rd Qu.:3.052
+</td>
+<td style="text-align:left;">
+3rd Qu.:3.132
+</td>
+<td style="text-align:left;">
+3rd Qu.:3.212
+</td>
+<td style="text-align:left;">
+3rd Qu.:3.292
+</td>
+<td style="text-align:left;">
+3rd Qu.:3.372
+</td>
+<td style="text-align:left;">
+3rd Qu.:3.453
+</td>
+<td style="text-align:left;">
+3rd Qu.:3.535
+</td>
+<td style="text-align:left;">
+3rd Qu.:3.616
+</td>
+<td style="text-align:left;">
+3rd Qu.:3.698
+</td>
+<td style="text-align:left;">
+3rd Qu.:3.779
+</td>
+<td style="text-align:left;">
+3rd Qu.:3.861
+</td>
+<td style="text-align:left;">
+3rd Qu.:3.943
+</td>
+<td style="text-align:left;">
+3rd Qu.:4.025
+</td>
+<td style="text-align:left;">
+3rd Qu.:4.107
+</td>
+<td style="text-align:left;">
+3rd Qu.:4.189
+</td>
+<td style="text-align:left;">
+3rd Qu.:4.271
+</td>
+<td style="text-align:left;">
+3rd Qu.:4.353
+</td>
+<td style="text-align:left;">
+3rd Qu.:4.436
+</td>
+<td style="text-align:left;">
+3rd Qu.:4.518
+</td>
+<td style="text-align:left;">
+3rd Qu.:4.600
+</td>
+<td style="text-align:left;">
+3rd Qu.:4.682
+</td>
+<td style="text-align:left;">
+3rd Qu.:4.765
+</td>
+<td style="text-align:left;">
+3rd Qu.:4.847
+</td>
+<td style="text-align:left;">
+3rd Qu.:4.929
+</td>
+<td style="text-align:left;">
+3rd Qu.:5.012
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Max. :1.6368
+</td>
+<td style="text-align:left;">
+Max. :1.697
+</td>
+<td style="text-align:left;">
+Max. :1.7566
+</td>
+<td style="text-align:left;">
+Max. :1.817
+</td>
+<td style="text-align:left;">
+Max. :1.8764
+</td>
+<td style="text-align:left;">
+Max. :1.936
+</td>
+<td style="text-align:left;">
+Max. :1.996
+</td>
+<td style="text-align:left;">
+Max. :2.056
+</td>
+<td style="text-align:left;">
+Max. :2.116
+</td>
+<td style="text-align:left;">
+Max. :2.176
+</td>
+<td style="text-align:left;">
+Max. :2.236
+</td>
+<td style="text-align:left;">
+Max. :2.296
+</td>
+<td style="text-align:left;">
+Max. :2.356
+</td>
+<td style="text-align:left;">
+Max. :2.416
+</td>
+<td style="text-align:left;">
+Max. :2.475
+</td>
+<td style="text-align:left;">
+Max. :2.535
+</td>
+<td style="text-align:left;">
+Max. :2.595
+</td>
+<td style="text-align:left;">
+Max. :2.655
+</td>
+<td style="text-align:left;">
+Max. :2.729
+</td>
+<td style="text-align:left;">
+Max. :2.811
+</td>
+<td style="text-align:left;">
+Max. :2.893
+</td>
+<td style="text-align:left;">
+Max. :2.974
+</td>
+<td style="text-align:left;">
+Max. :3.056
+</td>
+<td style="text-align:left;">
+Max. :3.138
+</td>
+<td style="text-align:left;">
+Max. :3.220
+</td>
+<td style="text-align:left;">
+Max. :3.301
+</td>
+<td style="text-align:left;">
+Max. :3.383
+</td>
+<td style="text-align:left;">
+Max. :3.465
+</td>
+<td style="text-align:left;">
+Max. :3.547
+</td>
+<td style="text-align:left;">
+Max. :3.628
+</td>
+<td style="text-align:left;">
+Max. :3.710
+</td>
+<td style="text-align:left;">
+Max. :3.792
+</td>
+<td style="text-align:left;">
+Max. :3.874
+</td>
+<td style="text-align:left;">
+Max. :3.955
+</td>
+<td style="text-align:left;">
+Max. :4.037
+</td>
+<td style="text-align:left;">
+Max. :4.123
+</td>
+<td style="text-align:left;">
+Max. :4.222
+</td>
+<td style="text-align:left;">
+Max. :4.321
+</td>
+<td style="text-align:left;">
+Max. :4.420
+</td>
+<td style="text-align:left;">
+Max. :4.520
+</td>
+<td style="text-align:left;">
+Max. :4.619
+</td>
+<td style="text-align:left;">
+Max. :4.718
+</td>
+<td style="text-align:left;">
+Max. :4.818
+</td>
+<td style="text-align:left;">
+Max. :4.917
+</td>
+<td style="text-align:left;">
+Max. :5.016
+</td>
+<td style="text-align:left;">
+Max. :5.116
+</td>
+<td style="text-align:left;">
+Max. :5.215
+</td>
+<td style="text-align:left;">
+Max. :5.314
+</td>
+<td style="text-align:left;">
+Max. :5.414
+</td>
+<td style="text-align:left;">
+Max. :5.513
+</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="robust-t-regression.html#cb58-1" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">extract</span>(fit_rstan2, <span class="st">&quot;y_pred&quot;</span>)[[<span class="dv">1</span>]])<span class="sc">%&gt;%</span>kableExtra<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+V1
+</th>
+<th style="text-align:left;">
+V2
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Min. :-36.0432
+</td>
+<td style="text-align:left;">
+Min. :-7.818
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+1st Qu.: 0.1482
+</td>
+<td style="text-align:left;">
+1st Qu.: 6.466
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Median : 0.5704
+</td>
+<td style="text-align:left;">
+Median : 6.954
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Mean : 0.5951
+</td>
+<td style="text-align:left;">
+Mean : 6.946
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+3rd Qu.: 1.0130
+</td>
+<td style="text-align:left;">
+3rd Qu.: 7.431
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Max. : 19.3150
+</td>
+<td style="text-align:left;">
+Max. :23.107
+</td>
+</tr>
+</tbody>
+</table>
+<p>These models can be also etimated through <em>brms</em> package’s API for Stan as follows</p>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb59-1"><a href="robust-t-regression.html#cb59-1" tabindex="-1"></a>M_gaussian <span class="ot">&lt;-</span> </span>
+<span id="cb59-2"><a href="robust-t-regression.html#cb59-2" tabindex="-1"></a>  <span class="fu">brm</span>(<span class="at">data =</span> data_o, </span>
+<span id="cb59-3"><a href="robust-t-regression.html#cb59-3" tabindex="-1"></a>      <span class="at">family =</span> gaussian,</span>
+<span id="cb59-4"><a href="robust-t-regression.html#cb59-4" tabindex="-1"></a>      y <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> x,</span>
+<span id="cb59-5"><a href="robust-t-regression.html#cb59-5" tabindex="-1"></a>      <span class="at">prior =</span> <span class="fu">c</span>(<span class="fu">prior</span>(<span class="fu">normal</span>(<span class="dv">0</span>, <span class="dv">10</span>), <span class="at">class =</span> Intercept),</span>
+<span id="cb59-6"><a href="robust-t-regression.html#cb59-6" tabindex="-1"></a>                <span class="fu">prior</span>(<span class="fu">normal</span>(<span class="dv">0</span>, <span class="dv">10</span>), <span class="at">class =</span> b),</span>
+<span id="cb59-7"><a href="robust-t-regression.html#cb59-7" tabindex="-1"></a>                <span class="fu">prior</span>(<span class="fu">cauchy</span>(<span class="dv">0</span>, <span class="dv">1</span>),  <span class="at">class =</span> sigma)),</span>
+<span id="cb59-8"><a href="robust-t-regression.html#cb59-8" tabindex="-1"></a>      <span class="at">seed =</span> <span class="dv">1</span>)</span></code></pre></div>
+<pre><code>## 
+## SAMPLING FOR MODEL &#39;anon_model&#39; NOW (CHAIN 1).
+## Chain 1: 
+## Chain 1: Gradient evaluation took 2.3e-05 seconds
+## Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 0.23 seconds.
+## Chain 1: Adjust your expectations accordingly!
+## Chain 1: 
+## Chain 1: 
+## Chain 1: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 1: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 1: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 1: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 1: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 1: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 1: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 1: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 1: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 1: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 1: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 1: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 1: 
+## Chain 1:  Elapsed Time: 0.02 seconds (Warm-up)
+## Chain 1:                0.019 seconds (Sampling)
+## Chain 1:                0.039 seconds (Total)
+## Chain 1: 
+## 
+## SAMPLING FOR MODEL &#39;anon_model&#39; NOW (CHAIN 2).
+## Chain 2: 
+## Chain 2: Gradient evaluation took 5e-06 seconds
+## Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 0.05 seconds.
+## Chain 2: Adjust your expectations accordingly!
+## Chain 2: 
+## Chain 2: 
+## Chain 2: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 2: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 2: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 2: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 2: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 2: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 2: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 2: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 2: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 2: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 2: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 2: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 2: 
+## Chain 2:  Elapsed Time: 0.019 seconds (Warm-up)
+## Chain 2:                0.016 seconds (Sampling)
+## Chain 2:                0.035 seconds (Total)
+## Chain 2: 
+## 
+## SAMPLING FOR MODEL &#39;anon_model&#39; NOW (CHAIN 3).
+## Chain 3: 
+## Chain 3: Gradient evaluation took 5e-06 seconds
+## Chain 3: 1000 transitions using 10 leapfrog steps per transition would take 0.05 seconds.
+## Chain 3: Adjust your expectations accordingly!
+## Chain 3: 
+## Chain 3: 
+## Chain 3: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 3: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 3: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 3: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 3: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 3: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 3: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 3: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 3: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 3: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 3: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 3: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 3: 
+## Chain 3:  Elapsed Time: 0.019 seconds (Warm-up)
+## Chain 3:                0.016 seconds (Sampling)
+## Chain 3:                0.035 seconds (Total)
+## Chain 3: 
+## 
+## SAMPLING FOR MODEL &#39;anon_model&#39; NOW (CHAIN 4).
+## Chain 4: 
+## Chain 4: Gradient evaluation took 4e-06 seconds
+## Chain 4: 1000 transitions using 10 leapfrog steps per transition would take 0.04 seconds.
+## Chain 4: Adjust your expectations accordingly!
+## Chain 4: 
+## Chain 4: 
+## Chain 4: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 4: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 4: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 4: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 4: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 4: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 4: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 4: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 4: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 4: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 4: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 4: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 4: 
+## Chain 4:  Elapsed Time: 0.019 seconds (Warm-up)
+## Chain 4:                0.018 seconds (Sampling)
+## Chain 4:                0.037 seconds (Total)
+## Chain 4:</code></pre>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb61-1"><a href="robust-t-regression.html#cb61-1" tabindex="-1"></a><span class="fu">summary</span>(M_gaussian)</span></code></pre></div>
+<pre><code>##  Family: gaussian 
+##   Links: mu = identity; sigma = identity 
+## Formula: y ~ 1 + x 
+##    Data: data_o (Number of observations: 100) 
+##   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
+##          total post-warmup draws = 4000
+## 
+## Population-Level Effects: 
+##           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## Intercept     1.56      0.34     0.88     2.22 1.00     3889     2871
+## x             0.50      0.11     0.28     0.72 1.00     3941     2995
+## 
+## Family Specific Parameters: 
+##       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## sigma     1.13      0.08     0.98     1.30 1.00     3719     2831
+## 
+## Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
+## and Tail_ESS are effective sample size measures, and Rhat is the potential
+## scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb63-1"><a href="robust-t-regression.html#cb63-1" tabindex="-1"></a>M_student <span class="ot">&lt;-</span> </span>
+<span id="cb63-2"><a href="robust-t-regression.html#cb63-2" tabindex="-1"></a>  <span class="fu">brm</span>(<span class="at">data =</span> data_o, <span class="at">family =</span> student,</span>
+<span id="cb63-3"><a href="robust-t-regression.html#cb63-3" tabindex="-1"></a>      y <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> x,</span>
+<span id="cb63-4"><a href="robust-t-regression.html#cb63-4" tabindex="-1"></a>      <span class="at">prior =</span> <span class="fu">c</span>(<span class="fu">prior</span>(<span class="fu">normal</span>(<span class="dv">0</span>, <span class="dv">10</span>), <span class="at">class =</span> Intercept),</span>
+<span id="cb63-5"><a href="robust-t-regression.html#cb63-5" tabindex="-1"></a>                <span class="fu">prior</span>(<span class="fu">normal</span>(<span class="dv">0</span>, <span class="dv">10</span>), <span class="at">class =</span> b),</span>
+<span id="cb63-6"><a href="robust-t-regression.html#cb63-6" tabindex="-1"></a>                <span class="fu">prior</span>(<span class="fu">gamma</span>(<span class="dv">4</span>, <span class="dv">1</span>), <span class="at">class =</span> nu),</span>
+<span id="cb63-7"><a href="robust-t-regression.html#cb63-7" tabindex="-1"></a>                <span class="fu">prior</span>(<span class="fu">cauchy</span>(<span class="dv">0</span>, <span class="dv">1</span>),  <span class="at">class =</span> sigma)),</span>
+<span id="cb63-8"><a href="robust-t-regression.html#cb63-8" tabindex="-1"></a>      <span class="at">seed =</span> <span class="dv">1</span>)</span></code></pre></div>
+<pre><code>## Compiling Stan program...</code></pre>
+<pre><code>## Trying to compile a simple C file</code></pre>
+<pre><code>## Running /Library/Frameworks/R.framework/Resources/bin/R CMD SHLIB foo.c
+## clang -mmacosx-version-min=10.13 -I&quot;/Library/Frameworks/R.framework/Resources/include&quot; -DNDEBUG   -I&quot;/Library/Frameworks/R.framework/Versions/4.0/Resources/library/Rcpp/include/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.0/Resources/library/RcppEigen/include/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.0/Resources/library/RcppEigen/include/unsupported&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.0/Resources/library/BH/include&quot; -I&quot;/Library/Frameworks/R.framework/Versions/4.0/Resources/library/StanHeaders/include/src/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.0/Resources/library/StanHeaders/include/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.0/Resources/library/RcppParallel/include/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.0/Resources/library/rstan/include&quot; -DEIGEN_NO_DEBUG  -DBOOST_DISABLE_ASSERTS  -DBOOST_PENDING_INTEGER_LOG2_HPP  -DSTAN_THREADS  -DUSE_STANC3 -DSTRICT_R_HEADERS  -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION  -DBOOST_NO_AUTO_PTR  -include &#39;/Library/Frameworks/R.framework/Versions/4.0/Resources/library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp&#39;  -D_REENTRANT -DRCPP_PARALLEL_USE_TBB=1   -I/usr/local/include   -fPIC  -Wall -g -O2  -c foo.c -o foo.o
+## In file included from &lt;built-in&gt;:1:
+## In file included from /Library/Frameworks/R.framework/Versions/4.0/Resources/library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp:22:
+## In file included from /Library/Frameworks/R.framework/Versions/4.0/Resources/library/RcppEigen/include/Eigen/Dense:1:
+## In file included from /Library/Frameworks/R.framework/Versions/4.0/Resources/library/RcppEigen/include/Eigen/Core:88:
+## /Library/Frameworks/R.framework/Versions/4.0/Resources/library/RcppEigen/include/Eigen/src/Core/util/Macros.h:628:1: error: unknown type name &#39;namespace&#39;
+## namespace Eigen {
+## ^
+## /Library/Frameworks/R.framework/Versions/4.0/Resources/library/RcppEigen/include/Eigen/src/Core/util/Macros.h:628:16: error: expected &#39;;&#39; after top level declarator
+## namespace Eigen {
+##                ^
+##                ;
+## In file included from &lt;built-in&gt;:1:
+## In file included from /Library/Frameworks/R.framework/Versions/4.0/Resources/library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp:22:
+## In file included from /Library/Frameworks/R.framework/Versions/4.0/Resources/library/RcppEigen/include/Eigen/Dense:1:
+## /Library/Frameworks/R.framework/Versions/4.0/Resources/library/RcppEigen/include/Eigen/Core:96:10: fatal error: &#39;complex&#39; file not found
+## #include &lt;complex&gt;
+##          ^~~~~~~~~
+## 3 errors generated.
+## make: *** [foo.o] Error 1</code></pre>
+<pre><code>## Start sampling</code></pre>
+<pre><code>## 
+## SAMPLING FOR MODEL &#39;anon_model&#39; NOW (CHAIN 1).
+## Chain 1: 
+## Chain 1: Gradient evaluation took 0.000456 seconds
+## Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 4.56 seconds.
+## Chain 1: Adjust your expectations accordingly!
+## Chain 1: 
+## Chain 1: 
+## Chain 1: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 1: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 1: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 1: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 1: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 1: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 1: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 1: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 1: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 1: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 1: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 1: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 1: 
+## Chain 1:  Elapsed Time: 0.07 seconds (Warm-up)
+## Chain 1:                0.063 seconds (Sampling)
+## Chain 1:                0.133 seconds (Total)
+## Chain 1: 
+## 
+## SAMPLING FOR MODEL &#39;anon_model&#39; NOW (CHAIN 2).
+## Chain 2: 
+## Chain 2: Gradient evaluation took 1.8e-05 seconds
+## Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 0.18 seconds.
+## Chain 2: Adjust your expectations accordingly!
+## Chain 2: 
+## Chain 2: 
+## Chain 2: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 2: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 2: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 2: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 2: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 2: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 2: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 2: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 2: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 2: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 2: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 2: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 2: 
+## Chain 2:  Elapsed Time: 0.069 seconds (Warm-up)
+## Chain 2:                0.066 seconds (Sampling)
+## Chain 2:                0.135 seconds (Total)
+## Chain 2: 
+## 
+## SAMPLING FOR MODEL &#39;anon_model&#39; NOW (CHAIN 3).
+## Chain 3: 
+## Chain 3: Gradient evaluation took 1.3e-05 seconds
+## Chain 3: 1000 transitions using 10 leapfrog steps per transition would take 0.13 seconds.
+## Chain 3: Adjust your expectations accordingly!
+## Chain 3: 
+## Chain 3: 
+## Chain 3: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 3: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 3: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 3: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 3: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 3: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 3: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 3: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 3: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 3: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 3: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 3: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 3: 
+## Chain 3:  Elapsed Time: 0.071 seconds (Warm-up)
+## Chain 3:                0.063 seconds (Sampling)
+## Chain 3:                0.134 seconds (Total)
+## Chain 3: 
+## 
+## SAMPLING FOR MODEL &#39;anon_model&#39; NOW (CHAIN 4).
+## Chain 4: 
+## Chain 4: Gradient evaluation took 2.5e-05 seconds
+## Chain 4: 1000 transitions using 10 leapfrog steps per transition would take 0.25 seconds.
+## Chain 4: Adjust your expectations accordingly!
+## Chain 4: 
+## Chain 4: 
+## Chain 4: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 4: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 4: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 4: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 4: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 4: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 4: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 4: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 4: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 4: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 4: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 4: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 4: 
+## Chain 4:  Elapsed Time: 0.07 seconds (Warm-up)
+## Chain 4:                0.065 seconds (Sampling)
+## Chain 4:                0.135 seconds (Total)
+## Chain 4:</code></pre>
+<div class="sourceCode" id="cb69"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb69-1"><a href="robust-t-regression.html#cb69-1" tabindex="-1"></a><span class="fu">summary</span>(M_student)</span></code></pre></div>
+<pre><code>##  Family: student 
+##   Links: mu = identity; sigma = identity; nu = identity 
+## Formula: y ~ 1 + x 
+##    Data: data_o (Number of observations: 100) 
+##   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
+##          total post-warmup draws = 4000
+## 
+## Population-Level Effects: 
+##           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## Intercept     0.56      0.20     0.17     0.96 1.00     3835     2836
+## x             0.80      0.07     0.66     0.93 1.00     3836     3084
+## 
+## Family Specific Parameters: 
+##       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## sigma     0.50      0.06     0.39     0.62 1.00     3183     2799
+## nu        2.80      0.70     1.71     4.49 1.00     3564     2917
+## 
+## Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
+## and Tail_ESS are effective sample size measures, and Rhat is the potential
+## scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
+</div>
+<div id="conclusion-1" class="section level2 hasAnchor" number="4.3">
+<h2><span class="header-section-number">4.3</span> Conclusion<a href="robust-t-regression.html#conclusion-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>In this post, we have provided a simple Bayesian approach to robustly estimate both parameters β and σ of a simple linear regression where the estiamtes are robust to the variance of the error term. The specificity of this approach is to replace the traditional normal assumption on the dependant variable by a heavy-tailed t-distribution assumption. Robusness against outliers comes at a price of a loss of efficiency, especially when the observations are normally distributed. This is a low premium that comes with the robust alternatives that offers a large protection against over-fiting.</p>
+</div>
+<div id="references-2" class="section level2 hasAnchor" number="4.4">
+<h2><span class="header-section-number">4.4</span> References<a href="robust-t-regression.html#references-2" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<ul>
+<li><p><a href="https://arxiv.org/pdf/1612.05307.pdf">Bayesian Robustness to Outliers in Linear Regression</a></p></li>
+<li><p><a href="https://dms.umontreal.ca/~bedard/Robustness.pdf">A New Bayesian Approach to Robustness Against Outliers in Linear Regression</a></p></li>
+<li><p><a href="https://mc-stan.org/docs/2_18/stan-users-guide/robust-noise-models.html">Robust Noise Models from stan manual</a></p></li>
+</ul>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="bayesian-regression-models-for-non-normal-data.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="appendix.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+  "sharing": {
+    "github": false,
+    "facebook": true,
+    "twitter": true,
+    "linkedin": false,
+    "weibo": false,
+    "instapaper": false,
+    "vk": false,
+    "whatsapp": false,
+    "all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+  },
+  "fontsettings": {
+    "theme": "white",
+    "family": "sans",
+    "size": 2
+  },
+  "edit": {
+    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/edit/main/04-Robust.Rmd",
+    "text": "Edit"
+  },
+  "history": {
+    "link": null,
+    "text": null
+  },
+  "view": {
+    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/blob/main/04-Robust.Rmd",
+    "text": null
+  },
+  "download": null,
+  "search": {
+    "engine": "fuse",
+    "options": null
+  },
+  "toc": {
+    "collapse": "subsection"
+  }
+});
+});
+</script>
+
+</body>
+
+</html>

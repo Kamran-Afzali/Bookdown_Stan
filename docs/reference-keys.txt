@@ -12,6 +12,11 @@ logistic-regression
 negative-binomial
 conclusion
 references-1
+robust-t-regression
+motivation
+concepts-and-code
+conclusion-1
+references-2
 appendix
 main-stan-distributions-cheatsheet
 main-stan-functions-cheatsheet
