@@ -25,6 +25,12 @@ bayesian-lasso-regression
 hierarchical-shrinkage
 conclusion-2
 references-3
+bayesian-quantile-regression
+model-specification
+using-bayesqr-package
+using-brms-package
+backend-stan-model
+references-4
 appendix
 main-stan-distributions-cheatsheet
 main-stan-functions-cheatsheet
