@@ -31,6 +31,12 @@ using-bayesqr-package
 using-brms-package
 backend-stan-model
 references-4
+gaussian-process-regression-gpr
+introduction-1
+challenges
+gpfit-package
+bayesian-stan
+references-5
 appendix
 main-stan-distributions-cheatsheet
 main-stan-functions-cheatsheet
