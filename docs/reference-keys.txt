@@ -37,6 +37,11 @@ challenges
 gpfit-package
 bayesian-stan
 references-5
+bayesian-gaussian-mixture-models
+single-varaible-example
+example-with-multiple-variable
+conclusion-3
+references-6
 appendix
 main-stan-distributions-cheatsheet
 main-stan-functions-cheatsheet
