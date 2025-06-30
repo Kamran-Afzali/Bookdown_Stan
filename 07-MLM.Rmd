@@ -1,0 +1,205 @@
+# Bayesian Multilevel (Mixed Effects) Regression in Stan
+
+## Introduction
+
+In this post, we will explore Bayesian multilevel (mixed effects) regression models, which extend traditional linear regression by incorporating hierarchical structures to account for grouped or clustered data. Unlike standard linear regression, which assumes observations are independent, multilevel models handle data with nested structures (e.g., students within schools, patients within hospitals) by modeling both fixed and random effects. Our goal is to understand how multilevel models pool information across groups, improve parameter estimation in the presence of group-level variation, and compare Bayesian multilevel models to their frequentist counterparts. We will focus on three specific approaches—random intercepts, random slopes, and hierarchical priors—implemented in Stan, highlighting their ability to model group-level variation and their connections to frequentist mixed effects models. Bayesian multilevel models use priors to regularize group-level parameters, producing partially pooled estimates that balance group-specific and population-level information, reducing overfitting compared to unpooled models.
+
+## Multilevel Regression
+
+Multilevel regression models are designed to handle data with hierarchical structures, where observations are nested within groups. These models estimate fixed effects (population-level parameters) and random effects (group-specific parameters), allowing for partial pooling of information across groups. In a Bayesian framework, this is achieved by placing priors on both fixed and random effects, enabling the model to borrow strength across groups while accounting for group-level variability. We will explore random intercepts, random slopes, and hierarchical priors, implementing each in Stan and comparing their behavior.
+
+### Bayesian Random Intercepts Model
+
+The random intercepts model allows each group to have its own intercept, drawn from a common distribution, while sharing the same slope across groups. This accounts for group-level variation in the baseline outcome. In a Bayesian framework, we place a normal prior on the group-specific intercepts, with a hyperprior on their standard deviation to control the degree of pooling.
+
+```r
+library(tidymodels)
+
+set.seed(123)
+n <- 1000  # total observations
+n_groups <- 10  # number of groups
+group_id <- rep(1:n_groups, each = n/n_groups)
+a <- 40  # population intercept
+b <- 3   # population slope
+sigma_group <- 5  # SD of group intercepts
+sigma <- 4       # residual SD
+x <- rnorm(n, mean = 0, sd = 1)
+group_effects <- rnorm(n_groups, mean = 0, sd = sigma_group)
+y <- a + group_effects[group_id] + b * x + rnorm(n, mean = 0, sd = sigma)
+data <- data.frame(y, x, group_id)
+head(data)
+
+set.seed(42)
+data_split <- initial_split(data, prop = 0.7)
+train_data <- training(data_split)
+test_data <- testing(data_split)
+```
+
+```stan
+data {
+  int<lower=0> N;               // number of observations
+  int<lower=0> J;               // number of groups
+  vector[N] y;                  // outcome
+  vector[N] x;                  // predictor
+  int<lower=1, upper=J> group_id[N];  // group index
+}
+parameters {
+  real alpha;                   // population intercept
+  real beta;                    // population slope
+  real<lower=0> sigma;          // residual SD
+  real<lower=0> sigma_group;    // SD of group intercepts
+  vector[J] alpha_group;        // group-specific intercepts
+}
+model {
+  alpha ~ normal(0, 10);        // prior for population intercept
+  beta ~ normal(0, 10);         // prior for population slope
+  sigma_group ~ cauchy(0, 5);   // hyperprior for group intercept SD
+  sigma ~ cauchy(0, 5);         // prior for residual SD
+  alpha_group ~ normal(0, sigma_group);  // group-specific intercepts
+  y ~ normal(alpha + alpha_group[group_id] + beta * x, sigma);  // likelihood
+}
+```
+
+```r
+writeLines(stan_mod_random_intercepts, con = "random_intercepts.stan")
+
+library(tidyverse)
+stan_data <- list(
+  N = nrow(train_data),
+  J = length(unique(train_data$group_id)),
+  y = train_data$y,
+  x = train_data$x,
+  group_id = train_data$group_id
+)
+
+fit_rstan <- rstan::stan(
+  file = "random_intercepts.stan",
+  data = stan_data
+)
+```
+
+### Bayesian Random Slopes Model
+
+The random slopes model extends the random intercepts model by allowing each group to have its own slope in addition to its intercept. This is useful when the effect of a predictor varies across groups. In the Bayesian framework, we place normal priors on both group-specific intercepts and slopes, with hyperpriors on their standard deviations to control pooling.
+
+```stan
+data {
+  int<lower=0> N;               // number of observations
+  int<lower=0> J;               // number of groups
+  vector[N] y;                  // outcome
+  vector[N] x;                  // predictor
+  int<lower=1, upper=J> group_id[N];  // group index
+}
+parameters {
+  real alpha;                   // population intercept
+  real beta;                    // population slope
+  real<lower=0> sigma;          // residual SD
+  real<lower=0> sigma_group_alpha;  // SD of group intercepts
+  real<lower=0> sigma_group_beta;   // SD of group slopes
+  vector[J] alpha_group;        // group-specific intercepts
+  vector[J] beta_group;         // group-specific slopes
+}
+model {
+  alpha ~ normal(0, 10);        // prior for population intercept
+  beta ~ normal(0, 10);         // prior for population slope
+  sigma_group_alpha ~ cauchy(0, 5);  // hyperprior for group intercept SD
+  sigma_group_beta ~ cauchy(0, 5);   // hyperprior for group slope SD
+  sigma ~ cauchy(0, 5);         // prior for residual SD
+  alpha_group ~ normal(0, sigma_group_alpha);  // group-specific intercepts
+  beta_group ~ normal(0, sigma_group_beta);    // group-specific slopes
+  y ~ normal(alpha + alpha_group[group_id] + (beta + beta_group[group_id]) * x, sigma);  // likelihood
+}
+generated quantities {
+  vector[N] y_pred;             // predicted values
+  for (n in 1:N) {
+    y_pred[n] = normal_rng(alpha + alpha_group[group_id[n]] + (beta + beta_group[group_id[n]]) * x[n], sigma);
+  }
+}
+```
+
+```r
+writeLines(stan_mod_random_slopes, con = "random_slopes.stan")
+
+stan_data <- list(
+  N = nrow(train_data),
+  J = length(unique(train_data$group_id)),
+  y = train_data$y,
+  x = train_data$x,
+  group_id = train_data$group_id
+)
+
+fit_rstan2 <- rstan::stan(
+  file = "random_slopes.stan",
+  data = stan_data
+)
+```
+
+### Hierarchical Priors Model
+
+For more complex hierarchies, we can use hierarchical priors to model group-level parameters with greater flexibility, allowing for correlations between random intercepts and slopes. This approach uses a multivariate normal prior for the group-specific effects, with a covariance matrix to capture dependencies between intercepts and slopes.
+
+```stan
+data {
+  int<lower=0> N;               // number of observations
+  int<lower=0> J;               // number of groups
+  vector[N] y;                  // outcome
+  vector[N] x;                  // predictor
+  int<lower=1, upper=J> group_id[N];  // group index
+}
+parameters {
+  real alpha;                   // population intercept
+  real beta;                    // population slope
+  real<lower=0> sigma;          // residual SD
+  vector[2] group_effects[J];   // group-specific intercept and slope
+  cholesky_factor_corr[2] L;    // Cholesky factor of correlation matrix
+  vector<lower=0>[2] sigma_group;  // SDs for intercept and slope
+}
+transformed parameters {
+  matrix[2, 2] Sigma;           // covariance matrix
+  Sigma = diag_pre_multiply(sigma_group, L) * diag_pre_multiply(sigma_group, L)';
+}
+model {
+  alpha ~ normal(0, 10);        // prior for population intercept
+  beta ~ normal(0, 10);         // prior for population slope
+  sigma_group ~ cauchy(0, 5);   // hyperprior for group SDs
+  sigma ~ cauchy(0, 5);         // prior for residual SD
+  L ~ lkj_corr_cholesky(2);     // prior for correlation matrix
+  for (j in 1:J) {
+    group_effects[j] ~ multi_normal_cholesky([0, 0]', diag_pre_multiply(sigma_group, L));
+  }
+  y ~ normal(alpha + group_effects[group_id, 1] + (beta + group_effects[group_id, 2]) * x, sigma);  // likelihood
+}
+generated quantities {
+  vector[N] y_pred;             // predicted values
+  for (n in 1:N) {
+    y_pred[n] = normal_rng(alpha + group_effects[group_id[n], 1] + (beta + group_effects[group_id[n], 2]) * x[n], sigma);
+  }
+}
+```
+
+```r
+writeLines(stan_mod_hierarchical, con = "hierarchical_priors.stan")
+
+stan_data <- list(
+  N = nrow(train_data),
+  J = length(unique(train_data$group_id)),
+  y = train_data$y,
+  x = train_data$x,
+  group_id = train_data$group_id
+)
+
+fit_rstan3 <- rstan::stan(
+  file = "hierarchical_priors.stan",
+  data = stan_data
+)
+```
+
+## Conclusion
+
+In this post, we explored Bayesian multilevel regression models, which extend traditional linear regression to handle hierarchical data structures. We learned that multilevel models account for group-level variation through random effects, providing partially pooled estimates that balance group-specific and population-level information. This reduces overfitting compared to unpooled models and improves performance in settings with clustered data. We implemented random intercepts, random slopes, and hierarchical priors models in Stan, demonstrating how Bayesian priors regularize group-level parameters and capture complex dependencies. Unlike frequentist mixed effects models, Bayesian approaches provide full posterior distributions for all parameters, eliminating the need for bootstrapping to estimate uncertainty.
+
+## References
+
++ [Stan User’s Guide on Hierarchical Models](https://mc-stan.org/docs/stan-users-guide/hierarchical.html)
++ [Blogpost on Bayesian Multilevel Modeling](https://rpsychologist.com/bayesian-hierarchical-regression)
++ [Gelman, A., & Hill, J. (2006). Data Analysis Using Regression and Multilevel/Hierarchical Models](https://www.cambridge.org/core/books/data-analysis-using-regression-and-multilevelhierarchical-models/9780521686891)
