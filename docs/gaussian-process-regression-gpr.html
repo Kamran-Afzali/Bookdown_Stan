@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 7 Gaussian Process Regression (GPR) | Stan Bookdown</title>
-  <meta name="description" content="Chapter 7 Gaussian Process Regression (GPR) | Stan Bookdown" />
+  <title>Chapter 8 Gaussian Process Regression (GPR) | Stan Bookdown</title>
+  <meta name="description" content="Chapter 8 Gaussian Process Regression (GPR) | Stan Bookdown" />
   <meta name="generator" content="bookdown 0.43 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 7 Gaussian Process Regression (GPR) | Stan Bookdown" />
+  <meta property="og:title" content="Chapter 8 Gaussian Process Regression (GPR) | Stan Bookdown" />
   <meta property="og:type" content="book" />
   
   
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 7 Gaussian Process Regression (GPR) | Stan Bookdown" />
+  <meta name="twitter:title" content="Chapter 8 Gaussian Process Regression (GPR) | Stan Bookdown" />
   
   
   
@@ -23,14 +23,14 @@
 <meta name="author" content="Kamran Afzali" />
 
 
-<meta name="date" content="2025-06-29" />
+<meta name="date" content="2025-07-02" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="bayesian-quantile-regression.html"/>
+<link rel="prev" href="bayesian-multilevel-mixed-effects-regression-in-stan.html"/>
 <link rel="next" href="bayesian-gaussian-mixture-models.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
@@ -187,36 +187,57 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="6.2" data-path="bayesian-quantile-regression.html"><a href="bayesian-quantile-regression.html#references-4"><i class="fa fa-check"></i><b>6.2</b> References</a></li>
 </ul></li>
-<li class="chapter" data-level="7" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html"><i class="fa fa-check"></i><b>7</b> Gaussian Process Regression (GPR)</a>
+<li class="chapter" data-level="7" data-path="bayesian-multilevel-mixed-effects-regression-in-stan.html"><a href="bayesian-multilevel-mixed-effects-regression-in-stan.html"><i class="fa fa-check"></i><b>7</b> Bayesian Multilevel (Mixed Effects) Regression in Stan</a>
 <ul>
-<li class="chapter" data-level="7.1" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#introduction-1"><i class="fa fa-check"></i><b>7.1</b> Introduction</a></li>
-<li class="chapter" data-level="7.2" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#challenges"><i class="fa fa-check"></i><b>7.2</b> Challenges</a></li>
-<li class="chapter" data-level="7.3" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#gpfit-package"><i class="fa fa-check"></i><b>7.3</b> GPfit package</a></li>
-<li class="chapter" data-level="7.4" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#bayesian-stan"><i class="fa fa-check"></i><b>7.4</b> Bayesian Stan</a></li>
-<li class="chapter" data-level="7.5" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#references-5"><i class="fa fa-check"></i><b>7.5</b> References</a></li>
+<li class="chapter" data-level="7.1" data-path="bayesian-multilevel-mixed-effects-regression-in-stan.html"><a href="bayesian-multilevel-mixed-effects-regression-in-stan.html#introduction-1"><i class="fa fa-check"></i><b>7.1</b> Introduction</a></li>
+<li class="chapter" data-level="7.2" data-path="bayesian-multilevel-mixed-effects-regression-in-stan.html"><a href="bayesian-multilevel-mixed-effects-regression-in-stan.html#multilevel-regression"><i class="fa fa-check"></i><b>7.2</b> Multilevel Regression</a>
+<ul>
+<li class="chapter" data-level="7.2.1" data-path="bayesian-multilevel-mixed-effects-regression-in-stan.html"><a href="bayesian-multilevel-mixed-effects-regression-in-stan.html#bayesian-random-intercepts-model"><i class="fa fa-check"></i><b>7.2.1</b> Bayesian Random Intercepts Model</a></li>
+<li class="chapter" data-level="7.2.2" data-path="bayesian-multilevel-mixed-effects-regression-in-stan.html"><a href="bayesian-multilevel-mixed-effects-regression-in-stan.html#bayesian-random-slopes-model"><i class="fa fa-check"></i><b>7.2.2</b> Bayesian Random Slopes Model</a></li>
+<li class="chapter" data-level="7.2.3" data-path="bayesian-multilevel-mixed-effects-regression-in-stan.html"><a href="bayesian-multilevel-mixed-effects-regression-in-stan.html#hierarchical-priors-model"><i class="fa fa-check"></i><b>7.2.3</b> Hierarchical Priors Model</a></li>
 </ul></li>
-<li class="chapter" data-level="8" data-path="bayesian-gaussian-mixture-models.html"><a href="bayesian-gaussian-mixture-models.html"><i class="fa fa-check"></i><b>8</b> Bayesian Gaussian Mixture Models</a>
-<ul>
-<li class="chapter" data-level="8.1" data-path="bayesian-gaussian-mixture-models.html"><a href="bayesian-gaussian-mixture-models.html#single-varaible-example"><i class="fa fa-check"></i><b>8.1</b> Single varaible example</a></li>
-<li class="chapter" data-level="8.2" data-path="bayesian-gaussian-mixture-models.html"><a href="bayesian-gaussian-mixture-models.html#example-with-multiple-variable"><i class="fa fa-check"></i><b>8.2</b> Example with multiple variable</a></li>
-<li class="chapter" data-level="8.3" data-path="bayesian-gaussian-mixture-models.html"><a href="bayesian-gaussian-mixture-models.html#conclusion-3"><i class="fa fa-check"></i><b>8.3</b> Conclusion</a></li>
-<li class="chapter" data-level="8.4" data-path="bayesian-gaussian-mixture-models.html"><a href="bayesian-gaussian-mixture-models.html#references-6"><i class="fa fa-check"></i><b>8.4</b> References</a></li>
+<li class="chapter" data-level="7.3" data-path="bayesian-multilevel-mixed-effects-regression-in-stan.html"><a href="bayesian-multilevel-mixed-effects-regression-in-stan.html#conclusion-3"><i class="fa fa-check"></i><b>7.3</b> Conclusion</a></li>
+<li class="chapter" data-level="7.4" data-path="bayesian-multilevel-mixed-effects-regression-in-stan.html"><a href="bayesian-multilevel-mixed-effects-regression-in-stan.html#references-5"><i class="fa fa-check"></i><b>7.4</b> References</a></li>
 </ul></li>
-<li class="chapter" data-level="9" data-path="appendix.html"><a href="appendix.html"><i class="fa fa-check"></i><b>9</b> Appendix</a>
+<li class="chapter" data-level="8" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html"><i class="fa fa-check"></i><b>8</b> Gaussian Process Regression (GPR)</a>
 <ul>
-<li class="chapter" data-level="9.1" data-path="appendix.html"><a href="appendix.html#main-stan-distributions-cheatsheet"><i class="fa fa-check"></i><b>9.1</b> Main Stan Distributions Cheatsheet</a></li>
-<li class="chapter" data-level="9.2" data-path="appendix.html"><a href="appendix.html#main-stan-functions-cheatsheet"><i class="fa fa-check"></i><b>9.2</b> Main Stan Functions Cheatsheet</a></li>
-<li class="chapter" data-level="9.3" data-path="appendix.html"><a href="appendix.html#why-non-distribution-functions"><i class="fa fa-check"></i><b>9.3</b> Why Non-Distribution Functions?</a></li>
-<li class="chapter" data-level="9.4" data-path="appendix.html"><a href="appendix.html#stan-functions-cheatsheet"><i class="fa fa-check"></i><b>9.4</b> Stan Functions Cheatsheet</a>
-<ul>
-<li class="chapter" data-level="9.4.1" data-path="appendix.html"><a href="appendix.html#mathematical-functions"><i class="fa fa-check"></i><b>9.4.1</b> 1. Mathematical Functions</a></li>
-<li class="chapter" data-level="9.4.2" data-path="appendix.html"><a href="appendix.html#transformation-functions"><i class="fa fa-check"></i><b>9.4.2</b> 2. Transformation Functions</a></li>
-<li class="chapter" data-level="9.4.3" data-path="appendix.html"><a href="appendix.html#matrix-and-vector-operations"><i class="fa fa-check"></i><b>9.4.3</b> 3. Matrix and Vector Operations</a></li>
-<li class="chapter" data-level="9.4.4" data-path="appendix.html"><a href="appendix.html#utility-functions"><i class="fa fa-check"></i><b>9.4.4</b> 4. Utility Functions</a></li>
-<li class="chapter" data-level="9.4.5" data-path="appendix.html"><a href="appendix.html#specialized-solvers"><i class="fa fa-check"></i><b>9.4.5</b> 5. Specialized Solvers</a></li>
+<li class="chapter" data-level="8.1" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#introduction-2"><i class="fa fa-check"></i><b>8.1</b> Introduction</a></li>
+<li class="chapter" data-level="8.2" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#challenges"><i class="fa fa-check"></i><b>8.2</b> Challenges</a></li>
+<li class="chapter" data-level="8.3" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#gpfit-package"><i class="fa fa-check"></i><b>8.3</b> GPfit package</a></li>
+<li class="chapter" data-level="8.4" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#bayesian-stan"><i class="fa fa-check"></i><b>8.4</b> Bayesian Stan</a></li>
+<li class="chapter" data-level="8.5" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#references-6"><i class="fa fa-check"></i><b>8.5</b> References</a></li>
 </ul></li>
-<li class="chapter" data-level="9.5" data-path="appendix.html"><a href="appendix.html#example-hierarchical-linear-regression"><i class="fa fa-check"></i><b>9.5</b> Example: Hierarchical Linear Regression</a></li>
-<li class="chapter" data-level="9.6" data-path="appendix.html"><a href="appendix.html#tips-for-using-stan-functions"><i class="fa fa-check"></i><b>9.6</b> Tips for Using Stan Functions</a></li>
+<li class="chapter" data-level="9" data-path="bayesian-gaussian-mixture-models.html"><a href="bayesian-gaussian-mixture-models.html"><i class="fa fa-check"></i><b>9</b> Bayesian Gaussian Mixture Models</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="bayesian-gaussian-mixture-models.html"><a href="bayesian-gaussian-mixture-models.html#single-varaible-example"><i class="fa fa-check"></i><b>9.1</b> Single varaible example</a></li>
+<li class="chapter" data-level="9.2" data-path="bayesian-gaussian-mixture-models.html"><a href="bayesian-gaussian-mixture-models.html#example-with-multiple-variable"><i class="fa fa-check"></i><b>9.2</b> Example with multiple variable</a></li>
+<li class="chapter" data-level="9.3" data-path="bayesian-gaussian-mixture-models.html"><a href="bayesian-gaussian-mixture-models.html#conclusion-4"><i class="fa fa-check"></i><b>9.3</b> Conclusion</a></li>
+<li class="chapter" data-level="9.4" data-path="bayesian-gaussian-mixture-models.html"><a href="bayesian-gaussian-mixture-models.html#references-7"><i class="fa fa-check"></i><b>9.4</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><i class="fa fa-check"></i><b>10</b> Bayesian Seasonal Decomposition in Stan and RStan</a>
+<ul>
+<li class="chapter" data-level="10.1" data-path="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#simulating-seasonal-time-series-data"><i class="fa fa-check"></i><b>10.1</b> Simulating Seasonal Time Series Data*</a></li>
+<li class="chapter" data-level="10.2" data-path="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#bayesian-seasonal-decomposition-model-in-stan"><i class="fa fa-check"></i><b>10.2</b> Bayesian Seasonal Decomposition Model in Stan</a></li>
+<li class="chapter" data-level="10.3" data-path="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#fitting-the-model-in-r"><i class="fa fa-check"></i><b>10.3</b> Fitting the Model in R</a></li>
+<li class="chapter" data-level="10.4" data-path="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#extracting-and-visualizing-components"><i class="fa fa-check"></i><b>10.4</b> Extracting and Visualizing Components</a></li>
+<li class="chapter" data-level="10.5" data-path="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#extensions-and-applications"><i class="fa fa-check"></i><b>10.5</b> Extensions and Applications</a></li>
+<li class="chapter" data-level="10.6" data-path="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#conclusion-5"><i class="fa fa-check"></i><b>10.6</b> Conclusion</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="appendix.html"><a href="appendix.html"><i class="fa fa-check"></i><b>11</b> Appendix</a>
+<ul>
+<li class="chapter" data-level="11.1" data-path="appendix.html"><a href="appendix.html#main-stan-distributions-cheatsheet"><i class="fa fa-check"></i><b>11.1</b> Main Stan Distributions Cheatsheet</a></li>
+<li class="chapter" data-level="11.2" data-path="appendix.html"><a href="appendix.html#main-stan-functions-cheatsheet"><i class="fa fa-check"></i><b>11.2</b> Main Stan Functions Cheatsheet</a></li>
+<li class="chapter" data-level="11.3" data-path="appendix.html"><a href="appendix.html#why-non-distribution-functions"><i class="fa fa-check"></i><b>11.3</b> Why Non-Distribution Functions?</a></li>
+<li class="chapter" data-level="11.4" data-path="appendix.html"><a href="appendix.html#stan-functions-cheatsheet"><i class="fa fa-check"></i><b>11.4</b> Stan Functions Cheatsheet</a>
+<ul>
+<li class="chapter" data-level="11.4.1" data-path="appendix.html"><a href="appendix.html#mathematical-functions"><i class="fa fa-check"></i><b>11.4.1</b> 1. Mathematical Functions</a></li>
+<li class="chapter" data-level="11.4.2" data-path="appendix.html"><a href="appendix.html#transformation-functions"><i class="fa fa-check"></i><b>11.4.2</b> 2. Transformation Functions</a></li>
+<li class="chapter" data-level="11.4.3" data-path="appendix.html"><a href="appendix.html#matrix-and-vector-operations"><i class="fa fa-check"></i><b>11.4.3</b> 3. Matrix and Vector Operations</a></li>
+<li class="chapter" data-level="11.4.4" data-path="appendix.html"><a href="appendix.html#utility-functions"><i class="fa fa-check"></i><b>11.4.4</b> 4. Utility Functions</a></li>
+<li class="chapter" data-level="11.4.5" data-path="appendix.html"><a href="appendix.html#specialized-solvers"><i class="fa fa-check"></i><b>11.4.5</b> 5. Specialized Solvers</a></li>
+</ul></li>
+<li class="chapter" data-level="11.5" data-path="appendix.html"><a href="appendix.html#example-hierarchical-linear-regression"><i class="fa fa-check"></i><b>11.5</b> Example: Hierarchical Linear Regression</a></li>
+<li class="chapter" data-level="11.6" data-path="appendix.html"><a href="appendix.html#tips-for-using-stan-functions"><i class="fa fa-check"></i><b>11.6</b> Tips for Using Stan Functions</a></li>
 </ul></li>
 <li class="divider"></li>
 <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
@@ -237,19 +258,19 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="gaussian-process-regression-gpr" class="section level1 hasAnchor" number="7">
-<h1><span class="header-section-number">Chapter 7</span> Gaussian Process Regression (GPR)<a href="gaussian-process-regression-gpr.html#gaussian-process-regression-gpr" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<div id="introduction-1" class="section level2 hasAnchor" number="7.1">
-<h2><span class="header-section-number">7.1</span> Introduction<a href="gaussian-process-regression-gpr.html#introduction-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="gaussian-process-regression-gpr" class="section level1 hasAnchor" number="8">
+<h1><span class="header-section-number">Chapter 8</span> Gaussian Process Regression (GPR)<a href="gaussian-process-regression-gpr.html#gaussian-process-regression-gpr" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="introduction-2" class="section level2 hasAnchor" number="8.1">
+<h2><span class="header-section-number">8.1</span> Introduction<a href="gaussian-process-regression-gpr.html#introduction-2" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Gaussian process regression (GPR) is a machine learning method based on non-parametric regression method that can be used to fit arbitrary scalar and vectorial quantities. GPR provides a probabilistic model that can be used to make predictions and estimate the uncertainty of those predictions. A Gaussian process is a generalization of the Gaussian probability distribution to functions, where any finite set of function values has a joint Gaussian distribution. The mean function and covariance function of the Gaussian process describe the prior distribution of the function, and the observations are used to update the prior to the posterior distribution of the function. In GPR, the output variable is assumed to be a function of the input variables, and the function is modeled as a sample from a Gaussian process. The goal is to predict the value of the output variable at a new input point, given the observed data. The predicted value is given by the posterior mean of the Gaussian process, and the uncertainty of the prediction is given by the posterior variance. GPR is particularly useful when the data is noisy or when the function being modeled is complex and nonlinear. The key advantages of GPR over other regression techniques are its flexibility and its ability to provide a probabilistic framework for uncertainty quantification. GPR can be used for both regression and classification problems, and it can handle both scalar and vector-valued outputs. Moreover, GPR can be easily extended to handle non-stationary and non-Gaussian data. In practice, GPR is often implemented using the kernlab or gpflow packages in R or Python, respectively. These packages provide functions for specifying the kernel function, which is used to model the covariance between the input variables, and for estimating the hyperparameters of the kernel function using maximum likelihood or Bayesian methods.</p>
 </div>
-<div id="challenges" class="section level2 hasAnchor" number="7.2">
-<h2><span class="header-section-number">7.2</span> Challenges<a href="gaussian-process-regression-gpr.html#challenges" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="challenges" class="section level2 hasAnchor" number="8.2">
+<h2><span class="header-section-number">8.2</span> Challenges<a href="gaussian-process-regression-gpr.html#challenges" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Overfitting occurs when a model is too complex and fits the training data too closely, resulting in poor generalization to new data. Like some other machine learning techniques, GPR is prone to overfitting if the model is too complex relative to the amount of data available. Specifically, if the number of hyperparameters of the Gaussian process model is large, or if the covariance function is too flexible, the model may fit the noise in the data rather than the underlying signal. This can result in poor generalization performance, where the model performs well on the training data but poorly on new, unseen data. To mitigate the risk of overfitting in GPR, it is important to carefully select the kernel function and the hyperparameters of the model based on the available data. Cross-validation can be used to estimate the generalization error of the model and to select the optimal values of the hyperparameters. Regularization techniques, such as adding a prior distribution on the hyperparameters or using Bayesian model selection, can also be used to prevent overfitting. Another way to prevent overfitting in GPR is to use a simpler covariance function that captures the key features of the data, rather than trying to fit the noise in the data. Overall, while GPR is a powerful and flexible regression technique, it requires careful tuning of the hyperparameters and selection of the kernel function to prevent overfitting and achieve good generalization performance.</p>
 <p>GPR use in domains such as healthcare comes with certain challenges and limitations that should be considered. Computational complexity poses a significant challenge, particularly with large datasets, necessitating efficient algorithms and computational resources to handle the complexity. Hyperparameter tuning is another consideration, involving the selection of optimal values for parameters such as the kernel function and noise level. This task can be challenging and may require expert knowledge or extensive experimentation. Furthermore, as GPR models complex relationships, the interpretability of the learned models can become intricate. Understanding the underlying factors contributing to predictions becomes more challenging in highly nonlinear models. These challenges highlight the need for careful consideration and expertise when applying GPR in healthcare settings. GPRs ability to model complex relationships, estimate uncertainties, and provide interpretable predictions makes it an invaluable asset for predictive modeling in healthcare, with a postential to enhance disease progression modeling, personalize treatment plans, detect diseases early, and improve medical imaging analysis. While challenges exist, ongoing research and advancements in computational techniques are addressing these limitations, making GPR an increasingly valuable tool in healthcare. As the field continues to evolve, GPR is poised to revolutionize healthcare by enabling more accurate predictions, better decision-making, and improved patient outcomes.</p>
 </div>
-<div id="gpfit-package" class="section level2 hasAnchor" number="7.3">
-<h2><span class="header-section-number">7.3</span> GPfit package<a href="gaussian-process-regression-gpr.html#gpfit-package" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="gpfit-package" class="section level2 hasAnchor" number="8.3">
+<h2><span class="header-section-number">8.3</span> GPfit package<a href="gaussian-process-regression-gpr.html#gpfit-package" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <pre><code># Load necessary packages
 library(kernlab)
 library(GPfit)
@@ -274,207 +295,207 @@ ggplot(df, aes(x = x, y = y)) +
 <ol style="list-style-type: decimal">
 <li>Load Necessary Packages:</li>
 </ol>
-<div class="sourceCode" id="cb81"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb81-1"><a href="gaussian-process-regression-gpr.html#cb81-1" tabindex="-1"></a><span class="fu">library</span>(kernlab)</span>
-<span id="cb81-2"><a href="gaussian-process-regression-gpr.html#cb81-2" tabindex="-1"></a><span class="fu">library</span>(GPfit)</span>
-<span id="cb81-3"><a href="gaussian-process-regression-gpr.html#cb81-3" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code></pre></div>
+<div class="sourceCode" id="cb88"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb88-1"><a href="gaussian-process-regression-gpr.html#cb88-1" tabindex="-1"></a><span class="fu">library</span>(kernlab)</span>
+<span id="cb88-2"><a href="gaussian-process-regression-gpr.html#cb88-2" tabindex="-1"></a><span class="fu">library</span>(GPfit)</span>
+<span id="cb88-3"><a href="gaussian-process-regression-gpr.html#cb88-3" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code></pre></div>
 <p>This part loads the required R packages: <code>kernlab</code> for kernel-based machine learning, <code>GPfit</code> for Gaussian process modeling, and <code>ggplot2</code> for data visualization.</p>
 <ol start="2" style="list-style-type: decimal">
 <li>Generate Simulated Data:</li>
 </ol>
-<div class="sourceCode" id="cb82"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb82-1"><a href="gaussian-process-regression-gpr.html#cb82-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb82-2"><a href="gaussian-process-regression-gpr.html#cb82-2" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="at">length =</span> <span class="dv">50</span>)</span>
-<span id="cb82-3"><a href="gaussian-process-regression-gpr.html#cb82-3" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">sin</span>(x) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">50</span>, <span class="dv">0</span>, <span class="fl">0.2</span>)</span>
-<span id="cb82-4"><a href="gaussian-process-regression-gpr.html#cb82-4" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)</span></code></pre></div>
+<div class="sourceCode" id="cb89"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb89-1"><a href="gaussian-process-regression-gpr.html#cb89-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb89-2"><a href="gaussian-process-regression-gpr.html#cb89-2" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="at">length =</span> <span class="dv">50</span>)</span>
+<span id="cb89-3"><a href="gaussian-process-regression-gpr.html#cb89-3" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">sin</span>(x) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">50</span>, <span class="dv">0</span>, <span class="fl">0.2</span>)</span>
+<span id="cb89-4"><a href="gaussian-process-regression-gpr.html#cb89-4" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)</span></code></pre></div>
 <p>Simulated data is generated for the predictor variable <code>x</code> and the response variable <code>y</code>. The <code>x</code> values are generated as a sequence from 0 to 10 with 50 points. The <code>y</code> values are generated by taking the sine of each <code>x</code> value and adding random noise from a normal distribution with mean 0 and standard deviation 0.2. The data is then combined into a data frame <code>df</code>.</p>
 <ol start="3" style="list-style-type: decimal">
 <li>Fit Gaussian Process Regression Model:</li>
 </ol>
-<div class="sourceCode" id="cb83"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb83-1"><a href="gaussian-process-regression-gpr.html#cb83-1" tabindex="-1"></a>gpr_model <span class="ot">&lt;-</span> <span class="fu">gausspr</span>(y <span class="sc">~</span> x, <span class="at">data =</span> df)</span></code></pre></div>
+<div class="sourceCode" id="cb90"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb90-1"><a href="gaussian-process-regression-gpr.html#cb90-1" tabindex="-1"></a>gpr_model <span class="ot">&lt;-</span> <span class="fu">gausspr</span>(y <span class="sc">~</span> x, <span class="at">data =</span> df)</span></code></pre></div>
 <p>A Gaussian process regression model is fitted using the <code>gausspr</code> function from the <code>GPfit</code> package. The model specification is <code>y ~ x</code>, indicating that we want to model <code>y</code> as a function of <code>x</code> using Gaussian process regression.</p>
 <ol start="4" style="list-style-type: decimal">
 <li>Predict Values of y and Visualize Results:</li>
 </ol>
-<div class="sourceCode" id="cb84"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb84-1"><a href="gaussian-process-regression-gpr.html#cb84-1" tabindex="-1"></a>y_pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(gpr_model, x)</span>
-<span id="cb84-2"><a href="gaussian-process-regression-gpr.html#cb84-2" tabindex="-1"></a></span>
-<span id="cb84-3"><a href="gaussian-process-regression-gpr.html#cb84-3" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)) <span class="sc">+</span></span>
-<span id="cb84-4"><a href="gaussian-process-regression-gpr.html#cb84-4" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb84-5"><a href="gaussian-process-regression-gpr.html#cb84-5" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> y_pred), <span class="at">color =</span> <span class="st">&quot;red&quot;</span>) <span class="sc">+</span></span>
-<span id="cb84-6"><a href="gaussian-process-regression-gpr.html#cb84-6" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Gaussian Process Regression&quot;</span>, <span class="at">x =</span> <span class="st">&quot;x&quot;</span>, <span class="at">y =</span> <span class="st">&quot;y&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb91-1"><a href="gaussian-process-regression-gpr.html#cb91-1" tabindex="-1"></a>y_pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(gpr_model, x)</span>
+<span id="cb91-2"><a href="gaussian-process-regression-gpr.html#cb91-2" tabindex="-1"></a></span>
+<span id="cb91-3"><a href="gaussian-process-regression-gpr.html#cb91-3" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)) <span class="sc">+</span></span>
+<span id="cb91-4"><a href="gaussian-process-regression-gpr.html#cb91-4" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb91-5"><a href="gaussian-process-regression-gpr.html#cb91-5" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> y_pred), <span class="at">color =</span> <span class="st">&quot;red&quot;</span>) <span class="sc">+</span></span>
+<span id="cb91-6"><a href="gaussian-process-regression-gpr.html#cb91-6" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Gaussian Process Regression&quot;</span>, <span class="at">x =</span> <span class="st">&quot;x&quot;</span>, <span class="at">y =</span> <span class="st">&quot;y&quot;</span>)</span></code></pre></div>
 <p>This part predicts the values of the response variable <code>y_pred</code> for the predictor variable <code>x</code> using the fitted Gaussian process regression model. The <code>predict</code> function is used to make the predictions based on the model <code>gpr_model</code>.</p>
 <p>The results are then visualized using <code>ggplot2</code>. A scatter plot of the original data points (<code>x</code> and <code>y</code>) is created with blue points (<code>geom_point()</code>). Overlaid on the scatter plot is a red line representing the predictions of the response variable (<code>y_pred</code>) from the Gaussian process regression model (<code>geom_line(aes(y = y_pred), color = "red")</code>).</p>
 </div>
-<div id="bayesian-stan" class="section level2 hasAnchor" number="7.4">
-<h2><span class="header-section-number">7.4</span> Bayesian Stan<a href="gaussian-process-regression-gpr.html#bayesian-stan" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="bayesian-stan" class="section level2 hasAnchor" number="8.4">
+<h2><span class="header-section-number">8.4</span> Bayesian Stan<a href="gaussian-process-regression-gpr.html#bayesian-stan" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Gaussian process regression (GPR) can also be implemented in a Bayesian context using Stan. In Bayesian GPR, we assume a prior distribution for the unknown function and then update our beliefs about the function based on the observed data. The prior distribution is typically specified as a Gaussian process with a mean function and covariance function that depend on hyperparameters. The likelihood function for the observed data is also assumed to be Gaussian with a mean function equal to the prior mean function and a covariance function equal to the sum of the prior covariance function and a noise term. The hyperparameters of the prior and likelihood functions are estimated from the data using Markov chain Monte Carlo (MCMC) methods.</p>
 <p>Here is an example of R code for fitting a Bayesian GPR model using Stan. Let’s break down each part of the code step-by-step:</p>
-<div class="sourceCode" id="cb85"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb85-1"><a href="gaussian-process-regression-gpr.html#cb85-1" tabindex="-1"></a><span class="fu">library</span>(rstan)</span>
-<span id="cb85-2"><a href="gaussian-process-regression-gpr.html#cb85-2" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb85-3"><a href="gaussian-process-regression-gpr.html#cb85-3" tabindex="-1"></a></span>
-<span id="cb85-4"><a href="gaussian-process-regression-gpr.html#cb85-4" tabindex="-1"></a><span class="co"># Generate simulated data</span></span>
-<span id="cb85-5"><a href="gaussian-process-regression-gpr.html#cb85-5" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb85-6"><a href="gaussian-process-regression-gpr.html#cb85-6" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="at">length =</span> <span class="dv">50</span>)</span>
-<span id="cb85-7"><a href="gaussian-process-regression-gpr.html#cb85-7" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">sin</span>(x) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">50</span>, <span class="dv">0</span>, <span class="fl">0.2</span>)</span>
-<span id="cb85-8"><a href="gaussian-process-regression-gpr.html#cb85-8" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)</span>
-<span id="cb85-9"><a href="gaussian-process-regression-gpr.html#cb85-9" tabindex="-1"></a></span>
-<span id="cb85-10"><a href="gaussian-process-regression-gpr.html#cb85-10" tabindex="-1"></a><span class="co"># Stan model code</span></span>
-<span id="cb85-11"><a href="gaussian-process-regression-gpr.html#cb85-11" tabindex="-1"></a>stan_model_code <span class="ot">&lt;-</span> <span class="st">&quot;</span></span>
-<span id="cb85-12"><a href="gaussian-process-regression-gpr.html#cb85-12" tabindex="-1"></a><span class="st">functions {</span></span>
-<span id="cb85-13"><a href="gaussian-process-regression-gpr.html#cb85-13" tabindex="-1"></a><span class="st">  vector gp_pred_rng(array[] real x2,</span></span>
-<span id="cb85-14"><a href="gaussian-process-regression-gpr.html#cb85-14" tabindex="-1"></a><span class="st">                     vector y1,</span></span>
-<span id="cb85-15"><a href="gaussian-process-regression-gpr.html#cb85-15" tabindex="-1"></a><span class="st">                     array[] real x1,</span></span>
-<span id="cb85-16"><a href="gaussian-process-regression-gpr.html#cb85-16" tabindex="-1"></a><span class="st">                     real sigma_f,</span></span>
-<span id="cb85-17"><a href="gaussian-process-regression-gpr.html#cb85-17" tabindex="-1"></a><span class="st">                     real lengthscale_f,</span></span>
-<span id="cb85-18"><a href="gaussian-process-regression-gpr.html#cb85-18" tabindex="-1"></a><span class="st">                     real sigma,</span></span>
-<span id="cb85-19"><a href="gaussian-process-regression-gpr.html#cb85-19" tabindex="-1"></a><span class="st">                     real jitter) {</span></span>
-<span id="cb85-20"><a href="gaussian-process-regression-gpr.html#cb85-20" tabindex="-1"></a><span class="st">    int N1 = rows(y1);</span></span>
-<span id="cb85-21"><a href="gaussian-process-regression-gpr.html#cb85-21" tabindex="-1"></a><span class="st">    int N2 = size(x2);</span></span>
-<span id="cb85-22"><a href="gaussian-process-regression-gpr.html#cb85-22" tabindex="-1"></a><span class="st">    vector[N2] f2;</span></span>
-<span id="cb85-23"><a href="gaussian-process-regression-gpr.html#cb85-23" tabindex="-1"></a><span class="st">    {</span></span>
-<span id="cb85-24"><a href="gaussian-process-regression-gpr.html#cb85-24" tabindex="-1"></a><span class="st">      matrix[N1, N1] L_K;</span></span>
-<span id="cb85-25"><a href="gaussian-process-regression-gpr.html#cb85-25" tabindex="-1"></a><span class="st">      vector[N1] K_div_y1;</span></span>
-<span id="cb85-26"><a href="gaussian-process-regression-gpr.html#cb85-26" tabindex="-1"></a><span class="st">      matrix[N1, N2] k_x1_x2;</span></span>
-<span id="cb85-27"><a href="gaussian-process-regression-gpr.html#cb85-27" tabindex="-1"></a><span class="st">      matrix[N1, N2] v_pred;</span></span>
-<span id="cb85-28"><a href="gaussian-process-regression-gpr.html#cb85-28" tabindex="-1"></a><span class="st">      vector[N2] f2_mu;</span></span>
-<span id="cb85-29"><a href="gaussian-process-regression-gpr.html#cb85-29" tabindex="-1"></a><span class="st">      matrix[N2, N2] cov_f2;</span></span>
-<span id="cb85-30"><a href="gaussian-process-regression-gpr.html#cb85-30" tabindex="-1"></a><span class="st">      matrix[N1, N1] K;</span></span>
-<span id="cb85-31"><a href="gaussian-process-regression-gpr.html#cb85-31" tabindex="-1"></a><span class="st">      K = gp_exp_quad_cov(x1, sigma_f, lengthscale_f);</span></span>
-<span id="cb85-32"><a href="gaussian-process-regression-gpr.html#cb85-32" tabindex="-1"></a><span class="st">      for (n in 1:N1)</span></span>
-<span id="cb85-33"><a href="gaussian-process-regression-gpr.html#cb85-33" tabindex="-1"></a><span class="st">        K[n, n] = K[n,n] + square(sigma);</span></span>
-<span id="cb85-34"><a href="gaussian-process-regression-gpr.html#cb85-34" tabindex="-1"></a><span class="st">      L_K = cholesky_decompose(K);</span></span>
-<span id="cb85-35"><a href="gaussian-process-regression-gpr.html#cb85-35" tabindex="-1"></a><span class="st">      K_div_y1 = mdivide_left_tri_low(L_K, y1);</span></span>
-<span id="cb85-36"><a href="gaussian-process-regression-gpr.html#cb85-36" tabindex="-1"></a><span class="st">      K_div_y1 = mdivide_right_tri_low(K_div_y1&#39;, L_K)&#39;;</span></span>
-<span id="cb85-37"><a href="gaussian-process-regression-gpr.html#cb85-37" tabindex="-1"></a><span class="st">      k_x1_x2 = gp_exp_quad_cov(x1, x2, sigma_f, lengthscale_f);</span></span>
-<span id="cb85-38"><a href="gaussian-process-regression-gpr.html#cb85-38" tabindex="-1"></a><span class="st">      f2_mu = (k_x1_x2&#39; * K_div_y1);</span></span>
-<span id="cb85-39"><a href="gaussian-process-regression-gpr.html#cb85-39" tabindex="-1"></a><span class="st">      v_pred = mdivide_left_tri_low(L_K, k_x1_x2);</span></span>
-<span id="cb85-40"><a href="gaussian-process-regression-gpr.html#cb85-40" tabindex="-1"></a><span class="st">      cov_f2 = gp_exp_quad_cov(x2, sigma_f, lengthscale_f) - v_pred&#39; * v_pred;</span></span>
-<span id="cb85-41"><a href="gaussian-process-regression-gpr.html#cb85-41" tabindex="-1"></a></span>
-<span id="cb85-42"><a href="gaussian-process-regression-gpr.html#cb85-42" tabindex="-1"></a><span class="st">      f2 = multi_normal_rng(f2_mu, add_diag(cov_f2, rep_vector(jitter, N2)));</span></span>
-<span id="cb85-43"><a href="gaussian-process-regression-gpr.html#cb85-43" tabindex="-1"></a><span class="st">    }</span></span>
-<span id="cb85-44"><a href="gaussian-process-regression-gpr.html#cb85-44" tabindex="-1"></a><span class="st">    return f2;</span></span>
-<span id="cb85-45"><a href="gaussian-process-regression-gpr.html#cb85-45" tabindex="-1"></a><span class="st">  }</span></span>
-<span id="cb85-46"><a href="gaussian-process-regression-gpr.html#cb85-46" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb85-47"><a href="gaussian-process-regression-gpr.html#cb85-47" tabindex="-1"></a><span class="st">data {</span></span>
-<span id="cb85-48"><a href="gaussian-process-regression-gpr.html#cb85-48" tabindex="-1"></a><span class="st">  int&lt;lower=1&gt; N;      // number of observations</span></span>
-<span id="cb85-49"><a href="gaussian-process-regression-gpr.html#cb85-49" tabindex="-1"></a><span class="st">  vector[N] x;         // univariate covariate</span></span>
-<span id="cb85-50"><a href="gaussian-process-regression-gpr.html#cb85-50" tabindex="-1"></a><span class="st">  vector[N] y;         // target variable</span></span>
-<span id="cb85-51"><a href="gaussian-process-regression-gpr.html#cb85-51" tabindex="-1"></a><span class="st">  int&lt;lower=1&gt; N2;     // number of test points</span></span>
-<span id="cb85-52"><a href="gaussian-process-regression-gpr.html#cb85-52" tabindex="-1"></a><span class="st">  vector[N2] x2;       // univariate test points</span></span>
-<span id="cb85-53"><a href="gaussian-process-regression-gpr.html#cb85-53" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb85-54"><a href="gaussian-process-regression-gpr.html#cb85-54" tabindex="-1"></a><span class="st">transformed data {</span></span>
-<span id="cb85-55"><a href="gaussian-process-regression-gpr.html#cb85-55" tabindex="-1"></a><span class="st">  // Normalize data</span></span>
-<span id="cb85-56"><a href="gaussian-process-regression-gpr.html#cb85-56" tabindex="-1"></a><span class="st">  real xmean = mean(x);</span></span>
-<span id="cb85-57"><a href="gaussian-process-regression-gpr.html#cb85-57" tabindex="-1"></a><span class="st">  real ymean = mean(y);</span></span>
-<span id="cb85-58"><a href="gaussian-process-regression-gpr.html#cb85-58" tabindex="-1"></a><span class="st">  real xsd = sd(x);</span></span>
-<span id="cb85-59"><a href="gaussian-process-regression-gpr.html#cb85-59" tabindex="-1"></a><span class="st">  real ysd = sd(y);</span></span>
-<span id="cb85-60"><a href="gaussian-process-regression-gpr.html#cb85-60" tabindex="-1"></a><span class="st">  array[N] real xn = to_array_1d((x - xmean)/xsd);</span></span>
-<span id="cb85-61"><a href="gaussian-process-regression-gpr.html#cb85-61" tabindex="-1"></a><span class="st">  array[N2] real x2n = to_array_1d((x2 - xmean)/xsd);</span></span>
-<span id="cb85-62"><a href="gaussian-process-regression-gpr.html#cb85-62" tabindex="-1"></a><span class="st">  vector[N] yn = (y - ymean)/ysd;</span></span>
-<span id="cb85-63"><a href="gaussian-process-regression-gpr.html#cb85-63" tabindex="-1"></a><span class="st">  real sigma_intercept = 1;</span></span>
-<span id="cb85-64"><a href="gaussian-process-regression-gpr.html#cb85-64" tabindex="-1"></a><span class="st">  vector[N] zeros = rep_vector(0, N);</span></span>
-<span id="cb85-65"><a href="gaussian-process-regression-gpr.html#cb85-65" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb85-66"><a href="gaussian-process-regression-gpr.html#cb85-66" tabindex="-1"></a><span class="st">parameters {</span></span>
-<span id="cb85-67"><a href="gaussian-process-regression-gpr.html#cb85-67" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; lengthscale_f; // lengthscale of f</span></span>
-<span id="cb85-68"><a href="gaussian-process-regression-gpr.html#cb85-68" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma_f;       // scale of f</span></span>
-<span id="cb85-69"><a href="gaussian-process-regression-gpr.html#cb85-69" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigman;         // noise sigma</span></span>
-<span id="cb85-70"><a href="gaussian-process-regression-gpr.html#cb85-70" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb85-71"><a href="gaussian-process-regression-gpr.html#cb85-71" tabindex="-1"></a><span class="st">model {</span></span>
-<span id="cb85-72"><a href="gaussian-process-regression-gpr.html#cb85-72" tabindex="-1"></a><span class="st">  // covariances and Cholesky decompositions</span></span>
-<span id="cb85-73"><a href="gaussian-process-regression-gpr.html#cb85-73" tabindex="-1"></a><span class="st">  matrix[N, N] K_f = gp_exp_quad_cov(xn, sigma_f, lengthscale_f)+</span></span>
-<span id="cb85-74"><a href="gaussian-process-regression-gpr.html#cb85-74" tabindex="-1"></a><span class="st">                     sigma_intercept^2;</span></span>
-<span id="cb85-75"><a href="gaussian-process-regression-gpr.html#cb85-75" tabindex="-1"></a><span class="st">  matrix[N, N] L_f = cholesky_decompose(add_diag(K_f, sigman^2));</span></span>
-<span id="cb85-76"><a href="gaussian-process-regression-gpr.html#cb85-76" tabindex="-1"></a><span class="st">  // priors</span></span>
-<span id="cb85-77"><a href="gaussian-process-regression-gpr.html#cb85-77" tabindex="-1"></a><span class="st">  lengthscale_f ~ normal(0, 1);</span></span>
-<span id="cb85-78"><a href="gaussian-process-regression-gpr.html#cb85-78" tabindex="-1"></a><span class="st">  sigma_f ~ normal(0, 1);</span></span>
-<span id="cb85-79"><a href="gaussian-process-regression-gpr.html#cb85-79" tabindex="-1"></a><span class="st">  sigman ~ normal(0, 1);</span></span>
-<span id="cb85-80"><a href="gaussian-process-regression-gpr.html#cb85-80" tabindex="-1"></a><span class="st">  // model</span></span>
-<span id="cb85-81"><a href="gaussian-process-regression-gpr.html#cb85-81" tabindex="-1"></a><span class="st">  yn ~ multi_normal_cholesky(zeros, L_f);</span></span>
-<span id="cb85-82"><a href="gaussian-process-regression-gpr.html#cb85-82" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb85-83"><a href="gaussian-process-regression-gpr.html#cb85-83" tabindex="-1"></a><span class="st">generated quantities {</span></span>
-<span id="cb85-84"><a href="gaussian-process-regression-gpr.html#cb85-84" tabindex="-1"></a><span class="st">  // function scaled back to the original scale</span></span>
-<span id="cb85-85"><a href="gaussian-process-regression-gpr.html#cb85-85" tabindex="-1"></a><span class="st">  vector[N2] f = gp_pred_rng(x2n, yn, xn, sigma_f, lengthscale_f, sigman, 1e-9)*ysd + ymean;</span></span>
-<span id="cb85-86"><a href="gaussian-process-regression-gpr.html#cb85-86" tabindex="-1"></a><span class="st">  real sigma = sigman*ysd;</span></span>
-<span id="cb85-87"><a href="gaussian-process-regression-gpr.html#cb85-87" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb85-88"><a href="gaussian-process-regression-gpr.html#cb85-88" tabindex="-1"></a><span class="st">&quot;</span></span>
-<span id="cb85-89"><a href="gaussian-process-regression-gpr.html#cb85-89" tabindex="-1"></a></span>
-<span id="cb85-90"><a href="gaussian-process-regression-gpr.html#cb85-90" tabindex="-1"></a><span class="co"># Compile Stan model</span></span>
-<span id="cb85-91"><a href="gaussian-process-regression-gpr.html#cb85-91" tabindex="-1"></a>gpr_stan_model <span class="ot">&lt;-</span> <span class="fu">stan_model</span>(<span class="at">model_code =</span> stan_model_code)</span>
-<span id="cb85-92"><a href="gaussian-process-regression-gpr.html#cb85-92" tabindex="-1"></a></span>
-<span id="cb85-93"><a href="gaussian-process-regression-gpr.html#cb85-93" tabindex="-1"></a><span class="co"># Prepare data for Stan model</span></span>
-<span id="cb85-94"><a href="gaussian-process-regression-gpr.html#cb85-94" tabindex="-1"></a>stan_data <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">x=</span>df<span class="sc">$</span>x,</span>
-<span id="cb85-95"><a href="gaussian-process-regression-gpr.html#cb85-95" tabindex="-1"></a>                  <span class="at">x2=</span>df<span class="sc">$</span>x,</span>
-<span id="cb85-96"><a href="gaussian-process-regression-gpr.html#cb85-96" tabindex="-1"></a>                  <span class="at">y=</span>df<span class="sc">$</span>y,</span>
-<span id="cb85-97"><a href="gaussian-process-regression-gpr.html#cb85-97" tabindex="-1"></a>                  <span class="at">N=</span><span class="fu">length</span>(df<span class="sc">$</span>x),</span>
-<span id="cb85-98"><a href="gaussian-process-regression-gpr.html#cb85-98" tabindex="-1"></a>                  <span class="at">N2=</span><span class="fu">length</span>(df<span class="sc">$</span>x))</span>
-<span id="cb85-99"><a href="gaussian-process-regression-gpr.html#cb85-99" tabindex="-1"></a></span>
-<span id="cb85-100"><a href="gaussian-process-regression-gpr.html#cb85-100" tabindex="-1"></a><span class="co"># Fit Bayesian GPR model using Stan</span></span>
-<span id="cb85-101"><a href="gaussian-process-regression-gpr.html#cb85-101" tabindex="-1"></a>gpr_fit <span class="ot">&lt;-</span> <span class="fu">sampling</span>(gpr_stan_model, <span class="at">data =</span> stan_data)</span>
-<span id="cb85-102"><a href="gaussian-process-regression-gpr.html#cb85-102" tabindex="-1"></a></span>
-<span id="cb85-103"><a href="gaussian-process-regression-gpr.html#cb85-103" tabindex="-1"></a></span>
-<span id="cb85-104"><a href="gaussian-process-regression-gpr.html#cb85-104" tabindex="-1"></a>f_samples <span class="ot">&lt;-</span> <span class="fu">extract</span>(gpr_fit, <span class="st">&quot;f&quot;</span>)<span class="sc">$</span>f</span>
-<span id="cb85-105"><a href="gaussian-process-regression-gpr.html#cb85-105" tabindex="-1"></a>sigma_samples <span class="ot">&lt;-</span> <span class="fu">extract</span>(gpr_fit, <span class="st">&quot;sigma&quot;</span>)<span class="sc">$</span>sigma</span>
-<span id="cb85-106"><a href="gaussian-process-regression-gpr.html#cb85-106" tabindex="-1"></a></span>
-<span id="cb85-107"><a href="gaussian-process-regression-gpr.html#cb85-107" tabindex="-1"></a></span>
-<span id="cb85-108"><a href="gaussian-process-regression-gpr.html#cb85-108" tabindex="-1"></a>df <span class="sc">%&gt;%</span></span>
-<span id="cb85-109"><a href="gaussian-process-regression-gpr.html#cb85-109" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Ef=</span><span class="fu">colMeans</span>(f_samples),</span>
-<span id="cb85-110"><a href="gaussian-process-regression-gpr.html#cb85-110" tabindex="-1"></a>         <span class="at">sigma=</span><span class="fu">mean</span>(sigma_samples)) <span class="sc">%&gt;%</span>  </span>
-<span id="cb85-111"><a href="gaussian-process-regression-gpr.html#cb85-111" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>x,<span class="at">y=</span>y))<span class="sc">+</span></span>
-<span id="cb85-112"><a href="gaussian-process-regression-gpr.html#cb85-112" tabindex="-1"></a>  <span class="fu">geom_point</span>()<span class="sc">+</span></span>
-<span id="cb85-113"><a href="gaussian-process-regression-gpr.html#cb85-113" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">&quot;Time (ms)&quot;</span>, <span class="at">y=</span><span class="st">&quot;Acceleration (g)&quot;</span>)<span class="sc">+</span></span>
-<span id="cb85-114"><a href="gaussian-process-regression-gpr.html#cb85-114" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y=</span>Ef), <span class="at">color=</span><span class="st">&#39;red&#39;</span>)<span class="sc">+</span></span>
-<span id="cb85-115"><a href="gaussian-process-regression-gpr.html#cb85-115" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y=</span>Ef<span class="dv">-2</span><span class="sc">*</span>sigma), <span class="at">color=</span><span class="st">&#39;red&#39;</span>,<span class="at">linetype=</span><span class="st">&quot;dashed&quot;</span>)<span class="sc">+</span></span>
-<span id="cb85-116"><a href="gaussian-process-regression-gpr.html#cb85-116" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y=</span>Ef<span class="sc">+</span><span class="dv">2</span><span class="sc">*</span>sigma), <span class="at">color=</span><span class="st">&#39;red&#39;</span>,<span class="at">linetype=</span><span class="st">&quot;dashed&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb92"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb92-1"><a href="gaussian-process-regression-gpr.html#cb92-1" tabindex="-1"></a><span class="fu">library</span>(rstan)</span>
+<span id="cb92-2"><a href="gaussian-process-regression-gpr.html#cb92-2" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb92-3"><a href="gaussian-process-regression-gpr.html#cb92-3" tabindex="-1"></a></span>
+<span id="cb92-4"><a href="gaussian-process-regression-gpr.html#cb92-4" tabindex="-1"></a><span class="co"># Generate simulated data</span></span>
+<span id="cb92-5"><a href="gaussian-process-regression-gpr.html#cb92-5" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb92-6"><a href="gaussian-process-regression-gpr.html#cb92-6" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="at">length =</span> <span class="dv">50</span>)</span>
+<span id="cb92-7"><a href="gaussian-process-regression-gpr.html#cb92-7" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">sin</span>(x) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">50</span>, <span class="dv">0</span>, <span class="fl">0.2</span>)</span>
+<span id="cb92-8"><a href="gaussian-process-regression-gpr.html#cb92-8" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)</span>
+<span id="cb92-9"><a href="gaussian-process-regression-gpr.html#cb92-9" tabindex="-1"></a></span>
+<span id="cb92-10"><a href="gaussian-process-regression-gpr.html#cb92-10" tabindex="-1"></a><span class="co"># Stan model code</span></span>
+<span id="cb92-11"><a href="gaussian-process-regression-gpr.html#cb92-11" tabindex="-1"></a>stan_model_code <span class="ot">&lt;-</span> <span class="st">&quot;</span></span>
+<span id="cb92-12"><a href="gaussian-process-regression-gpr.html#cb92-12" tabindex="-1"></a><span class="st">functions {</span></span>
+<span id="cb92-13"><a href="gaussian-process-regression-gpr.html#cb92-13" tabindex="-1"></a><span class="st">  vector gp_pred_rng(array[] real x2,</span></span>
+<span id="cb92-14"><a href="gaussian-process-regression-gpr.html#cb92-14" tabindex="-1"></a><span class="st">                     vector y1,</span></span>
+<span id="cb92-15"><a href="gaussian-process-regression-gpr.html#cb92-15" tabindex="-1"></a><span class="st">                     array[] real x1,</span></span>
+<span id="cb92-16"><a href="gaussian-process-regression-gpr.html#cb92-16" tabindex="-1"></a><span class="st">                     real sigma_f,</span></span>
+<span id="cb92-17"><a href="gaussian-process-regression-gpr.html#cb92-17" tabindex="-1"></a><span class="st">                     real lengthscale_f,</span></span>
+<span id="cb92-18"><a href="gaussian-process-regression-gpr.html#cb92-18" tabindex="-1"></a><span class="st">                     real sigma,</span></span>
+<span id="cb92-19"><a href="gaussian-process-regression-gpr.html#cb92-19" tabindex="-1"></a><span class="st">                     real jitter) {</span></span>
+<span id="cb92-20"><a href="gaussian-process-regression-gpr.html#cb92-20" tabindex="-1"></a><span class="st">    int N1 = rows(y1);</span></span>
+<span id="cb92-21"><a href="gaussian-process-regression-gpr.html#cb92-21" tabindex="-1"></a><span class="st">    int N2 = size(x2);</span></span>
+<span id="cb92-22"><a href="gaussian-process-regression-gpr.html#cb92-22" tabindex="-1"></a><span class="st">    vector[N2] f2;</span></span>
+<span id="cb92-23"><a href="gaussian-process-regression-gpr.html#cb92-23" tabindex="-1"></a><span class="st">    {</span></span>
+<span id="cb92-24"><a href="gaussian-process-regression-gpr.html#cb92-24" tabindex="-1"></a><span class="st">      matrix[N1, N1] L_K;</span></span>
+<span id="cb92-25"><a href="gaussian-process-regression-gpr.html#cb92-25" tabindex="-1"></a><span class="st">      vector[N1] K_div_y1;</span></span>
+<span id="cb92-26"><a href="gaussian-process-regression-gpr.html#cb92-26" tabindex="-1"></a><span class="st">      matrix[N1, N2] k_x1_x2;</span></span>
+<span id="cb92-27"><a href="gaussian-process-regression-gpr.html#cb92-27" tabindex="-1"></a><span class="st">      matrix[N1, N2] v_pred;</span></span>
+<span id="cb92-28"><a href="gaussian-process-regression-gpr.html#cb92-28" tabindex="-1"></a><span class="st">      vector[N2] f2_mu;</span></span>
+<span id="cb92-29"><a href="gaussian-process-regression-gpr.html#cb92-29" tabindex="-1"></a><span class="st">      matrix[N2, N2] cov_f2;</span></span>
+<span id="cb92-30"><a href="gaussian-process-regression-gpr.html#cb92-30" tabindex="-1"></a><span class="st">      matrix[N1, N1] K;</span></span>
+<span id="cb92-31"><a href="gaussian-process-regression-gpr.html#cb92-31" tabindex="-1"></a><span class="st">      K = gp_exp_quad_cov(x1, sigma_f, lengthscale_f);</span></span>
+<span id="cb92-32"><a href="gaussian-process-regression-gpr.html#cb92-32" tabindex="-1"></a><span class="st">      for (n in 1:N1)</span></span>
+<span id="cb92-33"><a href="gaussian-process-regression-gpr.html#cb92-33" tabindex="-1"></a><span class="st">        K[n, n] = K[n,n] + square(sigma);</span></span>
+<span id="cb92-34"><a href="gaussian-process-regression-gpr.html#cb92-34" tabindex="-1"></a><span class="st">      L_K = cholesky_decompose(K);</span></span>
+<span id="cb92-35"><a href="gaussian-process-regression-gpr.html#cb92-35" tabindex="-1"></a><span class="st">      K_div_y1 = mdivide_left_tri_low(L_K, y1);</span></span>
+<span id="cb92-36"><a href="gaussian-process-regression-gpr.html#cb92-36" tabindex="-1"></a><span class="st">      K_div_y1 = mdivide_right_tri_low(K_div_y1&#39;, L_K)&#39;;</span></span>
+<span id="cb92-37"><a href="gaussian-process-regression-gpr.html#cb92-37" tabindex="-1"></a><span class="st">      k_x1_x2 = gp_exp_quad_cov(x1, x2, sigma_f, lengthscale_f);</span></span>
+<span id="cb92-38"><a href="gaussian-process-regression-gpr.html#cb92-38" tabindex="-1"></a><span class="st">      f2_mu = (k_x1_x2&#39; * K_div_y1);</span></span>
+<span id="cb92-39"><a href="gaussian-process-regression-gpr.html#cb92-39" tabindex="-1"></a><span class="st">      v_pred = mdivide_left_tri_low(L_K, k_x1_x2);</span></span>
+<span id="cb92-40"><a href="gaussian-process-regression-gpr.html#cb92-40" tabindex="-1"></a><span class="st">      cov_f2 = gp_exp_quad_cov(x2, sigma_f, lengthscale_f) - v_pred&#39; * v_pred;</span></span>
+<span id="cb92-41"><a href="gaussian-process-regression-gpr.html#cb92-41" tabindex="-1"></a></span>
+<span id="cb92-42"><a href="gaussian-process-regression-gpr.html#cb92-42" tabindex="-1"></a><span class="st">      f2 = multi_normal_rng(f2_mu, add_diag(cov_f2, rep_vector(jitter, N2)));</span></span>
+<span id="cb92-43"><a href="gaussian-process-regression-gpr.html#cb92-43" tabindex="-1"></a><span class="st">    }</span></span>
+<span id="cb92-44"><a href="gaussian-process-regression-gpr.html#cb92-44" tabindex="-1"></a><span class="st">    return f2;</span></span>
+<span id="cb92-45"><a href="gaussian-process-regression-gpr.html#cb92-45" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb92-46"><a href="gaussian-process-regression-gpr.html#cb92-46" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb92-47"><a href="gaussian-process-regression-gpr.html#cb92-47" tabindex="-1"></a><span class="st">data {</span></span>
+<span id="cb92-48"><a href="gaussian-process-regression-gpr.html#cb92-48" tabindex="-1"></a><span class="st">  int&lt;lower=1&gt; N;      // number of observations</span></span>
+<span id="cb92-49"><a href="gaussian-process-regression-gpr.html#cb92-49" tabindex="-1"></a><span class="st">  vector[N] x;         // univariate covariate</span></span>
+<span id="cb92-50"><a href="gaussian-process-regression-gpr.html#cb92-50" tabindex="-1"></a><span class="st">  vector[N] y;         // target variable</span></span>
+<span id="cb92-51"><a href="gaussian-process-regression-gpr.html#cb92-51" tabindex="-1"></a><span class="st">  int&lt;lower=1&gt; N2;     // number of test points</span></span>
+<span id="cb92-52"><a href="gaussian-process-regression-gpr.html#cb92-52" tabindex="-1"></a><span class="st">  vector[N2] x2;       // univariate test points</span></span>
+<span id="cb92-53"><a href="gaussian-process-regression-gpr.html#cb92-53" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb92-54"><a href="gaussian-process-regression-gpr.html#cb92-54" tabindex="-1"></a><span class="st">transformed data {</span></span>
+<span id="cb92-55"><a href="gaussian-process-regression-gpr.html#cb92-55" tabindex="-1"></a><span class="st">  // Normalize data</span></span>
+<span id="cb92-56"><a href="gaussian-process-regression-gpr.html#cb92-56" tabindex="-1"></a><span class="st">  real xmean = mean(x);</span></span>
+<span id="cb92-57"><a href="gaussian-process-regression-gpr.html#cb92-57" tabindex="-1"></a><span class="st">  real ymean = mean(y);</span></span>
+<span id="cb92-58"><a href="gaussian-process-regression-gpr.html#cb92-58" tabindex="-1"></a><span class="st">  real xsd = sd(x);</span></span>
+<span id="cb92-59"><a href="gaussian-process-regression-gpr.html#cb92-59" tabindex="-1"></a><span class="st">  real ysd = sd(y);</span></span>
+<span id="cb92-60"><a href="gaussian-process-regression-gpr.html#cb92-60" tabindex="-1"></a><span class="st">  array[N] real xn = to_array_1d((x - xmean)/xsd);</span></span>
+<span id="cb92-61"><a href="gaussian-process-regression-gpr.html#cb92-61" tabindex="-1"></a><span class="st">  array[N2] real x2n = to_array_1d((x2 - xmean)/xsd);</span></span>
+<span id="cb92-62"><a href="gaussian-process-regression-gpr.html#cb92-62" tabindex="-1"></a><span class="st">  vector[N] yn = (y - ymean)/ysd;</span></span>
+<span id="cb92-63"><a href="gaussian-process-regression-gpr.html#cb92-63" tabindex="-1"></a><span class="st">  real sigma_intercept = 1;</span></span>
+<span id="cb92-64"><a href="gaussian-process-regression-gpr.html#cb92-64" tabindex="-1"></a><span class="st">  vector[N] zeros = rep_vector(0, N);</span></span>
+<span id="cb92-65"><a href="gaussian-process-regression-gpr.html#cb92-65" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb92-66"><a href="gaussian-process-regression-gpr.html#cb92-66" tabindex="-1"></a><span class="st">parameters {</span></span>
+<span id="cb92-67"><a href="gaussian-process-regression-gpr.html#cb92-67" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; lengthscale_f; // lengthscale of f</span></span>
+<span id="cb92-68"><a href="gaussian-process-regression-gpr.html#cb92-68" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma_f;       // scale of f</span></span>
+<span id="cb92-69"><a href="gaussian-process-regression-gpr.html#cb92-69" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigman;         // noise sigma</span></span>
+<span id="cb92-70"><a href="gaussian-process-regression-gpr.html#cb92-70" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb92-71"><a href="gaussian-process-regression-gpr.html#cb92-71" tabindex="-1"></a><span class="st">model {</span></span>
+<span id="cb92-72"><a href="gaussian-process-regression-gpr.html#cb92-72" tabindex="-1"></a><span class="st">  // covariances and Cholesky decompositions</span></span>
+<span id="cb92-73"><a href="gaussian-process-regression-gpr.html#cb92-73" tabindex="-1"></a><span class="st">  matrix[N, N] K_f = gp_exp_quad_cov(xn, sigma_f, lengthscale_f)+</span></span>
+<span id="cb92-74"><a href="gaussian-process-regression-gpr.html#cb92-74" tabindex="-1"></a><span class="st">                     sigma_intercept^2;</span></span>
+<span id="cb92-75"><a href="gaussian-process-regression-gpr.html#cb92-75" tabindex="-1"></a><span class="st">  matrix[N, N] L_f = cholesky_decompose(add_diag(K_f, sigman^2));</span></span>
+<span id="cb92-76"><a href="gaussian-process-regression-gpr.html#cb92-76" tabindex="-1"></a><span class="st">  // priors</span></span>
+<span id="cb92-77"><a href="gaussian-process-regression-gpr.html#cb92-77" tabindex="-1"></a><span class="st">  lengthscale_f ~ normal(0, 1);</span></span>
+<span id="cb92-78"><a href="gaussian-process-regression-gpr.html#cb92-78" tabindex="-1"></a><span class="st">  sigma_f ~ normal(0, 1);</span></span>
+<span id="cb92-79"><a href="gaussian-process-regression-gpr.html#cb92-79" tabindex="-1"></a><span class="st">  sigman ~ normal(0, 1);</span></span>
+<span id="cb92-80"><a href="gaussian-process-regression-gpr.html#cb92-80" tabindex="-1"></a><span class="st">  // model</span></span>
+<span id="cb92-81"><a href="gaussian-process-regression-gpr.html#cb92-81" tabindex="-1"></a><span class="st">  yn ~ multi_normal_cholesky(zeros, L_f);</span></span>
+<span id="cb92-82"><a href="gaussian-process-regression-gpr.html#cb92-82" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb92-83"><a href="gaussian-process-regression-gpr.html#cb92-83" tabindex="-1"></a><span class="st">generated quantities {</span></span>
+<span id="cb92-84"><a href="gaussian-process-regression-gpr.html#cb92-84" tabindex="-1"></a><span class="st">  // function scaled back to the original scale</span></span>
+<span id="cb92-85"><a href="gaussian-process-regression-gpr.html#cb92-85" tabindex="-1"></a><span class="st">  vector[N2] f = gp_pred_rng(x2n, yn, xn, sigma_f, lengthscale_f, sigman, 1e-9)*ysd + ymean;</span></span>
+<span id="cb92-86"><a href="gaussian-process-regression-gpr.html#cb92-86" tabindex="-1"></a><span class="st">  real sigma = sigman*ysd;</span></span>
+<span id="cb92-87"><a href="gaussian-process-regression-gpr.html#cb92-87" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb92-88"><a href="gaussian-process-regression-gpr.html#cb92-88" tabindex="-1"></a><span class="st">&quot;</span></span>
+<span id="cb92-89"><a href="gaussian-process-regression-gpr.html#cb92-89" tabindex="-1"></a></span>
+<span id="cb92-90"><a href="gaussian-process-regression-gpr.html#cb92-90" tabindex="-1"></a><span class="co"># Compile Stan model</span></span>
+<span id="cb92-91"><a href="gaussian-process-regression-gpr.html#cb92-91" tabindex="-1"></a>gpr_stan_model <span class="ot">&lt;-</span> <span class="fu">stan_model</span>(<span class="at">model_code =</span> stan_model_code)</span>
+<span id="cb92-92"><a href="gaussian-process-regression-gpr.html#cb92-92" tabindex="-1"></a></span>
+<span id="cb92-93"><a href="gaussian-process-regression-gpr.html#cb92-93" tabindex="-1"></a><span class="co"># Prepare data for Stan model</span></span>
+<span id="cb92-94"><a href="gaussian-process-regression-gpr.html#cb92-94" tabindex="-1"></a>stan_data <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">x=</span>df<span class="sc">$</span>x,</span>
+<span id="cb92-95"><a href="gaussian-process-regression-gpr.html#cb92-95" tabindex="-1"></a>                  <span class="at">x2=</span>df<span class="sc">$</span>x,</span>
+<span id="cb92-96"><a href="gaussian-process-regression-gpr.html#cb92-96" tabindex="-1"></a>                  <span class="at">y=</span>df<span class="sc">$</span>y,</span>
+<span id="cb92-97"><a href="gaussian-process-regression-gpr.html#cb92-97" tabindex="-1"></a>                  <span class="at">N=</span><span class="fu">length</span>(df<span class="sc">$</span>x),</span>
+<span id="cb92-98"><a href="gaussian-process-regression-gpr.html#cb92-98" tabindex="-1"></a>                  <span class="at">N2=</span><span class="fu">length</span>(df<span class="sc">$</span>x))</span>
+<span id="cb92-99"><a href="gaussian-process-regression-gpr.html#cb92-99" tabindex="-1"></a></span>
+<span id="cb92-100"><a href="gaussian-process-regression-gpr.html#cb92-100" tabindex="-1"></a><span class="co"># Fit Bayesian GPR model using Stan</span></span>
+<span id="cb92-101"><a href="gaussian-process-regression-gpr.html#cb92-101" tabindex="-1"></a>gpr_fit <span class="ot">&lt;-</span> <span class="fu">sampling</span>(gpr_stan_model, <span class="at">data =</span> stan_data)</span>
+<span id="cb92-102"><a href="gaussian-process-regression-gpr.html#cb92-102" tabindex="-1"></a></span>
+<span id="cb92-103"><a href="gaussian-process-regression-gpr.html#cb92-103" tabindex="-1"></a></span>
+<span id="cb92-104"><a href="gaussian-process-regression-gpr.html#cb92-104" tabindex="-1"></a>f_samples <span class="ot">&lt;-</span> <span class="fu">extract</span>(gpr_fit, <span class="st">&quot;f&quot;</span>)<span class="sc">$</span>f</span>
+<span id="cb92-105"><a href="gaussian-process-regression-gpr.html#cb92-105" tabindex="-1"></a>sigma_samples <span class="ot">&lt;-</span> <span class="fu">extract</span>(gpr_fit, <span class="st">&quot;sigma&quot;</span>)<span class="sc">$</span>sigma</span>
+<span id="cb92-106"><a href="gaussian-process-regression-gpr.html#cb92-106" tabindex="-1"></a></span>
+<span id="cb92-107"><a href="gaussian-process-regression-gpr.html#cb92-107" tabindex="-1"></a></span>
+<span id="cb92-108"><a href="gaussian-process-regression-gpr.html#cb92-108" tabindex="-1"></a>df <span class="sc">%&gt;%</span></span>
+<span id="cb92-109"><a href="gaussian-process-regression-gpr.html#cb92-109" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Ef=</span><span class="fu">colMeans</span>(f_samples),</span>
+<span id="cb92-110"><a href="gaussian-process-regression-gpr.html#cb92-110" tabindex="-1"></a>         <span class="at">sigma=</span><span class="fu">mean</span>(sigma_samples)) <span class="sc">%&gt;%</span>  </span>
+<span id="cb92-111"><a href="gaussian-process-regression-gpr.html#cb92-111" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>x,<span class="at">y=</span>y))<span class="sc">+</span></span>
+<span id="cb92-112"><a href="gaussian-process-regression-gpr.html#cb92-112" tabindex="-1"></a>  <span class="fu">geom_point</span>()<span class="sc">+</span></span>
+<span id="cb92-113"><a href="gaussian-process-regression-gpr.html#cb92-113" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">&quot;Time (ms)&quot;</span>, <span class="at">y=</span><span class="st">&quot;Acceleration (g)&quot;</span>)<span class="sc">+</span></span>
+<span id="cb92-114"><a href="gaussian-process-regression-gpr.html#cb92-114" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y=</span>Ef), <span class="at">color=</span><span class="st">&#39;red&#39;</span>)<span class="sc">+</span></span>
+<span id="cb92-115"><a href="gaussian-process-regression-gpr.html#cb92-115" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y=</span>Ef<span class="dv">-2</span><span class="sc">*</span>sigma), <span class="at">color=</span><span class="st">&#39;red&#39;</span>,<span class="at">linetype=</span><span class="st">&quot;dashed&quot;</span>)<span class="sc">+</span></span>
+<span id="cb92-116"><a href="gaussian-process-regression-gpr.html#cb92-116" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y=</span>Ef<span class="sc">+</span><span class="dv">2</span><span class="sc">*</span>sigma), <span class="at">color=</span><span class="st">&#39;red&#39;</span>,<span class="at">linetype=</span><span class="st">&quot;dashed&quot;</span>)</span></code></pre></div>
 <ol style="list-style-type: decimal">
 <li>Generate Simulated Data:</li>
 </ol>
-<div class="sourceCode" id="cb86"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb86-1"><a href="gaussian-process-regression-gpr.html#cb86-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb86-2"><a href="gaussian-process-regression-gpr.html#cb86-2" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="at">length =</span> <span class="dv">50</span>)</span>
-<span id="cb86-3"><a href="gaussian-process-regression-gpr.html#cb86-3" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">sin</span>(x) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">50</span>, <span class="dv">0</span>, <span class="fl">0.2</span>)</span>
-<span id="cb86-4"><a href="gaussian-process-regression-gpr.html#cb86-4" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)</span></code></pre></div>
+<div class="sourceCode" id="cb93"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb93-1"><a href="gaussian-process-regression-gpr.html#cb93-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb93-2"><a href="gaussian-process-regression-gpr.html#cb93-2" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="at">length =</span> <span class="dv">50</span>)</span>
+<span id="cb93-3"><a href="gaussian-process-regression-gpr.html#cb93-3" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">sin</span>(x) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">50</span>, <span class="dv">0</span>, <span class="fl">0.2</span>)</span>
+<span id="cb93-4"><a href="gaussian-process-regression-gpr.html#cb93-4" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)</span></code></pre></div>
 <p>Simulated data is generated for the predictor variable <code>x</code> and the response variable <code>y</code>. The <code>x</code> values are generated as a sequence from 0 to 10 with 50 points. The <code>y</code> values are generated by taking the sine of each <code>x</code> value and adding random noise from a normal distribution with mean 0 and standard deviation 0.2. The data is then combined into a data frame <code>df</code>.</p>
 <ol start="2" style="list-style-type: decimal">
 <li>Specify Stan Model Code:</li>
 </ol>
-<div class="sourceCode" id="cb87"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb87-1"><a href="gaussian-process-regression-gpr.html#cb87-1" tabindex="-1"></a>stan_model_code <span class="ot">&lt;-</span> <span class="st">&quot; ... &quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb94-1"><a href="gaussian-process-regression-gpr.html#cb94-1" tabindex="-1"></a>stan_model_code <span class="ot">&lt;-</span> <span class="st">&quot; ... &quot;</span></span></code></pre></div>
 <p>The Stan model code is specified as a character string. The model defines the data, parameters, and the statistical model for Bayesian GPR. It uses a Gaussian process kernel to model the relationship between the predictor variable <code>x</code> and the response variable <code>y</code>. The parameters <code>mu</code>, <code>sigma_f</code>, <code>sigma_n</code>, and <code>eta</code> represent the mean function, the covariance function for the underlying Gaussian process, the noise standard deviation, and the latent function values, respectively.</p>
 <ol start="3" style="list-style-type: decimal">
 <li>Compile Stan Model:</li>
 </ol>
-<div class="sourceCode" id="cb88"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb88-1"><a href="gaussian-process-regression-gpr.html#cb88-1" tabindex="-1"></a>gpr_stan_model <span class="ot">&lt;-</span> <span class="fu">stan_model</span>(<span class="at">model_code =</span> stan_model_code)</span></code></pre></div>
+<div class="sourceCode" id="cb95"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb95-1"><a href="gaussian-process-regression-gpr.html#cb95-1" tabindex="-1"></a>gpr_stan_model <span class="ot">&lt;-</span> <span class="fu">stan_model</span>(<span class="at">model_code =</span> stan_model_code)</span></code></pre></div>
 <p>The Stan model is compiled using the <code>stan_model</code> function from the <code>rstan</code> package. This step converts the Stan model code into a C++ program that will be used for Bayesian inference.</p>
 <ol start="4" style="list-style-type: decimal">
 <li>Prepare Data for Stan Model:</li>
 </ol>
-<div class="sourceCode" id="cb89"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb89-1"><a href="gaussian-process-regression-gpr.html#cb89-1" tabindex="-1"></a>stan_data <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">x=</span>df<span class="sc">$</span>x,</span>
-<span id="cb89-2"><a href="gaussian-process-regression-gpr.html#cb89-2" tabindex="-1"></a>                  <span class="at">x2=</span>df<span class="sc">$</span>x,</span>
-<span id="cb89-3"><a href="gaussian-process-regression-gpr.html#cb89-3" tabindex="-1"></a>                  <span class="at">y=</span>df<span class="sc">$</span>y,</span>
-<span id="cb89-4"><a href="gaussian-process-regression-gpr.html#cb89-4" tabindex="-1"></a>                  <span class="at">N=</span><span class="fu">length</span>(df<span class="sc">$</span>x),</span>
-<span id="cb89-5"><a href="gaussian-process-regression-gpr.html#cb89-5" tabindex="-1"></a>                  <span class="at">N2=</span><span class="fu">length</span>(df<span class="sc">$</span>x))</span></code></pre></div>
+<div class="sourceCode" id="cb96"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb96-1"><a href="gaussian-process-regression-gpr.html#cb96-1" tabindex="-1"></a>stan_data <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">x=</span>df<span class="sc">$</span>x,</span>
+<span id="cb96-2"><a href="gaussian-process-regression-gpr.html#cb96-2" tabindex="-1"></a>                  <span class="at">x2=</span>df<span class="sc">$</span>x,</span>
+<span id="cb96-3"><a href="gaussian-process-regression-gpr.html#cb96-3" tabindex="-1"></a>                  <span class="at">y=</span>df<span class="sc">$</span>y,</span>
+<span id="cb96-4"><a href="gaussian-process-regression-gpr.html#cb96-4" tabindex="-1"></a>                  <span class="at">N=</span><span class="fu">length</span>(df<span class="sc">$</span>x),</span>
+<span id="cb96-5"><a href="gaussian-process-regression-gpr.html#cb96-5" tabindex="-1"></a>                  <span class="at">N2=</span><span class="fu">length</span>(df<span class="sc">$</span>x))</span></code></pre></div>
 <p>The data is prepared as a list <code>stan_data</code> with the number of rows <code>N</code>, the predictor variable <code>x</code>, and the response variable <code>y</code>. This data will be used as input to the Stan model during sampling.</p>
 <ol start="5" style="list-style-type: decimal">
 <li>Fit Bayesian GPR Model using Stan:</li>
 </ol>
-<div class="sourceCode" id="cb90"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb90-1"><a href="gaussian-process-regression-gpr.html#cb90-1" tabindex="-1"></a>gpr_fit <span class="ot">&lt;-</span> <span class="fu">sampling</span>(gpr_stan_model, <span class="at">data =</span> stan_data)</span></code></pre></div>
+<div class="sourceCode" id="cb97"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb97-1"><a href="gaussian-process-regression-gpr.html#cb97-1" tabindex="-1"></a>gpr_fit <span class="ot">&lt;-</span> <span class="fu">sampling</span>(gpr_stan_model, <span class="at">data =</span> stan_data)</span></code></pre></div>
 <p>The Bayesian GPR model is fitted using the <code>sampling</code> function from <code>rstan</code>. This step performs Markov chain Monte Carlo (MCMC) sampling to estimate the posterior distribution of the model parameters.</p>
 <ol start="6" style="list-style-type: decimal">
 <li>Extract Posterior Samples of f for Prediction:</li>
 </ol>
-<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb91-1"><a href="gaussian-process-regression-gpr.html#cb91-1" tabindex="-1"></a>f_samples <span class="ot">&lt;-</span> <span class="fu">extract</span>(gpr_fit, <span class="st">&quot;f&quot;</span>)<span class="sc">$</span>f</span>
-<span id="cb91-2"><a href="gaussian-process-regression-gpr.html#cb91-2" tabindex="-1"></a>sigma_samples <span class="ot">&lt;-</span> <span class="fu">extract</span>(gpr_fit, <span class="st">&quot;sigma&quot;</span>)<span class="sc">$</span>sigma</span>
-<span id="cb91-3"><a href="gaussian-process-regression-gpr.html#cb91-3" tabindex="-1"></a></span>
-<span id="cb91-4"><a href="gaussian-process-regression-gpr.html#cb91-4" tabindex="-1"></a></span>
-<span id="cb91-5"><a href="gaussian-process-regression-gpr.html#cb91-5" tabindex="-1"></a>df <span class="sc">%&gt;%</span></span>
-<span id="cb91-6"><a href="gaussian-process-regression-gpr.html#cb91-6" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Ef=</span><span class="fu">colMeans</span>(f_samples),</span>
-<span id="cb91-7"><a href="gaussian-process-regression-gpr.html#cb91-7" tabindex="-1"></a>         <span class="at">sigma=</span><span class="fu">mean</span>(sigma_samples)) <span class="sc">%&gt;%</span>  </span>
-<span id="cb91-8"><a href="gaussian-process-regression-gpr.html#cb91-8" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>x,<span class="at">y=</span>y))<span class="sc">+</span></span>
-<span id="cb91-9"><a href="gaussian-process-regression-gpr.html#cb91-9" tabindex="-1"></a>  <span class="fu">geom_point</span>()<span class="sc">+</span></span>
-<span id="cb91-10"><a href="gaussian-process-regression-gpr.html#cb91-10" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">&quot;Time (ms)&quot;</span>, <span class="at">y=</span><span class="st">&quot;Acceleration (g)&quot;</span>)<span class="sc">+</span></span>
-<span id="cb91-11"><a href="gaussian-process-regression-gpr.html#cb91-11" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y=</span>Ef), <span class="at">color=</span><span class="st">&#39;red&#39;</span>)<span class="sc">+</span></span>
-<span id="cb91-12"><a href="gaussian-process-regression-gpr.html#cb91-12" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y=</span>Ef<span class="dv">-2</span><span class="sc">*</span>sigma), <span class="at">color=</span><span class="st">&#39;red&#39;</span>,<span class="at">linetype=</span><span class="st">&quot;dashed&quot;</span>)<span class="sc">+</span></span>
-<span id="cb91-13"><a href="gaussian-process-regression-gpr.html#cb91-13" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y=</span>Ef<span class="sc">+</span><span class="dv">2</span><span class="sc">*</span>sigma), <span class="at">color=</span><span class="st">&#39;red&#39;</span>,<span class="at">linetype=</span><span class="st">&quot;dashed&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb98"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb98-1"><a href="gaussian-process-regression-gpr.html#cb98-1" tabindex="-1"></a>f_samples <span class="ot">&lt;-</span> <span class="fu">extract</span>(gpr_fit, <span class="st">&quot;f&quot;</span>)<span class="sc">$</span>f</span>
+<span id="cb98-2"><a href="gaussian-process-regression-gpr.html#cb98-2" tabindex="-1"></a>sigma_samples <span class="ot">&lt;-</span> <span class="fu">extract</span>(gpr_fit, <span class="st">&quot;sigma&quot;</span>)<span class="sc">$</span>sigma</span>
+<span id="cb98-3"><a href="gaussian-process-regression-gpr.html#cb98-3" tabindex="-1"></a></span>
+<span id="cb98-4"><a href="gaussian-process-regression-gpr.html#cb98-4" tabindex="-1"></a></span>
+<span id="cb98-5"><a href="gaussian-process-regression-gpr.html#cb98-5" tabindex="-1"></a>df <span class="sc">%&gt;%</span></span>
+<span id="cb98-6"><a href="gaussian-process-regression-gpr.html#cb98-6" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Ef=</span><span class="fu">colMeans</span>(f_samples),</span>
+<span id="cb98-7"><a href="gaussian-process-regression-gpr.html#cb98-7" tabindex="-1"></a>         <span class="at">sigma=</span><span class="fu">mean</span>(sigma_samples)) <span class="sc">%&gt;%</span>  </span>
+<span id="cb98-8"><a href="gaussian-process-regression-gpr.html#cb98-8" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>x,<span class="at">y=</span>y))<span class="sc">+</span></span>
+<span id="cb98-9"><a href="gaussian-process-regression-gpr.html#cb98-9" tabindex="-1"></a>  <span class="fu">geom_point</span>()<span class="sc">+</span></span>
+<span id="cb98-10"><a href="gaussian-process-regression-gpr.html#cb98-10" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">&quot;Time (ms)&quot;</span>, <span class="at">y=</span><span class="st">&quot;Acceleration (g)&quot;</span>)<span class="sc">+</span></span>
+<span id="cb98-11"><a href="gaussian-process-regression-gpr.html#cb98-11" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y=</span>Ef), <span class="at">color=</span><span class="st">&#39;red&#39;</span>)<span class="sc">+</span></span>
+<span id="cb98-12"><a href="gaussian-process-regression-gpr.html#cb98-12" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y=</span>Ef<span class="dv">-2</span><span class="sc">*</span>sigma), <span class="at">color=</span><span class="st">&#39;red&#39;</span>,<span class="at">linetype=</span><span class="st">&quot;dashed&quot;</span>)<span class="sc">+</span></span>
+<span id="cb98-13"><a href="gaussian-process-regression-gpr.html#cb98-13" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y=</span>Ef<span class="sc">+</span><span class="dv">2</span><span class="sc">*</span>sigma), <span class="at">color=</span><span class="st">&#39;red&#39;</span>,<span class="at">linetype=</span><span class="st">&quot;dashed&quot;</span>)</span></code></pre></div>
 <p>The <code>extract</code> function is used to extract the posterior samples of the latent function <code>f</code> from the fitted GPR model. These samples will be used to predict new values of <code>f</code> for new values of <code>x</code>.</p>
 </div>
-<div id="references-5" class="section level2 hasAnchor" number="7.5">
-<h2><span class="header-section-number">7.5</span> References<a href="gaussian-process-regression-gpr.html#references-5" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="references-6" class="section level2 hasAnchor" number="8.5">
+<h2><span class="header-section-number">8.5</span> References<a href="gaussian-process-regression-gpr.html#references-6" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <ul>
 <li>Duvenaud, D. K., Nickisch, H., &amp; Rasmussen, C. E. (2013). Gaussian processes for machine learning: tutorial. In S. Sra, S. Nowozin, &amp; S. J. Wright (Eds.), Optimization for Machine Learning (pp. 133-181). MIT Press.</li>
 <li>Nguyen, T. D., &amp; Nguyen, T. T. (2018). Multi-task Gaussian process models for biomedical applications. arXiv preprint arXiv:1806.03836.</li>
@@ -491,7 +512,7 @@ ggplot(df, aes(x = x, y = y)) +
           </div>
         </div>
       </div>
-<a href="bayesian-quantile-regression.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="bayesian-multilevel-mixed-effects-regression-in-stan.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
 <a href="bayesian-gaussian-mixture-models.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
@@ -523,7 +544,7 @@ gitbook.start({
     "size": 2
   },
   "edit": {
-    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/edit/main/07-GPR.Rmd",
+    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/edit/main/08-GPR.Rmd",
     "text": "Edit"
   },
   "history": {
@@ -531,7 +552,7 @@ gitbook.start({
     "text": null
   },
   "view": {
-    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/blob/main/07-GPR.Rmd",
+    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/blob/main/08-GPR.Rmd",
     "text": null
   },
   "download": null,
@@ -546,6 +567,20 @@ gitbook.start({
 });
 </script>
 
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
 </body>
 
 </html>

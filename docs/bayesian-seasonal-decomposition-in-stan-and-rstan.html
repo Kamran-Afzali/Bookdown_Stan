@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 9 Bayesian Gaussian Mixture Models | Stan Bookdown</title>
-  <meta name="description" content="Chapter 9 Bayesian Gaussian Mixture Models | Stan Bookdown" />
+  <title>Chapter 10 Bayesian Seasonal Decomposition in Stan and RStan | Stan Bookdown</title>
+  <meta name="description" content="Chapter 10 Bayesian Seasonal Decomposition in Stan and RStan | Stan Bookdown" />
   <meta name="generator" content="bookdown 0.43 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 9 Bayesian Gaussian Mixture Models | Stan Bookdown" />
+  <meta property="og:title" content="Chapter 10 Bayesian Seasonal Decomposition in Stan and RStan | Stan Bookdown" />
   <meta property="og:type" content="book" />
   
   
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 9 Bayesian Gaussian Mixture Models | Stan Bookdown" />
+  <meta name="twitter:title" content="Chapter 10 Bayesian Seasonal Decomposition in Stan and RStan | Stan Bookdown" />
   
   
   
@@ -30,8 +30,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="gaussian-process-regression-gpr.html"/>
-<link rel="next" href="bayesian-seasonal-decomposition-in-stan-and-rstan.html"/>
+<link rel="prev" href="bayesian-gaussian-mixture-models.html"/>
+<link rel="next" href="appendix.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -258,270 +258,110 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="bayesian-gaussian-mixture-models" class="section level1 hasAnchor" number="9">
-<h1><span class="header-section-number">Chapter 9</span> Bayesian Gaussian Mixture Models<a href="bayesian-gaussian-mixture-models.html#bayesian-gaussian-mixture-models" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<p>In statistics, a mixture model is a probabilistic model used to represent the presence of subpopulations within an overall population without requiring that an individual belongs to a specific subpopulation. It is a flexible approach that can be used to model complex data containing multiple regions with high probability mass, such as multimodal distributions. A typical finite-dimensional mixture model consists of observed random variables, random latent variables specifying the identity of the mixture component of each observation, mixture weights, and parameters. Mixture models can be used to make statistical inferences about the properties of subpopulations without sub-population identity information. Mixture models are also referred to as latent class models if they assume that some of their parameters differ across unobserved subgroups or classes.</p>
-<p>Bayesian mixture models can be implemented in Stan, a probabilistic programming language. Mixture models assume that a given measurement can be drawn from one of K data generating processes, each with their own set of parameters. Stan allows for the fitting of Bayesian mixture models using its Hamiltonian Monte Carlo sampler. The models can be parameterized in several ways (see below) and used directly for modeling data with multimodal distributions or as priors for other parameters. The implementation of mixture models in Stan involves defining the model, specifying the priors, and marginalizing out the discrete parameters. Several resources provide examples and tutorials on fitting Bayesian mixture models in Stan, demonstrating the practical implementation of these models.</p>
-<p>In this post I will first introduce how mixture models are implemented in Bayesian inference. It is noteworthy to take into consideration non-identifiability inherent these models how the non-identifiability can be tempered with principled prior information. Michael Betancourt has a blogpost describing the problems often encountered with gaussian mixture models, specifically the estimation of parameters of a mixture model and identifiability i.e. the problem with labelling <a href="http://mc-stan.org/documentation/case-studies/identifying_mixture_models.html">mixtures</a>.</p>
-<div id="single-varaible-example" class="section level2 hasAnchor" number="9.1">
-<h2><span class="header-section-number">9.1</span> Single varaible example<a href="bayesian-gaussian-mixture-models.html#single-varaible-example" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<pre><code>library(dplyr)
-library(ggplot2)
-library(ggthemes)
-
-N &lt;- 500
-
-#  three clusters
-mu &lt;- c(1, 4, 9)
-sigma &lt;- c(1.2, 1, 0.8)
-
-# probability of each cluster
-Theta &lt;- c(.3, .5, .3)
-
-# Draw which model each belongs to
-z &lt;- sample(1:3, size = N, prob = Theta, replace = T)
-
-# white noise
-epsilon &lt;- rnorm(N)
-
-# Simulate the data using the fact that y ~ normal(mu, sigma) can be 
-# expressed as y = mu + sigma*epsilon for epsilon ~ normal(0, 1)
-y &lt;- mu[z] + sigma[z]*epsilon
-
-data_frame(y= y, z = as.factor(z)) %&gt;% 
-  ggplot(aes(x = y, fill = z)) +
-  geom_density(alpha = 0.3) +
-  ggtitle(&quot;Three clusters&quot;)</code></pre>
-<p><img src="/images/gmm_1.png" /></p>
-<pre><code>mixture_model&lt;-&#39;
-
-// saved as finite_mixture_linear_regression.stan
-data {
-  int N;
-  vector[N] y;
-  int n_groups;
-}
-parameters {
-  vector[n_groups] mu;
-  vector&lt;lower = 0&gt;[n_groups] sigma;
-  simplex[n_groups] Theta;
-}
-model {
-  vector[n_groups] contributions;
-  // priors
-  mu ~ normal(0, 10);
-  sigma ~ cauchy(0, 2);
-  Theta ~ dirichlet(rep_vector(2.0, n_groups));
-  
-  
-  // likelihood
-  for(i in 1:N) {
-    for(k in 1:n_groups) {
-      contributions[k] = log(Theta[k]) + normal_lpdf(y[i] | mu[k], sigma[k]);
-    }
-    target += log_sum_exp(contributions);
-  }
-}&#39;</code></pre>
-<p><strong>Data Block</strong>
-- <code>N</code>: Number of observations.
-- <code>y</code>: Vector of observed responses.
-- <code>n_groups</code>: Number of mixture components or groups.</p>
-<p><strong>Parameters Block</strong>
-- <code>mu</code>: Vector of means for each mixture component.
-- <code>sigma</code>: Vector of standard deviations for each mixture component.
-- <code>Theta</code>: Vector of mixing proportions, representing the probability of each group.</p>
-<p><strong>Model Block</strong>
-- <strong>Priors</strong>: Normal priors are specified for the means <code>mu</code> with a mean of 0 and a standard deviation of 10. Cauchy priors are specified for the standard deviations <code>sigma</code> with a location of 0 and a scale of 2. Dirichlet priors are specified for the mixing proportions <code>Theta</code> with equal concentration parameters of 2.0 for each group.
-- <strong>Likelihood</strong>: The likelihood is constructed within a nested loop. For each observation <code>i</code> and each group <code>k</code>, it calculates the log-likelihood of the observation given the mean and standard deviation of that group. These log-likelihoods are stored in the <code>contributions</code> vector.
-- <strong>Log-Sum-Exp Trick</strong>: To avoid numerical instability when dealing with small probabilities, the log-sum-exp trick is used. The <code>log_sum_exp</code> function sums up the contributions after exponentiating them. This is done to compute the log-likelihood of the data given the mixture model.
-- <strong>Target</strong>: The <code>target</code> is incremented by the log of the sum of exponentiated contributions for each observation. The <code>target</code> is essentially the log-posterior, and the goal of Stan is to maximize it during sampling.</p>
-<pre><code>library(rstan)
-options(mc.cores = parallel::detectCores())
-
-fit=stan(model_code=mixture_model, data=list(N= N, y = y, n_groups = 3), iter=3000, warmup=500, chains=3)
-
-
-print(fit)
-params=extract(fit)
-#density plots of the posteriors of the mixture means
-par(mfrow=c(1,3))
-plot(density(params$mu[,1]), ylab=&#39;&#39;, xlab=&#39;mu[1]&#39;, main=&#39;&#39;)
-abline(v=c(8), lty=&#39;dotted&#39;, col=&#39;red&#39;,lwd=2)
-
-
-plot(density(params$mu[,2]), ylab=&#39;&#39;, xlab=&#39;mu[1]&#39;, main=&#39;&#39;)
-abline(v=c(0), lty=&#39;dotted&#39;, col=&#39;red&#39;,lwd=2)
-
-plot(density(params$mu[,3]), ylab=&#39;&#39;, xlab=&#39;mu[1]&#39;, main=&#39;&#39;)
-abline(v=c(4), lty=&#39;dotted&#39;, col=&#39;red&#39;,lwd=2)
-
-</code></pre>
-<pre><code>Inference for Stan model: 9c40393d28e90e2c335fff95de690860.
-3 chains, each with iter=3000; warmup=500; thin=1; 
-post-warmup draws per chain=2500, total post-warmup draws=7500.
-
-             mean se_mean   sd     2.5%      25%      50%      75%    97.5% n_eff  Rhat
-mu[1]        6.35    3.06 3.76     0.65     1.21     8.96     9.02     9.11     2 21.87
-mu[2]        3.72    3.05 3.74     0.59     0.94     1.25     8.96     9.09     2 13.86
-mu[3]        4.03    0.00 0.17     3.71     3.92     4.03     4.14     4.36  2575  1.00
-sigma[1]     0.85    0.17 0.23     0.62     0.69     0.73     1.02     1.41     2  2.32
-sigma[2]     1.01    0.19 0.27     0.64     0.73     1.03     1.19     1.60     2  1.76
-sigma[3]     1.13    0.00 0.12     0.92     1.05     1.12     1.20     1.39  3232  1.00
-Theta[1]     0.27    0.00 0.04     0.19     0.25     0.27     0.29     0.34  1186  1.02
-Theta[2]     0.27    0.00 0.05     0.18     0.24     0.26     0.29     0.40  1553  1.00
-Theta[3]     0.47    0.00 0.06     0.32     0.44     0.47     0.51     0.57  1702  1.00
-lp__     -1161.00    0.05 2.18 -1166.34 -1162.15 -1160.64 -1159.40 -1157.91  2064  1.00
-
-Samples were drawn using NUTS(diag_e) at Tue Feb  6 13:03:03 2024.
-For each parameter, n_eff is a crude measure of effective sample size,
-and Rhat is the potential scale reduction factor on split chains (at 
-convergence, Rhat=1).</code></pre>
-<p><img src="/images/gmm_2.png" /></p>
+<div id="bayesian-seasonal-decomposition-in-stan-and-rstan" class="section level1 hasAnchor" number="10">
+<h1><span class="header-section-number">Chapter 10</span> Bayesian Seasonal Decomposition in Stan and RStan<a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#bayesian-seasonal-decomposition-in-stan-and-rstan" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>Understanding the components that make up a time series is a critical first step in analysis and forecasting. Classical seasonal decomposition techniques, such as STL or X-11, offer ways to separate a series into <strong>trend</strong>, <strong>seasonal</strong>, and <strong>irregular</strong> components. However, these methods are often deterministic and lack a coherent probabilistic framework for uncertainty quantification.</p>
+<p>In contrast, <strong>Bayesian seasonal decomposition</strong> allows us to model uncertainty in each component explicitly. In this post, we demonstrate how to construct a <strong>Bayesian structural time series model</strong> in Stan, decompose a seasonal time series, and obtain posterior distributions for each latent component.</p>
+<div id="simulating-seasonal-time-series-data" class="section level2 hasAnchor" number="10.1">
+<h2><span class="header-section-number">10.1</span> Simulating Seasonal Time Series Data*<a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#simulating-seasonal-time-series-data" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>We first simulate a synthetic time series with additive trend, seasonality, and noise:</p>
+<div class="sourceCode" id="cb107"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb107-1"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb107-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb107-2"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb107-2" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">120</span></span>
+<span id="cb107-3"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb107-3" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span>n</span>
+<span id="cb107-4"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb107-4" tabindex="-1"></a>trend <span class="ot">&lt;-</span> <span class="fl">0.05</span> <span class="sc">*</span> t</span>
+<span id="cb107-5"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb107-5" tabindex="-1"></a>seasonal_period <span class="ot">&lt;-</span> <span class="dv">12</span></span>
+<span id="cb107-6"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb107-6" tabindex="-1"></a>seasonal <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">sin</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> (<span class="dv">1</span><span class="sc">:</span>seasonal_period) <span class="sc">/</span> seasonal_period), <span class="at">length.out =</span> n)</span>
+<span id="cb107-7"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb107-7" tabindex="-1"></a>noise <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.5</span>)</span>
+<span id="cb107-8"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb107-8" tabindex="-1"></a>y <span class="ot">&lt;-</span> trend <span class="sc">+</span> seasonal <span class="sc">+</span> noise</span>
+<span id="cb107-9"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb107-9" tabindex="-1"></a></span>
+<span id="cb107-10"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb107-10" tabindex="-1"></a><span class="fu">ts.plot</span>(y, <span class="at">main =</span> <span class="st">&quot;Simulated Time Series with Trend and Seasonality&quot;</span>)</span></code></pre></div>
 </div>
-<div id="example-with-multiple-variable" class="section level2 hasAnchor" number="9.2">
-<h2><span class="header-section-number">9.2</span> Example with multiple variable<a href="bayesian-gaussian-mixture-models.html#example-with-multiple-variable" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<pre><code>library(MASS)
-
-#first cluster
-mu1=c(0,0,0,0)
-sigma1=matrix(c(0.2,0,0,0,0,0.2,0,0,0,0,0.1,0,0,0,0,0.1),ncol=4,nrow=4, byrow=TRUE)
-norm1=mvrnorm(30, mu1, sigma1)
-
-#second cluster
-mu2=c(10,10,10,10)
-sigma2=sigma1
-norm2=mvrnorm(30, mu2, sigma2)
-
-#third cluster
-mu3=c(4,4,4,4)
-sigma3=sigma1
-norm3=mvrnorm(30, mu3, sigma3)
-
-norms=rbind(norm1,norm2,norm3) #combine the 3 mixtures together
-N=90 #total number of data points 
-Dim=4 #number of dimensions
-y=array(as.vector(norms), dim=c(N,Dim))
-mixture_data=list(N=N, D=4, K=3, y=y)
-
-as.data.frame(norms)  %&gt;%
-  pivot_longer(colnames(as.data.frame(norms)), names_to = &quot;var&quot;, values_to = &quot;value&quot;)%&gt;%
-  ggplot( aes(x=value, color=var)) + geom_density() +
-  ggtitle(&quot;Three clusters on four variables&quot;)</code></pre>
-<p><img src="/images/gmm_3.png" /></p>
-<pre><code>mixture_model&lt;-&#39;
-data {
- int D; //number of dimensions
- int K; //number of gaussians
- int N; //number of data
- vector[D] y[N]; //data
-}
-
-parameters {
- simplex[K] theta; //mixing proportions
- ordered[D] mu[K]; //mixture component means
- cholesky_factor_corr[D] L[K]; //cholesky factor of covariance
-}
-
-model {
- real ps[K];
- 
- for(k in 1:K){
- mu[k] ~ normal(0,3);
- L[k] ~ lkj_corr_cholesky(4);
- }
- 
-
- for (n in 1:N){
- for (k in 1:K){
- ps[k] = log(theta[k])+multi_normal_cholesky_lpdf(y[n] | mu[k], L[k]); 
- }
- target += log_sum_exp(ps);
- }
-
-}&#39;</code></pre>
-<p><strong>Data Block</strong>
-- <code>D</code>: Number of dimensions.
-- <code>K</code>: Number of Gaussian components.
-- <code>N</code>: Number of data points.
-- <code>y</code>: An array of vectors, each representing a data point in D dimensions.</p>
-<p><strong>Parameters Block</strong>
-- <code>theta</code>: Mixing proportions. It is a simplex, ensuring that the proportions sum to 1.
-- <code>mu</code>: Mixture component means. These are ordered variables.
-- <code>L</code>: Cholesky factors of the covariance matrices for each component.</p>
-<p><strong>Model Block</strong>
-- <strong>Priors</strong>: Priors are specified for the means <code>mu</code> and the Cholesky factors <code>L</code>. Each mean is drawn from a normal distribution with a mean of 0 and a standard deviation of 3. The Cholesky factor is drawn from a LKJ correlation distribution with shape parameter 4.</p>
+<div id="bayesian-seasonal-decomposition-model-in-stan" class="section level2 hasAnchor" number="10.2">
+<h2><span class="header-section-number">10.2</span> Bayesian Seasonal Decomposition Model in Stan<a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#bayesian-seasonal-decomposition-model-in-stan" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>We use an additive structural model:</p>
+<p><span class="math display">\[
+y_t = \mu_t + \gamma_t + \epsilon_t
+\]</span></p>
 <ul>
-<li><p><strong>Log-Probability Calculation</strong>: For each data point <code>n</code> and each component <code>k</code>, the log-probability <code>ps[k]</code> is calculated. This log-probability is the logarithm of the product of the mixing proportion and the multivariate normal density of the data point under the k-th component.</p></li>
-<li><p><strong>Target Increment</strong>: The <code>target</code> is incremented by the logarithm of the sum of exponentiated log-probabilities <code>ps</code>. This step ensures that the model assigns higher probability to data points that are well-explained by one of the Gaussian components.</p></li>
+<li><span class="math inline">\(\mu_t\)</span>: Local level (trend)</li>
+<li><span class="math inline">\(\gamma_t\)</span>: Seasonal component</li>
+<li><span class="math inline">\(\epsilon_t \sim \mathcal{N}(0, \sigma^2)\)</span>: Irregular component</li>
 </ul>
-<pre><code>fit=stan(model_code=mixture_model, data=mixture_data, iter=3000, warmup=1000, chains=1)
-print(fit)
-
-Inference for Stan model: f913dae683b9f29657b0863fec348d71.
-1 chains, each with iter=3000; warmup=1000; thin=1; 
-post-warmup draws per chain=2000, total post-warmup draws=2000.
-
-            mean se_mean   sd    2.5%     25%     50%     75%   97.5% n_eff Rhat
-theta[1]    0.33    0.00 0.05    0.24    0.30    0.33    0.37    0.43  2120 1.00
-theta[2]    0.33    0.00 0.05    0.24    0.30    0.33    0.36    0.44  1740 1.00
-theta[3]    0.33    0.00 0.05    0.24    0.30    0.33    0.37    0.43  1854 1.00
-mu[1,1]     3.80    0.00 0.11    3.55    3.74    3.80    3.86    3.99   632 1.01
-mu[1,2]     3.91    0.01 0.12    3.67    3.84    3.90    3.98    4.15   236 1.00
-mu[1,3]     4.02    0.01 0.13    3.78    3.92    4.02    4.11    4.29   344 1.00
-mu[1,4]     4.09    0.01 0.15    3.82    3.99    4.09    4.20    4.39   259 1.00
-mu[2,1]     9.77    0.01 0.12    9.51    9.70    9.79    9.86    9.98   405 1.00
-mu[2,2]     9.96    0.00 0.11    9.74    9.90    9.96   10.03   10.20   794 1.00
-mu[2,3]    10.09    0.00 0.11    9.91   10.01   10.07   10.15   10.33   518 1.00
-mu[2,4]    10.18    0.01 0.12    9.97   10.09   10.17   10.25   10.43   498 1.00
-mu[3,1]    -0.22    0.01 0.13   -0.49   -0.30   -0.21   -0.14    0.01   409 1.01
-mu[3,2]    -0.10    0.01 0.13   -0.37   -0.17   -0.09   -0.02    0.17   218 1.00
-mu[3,3]     0.07    0.01 0.13   -0.17    0.00    0.07    0.15    0.36    81 1.00
-mu[3,4]     0.16    0.01 0.12   -0.03    0.08    0.15    0.23    0.42   541 1.00
-
-For each parameter, n_eff is a crude measure of effective sample size,
-and Rhat is the potential scale reduction factor on split chains (at 
-convergence, Rhat=1).</code></pre>
-<pre><code>
-params=extract(fit)
-#density plots of the posteriors of the mixture means
-par(mfrow=c(1,3))
-plot(density(params$mu[,1,1]), ylab=&#39;&#39;, xlab=&#39;mu[1]&#39;, main=&#39;&#39;)
-lines(density(params$mu[,1,2]), col=rgb(0,0,0,0.7))
-lines(density(params$mu[,1,3]), col=rgb(0,0,0,0.4))
-lines(density(params$mu[,1,4]), col=rgb(0,0,0,0.1))
-abline(v=c(4), lty=&#39;dotted&#39;, col=&#39;red&#39;,lwd=2)
-
-plot(density(params$mu[,2,1]), ylab=&#39;&#39;, xlab=&#39;mu[2]&#39;, main=&#39;&#39;)
-lines(density(params$mu[,2,2]), col=rgb(0,0,0,0.7))
-lines(density(params$mu[,2,3]), col=rgb(0,0,0,0.4))
-lines(density(params$mu[,2,4]), col=rgb(0,0,0,0.1))
-abline(v=c(10), lty=&#39;dotted&#39;, col=&#39;red&#39;,lwd=2)
-
-plot(density(params$mu[,3,1]), ylab=&#39;&#39;, xlab=&#39;mu[3]&#39;, main=&#39;&#39;)
-lines(density(params$mu[,3,2]), col=rgb(0,0,0,0.7))
-lines(density(params$mu[,3,3]), col=rgb(0,0,0,0.4))
-lines(density(params$mu[,3,4]), col=rgb(0,0,0,0.1))
-abline(v=c(0), lty=&#39;dotted&#39;, col=&#39;red&#39;,lwd=2)
-</code></pre>
-<p><img src="/images/gmm_4.png" /></p>
+<p>We impose a <strong>local level model</strong> for the trend:</p>
+<p><span class="math display">\[
+\mu_t = \mu_{t-1} + \eta_t, \quad \eta_t \sim \mathcal{N}(0, \sigma_{\mu}^2)
+\]</span></p>
+<p>And we model seasonality with a constraint that its sum over one period equals zero (to ensure identifiability):</p>
+<div class="sourceCode" id="cb108"><pre class="sourceCode stan"><code class="sourceCode stan"><span id="cb108-1"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb108-1" tabindex="-1"></a>stan_model_1 &lt;-&#39;<span class="kw">data</span> {</span>
+<span id="cb108-2"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb108-2" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">2</span>&gt; N;</span>
+<span id="cb108-3"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb108-3" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">2</span>&gt; s;           <span class="co">// seasonal period</span></span>
+<span id="cb108-4"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb108-4" tabindex="-1"></a>  <span class="dt">vector</span>[N] y;</span>
+<span id="cb108-5"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb108-5" tabindex="-1"></a>}</span>
+<span id="cb108-6"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb108-6" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb108-7"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb108-7" tabindex="-1"></a>  <span class="dt">vector</span>[N] mu;             <span class="co">// trend</span></span>
+<span id="cb108-8"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb108-8" tabindex="-1"></a>  <span class="dt">vector</span>[s] season_raw;     <span class="co">// raw seasonal effects</span></span>
+<span id="cb108-9"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb108-9" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma;</span>
+<span id="cb108-10"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb108-10" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_mu;</span>
+<span id="cb108-11"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb108-11" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_season;</span>
+<span id="cb108-12"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb108-12" tabindex="-1"></a>}</span>
+<span id="cb108-13"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb108-13" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb108-14"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb108-14" tabindex="-1"></a>  <span class="dt">vector</span>[N] season;</span>
+<span id="cb108-15"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb108-15" tabindex="-1"></a>  <span class="dt">vector</span>[s] season_clean;</span>
+<span id="cb108-16"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb108-16" tabindex="-1"></a>  </span>
+<span id="cb108-17"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb108-17" tabindex="-1"></a>  <span class="co">// Center seasonal component to sum to zero</span></span>
+<span id="cb108-18"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb108-18" tabindex="-1"></a>  season_clean = season_raw - mean(season_raw);</span>
+<span id="cb108-19"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb108-19" tabindex="-1"></a>  </span>
+<span id="cb108-20"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb108-20" tabindex="-1"></a>  <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span>:N)</span>
+<span id="cb108-21"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb108-21" tabindex="-1"></a>    season[t] = season_clean[<span class="dv">1</span> + ((t - <span class="dv">1</span>) % s)];</span>
+<span id="cb108-22"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb108-22" tabindex="-1"></a>}</span>
+<span id="cb108-23"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb108-23" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb108-24"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb108-24" tabindex="-1"></a>  mu[<span class="dv">2</span>:N] ~ normal(mu[<span class="dv">1</span>:(N - <span class="dv">1</span>)], sigma_mu);</span>
+<span id="cb108-25"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb108-25" tabindex="-1"></a>  season_raw ~ normal(<span class="dv">0</span>, sigma_season);</span>
+<span id="cb108-26"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb108-26" tabindex="-1"></a>  y ~ normal(mu + season, sigma);</span>
+<span id="cb108-27"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb108-27" tabindex="-1"></a>}&#39;</span></code></pre></div>
 </div>
-<div id="conclusion-4" class="section level2 hasAnchor" number="9.3">
-<h2><span class="header-section-number">9.3</span> Conclusion<a href="bayesian-gaussian-mixture-models.html#conclusion-4" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>Bayesian mixture models offer several advantages in statistical modeling. Their inherent flexibility makes them well-suited for diverse tasks such as clustering, data compression, outlier detection, and generative classification. The Bayesian framework’s ability to incorporate prior knowledge enhances model accuracy, especially when informative prior information is available. Moreover, these models effectively handle unobserved heterogeneity by integrating multiple data generating processes, proving valuable when data alone may not fully identify underlying patterns. The stability provided by Bayesian estimation ensures reliable posterior distributions, reducing sensitivity to issues like singularities, over-fitting, and violated identification criteria. Bayesian mixture models also facilitate the examination of the posterior distribution of the number of classes, offering insights into the underlying class structure of the data. However, the use of Bayesian mixture models comes with certain limitations. Applying these models demands a high level of statistical expertise to appropriately specify priors and ensure correct model formulation, presenting a challenge for practitioners lacking a strong background in Bayesian statistics. The complexity of posterior inference is compounded by label switching, a phenomenon that complicates the interpretation of results. Bayesian nonparametric mixture models, in particular, may suffer from inconsistency in estimating the number of clusters, impacting their performance in clustering applications. Additionally, model fitting challenges arise, and careful evaluation of inaccuracies in predictions and comparison with alternative models are essential to address potential shortcomings.</p>
-<p>In this post, we learned to fit mixture models using Stan. We saw how to evaluate model fit using the usual prior and posterior predictive checks, and to investigate parameter recovery. Such mixture models are notoriously difficult to fit, but they have a lot of potential in cognitive science applications, especially in developing computational models of different kinds of cognitive processes. The reader interested in a deeper understanding of potential challanges in the process can refer to Betancourt discussion of identification problems in Bayesian mixture models in a <a href="https://mc-stan.org/users/documentation/case-studies/identifying_mixture_models.html">case study</a>.</p>
+<div id="fitting-the-model-in-r" class="section level2 hasAnchor" number="10.3">
+<h2><span class="header-section-number">10.3</span> Fitting the Model in R<a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#fitting-the-model-in-r" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>We fit this model using RStan:</p>
+<div class="sourceCode" id="cb109"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb109-1"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb109-1" tabindex="-1"></a><span class="fu">library</span>(rstan)</span>
+<span id="cb109-2"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb109-2" tabindex="-1"></a></span>
+<span id="cb109-3"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb109-3" tabindex="-1"></a>data_list <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb109-4"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb109-4" tabindex="-1"></a>  <span class="at">N =</span> <span class="fu">length</span>(y),</span>
+<span id="cb109-5"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb109-5" tabindex="-1"></a>  <span class="at">s =</span> seasonal_period,</span>
+<span id="cb109-6"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb109-6" tabindex="-1"></a>  <span class="at">y =</span> y</span>
+<span id="cb109-7"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb109-7" tabindex="-1"></a>)</span>
+<span id="cb109-8"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb109-8" tabindex="-1"></a></span>
+<span id="cb109-9"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb109-9" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">stan</span>(</span>
+<span id="cb109-10"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb109-10" tabindex="-1"></a>  <span class="at">model_code =</span> stan_model_1,</span>
+<span id="cb109-11"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb109-11" tabindex="-1"></a>  <span class="at">data =</span> data_list,</span>
+<span id="cb109-12"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb109-12" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">4</span>,</span>
+<span id="cb109-13"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb109-13" tabindex="-1"></a>  <span class="at">iter =</span> <span class="dv">2000</span>,</span>
+<span id="cb109-14"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb109-14" tabindex="-1"></a>  <span class="at">warmup =</span> <span class="dv">1000</span>,</span>
+<span id="cb109-15"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb109-15" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">123</span></span>
+<span id="cb109-16"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb109-16" tabindex="-1"></a>)</span>
+<span id="cb109-17"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb109-17" tabindex="-1"></a></span>
+<span id="cb109-18"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb109-18" tabindex="-1"></a><span class="fu">print</span>(fit, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;sigma&quot;</span>, <span class="st">&quot;sigma_mu&quot;</span>, <span class="st">&quot;sigma_season&quot;</span>))</span></code></pre></div>
 </div>
-<div id="references-7" class="section level2 hasAnchor" number="9.4">
-<h2><span class="header-section-number">9.4</span> References<a href="bayesian-gaussian-mixture-models.html#references-7" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<ul>
-<li><a href="https://modernstatisticalworkflow.blogspot.com/2016/10/finite-mixture-models-in-stan.html">Finite mixture models in Stan</a></li>
-<li><a href="https://maggielieu.com/2017/03/21/multivariate-gaussian-mixture-model-done-properly/">Multivariate Gaussian Mixture Model done properly</a></li>
-<li><a href="https://mc-stan.org/docs/stan-users-guide/mixture-modeling.html">Finite Mixtures</a></li>
-<li><a href="https://mc-stan.org/users/documentation/case-studies/identifying_mixture_models.html">Identifying Bayesian Mixture Models</a></li>
-<li><a href="https://vasishth.github.io/bayescogsci/book/ch-mixture.html">Mixture models</a></li>
-<li><a href="https://rpubs.com/kaz_yos/fmm2">Bayesian Density Estimation (Finite Mixture Model)</a></li>
-<li><a href="https://hal.science/hal-03866434/document">Bayesian mixture models (in)consistency for the number of clusters</a></li>
-<li><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6459682/">Advantages of a Bayesian Approach for Examining Class Structure in Finite Mixture Models</a></li>
-</ul>
+<div id="extracting-and-visualizing-components" class="section level2 hasAnchor" number="10.4">
+<h2><span class="header-section-number">10.4</span> Extracting and Visualizing Components<a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#extracting-and-visualizing-components" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>We now extract the posterior estimates and visualize the trend and seasonal components:</p>
+<div class="sourceCode" id="cb110"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb110-1"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb110-1" tabindex="-1"></a>posterior <span class="ot">&lt;-</span> <span class="fu">extract</span>(fit)</span>
+<span id="cb110-2"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb110-2" tabindex="-1"></a>mu_hat <span class="ot">&lt;-</span> <span class="fu">apply</span>(posterior<span class="sc">$</span>mu, <span class="dv">2</span>, mean)</span>
+<span id="cb110-3"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb110-3" tabindex="-1"></a>season_hat <span class="ot">&lt;-</span> <span class="fu">apply</span>(posterior<span class="sc">$</span>season, <span class="dv">2</span>, mean)</span>
+<span id="cb110-4"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb110-4" tabindex="-1"></a></span>
+<span id="cb110-5"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb110-5" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">1</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">1</span>))</span>
+<span id="cb110-6"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb110-6" tabindex="-1"></a><span class="fu">plot</span>(y, <span class="at">type =</span> <span class="st">&#39;l&#39;</span>, <span class="at">main =</span> <span class="st">&quot;Observed Time Series&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;y&quot;</span>)</span>
+<span id="cb110-7"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb110-7" tabindex="-1"></a><span class="fu">plot</span>(mu_hat, <span class="at">type =</span> <span class="st">&#39;l&#39;</span>, <span class="at">col =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">main =</span> <span class="st">&quot;Estimated Trend (mu)&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;mu_t&quot;</span>)</span>
+<span id="cb110-8"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb110-8" tabindex="-1"></a><span class="fu">plot</span>(season_hat, <span class="at">type =</span> <span class="st">&#39;l&#39;</span>, <span class="at">col =</span> <span class="st">&quot;darkgreen&quot;</span>, <span class="at">main =</span> <span class="st">&quot;Estimated Seasonal Component&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;season_t&quot;</span>)</span></code></pre></div>
+<p>This visual decomposition gives insight into how much of the variation is driven by the underlying trend and how much by recurring seasonal patterns. The Bayesian framework also allows for full posterior uncertainty quantification, which can be visualized with credible intervals around each component.</p>
+</div>
+<div id="extensions-and-applications" class="section level2 hasAnchor" number="10.5">
+<h2><span class="header-section-number">10.5</span> Extensions and Applications<a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#extensions-and-applications" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Bayesian structural time series models can be extended in numerous ways. One may introduce regression components to account for covariates (leading to models like BSTS), or allow the trend to include a slope (i.e., a local linear trend). Multivariate or hierarchical seasonal decomposition is also possible and particularly useful for grouped or panel time series.</p>
+</div>
+<div id="conclusion-5" class="section level2 hasAnchor" number="10.6">
+<h2><span class="header-section-number">10.6</span> Conclusion<a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#conclusion-5" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Bayesian seasonal decomposition offers a principled approach to breaking down time series into interpretable components while rigorously accounting for uncertainty. Compared to classical methods, the Bayesian formulation in Stan provides flexibility, interpretability, and extensibility. Whether used for exploratory analysis or as a preprocessing step for forecasting, structural time series decomposition is a valuable tool in the Bayesian modeler’s toolkit.</p>
 
 </div>
 </div>
@@ -530,8 +370,8 @@ abline(v=c(0), lty=&#39;dotted&#39;, col=&#39;red&#39;,lwd=2)
           </div>
         </div>
       </div>
-<a href="gaussian-process-regression-gpr.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="bayesian-gaussian-mixture-models.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="appendix.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -562,7 +402,7 @@ gitbook.start({
     "size": 2
   },
   "edit": {
-    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/edit/main/09-GMM.Rmd",
+    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/edit/main/10-SDCMP.Rmd",
     "text": "Edit"
   },
   "history": {
@@ -570,7 +410,7 @@ gitbook.start({
     "text": null
   },
   "view": {
-    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/blob/main/09-GMM.Rmd",
+    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/blob/main/10-SDCMP.Rmd",
     "text": null
   },
   "download": null,
