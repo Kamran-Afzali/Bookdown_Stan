@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 11 Bayesian Exponential Smoothing and Holt-Winters Models in Stan and RStan | Stan Bookdown</title>
+  <meta name="description" content="Chapter 11 Bayesian Exponential Smoothing and Holt-Winters Models in Stan and RStan | Stan Bookdown" />
+  <meta name="generator" content="bookdown 0.43 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 11 Bayesian Exponential Smoothing and Holt-Winters Models in Stan and RStan | Stan Bookdown" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 11 Bayesian Exponential Smoothing and Holt-Winters Models in Stan and RStan | Stan Bookdown" />
+  
+  
+  
+
+<meta name="author" content="Kamran Afzali" />
+
+
+<meta name="date" content="2025-07-03" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="bayesian-seasonal-decomposition-in-stan-and-rstan.html"/>
+<link rel="next" href="appendix.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Stan</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Choosing the Right Bayesian Model</a></li>
+<li class="chapter" data-level="2" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html"><i class="fa fa-check"></i><b>2</b> Bayesian Modeling in R and Stan</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#what-is-stan"><i class="fa fa-check"></i><b>2.1</b> What is STAN?</a></li>
+<li class="chapter" data-level="2.2" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#model-file"><i class="fa fa-check"></i><b>2.2</b> Model file</a></li>
+<li class="chapter" data-level="2.3" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#fit-the-model"><i class="fa fa-check"></i><b>2.3</b> Fit the model</a></li>
+<li class="chapter" data-level="2.4" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#mcmc-diagnostics"><i class="fa fa-check"></i><b>2.4</b> MCMC diagnostics</a></li>
+<li class="chapter" data-level="2.5" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#parting-thoughts"><i class="fa fa-check"></i><b>2.5</b> Parting thoughts</a></li>
+<li class="chapter" data-level="2.6" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#conclusions"><i class="fa fa-check"></i><b>2.6</b> Conclusions</a></li>
+<li class="chapter" data-level="2.7" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#references"><i class="fa fa-check"></i><b>2.7</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="bayesian-regression-models-for-non-normal-data.html"><a href="bayesian-regression-models-for-non-normal-data.html"><i class="fa fa-check"></i><b>3</b> Bayesian Regression Models for Non-Normal Data</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="bayesian-regression-models-for-non-normal-data.html"><a href="bayesian-regression-models-for-non-normal-data.html#logistic-regression"><i class="fa fa-check"></i><b>3.1</b> Logistic Regression</a></li>
+<li class="chapter" data-level="3.2" data-path="bayesian-regression-models-for-non-normal-data.html"><a href="bayesian-regression-models-for-non-normal-data.html#negative-binomial"><i class="fa fa-check"></i><b>3.2</b> Negative Binomial</a></li>
+<li class="chapter" data-level="3.3" data-path="bayesian-regression-models-for-non-normal-data.html"><a href="bayesian-regression-models-for-non-normal-data.html#conclusion"><i class="fa fa-check"></i><b>3.3</b> Conclusion</a></li>
+<li class="chapter" data-level="3.4" data-path="bayesian-regression-models-for-non-normal-data.html"><a href="bayesian-regression-models-for-non-normal-data.html#references-1"><i class="fa fa-check"></i><b>3.4</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="robust-t-regression.html"><a href="robust-t-regression.html"><i class="fa fa-check"></i><b>4</b> Robust t-regression</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="robust-t-regression.html"><a href="robust-t-regression.html#motivation"><i class="fa fa-check"></i><b>4.1</b> Motivation</a></li>
+<li class="chapter" data-level="4.2" data-path="robust-t-regression.html"><a href="robust-t-regression.html#concepts-and-code"><i class="fa fa-check"></i><b>4.2</b> Concepts and code</a></li>
+<li class="chapter" data-level="4.3" data-path="robust-t-regression.html"><a href="robust-t-regression.html#conclusion-1"><i class="fa fa-check"></i><b>4.3</b> Conclusion</a></li>
+<li class="chapter" data-level="4.4" data-path="robust-t-regression.html"><a href="robust-t-regression.html#references-2"><i class="fa fa-check"></i><b>4.4</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html"><i class="fa fa-check"></i><b>5</b> Bayesian Regularized Regression</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#introduction"><i class="fa fa-check"></i><b>5.1</b> Introduction</a></li>
+<li class="chapter" data-level="5.2" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#regularized-regression"><i class="fa fa-check"></i><b>5.2</b> Regularized Regression</a>
+<ul>
+<li class="chapter" data-level="5.2.1" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#bayesian-ridge-regression"><i class="fa fa-check"></i><b>5.2.1</b> Bayesian Ridge Regression</a></li>
+<li class="chapter" data-level="5.2.2" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#bayesian-lasso-regression"><i class="fa fa-check"></i><b>5.2.2</b> Bayesian LASSO Regression</a></li>
+<li class="chapter" data-level="5.2.3" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#hierarchical-shrinkage"><i class="fa fa-check"></i><b>5.2.3</b> Hierarchical shrinkage</a></li>
+</ul></li>
+<li class="chapter" data-level="5.3" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#conclusion-2"><i class="fa fa-check"></i><b>5.3</b> Conclusion</a></li>
+<li class="chapter" data-level="5.4" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#references-3"><i class="fa fa-check"></i><b>5.4</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="bayesian-quantile-regression.html"><a href="bayesian-quantile-regression.html"><i class="fa fa-check"></i><b>6</b> Bayesian Quantile Regression</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="bayesian-quantile-regression.html"><a href="bayesian-quantile-regression.html#model-specification"><i class="fa fa-check"></i><b>6.1</b> Model Specification</a>
+<ul>
+<li class="chapter" data-level="6.1.1" data-path="bayesian-quantile-regression.html"><a href="bayesian-quantile-regression.html#using-bayesqr-package"><i class="fa fa-check"></i><b>6.1.1</b> Using bayesQR package</a></li>
+<li class="chapter" data-level="6.1.2" data-path="bayesian-quantile-regression.html"><a href="bayesian-quantile-regression.html#using-brms-package"><i class="fa fa-check"></i><b>6.1.2</b> Using brms package</a></li>
+<li class="chapter" data-level="6.1.3" data-path="bayesian-quantile-regression.html"><a href="bayesian-quantile-regression.html#backend-stan-model"><i class="fa fa-check"></i><b>6.1.3</b> Backend stan model</a></li>
+</ul></li>
+<li class="chapter" data-level="6.2" data-path="bayesian-quantile-regression.html"><a href="bayesian-quantile-regression.html#references-4"><i class="fa fa-check"></i><b>6.2</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="bayesian-multilevel-mixed-effects-regression-in-stan.html"><a href="bayesian-multilevel-mixed-effects-regression-in-stan.html"><i class="fa fa-check"></i><b>7</b> Bayesian Multilevel (Mixed Effects) Regression in Stan</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="bayesian-multilevel-mixed-effects-regression-in-stan.html"><a href="bayesian-multilevel-mixed-effects-regression-in-stan.html#introduction-1"><i class="fa fa-check"></i><b>7.1</b> Introduction</a></li>
+<li class="chapter" data-level="7.2" data-path="bayesian-multilevel-mixed-effects-regression-in-stan.html"><a href="bayesian-multilevel-mixed-effects-regression-in-stan.html#multilevel-regression"><i class="fa fa-check"></i><b>7.2</b> Multilevel Regression</a>
+<ul>
+<li class="chapter" data-level="7.2.1" data-path="bayesian-multilevel-mixed-effects-regression-in-stan.html"><a href="bayesian-multilevel-mixed-effects-regression-in-stan.html#bayesian-random-intercepts-model"><i class="fa fa-check"></i><b>7.2.1</b> Bayesian Random Intercepts Model</a></li>
+<li class="chapter" data-level="7.2.2" data-path="bayesian-multilevel-mixed-effects-regression-in-stan.html"><a href="bayesian-multilevel-mixed-effects-regression-in-stan.html#bayesian-random-slopes-model"><i class="fa fa-check"></i><b>7.2.2</b> Bayesian Random Slopes Model</a></li>
+<li class="chapter" data-level="7.2.3" data-path="bayesian-multilevel-mixed-effects-regression-in-stan.html"><a href="bayesian-multilevel-mixed-effects-regression-in-stan.html#hierarchical-priors-model"><i class="fa fa-check"></i><b>7.2.3</b> Hierarchical Priors Model</a></li>
+</ul></li>
+<li class="chapter" data-level="7.3" data-path="bayesian-multilevel-mixed-effects-regression-in-stan.html"><a href="bayesian-multilevel-mixed-effects-regression-in-stan.html#conclusion-3"><i class="fa fa-check"></i><b>7.3</b> Conclusion</a></li>
+<li class="chapter" data-level="7.4" data-path="bayesian-multilevel-mixed-effects-regression-in-stan.html"><a href="bayesian-multilevel-mixed-effects-regression-in-stan.html#references-5"><i class="fa fa-check"></i><b>7.4</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html"><i class="fa fa-check"></i><b>8</b> Gaussian Process Regression (GPR)</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#introduction-2"><i class="fa fa-check"></i><b>8.1</b> Introduction</a></li>
+<li class="chapter" data-level="8.2" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#challenges"><i class="fa fa-check"></i><b>8.2</b> Challenges</a></li>
+<li class="chapter" data-level="8.3" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#gpfit-package"><i class="fa fa-check"></i><b>8.3</b> GPfit package</a></li>
+<li class="chapter" data-level="8.4" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#bayesian-stan"><i class="fa fa-check"></i><b>8.4</b> Bayesian Stan</a></li>
+<li class="chapter" data-level="8.5" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#references-6"><i class="fa fa-check"></i><b>8.5</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="bayesian-gaussian-mixture-models.html"><a href="bayesian-gaussian-mixture-models.html"><i class="fa fa-check"></i><b>9</b> Bayesian Gaussian Mixture Models</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="bayesian-gaussian-mixture-models.html"><a href="bayesian-gaussian-mixture-models.html#single-varaible-example"><i class="fa fa-check"></i><b>9.1</b> Single varaible example</a></li>
+<li class="chapter" data-level="9.2" data-path="bayesian-gaussian-mixture-models.html"><a href="bayesian-gaussian-mixture-models.html#example-with-multiple-variable"><i class="fa fa-check"></i><b>9.2</b> Example with multiple variable</a></li>
+<li class="chapter" data-level="9.3" data-path="bayesian-gaussian-mixture-models.html"><a href="bayesian-gaussian-mixture-models.html#conclusion-4"><i class="fa fa-check"></i><b>9.3</b> Conclusion</a></li>
+<li class="chapter" data-level="9.4" data-path="bayesian-gaussian-mixture-models.html"><a href="bayesian-gaussian-mixture-models.html#references-7"><i class="fa fa-check"></i><b>9.4</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><i class="fa fa-check"></i><b>10</b> Bayesian Seasonal Decomposition in Stan and RStan</a>
+<ul>
+<li class="chapter" data-level="10.1" data-path="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#simulating-seasonal-time-series-data"><i class="fa fa-check"></i><b>10.1</b> Simulating Seasonal Time Series Data*</a></li>
+<li class="chapter" data-level="10.2" data-path="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#bayesian-seasonal-decomposition-model-in-stan"><i class="fa fa-check"></i><b>10.2</b> Bayesian Seasonal Decomposition Model in Stan</a></li>
+<li class="chapter" data-level="10.3" data-path="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#fitting-the-model-in-r"><i class="fa fa-check"></i><b>10.3</b> Fitting the Model in R</a></li>
+<li class="chapter" data-level="10.4" data-path="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#extracting-and-visualizing-components"><i class="fa fa-check"></i><b>10.4</b> Extracting and Visualizing Components</a></li>
+<li class="chapter" data-level="10.5" data-path="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#extensions-and-applications"><i class="fa fa-check"></i><b>10.5</b> Extensions and Applications</a></li>
+<li class="chapter" data-level="10.6" data-path="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#conclusion-5"><i class="fa fa-check"></i><b>10.6</b> Conclusion</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><i class="fa fa-check"></i><b>11</b> Bayesian Exponential Smoothing and Holt-Winters Models in Stan and RStan</a>
+<ul>
+<li class="chapter" data-level="11.1" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#bayesian-simple-exponential-smoothing-ses"><i class="fa fa-check"></i><b>11.1</b> Bayesian Simple Exponential Smoothing (SES)</a>
+<ul>
+<li class="chapter" data-level="11.1.1" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#stan-model"><i class="fa fa-check"></i><b>11.1.1</b> Stan Model</a></li>
+<li class="chapter" data-level="11.1.2" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#fitting-in-r"><i class="fa fa-check"></i><b>11.1.2</b> Fitting in R</a></li>
+<li class="chapter" data-level="11.1.3" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#visualization"><i class="fa fa-check"></i><b>11.1.3</b> Visualization</a></li>
+</ul></li>
+<li class="chapter" data-level="11.2" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#bayesian-holt-winters-models"><i class="fa fa-check"></i><b>11.2</b> Bayesian Holt-Winters Models</a>
+<ul>
+<li class="chapter" data-level="11.2.1" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#without-seasonality-additive-trend"><i class="fa fa-check"></i><b>11.2.1</b> Without Seasonality (Additive Trend)</a></li>
+<li class="chapter" data-level="11.2.2" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#stan-model-1"><i class="fa fa-check"></i><b>11.2.2</b> Stan Model</a></li>
+<li class="chapter" data-level="11.2.3" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#visualization-1"><i class="fa fa-check"></i><b>11.2.3</b> Visualization</a></li>
+<li class="chapter" data-level="11.2.4" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#with-seasonality-additive-seasonal-component"><i class="fa fa-check"></i><b>11.2.4</b> With Seasonality (Additive Seasonal Component)</a></li>
+<li class="chapter" data-level="11.2.5" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#fit"><i class="fa fa-check"></i><b>11.2.5</b> Fit</a></li>
+<li class="chapter" data-level="11.2.6" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#visualization-2"><i class="fa fa-check"></i><b>11.2.6</b> Visualization</a></li>
+</ul></li>
+<li class="chapter" data-level="11.3" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#conclusion-6"><i class="fa fa-check"></i><b>11.3</b> Conclusion</a></li>
+</ul></li>
+<li class="chapter" data-level="12" data-path="appendix.html"><a href="appendix.html"><i class="fa fa-check"></i><b>12</b> Appendix</a>
+<ul>
+<li class="chapter" data-level="12.1" data-path="appendix.html"><a href="appendix.html#main-stan-distributions-cheatsheet"><i class="fa fa-check"></i><b>12.1</b> Main Stan Distributions Cheatsheet</a></li>
+<li class="chapter" data-level="12.2" data-path="appendix.html"><a href="appendix.html#main-stan-functions-cheatsheet"><i class="fa fa-check"></i><b>12.2</b> Main Stan Functions Cheatsheet</a></li>
+<li class="chapter" data-level="12.3" data-path="appendix.html"><a href="appendix.html#why-non-distribution-functions"><i class="fa fa-check"></i><b>12.3</b> Why Non-Distribution Functions?</a></li>
+<li class="chapter" data-level="12.4" data-path="appendix.html"><a href="appendix.html#stan-functions-cheatsheet"><i class="fa fa-check"></i><b>12.4</b> Stan Functions Cheatsheet</a>
+<ul>
+<li class="chapter" data-level="12.4.1" data-path="appendix.html"><a href="appendix.html#mathematical-functions"><i class="fa fa-check"></i><b>12.4.1</b> 1. Mathematical Functions</a></li>
+<li class="chapter" data-level="12.4.2" data-path="appendix.html"><a href="appendix.html#transformation-functions"><i class="fa fa-check"></i><b>12.4.2</b> 2. Transformation Functions</a></li>
+<li class="chapter" data-level="12.4.3" data-path="appendix.html"><a href="appendix.html#matrix-and-vector-operations"><i class="fa fa-check"></i><b>12.4.3</b> 3. Matrix and Vector Operations</a></li>
+<li class="chapter" data-level="12.4.4" data-path="appendix.html"><a href="appendix.html#utility-functions"><i class="fa fa-check"></i><b>12.4.4</b> 4. Utility Functions</a></li>
+<li class="chapter" data-level="12.4.5" data-path="appendix.html"><a href="appendix.html#specialized-solvers"><i class="fa fa-check"></i><b>12.4.5</b> 5. Specialized Solvers</a></li>
+</ul></li>
+<li class="chapter" data-level="12.5" data-path="appendix.html"><a href="appendix.html#example-hierarchical-linear-regression"><i class="fa fa-check"></i><b>12.5</b> Example: Hierarchical Linear Regression</a></li>
+<li class="chapter" data-level="12.6" data-path="appendix.html"><a href="appendix.html#tips-for-using-stan-functions"><i class="fa fa-check"></i><b>12.6</b> Tips for Using Stan Functions</a></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Stan Bookdown</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan" class="section level1 hasAnchor" number="11">
+<h1><span class="header-section-number">Chapter 11</span> Bayesian Exponential Smoothing and Holt-Winters Models in Stan and RStan<a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>Time series data often reflect patterns of level, trend, and seasonality. While ARIMA-style models are foundational, exponential smoothing techniques are especially appealing when forecasting with recent observations is more informative than distant ones. In this post, we explore how to model these systems in a Bayesian framework using <strong>Stan</strong> and <strong>RStan</strong>, bringing full probabilistic inference and uncertainty quantification to these well-known methods.</p>
+<p>We walk through the following:</p>
+<ol style="list-style-type: decimal">
+<li><p><strong>Bayesian Simple Exponential Smoothing (SES)</strong></p></li>
+<li><p><strong>Bayesian Holt-Winters Models</strong></p>
+<ul>
+<li>Without seasonality (trend only)</li>
+<li>With seasonality (additive seasonal component)</li>
+</ul></li>
+</ol>
+<div id="bayesian-simple-exponential-smoothing-ses" class="section level2 hasAnchor" number="11.1">
+<h2><span class="header-section-number">11.1</span> Bayesian Simple Exponential Smoothing (SES)<a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#bayesian-simple-exponential-smoothing-ses" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Simple Exponential Smoothing assumes a local level that evolves recursively:</p>
+<p><span class="math display">\[
+\ell_t = \alpha y_{t-1} + (1 - \alpha) \ell_{t-1} \\
+y_t \sim \mathcal{N}(\ell_t, \sigma^2)
+\]</span></p>
+<p>To simulate a series under this model:</p>
+<div class="sourceCode" id="cb111"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb111-1"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb111-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb111-2"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb111-2" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb111-3"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb111-3" tabindex="-1"></a>alpha <span class="ot">&lt;-</span> <span class="fl">0.3</span></span>
+<span id="cb111-4"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb111-4" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb111-5"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb111-5" tabindex="-1"></a>l <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb111-6"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb111-6" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb111-7"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb111-7" tabindex="-1"></a>l[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb111-8"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb111-8" tabindex="-1"></a>y[<span class="dv">1</span>] <span class="ot">&lt;-</span> l[<span class="dv">1</span>] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, sigma)</span>
+<span id="cb111-9"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb111-9" tabindex="-1"></a><span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>n) {</span>
+<span id="cb111-10"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb111-10" tabindex="-1"></a>  l[t] <span class="ot">&lt;-</span> alpha <span class="sc">*</span> y[t <span class="sc">-</span> <span class="dv">1</span>] <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">-</span> alpha) <span class="sc">*</span> l[t <span class="sc">-</span> <span class="dv">1</span>]</span>
+<span id="cb111-11"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb111-11" tabindex="-1"></a>  y[t] <span class="ot">&lt;-</span> l[t] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, sigma)</span>
+<span id="cb111-12"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb111-12" tabindex="-1"></a>}</span>
+<span id="cb111-13"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb111-13" tabindex="-1"></a><span class="fu">ts.plot</span>(y, <span class="at">main =</span> <span class="st">&quot;Simulated SES Time Series&quot;</span>)</span></code></pre></div>
+<div id="stan-model" class="section level3 hasAnchor" number="11.1.1">
+<h3><span class="header-section-number">11.1.1</span> Stan Model<a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#stan-model" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb112"><pre class="sourceCode stan"><code class="sourceCode stan"><span id="cb112-1"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb112-1" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb112-2"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb112-2" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">2</span>&gt; N;</span>
+<span id="cb112-3"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb112-3" tabindex="-1"></a>  <span class="dt">vector</span>[N] y;</span>
+<span id="cb112-4"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb112-4" tabindex="-1"></a>}</span>
+<span id="cb112-5"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb112-5" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb112-6"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb112-6" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; alpha;</span>
+<span id="cb112-7"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb112-7" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma;</span>
+<span id="cb112-8"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb112-8" tabindex="-1"></a>  <span class="dt">vector</span>[N] l;  <span class="co">// local level</span></span>
+<span id="cb112-9"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb112-9" tabindex="-1"></a>}</span>
+<span id="cb112-10"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb112-10" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb112-11"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb112-11" tabindex="-1"></a>  l[<span class="dv">1</span>] ~ normal(y[<span class="dv">1</span>], sigma);</span>
+<span id="cb112-12"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb112-12" tabindex="-1"></a>  <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">2</span>:N)</span>
+<span id="cb112-13"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb112-13" tabindex="-1"></a>    l[t] ~ normal(alpha * y[t<span class="dv">-1</span>] + (<span class="dv">1</span> - alpha) * l[t<span class="dv">-1</span>], sigma);</span>
+<span id="cb112-14"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb112-14" tabindex="-1"></a>  y ~ normal(l, sigma);</span>
+<span id="cb112-15"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb112-15" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div id="fitting-in-r" class="section level3 hasAnchor" number="11.1.2">
+<h3><span class="header-section-number">11.1.2</span> Fitting in R<a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#fitting-in-r" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb113"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb113-1"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb113-1" tabindex="-1"></a><span class="fu">library</span>(rstan)</span>
+<span id="cb113-2"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb113-2" tabindex="-1"></a>data_list <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">N =</span> <span class="fu">length</span>(y), <span class="at">y =</span> y)</span>
+<span id="cb113-3"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb113-3" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">model_code =</span> stan_model_1, <span class="at">data =</span> data_list, <span class="at">chains =</span> <span class="dv">4</span>, <span class="at">iter =</span> <span class="dv">2000</span>, <span class="at">warmup =</span> <span class="dv">1000</span>)</span>
+<span id="cb113-4"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb113-4" tabindex="-1"></a><span class="fu">print</span>(fit, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;alpha&quot;</span>, <span class="st">&quot;sigma&quot;</span>))</span></code></pre></div>
+</div>
+<div id="visualization" class="section level3 hasAnchor" number="11.1.3">
+<h3><span class="header-section-number">11.1.3</span> Visualization<a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#visualization" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb114"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb114-1"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb114-1" tabindex="-1"></a>post <span class="ot">&lt;-</span> <span class="fu">extract</span>(fit)</span>
+<span id="cb114-2"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb114-2" tabindex="-1"></a>l_hat <span class="ot">&lt;-</span> <span class="fu">apply</span>(post<span class="sc">$</span>l, <span class="dv">2</span>, mean)</span>
+<span id="cb114-3"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb114-3" tabindex="-1"></a>l_ci_lower <span class="ot">&lt;-</span> <span class="fu">apply</span>(post<span class="sc">$</span>l, <span class="dv">2</span>, quantile, <span class="fl">0.025</span>)</span>
+<span id="cb114-4"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb114-4" tabindex="-1"></a>l_ci_upper <span class="ot">&lt;-</span> <span class="fu">apply</span>(post<span class="sc">$</span>l, <span class="dv">2</span>, quantile, <span class="fl">0.975</span>)</span>
+<span id="cb114-5"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb114-5" tabindex="-1"></a></span>
+<span id="cb114-6"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb114-6" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb114-7"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb114-7" tabindex="-1"></a>  <span class="at">time =</span> <span class="dv">1</span><span class="sc">:</span>n, <span class="at">observed =</span> y, <span class="at">true_level =</span> l,</span>
+<span id="cb114-8"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb114-8" tabindex="-1"></a>  <span class="at">posterior_mean =</span> l_hat, <span class="at">lower_95 =</span> l_ci_lower, <span class="at">upper_95 =</span> l_ci_upper</span>
+<span id="cb114-9"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb114-9" tabindex="-1"></a>)</span>
+<span id="cb114-10"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb114-10" tabindex="-1"></a></span>
+<span id="cb114-11"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb114-11" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> time)) <span class="sc">+</span></span>
+<span id="cb114-12"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb114-12" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> observed), <span class="at">linetype =</span> <span class="st">&quot;dashed&quot;</span>, <span class="at">color =</span> <span class="st">&quot;black&quot;</span>) <span class="sc">+</span></span>
+<span id="cb114-13"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb114-13" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> true_level), <span class="at">color =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb114-14"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb114-14" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> posterior_mean), <span class="at">color =</span> <span class="st">&quot;red&quot;</span>) <span class="sc">+</span></span>
+<span id="cb114-15"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb114-15" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> lower_95, <span class="at">ymax =</span> upper_95), <span class="at">fill =</span> <span class="st">&quot;red&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb114-16"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb114-16" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Bayesian SES: Posterior Level Estimates vs True Level&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Value&quot;</span>) <span class="sc">+</span></span>
+<span id="cb114-17"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb114-17" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div>
+</div>
+</div>
+<div id="bayesian-holt-winters-models" class="section level2 hasAnchor" number="11.2">
+<h2><span class="header-section-number">11.2</span> Bayesian Holt-Winters Models<a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#bayesian-holt-winters-models" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="without-seasonality-additive-trend" class="section level3 hasAnchor" number="11.2.1">
+<h3><span class="header-section-number">11.2.1</span> Without Seasonality (Additive Trend)<a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#without-seasonality-additive-trend" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Holt’s method models both level and trend:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\ell_t &amp;= \alpha y_{t-1} + (1 - \alpha)(\ell_{t-1} + b_{t-1}) \\
+b_t &amp;= \beta(\ell_t - \ell_{t-1}) + (1 - \beta)b_{t-1} \\
+y_t &amp;\sim \mathcal{N}(\ell_t + b_t, \sigma^2)
+\end{aligned}
+\]</span></p>
+<div class="sourceCode" id="cb115"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb115-1"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb115-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2</span>)</span>
+<span id="cb115-2"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb115-2" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb115-3"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb115-3" tabindex="-1"></a>alpha <span class="ot">&lt;-</span> <span class="fl">0.3</span></span>
+<span id="cb115-4"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb115-4" tabindex="-1"></a>beta <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb115-5"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb115-5" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb115-6"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb115-6" tabindex="-1"></a>l <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb115-7"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb115-7" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb115-8"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb115-8" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb115-9"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb115-9" tabindex="-1"></a>l[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb115-10"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb115-10" tabindex="-1"></a>b[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb115-11"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb115-11" tabindex="-1"></a>y[<span class="dv">1</span>] <span class="ot">&lt;-</span> l[<span class="dv">1</span>] <span class="sc">+</span> b[<span class="dv">1</span>] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, sigma)</span>
+<span id="cb115-12"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb115-12" tabindex="-1"></a><span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>n) {</span>
+<span id="cb115-13"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb115-13" tabindex="-1"></a>  l[t] <span class="ot">&lt;-</span> alpha <span class="sc">*</span> y[t <span class="sc">-</span> <span class="dv">1</span>] <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">-</span> alpha) <span class="sc">*</span> (l[t <span class="sc">-</span> <span class="dv">1</span>] <span class="sc">+</span> b[t <span class="sc">-</span> <span class="dv">1</span>])</span>
+<span id="cb115-14"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb115-14" tabindex="-1"></a>  b[t] <span class="ot">&lt;-</span> beta <span class="sc">*</span> (l[t] <span class="sc">-</span> l[t <span class="sc">-</span> <span class="dv">1</span>]) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">-</span> beta) <span class="sc">*</span> b[t <span class="sc">-</span> <span class="dv">1</span>]</span>
+<span id="cb115-15"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb115-15" tabindex="-1"></a>  y[t] <span class="ot">&lt;-</span> l[t] <span class="sc">+</span> b[t] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, sigma)</span>
+<span id="cb115-16"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb115-16" tabindex="-1"></a>}</span>
+<span id="cb115-17"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb115-17" tabindex="-1"></a><span class="fu">ts.plot</span>(y, <span class="at">main =</span> <span class="st">&quot;Simulated Holt-Winters Time Series&quot;</span>)</span></code></pre></div>
+</div>
+<div id="stan-model-1" class="section level3 hasAnchor" number="11.2.2">
+<h3><span class="header-section-number">11.2.2</span> Stan Model<a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#stan-model-1" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb116"><pre class="sourceCode stan"><code class="sourceCode stan"><span id="cb116-1"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb116-1" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb116-2"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb116-2" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">2</span>&gt; N;</span>
+<span id="cb116-3"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb116-3" tabindex="-1"></a>  <span class="dt">vector</span>[N] y;</span>
+<span id="cb116-4"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb116-4" tabindex="-1"></a>}</span>
+<span id="cb116-5"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb116-5" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb116-6"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb116-6" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; alpha;</span>
+<span id="cb116-7"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb116-7" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; beta;</span>
+<span id="cb116-8"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb116-8" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma;</span>
+<span id="cb116-9"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb116-9" tabindex="-1"></a>  <span class="dt">vector</span>[N] l;</span>
+<span id="cb116-10"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb116-10" tabindex="-1"></a>  <span class="dt">vector</span>[N] b;</span>
+<span id="cb116-11"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb116-11" tabindex="-1"></a>}</span>
+<span id="cb116-12"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb116-12" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb116-13"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb116-13" tabindex="-1"></a>  l[<span class="dv">1</span>] ~ normal(y[<span class="dv">1</span>], sigma);</span>
+<span id="cb116-14"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb116-14" tabindex="-1"></a>  b[<span class="dv">1</span>] ~ normal(<span class="dv">0</span>, sigma);</span>
+<span id="cb116-15"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb116-15" tabindex="-1"></a>  <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">2</span>:N) {</span>
+<span id="cb116-16"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb116-16" tabindex="-1"></a>    l[t] ~ normal(alpha * y[t<span class="dv">-1</span>] + (<span class="dv">1</span> - alpha) * (l[t<span class="dv">-1</span>] + b[t<span class="dv">-1</span>]), sigma);</span>
+<span id="cb116-17"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb116-17" tabindex="-1"></a>    b[t] ~ normal(beta * (l[t] - l[t<span class="dv">-1</span>]) + (<span class="dv">1</span> - beta) * b[t<span class="dv">-1</span>], sigma);</span>
+<span id="cb116-18"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb116-18" tabindex="-1"></a>  }</span>
+<span id="cb116-19"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb116-19" tabindex="-1"></a>  y ~ normal(l + b, sigma);</span>
+<span id="cb116-20"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb116-20" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div id="visualization-1" class="section level3 hasAnchor" number="11.2.3">
+<h3><span class="header-section-number">11.2.3</span> Visualization<a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#visualization-1" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb117"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb117-1"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb117-1" tabindex="-1"></a>post <span class="ot">&lt;-</span> <span class="fu">extract</span>(fit)</span>
+<span id="cb117-2"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb117-2" tabindex="-1"></a>l_hat <span class="ot">&lt;-</span> <span class="fu">apply</span>(post<span class="sc">$</span>l, <span class="dv">2</span>, mean)</span>
+<span id="cb117-3"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb117-3" tabindex="-1"></a>b_hat <span class="ot">&lt;-</span> <span class="fu">apply</span>(post<span class="sc">$</span>b, <span class="dv">2</span>, mean)</span>
+<span id="cb117-4"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb117-4" tabindex="-1"></a>y_hat <span class="ot">&lt;-</span> l_hat <span class="sc">+</span> b_hat</span>
+<span id="cb117-5"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb117-5" tabindex="-1"></a>l_ci_lower <span class="ot">&lt;-</span> <span class="fu">apply</span>(post<span class="sc">$</span>l, <span class="dv">2</span>, quantile, <span class="fl">0.025</span>)</span>
+<span id="cb117-6"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb117-6" tabindex="-1"></a>l_ci_upper <span class="ot">&lt;-</span> <span class="fu">apply</span>(post<span class="sc">$</span>l, <span class="dv">2</span>, quantile, <span class="fl">0.975</span>)</span>
+<span id="cb117-7"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb117-7" tabindex="-1"></a></span>
+<span id="cb117-8"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb117-8" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb117-9"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb117-9" tabindex="-1"></a>  <span class="at">time =</span> <span class="dv">1</span><span class="sc">:</span>n, <span class="at">observed =</span> y,</span>
+<span id="cb117-10"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb117-10" tabindex="-1"></a>  <span class="at">predicted =</span> y_hat, <span class="at">level_mean =</span> l_hat,</span>
+<span id="cb117-11"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb117-11" tabindex="-1"></a>  <span class="at">level_lower =</span> l_ci_lower, <span class="at">level_upper =</span> l_ci_upper</span>
+<span id="cb117-12"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb117-12" tabindex="-1"></a>)</span>
+<span id="cb117-13"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb117-13" tabindex="-1"></a></span>
+<span id="cb117-14"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb117-14" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> time)) <span class="sc">+</span></span>
+<span id="cb117-15"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb117-15" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> observed), <span class="at">linetype =</span> <span class="st">&quot;dashed&quot;</span>, <span class="at">color =</span> <span class="st">&quot;black&quot;</span>) <span class="sc">+</span></span>
+<span id="cb117-16"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb117-16" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> predicted), <span class="at">color =</span> <span class="st">&quot;red&quot;</span>) <span class="sc">+</span></span>
+<span id="cb117-17"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb117-17" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> level_lower, <span class="at">ymax =</span> level_upper), <span class="at">fill =</span> <span class="st">&quot;red&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb117-18"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb117-18" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Bayesian Holt-Winters: Posterior Level &amp; Trend Estimates&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Value&quot;</span>) <span class="sc">+</span></span>
+<span id="cb117-19"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb117-19" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div>
+</div>
+<div id="with-seasonality-additive-seasonal-component" class="section level3 hasAnchor" number="11.2.4">
+<h3><span class="header-section-number">11.2.4</span> With Seasonality (Additive Seasonal Component)<a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#with-seasonality-additive-seasonal-component" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>The full Holt-Winters seasonal model captures all three components:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\ell_t &amp;= \alpha(y_{t-1} - s_{t-m}) + (1 - \alpha)(\ell_{t-1} + b_{t-1}) \\
+b_t &amp;= \beta(\ell_t - \ell_{t-1}) + (1 - \beta)b_{t-1} \\
+s_t &amp;= \gamma(y_{t-1} - \ell_{t-1} - b_{t-1}) + (1 - \gamma)s_{t-m} \\
+y_t &amp;\sim \mathcal{N}(\ell_t + b_t + s_{t-m}, \sigma^2)
+\end{aligned}
+\]</span></p>
+<div class="sourceCode" id="cb118"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb118-1"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb118-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3</span>)</span>
+<span id="cb118-2"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb118-2" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">120</span></span>
+<span id="cb118-3"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb118-3" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="dv">12</span></span>
+<span id="cb118-4"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb118-4" tabindex="-1"></a>alpha <span class="ot">&lt;-</span> <span class="fl">0.3</span>; beta <span class="ot">&lt;-</span> <span class="fl">0.1</span>; gamma <span class="ot">&lt;-</span> <span class="fl">0.2</span>; sigma <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb118-5"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb118-5" tabindex="-1"></a>l <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n); b <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n); s <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n); y <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb118-6"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb118-6" tabindex="-1"></a>l[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="dv">10</span>; b[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fl">0.5</span>; s[<span class="dv">1</span><span class="sc">:</span>m] <span class="ot">&lt;-</span> <span class="fu">sin</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> (<span class="dv">1</span><span class="sc">:</span>m) <span class="sc">/</span> m)</span>
+<span id="cb118-7"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb118-7" tabindex="-1"></a>y[<span class="dv">1</span>] <span class="ot">&lt;-</span> l[<span class="dv">1</span>] <span class="sc">+</span> b[<span class="dv">1</span>] <span class="sc">+</span> s[<span class="dv">1</span>] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, sigma)</span>
+<span id="cb118-8"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb118-8" tabindex="-1"></a><span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>n) {</span>
+<span id="cb118-9"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb118-9" tabindex="-1"></a>  <span class="cf">if</span> (t <span class="sc">&gt;</span> m) {</span>
+<span id="cb118-10"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb118-10" tabindex="-1"></a>    l[t] <span class="ot">&lt;-</span> alpha <span class="sc">*</span> (y[t <span class="sc">-</span> <span class="dv">1</span>] <span class="sc">-</span> s[t <span class="sc">-</span> m]) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">-</span> alpha) <span class="sc">*</span> (l[t <span class="sc">-</span> <span class="dv">1</span>] <span class="sc">+</span> b[t <span class="sc">-</span> <span class="dv">1</span>])</span>
+<span id="cb118-11"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb118-11" tabindex="-1"></a>    b[t] <span class="ot">&lt;-</span> beta <span class="sc">*</span> (l[t] <span class="sc">-</span> l[t <span class="sc">-</span> <span class="dv">1</span>]) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">-</span> beta) <span class="sc">*</span> b[t <span class="sc">-</span> <span class="dv">1</span>]</span>
+<span id="cb118-12"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb118-12" tabindex="-1"></a>    s[t] <span class="ot">&lt;-</span> gamma <span class="sc">*</span> (y[t <span class="sc">-</span> <span class="dv">1</span>] <span class="sc">-</span> l[t <span class="sc">-</span> <span class="dv">1</span>] <span class="sc">-</span> b[t <span class="sc">-</span> <span class="dv">1</span>]) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">-</span> gamma) <span class="sc">*</span> s[t <span class="sc">-</span> m]</span>
+<span id="cb118-13"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb118-13" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb118-14"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb118-14" tabindex="-1"></a>    l[t] <span class="ot">&lt;-</span> l[t <span class="sc">-</span> <span class="dv">1</span>]; b[t] <span class="ot">&lt;-</span> b[t <span class="sc">-</span> <span class="dv">1</span>]; s[t] <span class="ot">&lt;-</span> s[t <span class="sc">-</span> <span class="dv">1</span>]</span>
+<span id="cb118-15"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb118-15" tabindex="-1"></a>  }</span>
+<span id="cb118-16"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb118-16" tabindex="-1"></a>  y[t] <span class="ot">&lt;-</span> l[t] <span class="sc">+</span> b[t] <span class="sc">+</span> s[t <span class="sc">%%</span> m <span class="sc">+</span> <span class="dv">1</span>] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, sigma)</span>
+<span id="cb118-17"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb118-17" tabindex="-1"></a>}</span>
+<span id="cb118-18"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb118-18" tabindex="-1"></a><span class="fu">ts.plot</span>(y, <span class="at">main =</span> <span class="st">&quot;Simulated Seasonal Holt-Winters Time Series&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb119"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb119-1"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-1" tabindex="-1"></a><span class="do">### Stan Model (Additive Seasonal)</span></span>
+<span id="cb119-2"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-2" tabindex="-1"></a></span>
+<span id="cb119-3"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-3" tabindex="-1"></a>stan_model_3<span class="ot">=</span><span class="st">&#39;data {</span></span>
+<span id="cb119-4"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-4" tabindex="-1"></a><span class="st">  int&lt;lower=2&gt; N;         // number of observations</span></span>
+<span id="cb119-5"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-5" tabindex="-1"></a><span class="st">  int&lt;lower=1&gt; m;         // seasonal period</span></span>
+<span id="cb119-6"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-6" tabindex="-1"></a><span class="st">  vector[N] y;</span></span>
+<span id="cb119-7"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-7" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb119-8"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-8" tabindex="-1"></a><span class="st">parameters {</span></span>
+<span id="cb119-9"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-9" tabindex="-1"></a><span class="st">  real&lt;lower=0, upper=1&gt; alpha;</span></span>
+<span id="cb119-10"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-10" tabindex="-1"></a><span class="st">  real&lt;lower=0, upper=1&gt; beta;</span></span>
+<span id="cb119-11"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-11" tabindex="-1"></a><span class="st">  real&lt;lower=0, upper=1&gt; gamma;</span></span>
+<span id="cb119-12"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-12" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma;</span></span>
+<span id="cb119-13"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-13" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb119-14"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-14" tabindex="-1"></a><span class="st">  vector[N] l;            // level</span></span>
+<span id="cb119-15"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-15" tabindex="-1"></a><span class="st">  vector[N] b;            // trend</span></span>
+<span id="cb119-16"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-16" tabindex="-1"></a><span class="st">  vector[N] s;            // seasonal</span></span>
+<span id="cb119-17"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-17" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb119-18"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-18" tabindex="-1"></a><span class="st">model {</span></span>
+<span id="cb119-19"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-19" tabindex="-1"></a><span class="st">  l[1] ~ normal(y[1], sigma);</span></span>
+<span id="cb119-20"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-20" tabindex="-1"></a><span class="st">  b[1] ~ normal(0, sigma);</span></span>
+<span id="cb119-21"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-21" tabindex="-1"></a><span class="st">  for (i in 1:m)</span></span>
+<span id="cb119-22"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-22" tabindex="-1"></a><span class="st">    s[i] ~ normal(0, 1);</span></span>
+<span id="cb119-23"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-23" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb119-24"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-24" tabindex="-1"></a><span class="st">  for (t in 2:N) {</span></span>
+<span id="cb119-25"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-25" tabindex="-1"></a><span class="st">    if (t &gt; m) {</span></span>
+<span id="cb119-26"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-26" tabindex="-1"></a><span class="st">      l[t] ~ normal(alpha * (y[t - 1] - s[t - m]) + (1 - alpha) * (l[t - 1] + b[t - 1]), sigma);</span></span>
+<span id="cb119-27"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-27" tabindex="-1"></a><span class="st">      b[t] ~ normal(beta * (l[t] - l[t - 1]) + (1 - beta) * b[t - 1], sigma);</span></span>
+<span id="cb119-28"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-28" tabindex="-1"></a><span class="st">      s[t] ~ normal(gamma * (y[t - 1] - l[t - 1] - b[t - 1]) + (1 - gamma) * s[t - m], sigma);</span></span>
+<span id="cb119-29"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-29" tabindex="-1"></a><span class="st">    } else {</span></span>
+<span id="cb119-30"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-30" tabindex="-1"></a><span class="st">      l[t] ~ normal(l[t - 1], 1);</span></span>
+<span id="cb119-31"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-31" tabindex="-1"></a><span class="st">      b[t] ~ normal(b[t - 1], 1);</span></span>
+<span id="cb119-32"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-32" tabindex="-1"></a><span class="st">      s[t] ~ normal(s[t - 1], 1);</span></span>
+<span id="cb119-33"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-33" tabindex="-1"></a><span class="st">    }</span></span>
+<span id="cb119-34"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-34" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb119-35"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-35" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb119-36"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-36" tabindex="-1"></a><span class="st">  for (t in 1:N) {</span></span>
+<span id="cb119-37"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-37" tabindex="-1"></a><span class="st">    if (t &gt; m)</span></span>
+<span id="cb119-38"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-38" tabindex="-1"></a><span class="st">      y[t] ~ normal(l[t] + b[t] + s[t - m], sigma);</span></span>
+<span id="cb119-39"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-39" tabindex="-1"></a><span class="st">    else</span></span>
+<span id="cb119-40"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-40" tabindex="-1"></a><span class="st">      y[t] ~ normal(l[t] + b[t] + s[t], sigma);</span></span>
+<span id="cb119-41"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-41" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb119-42"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb119-42" tabindex="-1"></a><span class="st">}&#39;</span></span></code></pre></div>
+</div>
+<div id="fit" class="section level3 hasAnchor" number="11.2.5">
+<h3><span class="header-section-number">11.2.5</span> Fit<a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#fit" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb120"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb120-1"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb120-1" tabindex="-1"></a><span class="fu">library</span>(rstan)</span>
+<span id="cb120-2"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb120-2" tabindex="-1"></a></span>
+<span id="cb120-3"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb120-3" tabindex="-1"></a>data_list <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">N =</span> <span class="fu">length</span>(y), <span class="at">y =</span> y, <span class="at">m =</span> m)</span>
+<span id="cb120-4"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb120-4" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">model_code =</span> stan_model_3, <span class="at">data =</span> data_list,</span>
+<span id="cb120-5"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb120-5" tabindex="-1"></a>            <span class="at">chains =</span> <span class="dv">4</span>, <span class="at">iter =</span> <span class="dv">2000</span>, <span class="at">warmup =</span> <span class="dv">1000</span>)</span>
+<span id="cb120-6"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb120-6" tabindex="-1"></a></span>
+<span id="cb120-7"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb120-7" tabindex="-1"></a><span class="fu">print</span>(fit, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;alpha&quot;</span>, <span class="st">&quot;beta&quot;</span>, <span class="st">&quot;gamma&quot;</span>, <span class="st">&quot;sigma&quot;</span>))</span>
+<span id="cb120-8"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb120-8" tabindex="-1"></a></span>
+<span id="cb120-9"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb120-9" tabindex="-1"></a>post <span class="ot">&lt;-</span> rstan<span class="sc">::</span><span class="fu">extract</span>(fit)</span>
+<span id="cb120-10"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb120-10" tabindex="-1"></a></span>
+<span id="cb120-11"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb120-11" tabindex="-1"></a>l_hat <span class="ot">&lt;-</span> <span class="fu">apply</span>(post<span class="sc">$</span>l, <span class="dv">2</span>, mean)</span>
+<span id="cb120-12"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb120-12" tabindex="-1"></a>l_ci_lower <span class="ot">&lt;-</span> <span class="fu">apply</span>(post<span class="sc">$</span>l, <span class="dv">2</span>, quantile, <span class="at">probs =</span> <span class="fl">0.025</span>)</span>
+<span id="cb120-13"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb120-13" tabindex="-1"></a>l_ci_upper <span class="ot">&lt;-</span> <span class="fu">apply</span>(post<span class="sc">$</span>l, <span class="dv">2</span>, quantile, <span class="at">probs =</span> <span class="fl">0.975</span>)</span>
+<span id="cb120-14"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb120-14" tabindex="-1"></a></span>
+<span id="cb120-15"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb120-15" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb120-16"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb120-16" tabindex="-1"></a>  <span class="at">time =</span> <span class="dv">1</span><span class="sc">:</span>n,</span>
+<span id="cb120-17"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb120-17" tabindex="-1"></a>  <span class="at">observed =</span> y,</span>
+<span id="cb120-18"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb120-18" tabindex="-1"></a>  <span class="at">level_mean =</span> l_hat,</span>
+<span id="cb120-19"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb120-19" tabindex="-1"></a>  <span class="at">level_lower =</span> l_ci_lower,</span>
+<span id="cb120-20"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb120-20" tabindex="-1"></a>  <span class="at">level_upper =</span> l_ci_upper</span>
+<span id="cb120-21"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb120-21" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="visualization-2" class="section level3 hasAnchor" number="11.2.6">
+<h3><span class="header-section-number">11.2.6</span> Visualization<a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#visualization-2" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb121"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb121-1"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb121-1" tabindex="-1"></a>post <span class="ot">&lt;-</span> <span class="fu">extract</span>(fit)</span>
+<span id="cb121-2"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb121-2" tabindex="-1"></a>l_hat <span class="ot">&lt;-</span> <span class="fu">apply</span>(post<span class="sc">$</span>l, <span class="dv">2</span>, mean)</span>
+<span id="cb121-3"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb121-3" tabindex="-1"></a>l_ci_lower <span class="ot">&lt;-</span> <span class="fu">apply</span>(post<span class="sc">$</span>l, <span class="dv">2</span>, quantile, <span class="fl">0.025</span>)</span>
+<span id="cb121-4"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb121-4" tabindex="-1"></a>l_ci_upper <span class="ot">&lt;-</span> <span class="fu">apply</span>(post<span class="sc">$</span>l, <span class="dv">2</span>, quantile, <span class="fl">0.975</span>)</span>
+<span id="cb121-5"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb121-5" tabindex="-1"></a></span>
+<span id="cb121-6"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb121-6" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb121-7"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb121-7" tabindex="-1"></a>  <span class="at">time =</span> <span class="dv">1</span><span class="sc">:</span>n,</span>
+<span id="cb121-8"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb121-8" tabindex="-1"></a>  <span class="at">observed =</span> y,</span>
+<span id="cb121-9"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb121-9" tabindex="-1"></a>  <span class="at">level_mean =</span> l_hat,</span>
+<span id="cb121-10"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb121-10" tabindex="-1"></a>  <span class="at">level_lower =</span> l_ci_lower,</span>
+<span id="cb121-11"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb121-11" tabindex="-1"></a>  <span class="at">level_upper =</span> l_ci_upper</span>
+<span id="cb121-12"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb121-12" tabindex="-1"></a>)</span>
+<span id="cb121-13"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb121-13" tabindex="-1"></a></span>
+<span id="cb121-14"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb121-14" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> time)) <span class="sc">+</span></span>
+<span id="cb121-15"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb121-15" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> observed), <span class="at">linetype =</span> <span class="st">&quot;dashed&quot;</span>, <span class="at">color =</span> <span class="st">&quot;black&quot;</span>) <span class="sc">+</span></span>
+<span id="cb121-16"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb121-16" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> level_mean), <span class="at">color =</span> <span class="st">&quot;red&quot;</span>) <span class="sc">+</span></span>
+<span id="cb121-17"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb121-17" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> level_lower, <span class="at">ymax =</span> level_upper), <span class="at">fill =</span> <span class="st">&quot;red&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb121-18"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb121-18" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Bayesian Seasonal Holt-Winters: Posterior Level Estimates&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Value&quot;</span>) <span class="sc">+</span></span>
+<span id="cb121-19"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#cb121-19" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div>
+</div>
+</div>
+<div id="conclusion-6" class="section level2 hasAnchor" number="11.3">
+<h2><span class="header-section-number">11.3</span> Conclusion<a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#conclusion-6" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Bayesian formulations of Exponential Smoothing and Holt-Winters models offer elegant alternatives to frequentist smoothing, with the advantage of posterior inference, natural handling of uncertainty, and full probabilistic forecasting. Using <strong>Stan</strong> via <strong>RStan</strong>, we can model level, trend, and seasonality in a transparent and interpretable way—crucial for applications in forecasting and planning. These methods can be extended further to include hierarchical structure, time-varying parameters, or non-Gaussian errors for more complex real-world tasks.</p>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="appendix.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+  "sharing": {
+    "github": false,
+    "facebook": true,
+    "twitter": true,
+    "linkedin": false,
+    "weibo": false,
+    "instapaper": false,
+    "vk": false,
+    "whatsapp": false,
+    "all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+  },
+  "fontsettings": {
+    "theme": "white",
+    "family": "sans",
+    "size": 2
+  },
+  "edit": {
+    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/edit/main/11-HOLT.Rmd",
+    "text": "Edit"
+  },
+  "history": {
+    "link": null,
+    "text": null
+  },
+  "view": {
+    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/blob/main/11-HOLT.Rmd",
+    "text": null
+  },
+  "download": null,
+  "search": {
+    "engine": "fuse",
+    "options": null
+  },
+  "toc": {
+    "collapse": "subsection"
+  }
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
