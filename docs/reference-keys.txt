@@ -70,6 +70,11 @@ with-seasonality-additive-seasonal-component
 fit
 visualization-2
 conclusion-6
+bayesian-ar-arma-and-arima-models-in-stan-and-rstan
+bayesian-ar1-model
+bayesian-arma11-model
+bayesian-arima111-model
+conclusion-7
 appendix
 main-stan-distributions-cheatsheet
 main-stan-functions-cheatsheet
