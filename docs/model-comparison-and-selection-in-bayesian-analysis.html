@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 5 Bayesian Regularized Regression | Stan Bookdown</title>
-  <meta name="description" content="Chapter 5 Bayesian Regularized Regression | Stan Bookdown" />
+  <title>Chapter 13 Model Comparison and Selection in Bayesian Analysis | Stan Bookdown</title>
+  <meta name="description" content="Chapter 13 Model Comparison and Selection in Bayesian Analysis | Stan Bookdown" />
   <meta name="generator" content="bookdown 0.43 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 5 Bayesian Regularized Regression | Stan Bookdown" />
+  <meta property="og:title" content="Chapter 13 Model Comparison and Selection in Bayesian Analysis | Stan Bookdown" />
   <meta property="og:type" content="book" />
   
   
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 5 Bayesian Regularized Regression | Stan Bookdown" />
+  <meta name="twitter:title" content="Chapter 13 Model Comparison and Selection in Bayesian Analysis | Stan Bookdown" />
   
   
   
@@ -30,8 +30,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="robust-t-regression.html"/>
-<link rel="next" href="bayesian-quantile-regression.html"/>
+<link rel="prev" href="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html"/>
+<link rel="next" href="appendix.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -297,274 +297,182 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="bayesian-regularized-regression" class="section level1 hasAnchor" number="5">
-<h1><span class="header-section-number">Chapter 5</span> Bayesian Regularized Regression<a href="bayesian-regularized-regression.html#bayesian-regularized-regression" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<div id="introduction" class="section level2 hasAnchor" number="5.1">
-<h2><span class="header-section-number">5.1</span> Introduction<a href="bayesian-regularized-regression.html#introduction" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>In this post, we will explore Bayesian analogues of regularized/penalized linear regression models (e.g., LASSO, Ridge regression), which are an extention of traditional linear regression models of the form. First we will discuss shrinkage and regularization in regression problems. These methods are useful for improving prediction, estimating regression models with many variables, and as an alternative to model selection methods. Our goal is to
-understand shrinkage/regularization of coefficients as an alternative/complement to variable selection. Use three specific approaches to regularization—ridge, LASSO, hierarchical shrinkage—which regularize through different priors, with different consequences for sparsity, and to recognize connections between Bayesian regularized regression and regularized regression in a machine learning/penalized maximum likelihood estimation (MLE) framework. Traditional linear regression models assume that weights share no group-level information (i.e. they are independent), which leads to so-called unbiased estimates. Unlike traditional linear regression models, regularized linear regression models produce biased estimates for the weights. Specifically, Bayesian regularized linear regression models pool information across weights, resulting in regression toward a common mean. When the common mean is centered at 0, this pooling of information produces more conservative estimates for each weight (they are biased toward 0). Shrinkage estimation deliberately increases the bias of the model in order to reduce variance and improve overall model performance, often at the cost of individual estimates. In other words, by adding bias to the model, shrinkage estimators provide a means to adjust the bias-variance in the model in order to achieve lower generalization error. Bayesian models with non-informative priors will produce similar to the MLE. However, parameters are modeled as exchangeable and given a proper prior, it induces some amount of shrinkage. But stronger priors can produce estimate much different estimtes than MLE.</p>
+<div id="model-comparison-and-selection-in-bayesian-analysis" class="section level1 hasAnchor" number="13">
+<h1><span class="header-section-number">Chapter 13</span> Model Comparison and Selection in Bayesian Analysis<a href="model-comparison-and-selection-in-bayesian-analysis.html#model-comparison-and-selection-in-bayesian-analysis" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="introduction-3" class="section level2 hasAnchor" number="13.1">
+<h2><span class="header-section-number">13.1</span> Introduction<a href="model-comparison-and-selection-in-bayesian-analysis.html#introduction-3" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Bayesian statistical modeling offers a flexible and principled approach to quantifying uncertainty and incorporating prior knowledge. As readers gain familiarity with building a variety of models—ranging from simple linear regressions to complex hierarchical and non-parametric models—a critical question emerges: how do we choose among competing models? Bayesian model comparison and selection are fundamental steps in the modeling process, ensuring that inferences are both robust and interpretable.</p>
+<p>Unlike frequentist paradigms, Bayesian methods provide a coherent framework for comparing models by evaluating the plausibility of the data given the model, known as model evidence. However, this task is often complicated by practical challenges in estimating model evidence and balancing predictive accuracy with model complexity. This article explores the key tools available for Bayesian model comparison, including posterior predictive checks, information criteria like WAIC and LOO-CV, and Bayes factors. Each method offers unique insights, and their strengths and limitations make them suitable for different analytical contexts.</p>
+<p>While selecting a single model is a common goal, Bayesian modeling also allows for <strong>model averaging</strong> and <strong>stacking</strong>, approaches that combine models to account for model uncertainty and improve predictive robustness. These alternatives are especially useful when no model clearly dominates or when combining perspectives from multiple models provides more comprehensive insights.</p>
 </div>
-<div id="regularized-regression" class="section level2 hasAnchor" number="5.2">
-<h2><span class="header-section-number">5.2</span> Regularized Regression<a href="bayesian-regularized-regression.html#regularized-regression" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>As described above, regularized linear regression models aim to estimate more conservative values for the weights in a model, and this is true for both frequentist and Bayesian versions of regularization. While there are many methods that can be used to regularize your estimation procedure, we will focus specifically on two popular forms—namely, ridge and LASSO regression. We start below by describing each regression generally, and then proceed to implement both the frequentist and Bayesian versions.</p>
-<div id="bayesian-ridge-regression" class="section level3 hasAnchor" number="5.2.1">
-<h3><span class="header-section-number">5.2.1</span> Bayesian Ridge Regression<a href="bayesian-regularized-regression.html#bayesian-ridge-regression" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>Ridge regression modifies the loss function to include a penalty term for model complexity, where model complexity is operationalized as the sum of squared weights. Bayesian Ridge regression differs from the frequentist variant in only one way, and it is with how we think of the penalty term. In the frequentist perspective, we showed that effectively tells our model how much it is allowed to learn from the data. Bayesian models view estimation as a problem of integrating prior information with information gained from data, which we formalize using probability distributions. The Bayesian estimation captures this in the form of a prior distribution over our weights the choice of prior distribution on is what determines how much information we learn from the data, analagous to the penalty term used for MLE regularization.</p>
-<pre><code>
-library(tidymodels)
-
-set.seed(123)
-n &lt;- 1000
-ntr=700
-nts=300
-a &lt;- 40  #intercept
-b &lt;- c(-2, 3, 4, 1 , 0.25) #slopes
-sigma2 &lt;- 25  #residual variance (sd=5)
-x &lt;- matrix(rnorm(5000),1000,5)
-eps &lt;- rnorm(n, mean = 0, sd = sqrt(sigma2))  #residuals
-y &lt;- a +x%*%b+ eps  #response variable
-data &lt;- data.frame(y, x)  #dataset
-head(data)
-
-set.seed(42)
-data_split &lt;- initial_split(data, prop = 0.7)
-train_data &lt;- training(data_split )
-test_data &lt;- testing(data_split )
-
-stan_mod = &quot;data {
-  int&lt;lower=0&gt; N;   // number of observations
-  int&lt;lower=0&gt; K;   // number of predictors
-  matrix[N, K] X;   // predictor matrix
-  vector[N] y;      // outcome vector
-}
-parameters {
-  real alpha;           // intercept
-  vector[K] beta;       // coefficients for predictors
-  real&lt;lower=0&gt; sigma;  // error scale
-}
-model {
-  y ~ normal(alpha + X * beta, sigma);  // target density
-}&quot;
-
-writeLines(stan_mod, con = &quot;stan_mod.stan&quot;)
-
-cat(stan_mod)
-
-
-
-stan_mod_ridge = &quot;data{
-  int N_train;             //  training observations
-  int N_test;              // test observations
-  int N_pred;              //  predictor variables
-  vector[N_train] y_train; // training outcomes
-  matrix[N_train, N_pred] X_train; // training data
-  matrix[N_test, N_pred] X_test;   // testing data
-}
-parameters{
-  real alpha;           // intercept
-  real&lt;lower=0&gt; sigma;   // error SD
-  real&lt;lower=0&gt; sigma_B; // hierarchical SD across betas
-  vector[N_pred] beta;   // regression beta weights
-}
-model{
-  // group-level (hierarchical) SD across betas
-  sigma_B ~ cauchy(0, 1);
-  
-  // model error SD
-  sigma ~ normal(0, 1);
-  
-  // beta prior 
-  beta ~ normal(0, sigma_B);
-  
-  // model likelihood
-  y_train ~ normal(alpha+X_train*beta, sigma);
-}
-generated quantities{ 
-  real y_test[N_test]; // test data predictions
-  for(i in 1:N_test){
-    y_test[i] = normal_rng(alpha+ X_test[i,] * beta, sigma);
-  }
-}&quot;
-
-writeLines(stan_mod_ridge, con = &quot;stan_mod_ridge.stan&quot;)
-
-cat(stan_mod_ridge)
-
-library(tidyverse)
-X_trt &lt;- train_data %&gt;%
-  select(-y)
-X_tst &lt;- test_data %&gt;%
-  select(-y)
-Y_trt &lt;- train_data %&gt;%
-  select(y)
-stan_data &lt;- list(
-  N_train=ntr,             
-  N_test=nts,            
-  N_pred=5,             
-  y_train=Y_trt,
-  X_train=X_trt, 
-  X_test=X_tst  
-)
-
-fit_rstan &lt;- rstan::stan(
-  file = &quot;stan_mod_ridge.stan&quot;,
-  data = stan_data
-)
-</code></pre>
+<div id="posterior-predictive-checks" class="section level2 hasAnchor" number="13.2">
+<h2><span class="header-section-number">13.2</span> Posterior Predictive Checks<a href="model-comparison-and-selection-in-bayesian-analysis.html#posterior-predictive-checks" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Posterior predictive checks are a fundamental diagnostic tool used to assess the fit of a Bayesian model to the observed data. The idea is to simulate data from the posterior predictive distribution and compare it to the actual observed data. Discrepancies between the simulated and observed data can indicate model misfit or structural inadequacies.</p>
+<p>Formally, the posterior predictive distribution is given by:</p>
+<p><span class="math inline">\(p(\tilde{y} \mid y) = \int p(\tilde{y} \mid \theta) p(\theta \mid y) d\theta\)</span></p>
+<p>where <span class="math inline">\(\tilde{y}\)</span> represents future or replicated data, <span class="math inline">\(y\)</span> is the observed data, and <span class="math inline">\(\theta\)</span> denotes the parameters.</p>
+<p>Visualization tools such as histograms, density plots, and test statistics (e.g., discrepancy measures) are commonly used to perform these checks. In practice, packages like <code>bayesplot</code> in R make it easy to implement these diagnostics. Although posterior predictive checks are excellent for identifying model fit issues, they do not provide a direct basis for comparing multiple models.</p>
+<p><strong>Transition:</strong> While posterior predictive checks help diagnose model adequacy, they are less informative for ranking competing models. For this, we turn to information-theoretic approaches like WAIC and LOO-CV.</p>
 </div>
-<div id="bayesian-lasso-regression" class="section level3 hasAnchor" number="5.2.2">
-<h3><span class="header-section-number">5.2.2</span> Bayesian LASSO Regression<a href="bayesian-regularized-regression.html#bayesian-lasso-regression" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>LASSO regression only involves a minor change to the loss function compared to ridge regression. Specifically, as opposed to penalizing the model based on the sum of squared weights, it will penalize the model by the sum of the absolute value of weights. As for Bayesian ridge regression, we only needed to specifiy a normal prior distribution to the weights that we were aiming to regularize, for Bayesian LASSO regression, the only difference is in the form of the prior distribution by setting it to a double-exponential prior on the weights is mathematically equivalent in expectation to the frequentist LASSO penalty. Laplace distribiution places much more probability mass directly on 0, which produces the variable selection effect specific to LASSO regression.</p>
-<pre><code>
-
-stan_mod_lasso = &quot;data{
-  int N_train;             //  training observations
-  int N_test;              // test observations
-  int N_pred;              //  predictor variables
-  vector[N_train] y_train; // training outcomes
-  matrix[N_train, N_pred] X_train; // training data
-  matrix[N_test, N_pred] X_test;   // testing data
-}
-parameters{
-  real alpha;           // intercept
-  real&lt;lower=0&gt; sigma;   // error SD
-  real&lt;lower=0&gt; sigma_B; // hierarchical SD across betas
-  vector[N_pred] beta;   // regression beta weights
-}
-model{
-  // group-level (hierarchical) SD across betas
-  sigma_B ~ cauchy(0, 1);
-  
-  // model error SD
-  sigma ~ normal(0, 1);
-  
-  // beta prior 
-  beta ~ double_exponential(0, sigma_B);
-  
-  // model likelihood
-  y_train ~ normal(alpha + X_train*beta, sigma);
-}
-generated quantities{ 
-  real y_test[N_test]; // test data predictions
-  for(i in 1:N_test){
-    y_test[i] = normal_rng(alpha + X_test[i,] * beta, sigma);
-  }
-}&quot;
-
-writeLines(stan_mod_lasso, con = &quot;stan_mod_lasso.stan&quot;)
-
-cat(stan_mod_lasso)
-
-
-
-
-
-library(tidyverse)
-X_trt &lt;- train_data %&gt;%
-  select(-y)
-X_tst &lt;- test_data %&gt;%
-  select(-y)
-Y_trt &lt;- train_data$y
-stan_data &lt;- list(
-  N_train=ntr,             
-  N_test=nts,            
-  N_pred=5,             
-  y_train=Y_trt,
-  X_train=X_trt, 
-  X_test=X_tst  
-)
-
-fit_rstan2 &lt;- rstan::stan(
-  file = &quot;stan_mod_lasso.stan&quot;,
-  data = stan_data
-)
-
-fit_rstan2
-</code></pre>
+<div id="information-criteria-waic-and-loo-cv" class="section level2 hasAnchor" number="13.3">
+<h2><span class="header-section-number">13.3</span> Information Criteria: WAIC and LOO-CV<a href="model-comparison-and-selection-in-bayesian-analysis.html#information-criteria-waic-and-loo-cv" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Two widely used Bayesian model comparison tools are the Watanabe-Akaike Information Criterion (WAIC) and Leave-One-Out Cross-Validation (LOO-CV). Both aim to estimate a model’s out-of-sample predictive performance.</p>
+<div id="waic-watanabe-akaike-information-criterion" class="section level3 hasAnchor" number="13.3.1">
+<h3><span class="header-section-number">13.3.1</span> WAIC (Watanabe-Akaike Information Criterion)<a href="model-comparison-and-selection-in-bayesian-analysis.html#waic-watanabe-akaike-information-criterion" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>WAIC is a fully Bayesian criterion that estimates out-of-sample predictive accuracy while penalizing for model complexity. It is computed as:</p>
+<p><span class="math inline">\(\text{WAIC} = -2(\text{lppd} - p_{\text{WAIC}})\)</span></p>
+<p>where lppd is the log pointwise predictive density and <span class="math inline">\(p_{\text{WAIC}}\)</span> is the effective number of parameters, which quantifies the flexibility of the posterior distribution in fitting the data. WAIC is asymptotically equivalent to Bayesian cross-validation and is computable directly from posterior samples.</p>
+<p>Unlike classical AIC or BIC, which penalize complexity by parameter count, WAIC adjusts based on how flexible the posterior is in fitting the data. This leads to more nuanced complexity penalties, especially in hierarchical models where the number of effective parameters can be non-integer and context-sensitive.</p>
 </div>
-<div id="hierarchical-shrinkage" class="section level3 hasAnchor" number="5.2.3">
-<h3><span class="header-section-number">5.2.3</span> Hierarchical shrinkage<a href="bayesian-regularized-regression.html#hierarchical-shrinkage" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>IF The Bayesian LASSO doesn’t get us sparsity with a few relatively large coefficients, and many coefficients very close to zero it is possible to use different global-local scale mixtures of normal distributions as our priors to encourage more sparsity. In that case it is possible to combine the global scale for all coefficient priors along with a local scale for each coefficient.</p>
-<pre><code>
-stan_mod_hr = &quot;data {
-  
-  int N; //  observations
-  vector[N] y; // outcome
-  int K;   // number of columns in the design matrix X
-  matrix [N, K] X;  // design matrix X
-  real&lt;lower = 0&gt; tau;   // global scale prior scale
-}
-transformed data {
-  real&lt;lower = 0&gt; y_sd;
-  real a_pr_scale;
-  real sigma_pr_scale;
-  y_sd = sd(y);
-  sigma_pr_scale = y_sd * 5;
-  a_pr_scale = 10;
-}
-parameters {
-  real a;   // regression coefficient vector
-  vector[K] b_raw;   // scale of the regression errors
-  real&lt;lower = 0&gt; sigma;   // local scales of coefficients
-  vector&lt;lower = 0&gt;[K] lambda;
-}
-transformed parameters {
-  vector[N] mu;   // mu is the observation fitted/predicted value
-  vector[K] b;   // b is the transformed beta
-  b = b_raw * tau .* lambda;
-  mu = a + X * b;
-}
-model {
-  lambda ~ cauchy(0, 1);   // priors
-  a ~ normal(0, a_pr_scale);
-  b_raw ~ normal(0, 1);
-  sigma ~ cauchy(0, sigma_pr_scale);
-  y ~ normal(mu, sigma);   // likelihood
-}
-generated quantities {
-  vector[N] y_rep;   // simulate data from the posterior
-  vector[N] log_lik;   // log-likelihood posterior
-  for (n in 1:N) {
-    y_rep[n] = normal_rng(mu[n], sigma);
-    log_lik[n] = normal_lpdf(y[n] | mu[n], sigma);
-  }
-}&quot;
-
-writeLines(stan_mod_hr, con = &quot;stan_mod_hr.stan&quot;)
-
-cat(stan_mod_hr)
-
-
-
-stan_data &lt;- list(
-  N=ntr,             
-  y=Y_trt,
-  K=5,     
-  X=X_trt, 
-  tau=1  
-)
-
-fit_rstan3 &lt;- rstan::stan(
-  file = &quot;stan_mod_hr.stan&quot;,
-  data = stan_data
-)
-
-fit_rstan3
-</code></pre>
+<div id="loo-cv-leave-one-out-cross-validation" class="section level3 hasAnchor" number="13.3.2">
+<h3><span class="header-section-number">13.3.2</span> LOO-CV (Leave-One-Out Cross-Validation)<a href="model-comparison-and-selection-in-bayesian-analysis.html#loo-cv-leave-one-out-cross-validation" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>LOO-CV involves fitting the model repeatedly, leaving out one observation at a time and evaluating predictive performance on the omitted data. To avoid the computational burden of refitting the model <span class="math inline">\(n\)</span> times, Pareto-smoothed importance sampling (PSIS) offers an efficient approximation, implemented in the <code>loo</code> R package.</p>
+<p>The <code>loo</code> package also provides diagnostic tools, such as Pareto <span class="math inline">\(k\)</span> values, to assess the reliability of importance sampling. Typically, values below 0.7 suggest stable estimates; higher values may indicate influential observations that require model reassessment.</p>
+<p>Additionally, LOO-CV provides a natural framework for identifying influential data points. Observations with high <span class="math inline">\(k\)</span> values may point to model misspecification, data entry errors, or unaccounted-for heterogeneity. Thus, beyond model ranking, LOO-CV offers an avenue for deepening model diagnostics.</p>
+<p>Both WAIC and LOO-CV yield estimates of expected out-of-sample deviance. Lower values indicate better predictive accuracy.</p>
+<p><strong>Transition:</strong> While WAIC and LOO-CV emphasize predictive performance, Bayes factors offer an alternative grounded in model plausibility and marginal likelihood.</p>
 </div>
 </div>
-<div id="conclusion-2" class="section level2 hasAnchor" number="5.3">
-<h2><span class="header-section-number">5.3</span> Conclusion<a href="bayesian-regularized-regression.html#conclusion-2" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>In this post, we learned about the benefits of using regularized/penalized regression models over traditional regression. We determined that in low and/or noisy data settings, the so-called unbiased estimates given by non-regularized regression modeling actually lead to worse-off model performance. Importantly, we learned that this occurs because being ubiased allows a model to learn a lot from the data, including learning patterns of noise. Then, we learned that biased methods such as ridge and LASSO regression restrict the amount of learning that we get from data, which leads to better estimates in low and/or noisy data settings. Finally, hierarchical Bayesian models can choose a prior distribution across the weights that gives us a solution that is equivalent to that of the frequentist ridge or LASSO methods, with a full posterior distribution for each parameter, thus circumventing problems with frequentist regularization that require the use of bootstrapping to estimate confidence intervals.</p>
-</div>
-<div id="references-3" class="section level2 hasAnchor" number="5.4">
-<h2><span class="header-section-number">5.4</span> References<a href="bayesian-regularized-regression.html#references-3" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="bayes-factors-vs.-information-criteria" class="section level2 hasAnchor" number="13.4">
+<h2><span class="header-section-number">13.4</span> Bayes Factors vs. Information Criteria<a href="model-comparison-and-selection-in-bayesian-analysis.html#bayes-factors-vs.-information-criteria" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Bayes factors provide a coherent Bayesian approach to model comparison by evaluating how well each model explains the observed data, integrating over all parameter values:</p>
+<p><span class="math inline">\(BF_{12} = \frac{p(y \mid M_1)}{p(y \mid M_2)}\)</span></p>
+<p>A Bayes factor greater than 1 indicates support for model <span class="math inline">\(M_1\)</span> over <span class="math inline">\(M_2\)</span>, and vice versa. Interpretation guidelines (Kass &amp; Raftery, 1995) suggest:</p>
 <ul>
-<li><p><a href="http://haines-lab.com/post/2019-05-06-on-the-equivalency-between-the-lasso-ridge-regression-and-specific-bayesian-priors/on-the-equivalency-between-the-lasso-ridge-regression-and-specific-bayesian-priors/">Blogpost on the equivalency between frequentist Ridge (and LASSO) regression and hierarchial Bayesian regression</a></p></li>
-<li><p><a href="https://jrnold.github.io/bayesian_notes/shrinkage-and-regularized-regression.html">Blogpost on Bayesian regularization 1</a></p></li>
-<li><p><a href="http://ccgilroy.com/csss564-labs-2019/08-regularization/08-regularization.html">Blogpost on Bayesian regularization 2</a></p></li>
-<li><p><a href="https://github.com/ccgilroy/csss564-labs-2019">Github code examples</a></p></li>
+<li>1 to 3: Anecdotal evidence</li>
+<li>3 to 10: Moderate evidence</li>
+<li><blockquote>
+<p>10: Strong evidence</p>
+</blockquote></li>
 </ul>
+<p>Bayes factors incorporate prior model probabilities and are grounded in decision theory. However, they are often sensitive to the choice of priors and can be computationally intensive due to the need to estimate marginal likelihoods.</p>
+<p>Despite their theoretical appeal, Bayes factors suffer from two key limitations. First, the <em>sensitivity to prior distributions</em> — especially priors on nuisance parameters — can lead to unstable or unintuitive conclusions. Second, the <em>marginal likelihood</em> integrates over the entire parameter space, potentially over-penalizing complex models when priors are diffuse. This makes Bayes factors ill-suited to models with weak or uninformative priors unless priors are carefully calibrated.</p>
+<p>A useful computational shortcut in nested models is the <strong>Savage-Dickey density ratio</strong>, which allows Bayes factor computation via prior and posterior densities of a parameter of interest.</p>
+<p>In contrast, WAIC and LOO-CV focus on predictive accuracy and are generally more robust to prior specification, making them preferable in prediction-oriented tasks.</p>
+</div>
+<div id="summary-of-bayesian-model-comparison-methods" class="section level2 hasAnchor" number="13.5">
+<h2><span class="header-section-number">13.5</span> Summary of Bayesian Model Comparison Methods<a href="model-comparison-and-selection-in-bayesian-analysis.html#summary-of-bayesian-model-comparison-methods" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<table>
+<colgroup>
+<col width="10%" />
+<col width="16%" />
+<col width="10%" />
+<col width="10%" />
+<col width="13%" />
+<col width="17%" />
+<col width="20%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Goal</th>
+<th>Sensitive to Priors</th>
+<th>Penalizes Complexity</th>
+<th>Emphasis</th>
+<th>Tools (R Packages)</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Posterior Predictive</td>
+<td>Assess model fit</td>
+<td>No</td>
+<td>No</td>
+<td>Model adequacy</td>
+<td><code>bayesplot</code>, <code>rstanarm</code></td>
+<td>Diagnosing misfit or model structure</td>
+</tr>
+<tr class="even">
+<td>WAIC</td>
+<td>Estimate predictive accuracy</td>
+<td>Mildly</td>
+<td>Yes</td>
+<td>Out-of-sample prediction</td>
+<td><code>loo</code>, <code>rstanarm</code></td>
+<td>Model ranking for prediction</td>
+</tr>
+<tr class="odd">
+<td>LOO-CV (PSIS)</td>
+<td>Estimate predictive accuracy</td>
+<td>Mildly</td>
+<td>Yes</td>
+<td>Out-of-sample prediction</td>
+<td><code>loo</code>, <code>rstanarm</code></td>
+<td>Robust prediction comparison</td>
+</tr>
+<tr class="even">
+<td>Bayes Factors</td>
+<td>Marginal likelihood comparison</td>
+<td>Yes</td>
+<td>Implicit</td>
+<td>Model evidence</td>
+<td><code>bridgesampling</code>, <code>BayesFactor</code></td>
+<td>Hypothesis testing, model plausibility</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="practical-example-comparing-models-in-r" class="section level2 hasAnchor" number="13.6">
+<h2><span class="header-section-number">13.6</span> Practical Example: Comparing Models in R<a href="model-comparison-and-selection-in-bayesian-analysis.html#practical-example-comparing-models-in-r" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>To illustrate these concepts, consider the following example using a synthetic dataset. We compare two models: a simple linear regression and a polynomial regression.</p>
+<div class="sourceCode" id="cb131"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb131-1"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb131-1" tabindex="-1"></a><span class="fu">library</span>(rstanarm)</span>
+<span id="cb131-2"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb131-2" tabindex="-1"></a><span class="fu">library</span>(loo)</span>
+<span id="cb131-3"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb131-3" tabindex="-1"></a><span class="fu">library</span>(bayesplot)</span>
+<span id="cb131-4"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb131-4" tabindex="-1"></a></span>
+<span id="cb131-5"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb131-5" tabindex="-1"></a><span class="co"># Simulate data</span></span>
+<span id="cb131-6"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb131-6" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb131-7"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb131-7" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>)</span>
+<span id="cb131-8"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb131-8" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> x <span class="sc">+</span> x<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">100</span>)</span>
+<span id="cb131-9"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb131-9" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)</span>
+<span id="cb131-10"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb131-10" tabindex="-1"></a></span>
+<span id="cb131-11"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb131-11" tabindex="-1"></a><span class="co"># Fit linear and quadratic models</span></span>
+<span id="cb131-12"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb131-12" tabindex="-1"></a>fit_linear <span class="ot">&lt;-</span> <span class="fu">stan_glm</span>(y <span class="sc">~</span> x, <span class="at">data =</span> data, <span class="at">refresh =</span> <span class="dv">0</span>)</span>
+<span id="cb131-13"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb131-13" tabindex="-1"></a>fit_quad <span class="ot">&lt;-</span> <span class="fu">stan_glm</span>(y <span class="sc">~</span> x <span class="sc">+</span> <span class="fu">I</span>(x<span class="sc">^</span><span class="dv">2</span>), <span class="at">data =</span> data, <span class="at">refresh =</span> <span class="dv">0</span>)</span>
+<span id="cb131-14"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb131-14" tabindex="-1"></a></span>
+<span id="cb131-15"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb131-15" tabindex="-1"></a><span class="co"># Posterior predictive checks</span></span>
+<span id="cb131-16"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb131-16" tabindex="-1"></a><span class="fu">pp_check</span>(fit_linear)</span>
+<span id="cb131-17"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb131-17" tabindex="-1"></a><span class="fu">pp_check</span>(fit_quad)</span>
+<span id="cb131-18"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb131-18" tabindex="-1"></a></span>
+<span id="cb131-19"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb131-19" tabindex="-1"></a><span class="co"># WAIC comparison</span></span>
+<span id="cb131-20"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb131-20" tabindex="-1"></a>waic_linear <span class="ot">&lt;-</span> <span class="fu">waic</span>(fit_linear)</span>
+<span id="cb131-21"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb131-21" tabindex="-1"></a>waic_quad <span class="ot">&lt;-</span> <span class="fu">waic</span>(fit_quad)</span>
+<span id="cb131-22"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb131-22" tabindex="-1"></a><span class="fu">print</span>(waic_linear)</span>
+<span id="cb131-23"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb131-23" tabindex="-1"></a><span class="fu">print</span>(waic_quad)</span>
+<span id="cb131-24"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb131-24" tabindex="-1"></a></span>
+<span id="cb131-25"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb131-25" tabindex="-1"></a><span class="co"># LOO-CV comparison</span></span>
+<span id="cb131-26"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb131-26" tabindex="-1"></a>loo_linear <span class="ot">&lt;-</span> <span class="fu">loo</span>(fit_linear)</span>
+<span id="cb131-27"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb131-27" tabindex="-1"></a>loo_quad <span class="ot">&lt;-</span> <span class="fu">loo</span>(fit_quad)</span>
+<span id="cb131-28"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb131-28" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">loo_compare</span>(loo_linear, loo_quad))</span></code></pre></div>
+<pre><code># Bayes factor using bridgesampling
+
+library(rstanarm)
+library(bridgesampling)
+
+# Fit model with diagnostic_file argument
+fit_linear &lt;- stan_glm(
+  y ~ x, 
+  data = data, 
+  refresh = 0,
+  diagnostic_file = file.path(tempdir(), &quot;linear_diag.csv&quot;)
+)
+
+fit_quad &lt;- stan_glm(
+  y ~ x + I(x^2), 
+  data = data, 
+  refresh = 0,
+  diagnostic_file = file.path(tempdir(), &quot;quad_diag.csv&quot;)
+)
+
+# Run bridge sampling
+bridge_linear &lt;- bridge_sampler(fit_linear)
+bridge_quad &lt;- bridge_sampler(fit_quad)
+
+# Compute Bayes factor
+bf_result &lt;- bf(bridge_quad, bridge_linear)
+print(bf_result)
+</code></pre>
+<p>In situations where neither model clearly dominates or when both offer complementary insights, Bayesian stacking or model averaging may be employed to combine predictive strengths rather than choosing a single model. The <code>loo</code> package also supports stacking weights, enabling ensemble predictive performance evaluation. No single method is universally superior; the choice depends on the modeling context, computational resources, and analytic goals. In some cases, model averaging or stacking may offer additional robustness when no single model clearly dominates. Posterior predictive checks serve as intuitive diagnostics for model adequacy, while information criteria like WAIC and LOO-CV offer principled approaches for evaluating predictive performance. Bayes factors provide an alternative rooted in model evidence, though they require careful prior specification and computational resources. By incorporating these tools into their workflow, practitioners can enhance the credibility, interpretability, and predictive utility of their Bayesian analyses. A reasonable workflow might begin with posterior predictive checks to assess absolute model fit, followed by WAIC or LOO-CV to evaluate predictive utility. Bayes factors can be used where prior calibration is strong and the goal is hypothesis testing. When model choice is ambiguous, averaging via stacking provides a principled compromise. Ultimately, careful model comparison is as much about understanding the modeling context as it is about applying formulas.</p>
 
 </div>
 </div>
@@ -573,8 +481,8 @@ fit_rstan3
           </div>
         </div>
       </div>
-<a href="robust-t-regression.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="bayesian-quantile-regression.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="appendix.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -605,7 +513,7 @@ gitbook.start({
     "size": 2
   },
   "edit": {
-    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/edit/main/05-Regularization.Rmd",
+    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/edit/main/Appendix-II.Rmd",
     "text": "Edit"
   },
   "history": {
@@ -613,7 +521,7 @@ gitbook.start({
     "text": null
   },
   "view": {
-    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/blob/main/05-Regularization.Rmd",
+    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/blob/main/Appendix-II.Rmd",
     "text": null
   },
   "download": null,

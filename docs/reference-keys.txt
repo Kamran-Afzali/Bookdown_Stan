@@ -75,6 +75,15 @@ bayesian-ar1-model
 bayesian-arma11-model
 bayesian-arima111-model
 conclusion-7
+model-comparison-and-selection-in-bayesian-analysis
+introduction-3
+posterior-predictive-checks
+information-criteria-waic-and-loo-cv
+waic-watanabe-akaike-information-criterion
+loo-cv-leave-one-out-cross-validation
+bayes-factors-vs.-information-criteria
+summary-of-bayesian-model-comparison-methods
+practical-example-comparing-models-in-r
 appendix
 main-stan-distributions-cheatsheet
 main-stan-functions-cheatsheet
