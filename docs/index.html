@@ -23,7 +23,7 @@
 <meta name="author" content="Kamran Afzali" />
 
 
-<meta name="date" content="2025-08-08" />
+<meta name="date" content="2025-08-14" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -311,42 +311,58 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="header">
 <h1 class="title">Stan Bookdown</h1>
 <p class="author"><em>Kamran Afzali</em></p>
-<p class="date"><em>2025-08-08</em></p>
+<p class="date"><em>2025-08-14</em></p>
 </div>
 <div id="choosing-the-right-bayesian-model" class="section level1 hasAnchor" number="1">
 <h1><span class="header-section-number">Chapter 1</span> Choosing the Right Bayesian Model<a href="index.html#choosing-the-right-bayesian-model" class="anchor-section" aria-label="Anchor link to header"></a></h1>
 <p><strong>Introduction</strong></p>
-<p>Bayesian modeling has become a central approach in modern data analysis, providing a coherent framework for incorporating prior knowledge and quantifying uncertainty. With the advent of powerful tools such as <code>Stan</code> and user-friendly interfaces like the R package <code>brms</code>, practitioners can now implement a wide array of Bayesian models with relative ease. However, the flexibility of the Bayesian framework also introduces a new challenge: selecting the most appropriate model for a given dataset and research question. The landscape of Bayesian models is vast, encompassing linear and generalized linear models, robust and regularized regressions, hierarchical models, and more sophisticated approaches such as Gaussian processes and mixture models. This guide aims to offer a structured approach to model selection within the Bayesian paradigm, focusing on practical considerations, data characteristics, and modeling objectives.</p>
+<p>Bayesian modeling has become a central approach in modern data analysis, providing a coherent framework for incorporating prior knowledge and quantifying uncertainty. With the advent of powerful tools such as <code>Stan</code> and user-friendly interfaces like the R package <code>brms</code>, practitioners can now implement a wide array of Bayesian models with relative ease. However, the flexibility of the Bayesian framework also introduces a new challenge: selecting the most appropriate model for a given dataset and research question. The landscape of Bayesian models is vast, encompassing linear and generalized linear models, robust and regularized regressions, hierarchical models, time series models, multivariate approaches, and more sophisticated methods such as Gaussian processes and mixture models. This guide aims to offer a structured approach to model selection within the Bayesian paradigm, focusing on practical considerations, data characteristics, and modeling objectives.</p>
 <p><strong>Modeling Objectives and Data Characteristics</strong></p>
-<p>The choice of a Bayesian model should begin with a clear understanding of the research objective. In broad terms, the aim of modeling can be categorized into two primary goals: inference and prediction. Inference focuses on understanding the relationships between variables, quantifying uncertainty in parameter estimates, and testing theoretical hypotheses. Prediction, on the other hand, emphasizes the accuracy of forecasting outcomes for new observations. While the two goals are not mutually exclusive, they can lead to different modeling choices, particularly in terms of model complexity and regularization. Another factor influencing model selection is the nature of the data. Key aspects include the type of response variable (continuous, binary, count, categorical), the presence of outliers or heavy-tailed distributions, the structure of the data (e.g., hierarchical or longitudinal), and the dimensionality of the predictor space. A careful examination of these characteristics provides essential guidance for selecting an appropriate Bayesian model.</p>
+<p>The choice of a Bayesian model should begin with a clear understanding of the research objective. In broad terms, the aim of modeling can be categorized into two primary goals: inference and prediction. Inference focuses on understanding the relationships between variables, quantifying uncertainty in parameter estimates, and testing theoretical hypotheses. Prediction, on the other hand, emphasizes the accuracy of forecasting outcomes for new observations. While the two goals are not mutually exclusive, they can lead to different modeling choices, particularly in terms of model complexity and regularization. Another factor influencing model selection is the nature of the data. Key aspects include the type of response variable (continuous, binary, count, categorical), the temporal structure of observations (time series, longitudinal data), the presence of outliers or heavy-tailed distributions, the structure of the data (e.g., hierarchical or longitudinal), and the dimensionality of the predictor space. A careful examination of these characteristics provides essential guidance for selecting an appropriate Bayesian model.</p>
 <p><strong>Prior Specification and Computational Considerations</strong></p>
 <p>An essential feature of Bayesian modeling is the specification of prior distributions. Priors can be informative, weakly informative, or non-informative, depending on the amount of domain knowledge available. Informative priors are grounded in expert knowledge or historical data, while weakly informative priors help stabilize estimates without unduly influencing the posterior. Prior predictive checks can assess the implications of the priors before seeing the data, ensuring they encode plausible assumptions. Modelers should also perform sensitivity analyses to understand how different priors affect inferences.</p>
 <p>Computational feasibility is another practical concern. Some Bayesian models—especially nonparametric or high-dimensional ones—can be computationally intensive, requiring advanced MCMC algorithms or variational inference. Diagnostics such as the Gelman-Rubin R-hat statistic, effective sample size (ESS), and checks for divergent transitions should be used to ensure reliable inference (Gelman et al., 2013). Stan and <code>brms</code> provide tools to assess convergence and evaluate sampling efficiency.</p>
-<p><strong><a href="https://kamran-afzali.github.io/posts/2022-04-25/STAN.html">Bayesian Linear Regression</a></strong></p>
+<p><strong>Bayesian Linear Regression</strong></p>
 <p>Bayesian linear regression serves as the foundational model in the Bayesian framework. It assumes a linear relationship between predictors and a continuous response variable, with normally distributed residuals. This model is particularly useful for its simplicity and interpretability. When the assumptions of linearity and normality hold reasonably well, Bayesian linear regression provides reliable parameter estimates and predictive intervals. It also serves as a baseline model against which more complex models can be compared. In practice, Bayesian linear regression can be implemented in Stan with straightforward model code, specifying priors for the regression coefficients and residual variance. The flexibility of Bayesian inference allows for the incorporation of prior knowledge, which can be particularly valuable in small-sample contexts or when strong domain expertise is available.</p>
-<p><strong><a href="https://kamran-afzali.github.io/posts/2022-06-27/stan_2.html">Robust Regression for Non-Normal Residuals</a></strong></p>
+<p><strong>Robust Regression for Non-Normal Residuals</strong></p>
 <p>Real-world data often deviate from the assumption of normally distributed residuals. Outliers or heavy-tailed distributions can exert undue influence on parameter estimates, leading to biased or unstable results. Bayesian robust regression addresses this issue by modeling the residuals using a t-distribution, which has heavier tails than the normal distribution. This approach reduces the influence of outliers, leading to more robust and reliable inferences. The implementation of robust regression in Stan involves specifying a likelihood based on the t-distribution and including an additional parameter for the degrees of freedom. This parameter controls the heaviness of the tails and can itself be estimated from the data. The robust regression model is particularly recommended when residual diagnostics from a standard linear model indicate non-normality or the presence of extreme observations.</p>
-<p><strong><a href="https://kamran-afzali.github.io/posts/2022-12-28/stan-regul.html">Regularized Regression for High-Dimensional Data</a></strong></p>
+<p><strong>Regularized Regression for High-Dimensional Data</strong></p>
 <p>When dealing with a large number of predictors or multicollinearity, regularization becomes essential to prevent overfitting and to enhance predictive performance. Bayesian regularized regression models incorporate shrinkage priors, such as the Laplace prior for Bayesian LASSO or the Gaussian prior for Bayesian ridge regression. These priors shrink the regression coefficients toward zero, effectively performing variable selection and regularization. In the Bayesian framework, regularization is naturally integrated through the prior distribution. For example, the Bayesian LASSO uses a double-exponential prior that induces sparsity by assigning higher probability mass near zero. These models are particularly useful in settings with more predictors than observations or when there is a need to identify the most influential variables.</p>
-<p><strong><a href="https://kamran-afzali.github.io/posts/2024-05-25/stan_multinomial.html">Models for Non-Normal Data</a></strong></p>
+<p><strong>Models for Non-Normal Data</strong></p>
 <p>In many applications, the response variable does not follow a normal distribution. Binary outcomes, count data, and categorical responses require specialized models. Bayesian generalized linear models (GLMs) extend the linear model framework to accommodate different types of response variables through appropriate link functions and likelihood distributions. For binary outcomes, the logistic regression model with a logit link is commonly used. For count data, Poisson and negative binomial models are appropriate, with the latter providing a flexible alternative in the presence of overdispersion. Multinomial and ordinal regression models are used for categorical outcomes, with the choice depending on whether the categories are ordered. These models are readily implemented in Stan and <code>brms</code>, allowing users to specify the appropriate family and link function. Model selection in this context should be guided by the distributional characteristics of the response variable and the research question at hand.</p>
-<p><strong><a href="https://kamran-afzali.github.io/posts/2023-01-28/brms.html">Multilevel and Hierarchical Models</a></strong></p>
+<p><strong>Multilevel and Hierarchical Models</strong></p>
 <p>Hierarchical data structures are common in social sciences, education, and biomedical research. In such settings, observations are nested within higher-level units, such as students within schools or patients within hospitals. Ignoring this structure can lead to biased inferences and underestimated uncertainty.</p>
 <p>Bayesian multilevel models explicitly account for the hierarchical structure by including group-level effects. These models allow for partial pooling of information across groups, balancing between complete pooling (ignoring group differences) and no pooling (treating each group separately). The <code>brms</code> package offers a user-friendly interface for fitting multilevel models, handling complex random effects structures with ease. The flexibility of Bayesian multilevel modeling also facilitates the inclusion of varying slopes, cross-level interactions, and non-linear effects. When the data structure suggests hierarchical dependencies, multilevel modeling should be the default approach.</p>
-<p><strong><a href="https://kamran-afzali.github.io/posts/2023-10-28/GPR.html">Nonlinear and Nonparametric Models</a></strong></p>
+<p><strong>Canonical Correlation Analysis</strong></p>
+<p>When the research objective involves understanding the relationship between two sets of multivariate observations, Bayesian canonical correlation analysis provides a principled framework for multivariate association. This approach identifies linear combinations of variables from each set that are maximally correlated, revealing the underlying structure of relationships between variable groups. Bayesian canonical correlation extends traditional methods by providing uncertainty quantification for canonical correlations and loadings, allowing for more robust inference about multivariate relationships.</p>
+<p>The Bayesian formulation typically employs matrix-variate priors on the canonical vectors and incorporates shrinkage to prevent overfitting in high-dimensional settings. This approach is particularly valuable when exploring relationships between groups of predictors and outcomes, such as relating brain imaging measures to cognitive assessments or linking genomic profiles to phenotypic characteristics. The posterior distribution provides natural measures of uncertainty for the canonical correlations and facilitates model comparison through Bayes factors or information criteria.</p>
+<p><strong>Time Series Models: ARIMA and Seasonal Decomposition</strong></p>
+<p>Time series data require specialized modeling approaches that account for temporal dependence and potential seasonality. Bayesian autoregressive integrated moving average (ARIMA) models provide a flexible framework for modeling univariate time series with trend and seasonal components. The Bayesian approach to ARIMA modeling offers advantages over classical methods by naturally incorporating parameter uncertainty and allowing for informative priors based on domain knowledge.</p>
+<p>Seasonal decomposition within the Bayesian framework explicitly separates time series into trend, seasonal, and irregular components. This decomposition can be achieved through state space formulations that treat each component as a latent process with its own dynamics. The Bayesian treatment provides posterior distributions for each component, enabling uncertainty quantification for trend estimates and seasonal patterns. This approach is particularly useful for time series exhibiting clear seasonal patterns, such as economic indicators, climate data, or retail sales.</p>
+<p>The implementation of Bayesian ARIMA and seasonal decomposition models often requires careful specification of priors on autoregressive and moving average parameters, ensuring stationarity and invertibility constraints are respected. Modern packages like <code>bsts</code> in R provide convenient interfaces for these models, handling the complexities of state space formulations and MCMC sampling.</p>
+<p><strong>Exponential Smoothing: Bayesian Holt-Winters</strong></p>
+<p>The Holt-Winters exponential smoothing method can be formulated within a Bayesian framework to provide uncertainty quantification for forecasts. Bayesian Holt-Winters models treat the level, trend, and seasonal components as evolving parameters with their own prior distributions. This approach naturally handles the adaptive nature of exponential smoothing while providing credible intervals for predictions.</p>
+<p>The Bayesian formulation typically specifies prior distributions on the smoothing parameters (alpha, beta, gamma) and the initial state values. This allows for the incorporation of prior beliefs about the relative importance of recent versus historical observations and the stability of trend and seasonal patterns. The resulting posterior distributions provide not only point forecasts but also prediction intervals that reflect both parameter uncertainty and inherent noise in the time series.</p>
+<p>Bayesian Holt-Winters models are particularly valuable for forecasting applications where quantifying prediction uncertainty is crucial, such as supply chain planning, financial forecasting, or resource allocation. The ability to incorporate prior knowledge about seasonal patterns and trend behavior makes this approach especially suitable for business applications with strong domain expertise.</p>
+<p><strong>Bayesian Structural Time Series (BSTS)</strong></p>
+<p>Bayesian structural time series models represent a comprehensive approach to time series analysis that combines the flexibility of state space models with the principled uncertainty quantification of Bayesian inference. BSTS models decompose time series into interpretable components such as trends, seasonal patterns, regression effects, and external interventions, all within a unified probabilistic framework.</p>
+<p>The key advantage of BSTS lies in its ability to handle complex time series structures while maintaining interpretability. The model can incorporate external regressors, detect structural breaks, and account for irregular seasonal patterns through flexible specification of state evolution equations. The Bayesian treatment provides posterior distributions for all model components, enabling inference about the relative importance of different factors driving the time series.</p>
+<p>BSTS models are particularly powerful for causal inference in time series settings, as they can incorporate control variables and assess the impact of interventions through counterfactual analysis. The spike-and-slab priors commonly used in BSTS facilitate automatic variable selection among potential regressors, making the approach suitable for high-dimensional settings with many candidate predictors.</p>
+<p>Implementation of BSTS models typically requires careful specification of prior distributions on state variances and regression coefficients. The <code>bsts</code> package in R provides a mature implementation with extensive functionality for model specification, fitting, and diagnostic checking. The resulting models offer both excellent predictive performance and interpretable decomposition of time series components.</p>
+<p><strong>Nonlinear and Nonparametric Models</strong></p>
 <p>In some applications, the relationship between predictors and the response variable is inherently nonlinear or unknown. Bayesian nonparametric models, such as Gaussian process regression, offer a flexible solution by modeling the function space directly. Gaussian processes define a prior over functions and use observed data to update this prior, resulting in a posterior distribution over functions. Gaussian process regression is particularly powerful when the form of the relationship is unknown or when modeling smooth, nonlinear trends is important. However, it comes at a higher computational cost and may not scale well with large datasets. Nevertheless, for problems involving spatial data, temporal trends, or complex functional relationships, Gaussian processes provide a valuable modeling tool.</p>
-<p><strong><a href="https://kamran-afzali.github.io/posts/2024-01-28/Bayes_GMM.html">Mixture Models and Latent Structure</a></strong></p>
+<p><strong>Mixture Models and Latent Structure</strong></p>
 <p>Data arising from heterogeneous populations may be better modeled using mixture models. Bayesian Gaussian mixture models, for instance, assume that the data are generated from a mixture of several Gaussian distributions, each representing a subpopulation. These models can uncover latent structure in the data, such as clusters or subtypes.</p>
 <p>Mixture models introduce additional complexity due to the need to estimate both the component parameters and the mixing proportions. Bayesian inference provides a principled framework for dealing with this uncertainty, often using techniques such as latent variable augmentation and label switching adjustments.</p>
 <p>When there is reason to believe that the data comprise distinct subgroups with different underlying characteristics, mixture models offer an effective approach to modeling such heterogeneity.</p>
 <p><strong>Comparative Summary Table</strong></p>
 <table>
 <colgroup>
-<col width="16%" />
-<col width="24%" />
-<col width="18%" />
-<col width="15%" />
-<col width="24%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -394,13 +410,48 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <td>Sensitive to group size</td>
 </tr>
 <tr class="even">
+<td>Canonical Correlation</td>
+<td>Multivariate association</td>
+<td>Linear relationships</td>
+<td>Matrix-variate priors</td>
+<td>Assumes linear associations</td>
+</tr>
+<tr class="odd">
+<td>ARIMA</td>
+<td>Univariate time series</td>
+<td>Stationarity after diff.</td>
+<td>Constrained AR/MA priors</td>
+<td>Limited to linear dynamics</td>
+</tr>
+<tr class="even">
+<td>Seasonal Decomposition</td>
+<td>Time series with seasonality</td>
+<td>Additive/multiplicative</td>
+<td>Component-specific priors</td>
+<td>Assumes stable patterns</td>
+</tr>
+<tr class="odd">
+<td>Holt-Winters</td>
+<td>Time series forecasting</td>
+<td>Exponential smoothing</td>
+<td>Smoothing parameter priors</td>
+<td>Limited to trend/seasonal forms</td>
+</tr>
+<tr class="even">
+<td>BSTS</td>
+<td>Complex time series</td>
+<td>State space structure</td>
+<td>Spike-and-slab, others</td>
+<td>Computationally intensive</td>
+</tr>
+<tr class="odd">
 <td>Gaussian Processes</td>
 <td>Unknown nonlinear function</td>
 <td>Smoothness in kernel</td>
 <td>GP prior</td>
 <td>Poor scaling (O(n³))</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Mixture Models</td>
 <td>Latent structure/clustering</td>
 <td>Finite components</td>
