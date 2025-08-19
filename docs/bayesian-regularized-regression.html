@@ -23,7 +23,7 @@
 <meta name="author" content="Kamran Afzali" />
 
 
-<meta name="date" content="2025-08-14" />
+<meta name="date" content="2025-08-19" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -168,14 +168,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="5" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html"><i class="fa fa-check"></i><b>5</b> Bayesian Regularized Regression</a>
 <ul>
 <li class="chapter" data-level="5.1" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#introduction"><i class="fa fa-check"></i><b>5.1</b> Introduction</a></li>
-<li class="chapter" data-level="5.2" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#regularized-regression"><i class="fa fa-check"></i><b>5.2</b> Regularized Regression</a>
+<li class="chapter" data-level="5.2" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#ridge-regression-and-gaussian-priors"><i class="fa fa-check"></i><b>5.2</b> Ridge Regression and Gaussian Priors</a></li>
+<li class="chapter" data-level="5.3" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#lasso-regression-and-laplace-priors"><i class="fa fa-check"></i><b>5.3</b> LASSO Regression and Laplace Priors</a></li>
+<li class="chapter" data-level="5.4" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#hierarchical-shrinkage-and-adaptive-priors"><i class="fa fa-check"></i><b>5.4</b> Hierarchical Shrinkage and Adaptive Priors</a></li>
+<li class="chapter" data-level="5.5" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#implementation"><i class="fa fa-check"></i><b>5.5</b> Implementation</a>
 <ul>
-<li class="chapter" data-level="5.2.1" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#bayesian-ridge-regression"><i class="fa fa-check"></i><b>5.2.1</b> Bayesian Ridge Regression</a></li>
-<li class="chapter" data-level="5.2.2" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#bayesian-lasso-regression"><i class="fa fa-check"></i><b>5.2.2</b> Bayesian LASSO Regression</a></li>
-<li class="chapter" data-level="5.2.3" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#hierarchical-shrinkage"><i class="fa fa-check"></i><b>5.2.3</b> Hierarchical shrinkage</a></li>
+<li class="chapter" data-level="5.5.1" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#bayesian-ridge-regression"><i class="fa fa-check"></i><b>5.5.1</b> Bayesian Ridge Regression</a></li>
+<li class="chapter" data-level="5.5.2" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#bayesian-lasso-regression"><i class="fa fa-check"></i><b>5.5.2</b> Bayesian LASSO Regression</a></li>
+<li class="chapter" data-level="5.5.3" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#hierarchical-shrinkage-horseshoe-prior"><i class="fa fa-check"></i><b>5.5.3</b> Hierarchical Shrinkage (Horseshoe Prior)</a></li>
 </ul></li>
-<li class="chapter" data-level="5.3" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#conclusion-2"><i class="fa fa-check"></i><b>5.3</b> Conclusion</a></li>
-<li class="chapter" data-level="5.4" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#references-3"><i class="fa fa-check"></i><b>5.4</b> References</a></li>
+<li class="chapter" data-level="5.6" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#empirical-comparison-and-model-evaluation"><i class="fa fa-check"></i><b>5.6</b> Empirical Comparison and Model Evaluation</a></li>
+<li class="chapter" data-level="5.7" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#understanding-posterior-behavior"><i class="fa fa-check"></i><b>5.7</b> Understanding Posterior Behavior</a></li>
+<li class="chapter" data-level="5.8" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#choosing-among-regularization-methods"><i class="fa fa-check"></i><b>5.8</b> Choosing Among Regularization Methods</a></li>
+<li class="chapter" data-level="5.9" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#conclusion-2"><i class="fa fa-check"></i><b>5.9</b> Conclusion</a></li>
+<li class="chapter" data-level="5.10" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#references-3"><i class="fa fa-check"></i><b>5.10</b> References</a></li>
 </ul></li>
 <li class="chapter" data-level="6" data-path="bayesian-quantile-regression.html"><a href="bayesian-quantile-regression.html"><i class="fa fa-check"></i><b>6</b> Bayesian Quantile Regression</a>
 <ul>
@@ -260,34 +266,44 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="13.3" data-path="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html"><a href="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html#bayesian-arima111-model"><i class="fa fa-check"></i><b>13.3</b> Bayesian ARIMA(1,1,1) Model</a></li>
 <li class="chapter" data-level="13.4" data-path="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html"><a href="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html#conclusion-8"><i class="fa fa-check"></i><b>13.4</b> Conclusion</a></li>
 </ul></li>
-<li class="chapter" data-level="14" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html"><i class="fa fa-check"></i><b>14</b> Model Comparison and Selection in Bayesian Analysis</a>
+<li class="chapter" data-level="14" data-path="bayesian-structural-time-series-models.html"><a href="bayesian-structural-time-series-models.html"><i class="fa fa-check"></i><b>14</b> 14 Bayesian Structural Time Series Models</a>
 <ul>
-<li class="chapter" data-level="14.1" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#introduction-4"><i class="fa fa-check"></i><b>14.1</b> Introduction</a></li>
-<li class="chapter" data-level="14.2" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#posterior-predictive-checks"><i class="fa fa-check"></i><b>14.2</b> Posterior Predictive Checks</a></li>
-<li class="chapter" data-level="14.3" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#information-criteria-waic-and-loo-cv"><i class="fa fa-check"></i><b>14.3</b> Information Criteria: WAIC and LOO-CV</a>
+<li class="chapter" data-level="14.1" data-path="bayesian-structural-time-series-models.html"><a href="bayesian-structural-time-series-models.html#introduction-4"><i class="fa fa-check"></i><b>14.1</b> Introduction</a>
 <ul>
-<li class="chapter" data-level="14.3.1" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#waic-watanabe-akaike-information-criterion"><i class="fa fa-check"></i><b>14.3.1</b> WAIC (Watanabe-Akaike Information Criterion)</a></li>
-<li class="chapter" data-level="14.3.2" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#loo-cv-leave-one-out-cross-validation"><i class="fa fa-check"></i><b>14.3.2</b> LOO-CV (Leave-One-Out Cross-Validation)</a></li>
+<li class="chapter" data-level="14.1.1" data-path="bayesian-structural-time-series-models.html"><a href="bayesian-structural-time-series-models.html#stan-implementation-basic-bsts-model"><i class="fa fa-check"></i><b>14.1.1</b> Stan Implementation: Basic BSTS Model</a></li>
+<li class="chapter" data-level="14.1.2" data-path="bayesian-structural-time-series-models.html"><a href="bayesian-structural-time-series-models.html#stan-implementation-time-varying-trend-volatility"><i class="fa fa-check"></i><b>14.1.2</b> Stan Implementation: Time-Varying Trend Volatility</a></li>
 </ul></li>
-<li class="chapter" data-level="14.4" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#bayes-factors-vs.-information-criteria"><i class="fa fa-check"></i><b>14.4</b> Bayes Factors vs. Information Criteria</a></li>
-<li class="chapter" data-level="14.5" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#summary-of-bayesian-model-comparison-methods"><i class="fa fa-check"></i><b>14.5</b> Summary of Bayesian Model Comparison Methods</a></li>
-<li class="chapter" data-level="14.6" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#practical-example-comparing-models-in-r"><i class="fa fa-check"></i><b>14.6</b> Practical Example: Comparing Models in R</a></li>
+<li class="chapter" data-level="14.2" data-path="bayesian-structural-time-series-models.html"><a href="bayesian-structural-time-series-models.html#model-comparison-and-selection"><i class="fa fa-check"></i><b>14.2</b> Model Comparison and Selection</a></li>
+<li class="chapter" data-level="14.3" data-path="bayesian-structural-time-series-models.html"><a href="bayesian-structural-time-series-models.html#conclusion-9"><i class="fa fa-check"></i><b>14.3</b> Conclusion</a></li>
 </ul></li>
-<li class="chapter" data-level="15" data-path="appendix.html"><a href="appendix.html"><i class="fa fa-check"></i><b>15</b> Appendix</a>
+<li class="chapter" data-level="15" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html"><i class="fa fa-check"></i><b>15</b> Model Comparison and Selection in Bayesian Analysis</a>
 <ul>
-<li class="chapter" data-level="15.1" data-path="appendix.html"><a href="appendix.html#main-stan-distributions-cheatsheet"><i class="fa fa-check"></i><b>15.1</b> Main Stan Distributions Cheatsheet</a></li>
-<li class="chapter" data-level="15.2" data-path="appendix.html"><a href="appendix.html#main-stan-functions-cheatsheet"><i class="fa fa-check"></i><b>15.2</b> Main Stan Functions Cheatsheet</a></li>
-<li class="chapter" data-level="15.3" data-path="appendix.html"><a href="appendix.html#why-non-distribution-functions"><i class="fa fa-check"></i><b>15.3</b> Why Non-Distribution Functions?</a></li>
-<li class="chapter" data-level="15.4" data-path="appendix.html"><a href="appendix.html#stan-functions-cheatsheet"><i class="fa fa-check"></i><b>15.4</b> Stan Functions Cheatsheet</a>
+<li class="chapter" data-level="15.1" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#introduction-5"><i class="fa fa-check"></i><b>15.1</b> Introduction</a></li>
+<li class="chapter" data-level="15.2" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#posterior-predictive-checks"><i class="fa fa-check"></i><b>15.2</b> Posterior Predictive Checks</a></li>
+<li class="chapter" data-level="15.3" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#information-criteria-waic-and-loo-cv"><i class="fa fa-check"></i><b>15.3</b> Information Criteria: WAIC and LOO-CV</a>
 <ul>
-<li class="chapter" data-level="15.4.1" data-path="appendix.html"><a href="appendix.html#mathematical-functions"><i class="fa fa-check"></i><b>15.4.1</b> 1. Mathematical Functions</a></li>
-<li class="chapter" data-level="15.4.2" data-path="appendix.html"><a href="appendix.html#transformation-functions"><i class="fa fa-check"></i><b>15.4.2</b> 2. Transformation Functions</a></li>
-<li class="chapter" data-level="15.4.3" data-path="appendix.html"><a href="appendix.html#matrix-and-vector-operations"><i class="fa fa-check"></i><b>15.4.3</b> 3. Matrix and Vector Operations</a></li>
-<li class="chapter" data-level="15.4.4" data-path="appendix.html"><a href="appendix.html#utility-functions"><i class="fa fa-check"></i><b>15.4.4</b> 4. Utility Functions</a></li>
-<li class="chapter" data-level="15.4.5" data-path="appendix.html"><a href="appendix.html#specialized-solvers"><i class="fa fa-check"></i><b>15.4.5</b> 5. Specialized Solvers</a></li>
+<li class="chapter" data-level="15.3.1" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#waic-watanabe-akaike-information-criterion"><i class="fa fa-check"></i><b>15.3.1</b> WAIC (Watanabe-Akaike Information Criterion)</a></li>
+<li class="chapter" data-level="15.3.2" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#loo-cv-leave-one-out-cross-validation"><i class="fa fa-check"></i><b>15.3.2</b> LOO-CV (Leave-One-Out Cross-Validation)</a></li>
 </ul></li>
-<li class="chapter" data-level="15.5" data-path="appendix.html"><a href="appendix.html#example-hierarchical-linear-regression"><i class="fa fa-check"></i><b>15.5</b> Example: Hierarchical Linear Regression</a></li>
-<li class="chapter" data-level="15.6" data-path="appendix.html"><a href="appendix.html#tips-for-using-stan-functions"><i class="fa fa-check"></i><b>15.6</b> Tips for Using Stan Functions</a></li>
+<li class="chapter" data-level="15.4" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#bayes-factors-vs.-information-criteria"><i class="fa fa-check"></i><b>15.4</b> Bayes Factors vs. Information Criteria</a></li>
+<li class="chapter" data-level="15.5" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#summary-of-bayesian-model-comparison-methods"><i class="fa fa-check"></i><b>15.5</b> Summary of Bayesian Model Comparison Methods</a></li>
+<li class="chapter" data-level="15.6" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#practical-example-comparing-models-in-r"><i class="fa fa-check"></i><b>15.6</b> Practical Example: Comparing Models in R</a></li>
+</ul></li>
+<li class="chapter" data-level="16" data-path="appendix.html"><a href="appendix.html"><i class="fa fa-check"></i><b>16</b> Appendix</a>
+<ul>
+<li class="chapter" data-level="16.1" data-path="appendix.html"><a href="appendix.html#main-stan-distributions-cheatsheet"><i class="fa fa-check"></i><b>16.1</b> Main Stan Distributions Cheatsheet</a></li>
+<li class="chapter" data-level="16.2" data-path="appendix.html"><a href="appendix.html#main-stan-functions-cheatsheet"><i class="fa fa-check"></i><b>16.2</b> Main Stan Functions Cheatsheet</a></li>
+<li class="chapter" data-level="16.3" data-path="appendix.html"><a href="appendix.html#why-non-distribution-functions"><i class="fa fa-check"></i><b>16.3</b> Why Non-Distribution Functions?</a></li>
+<li class="chapter" data-level="16.4" data-path="appendix.html"><a href="appendix.html#stan-functions-cheatsheet"><i class="fa fa-check"></i><b>16.4</b> Stan Functions Cheatsheet</a>
+<ul>
+<li class="chapter" data-level="16.4.1" data-path="appendix.html"><a href="appendix.html#mathematical-functions"><i class="fa fa-check"></i><b>16.4.1</b> 1. Mathematical Functions</a></li>
+<li class="chapter" data-level="16.4.2" data-path="appendix.html"><a href="appendix.html#transformation-functions"><i class="fa fa-check"></i><b>16.4.2</b> 2. Transformation Functions</a></li>
+<li class="chapter" data-level="16.4.3" data-path="appendix.html"><a href="appendix.html#matrix-and-vector-operations"><i class="fa fa-check"></i><b>16.4.3</b> 3. Matrix and Vector Operations</a></li>
+<li class="chapter" data-level="16.4.4" data-path="appendix.html"><a href="appendix.html#utility-functions"><i class="fa fa-check"></i><b>16.4.4</b> 4. Utility Functions</a></li>
+<li class="chapter" data-level="16.4.5" data-path="appendix.html"><a href="appendix.html#specialized-solvers"><i class="fa fa-check"></i><b>16.4.5</b> 5. Specialized Solvers</a></li>
+</ul></li>
+<li class="chapter" data-level="16.5" data-path="appendix.html"><a href="appendix.html#example-hierarchical-linear-regression"><i class="fa fa-check"></i><b>16.5</b> Example: Hierarchical Linear Regression</a></li>
+<li class="chapter" data-level="16.6" data-path="appendix.html"><a href="appendix.html#tips-for-using-stan-functions"><i class="fa fa-check"></i><b>16.6</b> Tips for Using Stan Functions</a></li>
 </ul></li>
 <li class="divider"></li>
 <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
@@ -312,269 +328,321 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h1><span class="header-section-number">Chapter 5</span> Bayesian Regularized Regression<a href="bayesian-regularized-regression.html#bayesian-regularized-regression" class="anchor-section" aria-label="Anchor link to header"></a></h1>
 <div id="introduction" class="section level2 hasAnchor" number="5.1">
 <h2><span class="header-section-number">5.1</span> Introduction<a href="bayesian-regularized-regression.html#introduction" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>In this post, we will explore Bayesian analogues of regularized/penalized linear regression models (e.g., LASSO, Ridge regression), which are an extention of traditional linear regression models of the form. First we will discuss shrinkage and regularization in regression problems. These methods are useful for improving prediction, estimating regression models with many variables, and as an alternative to model selection methods. Our goal is to
-understand shrinkage/regularization of coefficients as an alternative/complement to variable selection. Use three specific approaches to regularization—ridge, LASSO, hierarchical shrinkage—which regularize through different priors, with different consequences for sparsity, and to recognize connections between Bayesian regularized regression and regularized regression in a machine learning/penalized maximum likelihood estimation (MLE) framework. Traditional linear regression models assume that weights share no group-level information (i.e. they are independent), which leads to so-called unbiased estimates. Unlike traditional linear regression models, regularized linear regression models produce biased estimates for the weights. Specifically, Bayesian regularized linear regression models pool information across weights, resulting in regression toward a common mean. When the common mean is centered at 0, this pooling of information produces more conservative estimates for each weight (they are biased toward 0). Shrinkage estimation deliberately increases the bias of the model in order to reduce variance and improve overall model performance, often at the cost of individual estimates. In other words, by adding bias to the model, shrinkage estimators provide a means to adjust the bias-variance in the model in order to achieve lower generalization error. Bayesian models with non-informative priors will produce similar to the MLE. However, parameters are modeled as exchangeable and given a proper prior, it induces some amount of shrinkage. But stronger priors can produce estimate much different estimtes than MLE.</p>
+<p>In this post, we will explore Bayesian analogues of regularized linear regression models such as LASSO and Ridge regression, which extend traditional linear regression to handle challenging modeling scenarios. These methods prove particularly valuable for improving prediction accuracy, estimating regression models with many variables, and providing alternatives to traditional model selection approaches.</p>
+<p>The foundation of our discussion rests on the standard linear regression model <span class="math inline">\(\mathbf{y} = \mathbf{X}\boldsymbol{\beta} + \boldsymbol{\epsilon}\)</span>, where <span class="math inline">\(\mathbf{y} \in \mathbb{R}^n\)</span> represents the response vector, <span class="math inline">\(\mathbf{X} \in \mathbb{R}^{n \times p}\)</span> is the design matrix, <span class="math inline">\(\boldsymbol{\beta} \in \mathbb{R}^p\)</span> contains the coefficients of interest, and <span class="math inline">\(\boldsymbol{\epsilon} \sim \mathcal{N}(0, \sigma^2\mathbf{I})\)</span> captures the random error. Traditional linear regression treats coefficients as independent, producing what statisticians call “unbiased” estimates. However, this independence assumption can lead to poor performance in settings with limited data, high-dimensional predictor spaces, or substantial noise.</p>
+<p>Regularized linear regression models deliberately introduce bias into coefficient estimates by pooling information across parameters, causing them to shrink toward a common value, typically zero. This shrinkage represents a fundamental trade-off captured by the bias-variance decomposition: <span class="math inline">\(\text{MSE}(\hat{\boldsymbol{\beta}}) = \text{Bias}^2(\hat{\boldsymbol{\beta}}) + \text{Var}(\hat{\boldsymbol{\beta}})\)</span>. While regularization increases bias, it often reduces variance substantially enough that the overall mean squared error decreases, particularly in high-dimensional or noisy settings where traditional methods tend to overfit.</p>
+<p>The Bayesian perspective reframes regularization as a problem of specifying appropriate prior distributions for model parameters. Rather than viewing penalty terms as arbitrary constraints on optimization, Bayesian regularization emerges naturally from the choice of prior distribution over coefficients. This connection provides both theoretical insight into why regularization works and practical advantages through full posterior distributions for all parameters.</p>
 </div>
-<div id="regularized-regression" class="section level2 hasAnchor" number="5.2">
-<h2><span class="header-section-number">5.2</span> Regularized Regression<a href="bayesian-regularized-regression.html#regularized-regression" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>As described above, regularized linear regression models aim to estimate more conservative values for the weights in a model, and this is true for both frequentist and Bayesian versions of regularization. While there are many methods that can be used to regularize your estimation procedure, we will focus specifically on two popular forms—namely, ridge and LASSO regression. We start below by describing each regression generally, and then proceed to implement both the frequentist and Bayesian versions.</p>
-<div id="bayesian-ridge-regression" class="section level3 hasAnchor" number="5.2.1">
-<h3><span class="header-section-number">5.2.1</span> Bayesian Ridge Regression<a href="bayesian-regularized-regression.html#bayesian-ridge-regression" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>Ridge regression modifies the loss function to include a penalty term for model complexity, where model complexity is operationalized as the sum of squared weights. Bayesian Ridge regression differs from the frequentist variant in only one way, and it is with how we think of the penalty term. In the frequentist perspective, we showed that effectively tells our model how much it is allowed to learn from the data. Bayesian models view estimation as a problem of integrating prior information with information gained from data, which we formalize using probability distributions. The Bayesian estimation captures this in the form of a prior distribution over our weights the choice of prior distribution on is what determines how much information we learn from the data, analagous to the penalty term used for MLE regularization.</p>
-<pre><code>
-library(tidymodels)
-
-set.seed(123)
-n &lt;- 1000
-ntr=700
-nts=300
-a &lt;- 40  #intercept
-b &lt;- c(-2, 3, 4, 1 , 0.25) #slopes
-sigma2 &lt;- 25  #residual variance (sd=5)
-x &lt;- matrix(rnorm(5000),1000,5)
-eps &lt;- rnorm(n, mean = 0, sd = sqrt(sigma2))  #residuals
-y &lt;- a +x%*%b+ eps  #response variable
-data &lt;- data.frame(y, x)  #dataset
-head(data)
-
-set.seed(42)
-data_split &lt;- initial_split(data, prop = 0.7)
-train_data &lt;- training(data_split )
-test_data &lt;- testing(data_split )
-
-stan_mod = &quot;data {
-  int&lt;lower=0&gt; N;   // number of observations
-  int&lt;lower=0&gt; K;   // number of predictors
-  matrix[N, K] X;   // predictor matrix
-  vector[N] y;      // outcome vector
-}
-parameters {
-  real alpha;           // intercept
-  vector[K] beta;       // coefficients for predictors
-  real&lt;lower=0&gt; sigma;  // error scale
-}
-model {
-  y ~ normal(alpha + X * beta, sigma);  // target density
-}&quot;
-
-writeLines(stan_mod, con = &quot;stan_mod.stan&quot;)
-
-cat(stan_mod)
-
-
-
-stan_mod_ridge = &quot;data{
-  int N_train;             //  training observations
-  int N_test;              // test observations
-  int N_pred;              //  predictor variables
-  vector[N_train] y_train; // training outcomes
-  matrix[N_train, N_pred] X_train; // training data
-  matrix[N_test, N_pred] X_test;   // testing data
-}
-parameters{
-  real alpha;           // intercept
-  real&lt;lower=0&gt; sigma;   // error SD
-  real&lt;lower=0&gt; sigma_B; // hierarchical SD across betas
-  vector[N_pred] beta;   // regression beta weights
-}
-model{
-  // group-level (hierarchical) SD across betas
-  sigma_B ~ cauchy(0, 1);
-  
-  // model error SD
-  sigma ~ normal(0, 1);
-  
-  // beta prior 
-  beta ~ normal(0, sigma_B);
-  
-  // model likelihood
-  y_train ~ normal(alpha+X_train*beta, sigma);
-}
-generated quantities{ 
-  real y_test[N_test]; // test data predictions
-  for(i in 1:N_test){
-    y_test[i] = normal_rng(alpha+ X_test[i,] * beta, sigma);
-  }
-}&quot;
-
-writeLines(stan_mod_ridge, con = &quot;stan_mod_ridge.stan&quot;)
-
-cat(stan_mod_ridge)
-
-library(tidyverse)
-X_trt &lt;- train_data %&gt;%
-  select(-y)
-X_tst &lt;- test_data %&gt;%
-  select(-y)
-Y_trt &lt;- train_data %&gt;%
-  select(y)
-stan_data &lt;- list(
-  N_train=ntr,             
-  N_test=nts,            
-  N_pred=5,             
-  y_train=Y_trt,
-  X_train=X_trt, 
-  X_test=X_tst  
-)
-
-fit_rstan &lt;- rstan::stan(
-  file = &quot;stan_mod_ridge.stan&quot;,
-  data = stan_data
-)
-</code></pre>
+<div id="ridge-regression-and-gaussian-priors" class="section level2 hasAnchor" number="5.2">
+<h2><span class="header-section-number">5.2</span> Ridge Regression and Gaussian Priors<a href="bayesian-regularized-regression.html#ridge-regression-and-gaussian-priors" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Ridge regression modifies the ordinary least squares objective by adding a penalty proportional to the sum of squared coefficients. In the frequentist framework, ridge regression minimizes <span class="math inline">\(\|\mathbf{y} - \mathbf{X}\boldsymbol{\beta}\|_2^2 + \lambda \|\boldsymbol{\beta}\|_2^2\)</span>, yielding the closed-form solution <span class="math inline">\(\hat{\boldsymbol{\beta}}_{\text{ridge}} = (\mathbf{X}^T\mathbf{X} + \lambda\mathbf{I})^{-1}\mathbf{X}^T\mathbf{y}\)</span>. The penalty parameter <span class="math inline">\(\lambda\)</span> controls the strength of regularization, with larger values producing more shrinkage toward zero.</p>
+<p>The Bayesian equivalent emerges by placing independent Gaussian priors on each coefficient: <span class="math inline">\(\beta_j \sim \mathcal{N}(0, \tau^2)\)</span> for <span class="math inline">\(j = 1, \ldots, p\)</span>. Under this prior specification, the posterior distribution becomes <span class="math inline">\(p(\boldsymbol{\beta}|\mathbf{y}, \mathbf{X}, \sigma^2, \tau^2) \propto \exp\left(-\frac{1}{2\sigma^2}\|\mathbf{y} - \mathbf{X}\boldsymbol{\beta}\|_2^2 - \frac{1}{2\tau^2}\|\boldsymbol{\beta}\|_2^2\right)\)</span>. The mathematical equivalence becomes clear when we recognize that <span class="math inline">\(\lambda = \sigma^2/\tau^2\)</span>, establishing a direct correspondence between the frequentist penalty parameter and the ratio of error variance to prior variance.</p>
+<p>This Bayesian formulation offers several advantages over its frequentist counterpart. Most importantly, it provides full posterior distributions for all parameters rather than just point estimates, enabling principled uncertainty quantification without requiring bootstrap procedures. The prior variance <span class="math inline">\(\tau^2\)</span> also admits a natural hierarchical extension by treating it as an unknown parameter with its own prior distribution, allowing the data to inform the appropriate level of shrinkage.</p>
 </div>
-<div id="bayesian-lasso-regression" class="section level3 hasAnchor" number="5.2.2">
-<h3><span class="header-section-number">5.2.2</span> Bayesian LASSO Regression<a href="bayesian-regularized-regression.html#bayesian-lasso-regression" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>LASSO regression only involves a minor change to the loss function compared to ridge regression. Specifically, as opposed to penalizing the model based on the sum of squared weights, it will penalize the model by the sum of the absolute value of weights. As for Bayesian ridge regression, we only needed to specifiy a normal prior distribution to the weights that we were aiming to regularize, for Bayesian LASSO regression, the only difference is in the form of the prior distribution by setting it to a double-exponential prior on the weights is mathematically equivalent in expectation to the frequentist LASSO penalty. Laplace distribiution places much more probability mass directly on 0, which produces the variable selection effect specific to LASSO regression.</p>
-<pre><code>
-
-stan_mod_lasso = &quot;data{
-  int N_train;             //  training observations
-  int N_test;              // test observations
-  int N_pred;              //  predictor variables
-  vector[N_train] y_train; // training outcomes
-  matrix[N_train, N_pred] X_train; // training data
-  matrix[N_test, N_pred] X_test;   // testing data
-}
-parameters{
-  real alpha;           // intercept
-  real&lt;lower=0&gt; sigma;   // error SD
-  real&lt;lower=0&gt; sigma_B; // hierarchical SD across betas
-  vector[N_pred] beta;   // regression beta weights
-}
-model{
-  // group-level (hierarchical) SD across betas
-  sigma_B ~ cauchy(0, 1);
-  
-  // model error SD
-  sigma ~ normal(0, 1);
-  
-  // beta prior 
-  beta ~ double_exponential(0, sigma_B);
-  
-  // model likelihood
-  y_train ~ normal(alpha + X_train*beta, sigma);
-}
-generated quantities{ 
-  real y_test[N_test]; // test data predictions
-  for(i in 1:N_test){
-    y_test[i] = normal_rng(alpha + X_test[i,] * beta, sigma);
-  }
-}&quot;
-
-writeLines(stan_mod_lasso, con = &quot;stan_mod_lasso.stan&quot;)
-
-cat(stan_mod_lasso)
-
-
-
-
-
-library(tidyverse)
-X_trt &lt;- train_data %&gt;%
-  select(-y)
-X_tst &lt;- test_data %&gt;%
-  select(-y)
-Y_trt &lt;- train_data$y
-stan_data &lt;- list(
-  N_train=ntr,             
-  N_test=nts,            
-  N_pred=5,             
-  y_train=Y_trt,
-  X_train=X_trt, 
-  X_test=X_tst  
-)
-
-fit_rstan2 &lt;- rstan::stan(
-  file = &quot;stan_mod_lasso.stan&quot;,
-  data = stan_data
-)
-
-fit_rstan2
-</code></pre>
+<div id="lasso-regression-and-laplace-priors" class="section level2 hasAnchor" number="5.3">
+<h2><span class="header-section-number">5.3</span> LASSO Regression and Laplace Priors<a href="bayesian-regularized-regression.html#lasso-regression-and-laplace-priors" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>LASSO regression replaces the ridge penalty with an L1 penalty on the coefficient magnitudes, minimizing <span class="math inline">\(\|\mathbf{y} - \mathbf{X}\boldsymbol{\beta}\|_2^2 + \lambda \|\boldsymbol{\beta}\|_1\)</span>. This seemingly minor modification produces dramatically different behavior: while ridge regression shrinks coefficients toward zero, LASSO can set them exactly to zero, performing automatic variable selection. The geometric intuition reveals that the L1 penalty creates a diamond-shaped constraint region whose corners lie on the coordinate axes, making exact zeros more likely when the unconstrained optimum lies in particular regions of the parameter space.</p>
+<p>The Bayesian LASSO emerges by specifying independent Laplace priors for each coefficient: <span class="math inline">\(\beta_j \sim \text{Laplace}(0, b)\)</span> for <span class="math inline">\(j = 1, \ldots, p\)</span>. The Laplace density <span class="math inline">\(p(\beta_j|b) = \frac{1}{2b}\exp\left(-\frac{|\beta_j|}{b}\right)\)</span> places much more probability mass at zero compared to a Gaussian distribution with the same variance, naturally encouraging sparsity. The relationship between the frequentist penalty and Bayesian scale parameter follows <span class="math inline">\(\lambda = \sigma^2/b\)</span>.</p>
+<p>While the Bayesian LASSO provides the same point estimates as its frequentist counterpart through the posterior mode, its real advantage lies in proper uncertainty quantification for the selected variables. The full posterior distribution accounts for both parameter uncertainty and model uncertainty, providing more honest assessments of prediction intervals and coefficient significance than frequentist methods that condition on the selected model.</p>
 </div>
-<div id="hierarchical-shrinkage" class="section level3 hasAnchor" number="5.2.3">
-<h3><span class="header-section-number">5.2.3</span> Hierarchical shrinkage<a href="bayesian-regularized-regression.html#hierarchical-shrinkage" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>IF The Bayesian LASSO doesn’t get us sparsity with a few relatively large coefficients, and many coefficients very close to zero it is possible to use different global-local scale mixtures of normal distributions as our priors to encourage more sparsity. In that case it is possible to combine the global scale for all coefficient priors along with a local scale for each coefficient.</p>
-<pre><code>
-stan_mod_hr = &quot;data {
-  
-  int N; //  observations
-  vector[N] y; // outcome
-  int K;   // number of columns in the design matrix X
-  matrix [N, K] X;  // design matrix X
-  real&lt;lower = 0&gt; tau;   // global scale prior scale
-}
-transformed data {
-  real&lt;lower = 0&gt; y_sd;
-  real a_pr_scale;
-  real sigma_pr_scale;
-  y_sd = sd(y);
-  sigma_pr_scale = y_sd * 5;
-  a_pr_scale = 10;
-}
-parameters {
-  real a;   // regression coefficient vector
-  vector[K] b_raw;   // scale of the regression errors
-  real&lt;lower = 0&gt; sigma;   // local scales of coefficients
-  vector&lt;lower = 0&gt;[K] lambda;
-}
-transformed parameters {
-  vector[N] mu;   // mu is the observation fitted/predicted value
-  vector[K] b;   // b is the transformed beta
-  b = b_raw * tau .* lambda;
-  mu = a + X * b;
-}
-model {
-  lambda ~ cauchy(0, 1);   // priors
-  a ~ normal(0, a_pr_scale);
-  b_raw ~ normal(0, 1);
-  sigma ~ cauchy(0, sigma_pr_scale);
-  y ~ normal(mu, sigma);   // likelihood
-}
-generated quantities {
-  vector[N] y_rep;   // simulate data from the posterior
-  vector[N] log_lik;   // log-likelihood posterior
-  for (n in 1:N) {
-    y_rep[n] = normal_rng(mu[n], sigma);
-    log_lik[n] = normal_lpdf(y[n] | mu[n], sigma);
-  }
-}&quot;
-
-writeLines(stan_mod_hr, con = &quot;stan_mod_hr.stan&quot;)
-
-cat(stan_mod_hr)
-
-
-
-stan_data &lt;- list(
-  N=ntr,             
-  y=Y_trt,
-  K=5,     
-  X=X_trt, 
-  tau=1  
-)
-
-fit_rstan3 &lt;- rstan::stan(
-  file = &quot;stan_mod_hr.stan&quot;,
-  data = stan_data
-)
-
-fit_rstan3
-</code></pre>
+<div id="hierarchical-shrinkage-and-adaptive-priors" class="section level2 hasAnchor" number="5.4">
+<h2><span class="header-section-number">5.4</span> Hierarchical Shrinkage and Adaptive Priors<a href="bayesian-regularized-regression.html#hierarchical-shrinkage-and-adaptive-priors" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Both ridge and LASSO impose uniform shrinkage across all coefficients, but real data often contains a mixture of large, moderate, and negligible effects that would benefit from adaptive shrinkage. Hierarchical shrinkage priors address this limitation by allowing different coefficients to experience different amounts of shrinkage based on their apparent signal strength in the data.</p>
+<p>The general framework specifies <span class="math inline">\(\beta_j \sim \mathcal{N}(0, \tau^2 \lambda_j^2)\)</span> for <span class="math inline">\(j = 1, \ldots, p\)</span>, where <span class="math inline">\(\tau\)</span> represents a global shrinkage parameter affecting all coefficients and <span class="math inline">\(\lambda_j\)</span> represents local shrinkage parameters that can vary across coefficients. This hierarchical structure enables the model to shrink small coefficients aggressively while leaving large coefficients relatively unshrunk.</p>
+<p>The horseshoe prior represents one particularly successful implementation of this idea, specifying <span class="math inline">\(\lambda_j \sim \text{Cauchy}^+(0, 1)\)</span> and <span class="math inline">\(\tau \sim \text{Cauchy}^+(0, 1)\)</span>. The Cauchy distribution’s heavy tails ensure that large coefficients can escape shrinkage while still encouraging small coefficients toward zero. The horseshoe prior gets its name from the shape of its shrinkage function, which resembles an inverted horseshoe when plotted against the signal-to-noise ratio.</p>
+</div>
+<div id="implementation" class="section level2 hasAnchor" number="5.5">
+<h2><span class="header-section-number">5.5</span> Implementation<a href="bayesian-regularized-regression.html#implementation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div class="sourceCode" id="cb71"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb71-1"><a href="bayesian-regularized-regression.html#cb71-1" tabindex="-1"></a><span class="fu">library</span>(tidymodels)</span>
+<span id="cb71-2"><a href="bayesian-regularized-regression.html#cb71-2" tabindex="-1"></a><span class="fu">library</span>(rstan)</span>
+<span id="cb71-3"><a href="bayesian-regularized-regression.html#cb71-3" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb71-4"><a href="bayesian-regularized-regression.html#cb71-4" tabindex="-1"></a></span>
+<span id="cb71-5"><a href="bayesian-regularized-regression.html#cb71-5" tabindex="-1"></a><span class="co"># Data simulation</span></span>
+<span id="cb71-6"><a href="bayesian-regularized-regression.html#cb71-6" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb71-7"><a href="bayesian-regularized-regression.html#cb71-7" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb71-8"><a href="bayesian-regularized-regression.html#cb71-8" tabindex="-1"></a>n_train <span class="ot">&lt;-</span> <span class="dv">700</span></span>
+<span id="cb71-9"><a href="bayesian-regularized-regression.html#cb71-9" tabindex="-1"></a>n_test <span class="ot">&lt;-</span> <span class="dv">300</span></span>
+<span id="cb71-10"><a href="bayesian-regularized-regression.html#cb71-10" tabindex="-1"></a>alpha_true <span class="ot">&lt;-</span> <span class="dv">40</span>  <span class="co"># intercept</span></span>
+<span id="cb71-11"><a href="bayesian-regularized-regression.html#cb71-11" tabindex="-1"></a>beta_true <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="fl">0.25</span>)  <span class="co"># slopes</span></span>
+<span id="cb71-12"><a href="bayesian-regularized-regression.html#cb71-12" tabindex="-1"></a>sigma_true <span class="ot">&lt;-</span> <span class="dv">5</span>  <span class="co"># residual standard deviation</span></span>
+<span id="cb71-13"><a href="bayesian-regularized-regression.html#cb71-13" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">length</span>(beta_true)</span>
+<span id="cb71-14"><a href="bayesian-regularized-regression.html#cb71-14" tabindex="-1"></a></span>
+<span id="cb71-15"><a href="bayesian-regularized-regression.html#cb71-15" tabindex="-1"></a><span class="co"># Generate design matrix and response</span></span>
+<span id="cb71-16"><a href="bayesian-regularized-regression.html#cb71-16" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n <span class="sc">*</span> p), n, p)</span>
+<span id="cb71-17"><a href="bayesian-regularized-regression.html#cb71-17" tabindex="-1"></a>epsilon <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> sigma_true)</span>
+<span id="cb71-18"><a href="bayesian-regularized-regression.html#cb71-18" tabindex="-1"></a>y <span class="ot">&lt;-</span> alpha_true <span class="sc">+</span> X <span class="sc">%*%</span> beta_true <span class="sc">+</span> epsilon</span>
+<span id="cb71-19"><a href="bayesian-regularized-regression.html#cb71-19" tabindex="-1"></a></span>
+<span id="cb71-20"><a href="bayesian-regularized-regression.html#cb71-20" tabindex="-1"></a><span class="co"># Create dataset</span></span>
+<span id="cb71-21"><a href="bayesian-regularized-regression.html#cb71-21" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">y =</span> y, X)</span>
+<span id="cb71-22"><a href="bayesian-regularized-regression.html#cb71-22" tabindex="-1"></a><span class="fu">colnames</span>(data) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;y&quot;</span>, <span class="fu">paste0</span>(<span class="st">&quot;X&quot;</span>, <span class="dv">1</span><span class="sc">:</span>p))</span>
+<span id="cb71-23"><a href="bayesian-regularized-regression.html#cb71-23" tabindex="-1"></a></span>
+<span id="cb71-24"><a href="bayesian-regularized-regression.html#cb71-24" tabindex="-1"></a><span class="co"># Train-test split</span></span>
+<span id="cb71-25"><a href="bayesian-regularized-regression.html#cb71-25" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb71-26"><a href="bayesian-regularized-regression.html#cb71-26" tabindex="-1"></a>data_split <span class="ot">&lt;-</span> <span class="fu">initial_split</span>(data, <span class="at">prop =</span> <span class="fl">0.7</span>)</span>
+<span id="cb71-27"><a href="bayesian-regularized-regression.html#cb71-27" tabindex="-1"></a>train_data <span class="ot">&lt;-</span> <span class="fu">training</span>(data_split)</span>
+<span id="cb71-28"><a href="bayesian-regularized-regression.html#cb71-28" tabindex="-1"></a>test_data <span class="ot">&lt;-</span> <span class="fu">testing</span>(data_split)</span>
+<span id="cb71-29"><a href="bayesian-regularized-regression.html#cb71-29" tabindex="-1"></a></span>
+<span id="cb71-30"><a href="bayesian-regularized-regression.html#cb71-30" tabindex="-1"></a><span class="co"># Prepare data for Stan</span></span>
+<span id="cb71-31"><a href="bayesian-regularized-regression.html#cb71-31" tabindex="-1"></a>X_train <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(train_data[, <span class="sc">-</span><span class="dv">1</span>])</span>
+<span id="cb71-32"><a href="bayesian-regularized-regression.html#cb71-32" tabindex="-1"></a>X_test <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(test_data[, <span class="sc">-</span><span class="dv">1</span>])</span>
+<span id="cb71-33"><a href="bayesian-regularized-regression.html#cb71-33" tabindex="-1"></a>y_train <span class="ot">&lt;-</span> train_data<span class="sc">$</span>y</span>
+<span id="cb71-34"><a href="bayesian-regularized-regression.html#cb71-34" tabindex="-1"></a>y_test <span class="ot">&lt;-</span> test_data<span class="sc">$</span>y</span></code></pre></div>
+<div id="bayesian-ridge-regression" class="section level3 hasAnchor" number="5.5.1">
+<h3><span class="header-section-number">5.5.1</span> Bayesian Ridge Regression<a href="bayesian-regularized-regression.html#bayesian-ridge-regression" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb72"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb72-1"><a href="bayesian-regularized-regression.html#cb72-1" tabindex="-1"></a><span class="co"># Stan model for Bayesian Ridge Regression</span></span>
+<span id="cb72-2"><a href="bayesian-regularized-regression.html#cb72-2" tabindex="-1"></a>stan_ridge <span class="ot">&lt;-</span> <span class="st">&quot;</span></span>
+<span id="cb72-3"><a href="bayesian-regularized-regression.html#cb72-3" tabindex="-1"></a><span class="st">data {</span></span>
+<span id="cb72-4"><a href="bayesian-regularized-regression.html#cb72-4" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; N_train;</span></span>
+<span id="cb72-5"><a href="bayesian-regularized-regression.html#cb72-5" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; N_test;</span></span>
+<span id="cb72-6"><a href="bayesian-regularized-regression.html#cb72-6" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; p;</span></span>
+<span id="cb72-7"><a href="bayesian-regularized-regression.html#cb72-7" tabindex="-1"></a><span class="st">  matrix[N_train, p] X_train;</span></span>
+<span id="cb72-8"><a href="bayesian-regularized-regression.html#cb72-8" tabindex="-1"></a><span class="st">  matrix[N_test, p] X_test;</span></span>
+<span id="cb72-9"><a href="bayesian-regularized-regression.html#cb72-9" tabindex="-1"></a><span class="st">  vector[N_train] y_train;</span></span>
+<span id="cb72-10"><a href="bayesian-regularized-regression.html#cb72-10" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb72-11"><a href="bayesian-regularized-regression.html#cb72-11" tabindex="-1"></a><span class="st">parameters {</span></span>
+<span id="cb72-12"><a href="bayesian-regularized-regression.html#cb72-12" tabindex="-1"></a><span class="st">  real alpha;</span></span>
+<span id="cb72-13"><a href="bayesian-regularized-regression.html#cb72-13" tabindex="-1"></a><span class="st">  vector[p] beta;</span></span>
+<span id="cb72-14"><a href="bayesian-regularized-regression.html#cb72-14" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma;</span></span>
+<span id="cb72-15"><a href="bayesian-regularized-regression.html#cb72-15" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; tau;  // prior standard deviation for beta</span></span>
+<span id="cb72-16"><a href="bayesian-regularized-regression.html#cb72-16" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb72-17"><a href="bayesian-regularized-regression.html#cb72-17" tabindex="-1"></a><span class="st">model {</span></span>
+<span id="cb72-18"><a href="bayesian-regularized-regression.html#cb72-18" tabindex="-1"></a><span class="st">  // Priors</span></span>
+<span id="cb72-19"><a href="bayesian-regularized-regression.html#cb72-19" tabindex="-1"></a><span class="st">  alpha ~ normal(0, 10);</span></span>
+<span id="cb72-20"><a href="bayesian-regularized-regression.html#cb72-20" tabindex="-1"></a><span class="st">  tau ~ cauchy(0, 1);</span></span>
+<span id="cb72-21"><a href="bayesian-regularized-regression.html#cb72-21" tabindex="-1"></a><span class="st">  sigma ~ cauchy(0, 5);</span></span>
+<span id="cb72-22"><a href="bayesian-regularized-regression.html#cb72-22" tabindex="-1"></a><span class="st">  beta ~ normal(0, tau);  // Ridge prior</span></span>
+<span id="cb72-23"><a href="bayesian-regularized-regression.html#cb72-23" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb72-24"><a href="bayesian-regularized-regression.html#cb72-24" tabindex="-1"></a><span class="st">  // Likelihood</span></span>
+<span id="cb72-25"><a href="bayesian-regularized-regression.html#cb72-25" tabindex="-1"></a><span class="st">  y_train ~ normal(alpha + X_train * beta, sigma);</span></span>
+<span id="cb72-26"><a href="bayesian-regularized-regression.html#cb72-26" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb72-27"><a href="bayesian-regularized-regression.html#cb72-27" tabindex="-1"></a><span class="st">generated quantities {</span></span>
+<span id="cb72-28"><a href="bayesian-regularized-regression.html#cb72-28" tabindex="-1"></a><span class="st">  vector[N_test] y_pred;</span></span>
+<span id="cb72-29"><a href="bayesian-regularized-regression.html#cb72-29" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb72-30"><a href="bayesian-regularized-regression.html#cb72-30" tabindex="-1"></a><span class="st">  for (i in 1:N_test) {</span></span>
+<span id="cb72-31"><a href="bayesian-regularized-regression.html#cb72-31" tabindex="-1"></a><span class="st">    y_pred[i] = normal_rng(alpha + X_test[i] * beta, sigma);</span></span>
+<span id="cb72-32"><a href="bayesian-regularized-regression.html#cb72-32" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb72-33"><a href="bayesian-regularized-regression.html#cb72-33" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb72-34"><a href="bayesian-regularized-regression.html#cb72-34" tabindex="-1"></a><span class="st">&quot;</span></span>
+<span id="cb72-35"><a href="bayesian-regularized-regression.html#cb72-35" tabindex="-1"></a></span>
+<span id="cb72-36"><a href="bayesian-regularized-regression.html#cb72-36" tabindex="-1"></a><span class="co"># Prepare data</span></span>
+<span id="cb72-37"><a href="bayesian-regularized-regression.html#cb72-37" tabindex="-1"></a>stan_data_ridge <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb72-38"><a href="bayesian-regularized-regression.html#cb72-38" tabindex="-1"></a>  <span class="at">N_train =</span> n_train,</span>
+<span id="cb72-39"><a href="bayesian-regularized-regression.html#cb72-39" tabindex="-1"></a>  <span class="at">N_test =</span> n_test,</span>
+<span id="cb72-40"><a href="bayesian-regularized-regression.html#cb72-40" tabindex="-1"></a>  <span class="at">p =</span> p,</span>
+<span id="cb72-41"><a href="bayesian-regularized-regression.html#cb72-41" tabindex="-1"></a>  <span class="at">X_train =</span> X_train,</span>
+<span id="cb72-42"><a href="bayesian-regularized-regression.html#cb72-42" tabindex="-1"></a>  <span class="at">X_test =</span> X_test,</span>
+<span id="cb72-43"><a href="bayesian-regularized-regression.html#cb72-43" tabindex="-1"></a>  <span class="at">y_train =</span> y_train</span>
+<span id="cb72-44"><a href="bayesian-regularized-regression.html#cb72-44" tabindex="-1"></a>)</span>
+<span id="cb72-45"><a href="bayesian-regularized-regression.html#cb72-45" tabindex="-1"></a></span>
+<span id="cb72-46"><a href="bayesian-regularized-regression.html#cb72-46" tabindex="-1"></a><span class="co"># Fit model</span></span>
+<span id="cb72-47"><a href="bayesian-regularized-regression.html#cb72-47" tabindex="-1"></a>fit_ridge <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">model_code =</span> stan_ridge, </span>
+<span id="cb72-48"><a href="bayesian-regularized-regression.html#cb72-48" tabindex="-1"></a>                  <span class="at">data =</span> stan_data_ridge,</span>
+<span id="cb72-49"><a href="bayesian-regularized-regression.html#cb72-49" tabindex="-1"></a>                  <span class="at">chains =</span> <span class="dv">4</span>, <span class="at">iter =</span> <span class="dv">2000</span>,</span>
+<span id="cb72-50"><a href="bayesian-regularized-regression.html#cb72-50" tabindex="-1"></a>                  <span class="at">cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>())</span>
+<span id="cb72-51"><a href="bayesian-regularized-regression.html#cb72-51" tabindex="-1"></a></span>
+<span id="cb72-52"><a href="bayesian-regularized-regression.html#cb72-52" tabindex="-1"></a><span class="fu">print</span>(fit_ridge, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;alpha&quot;</span>, <span class="st">&quot;beta&quot;</span>, <span class="st">&quot;sigma&quot;</span>, <span class="st">&quot;tau&quot;</span>))</span></code></pre></div>
+</div>
+<div id="bayesian-lasso-regression" class="section level3 hasAnchor" number="5.5.2">
+<h3><span class="header-section-number">5.5.2</span> Bayesian LASSO Regression<a href="bayesian-regularized-regression.html#bayesian-lasso-regression" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb73"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb73-1"><a href="bayesian-regularized-regression.html#cb73-1" tabindex="-1"></a><span class="co"># Stan model for Bayesian LASSO</span></span>
+<span id="cb73-2"><a href="bayesian-regularized-regression.html#cb73-2" tabindex="-1"></a>stan_lasso <span class="ot">&lt;-</span> <span class="st">&quot;</span></span>
+<span id="cb73-3"><a href="bayesian-regularized-regression.html#cb73-3" tabindex="-1"></a><span class="st">data {</span></span>
+<span id="cb73-4"><a href="bayesian-regularized-regression.html#cb73-4" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; N_train;</span></span>
+<span id="cb73-5"><a href="bayesian-regularized-regression.html#cb73-5" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; N_test;</span></span>
+<span id="cb73-6"><a href="bayesian-regularized-regression.html#cb73-6" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; p;</span></span>
+<span id="cb73-7"><a href="bayesian-regularized-regression.html#cb73-7" tabindex="-1"></a><span class="st">  matrix[N_train, p] X_train;</span></span>
+<span id="cb73-8"><a href="bayesian-regularized-regression.html#cb73-8" tabindex="-1"></a><span class="st">  matrix[N_test, p] X_test;</span></span>
+<span id="cb73-9"><a href="bayesian-regularized-regression.html#cb73-9" tabindex="-1"></a><span class="st">  vector[N_train] y_train;</span></span>
+<span id="cb73-10"><a href="bayesian-regularized-regression.html#cb73-10" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb73-11"><a href="bayesian-regularized-regression.html#cb73-11" tabindex="-1"></a><span class="st">parameters {</span></span>
+<span id="cb73-12"><a href="bayesian-regularized-regression.html#cb73-12" tabindex="-1"></a><span class="st">  real alpha;</span></span>
+<span id="cb73-13"><a href="bayesian-regularized-regression.html#cb73-13" tabindex="-1"></a><span class="st">  vector[p] beta;</span></span>
+<span id="cb73-14"><a href="bayesian-regularized-regression.html#cb73-14" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma;</span></span>
+<span id="cb73-15"><a href="bayesian-regularized-regression.html#cb73-15" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; b;  // Laplace scale parameter</span></span>
+<span id="cb73-16"><a href="bayesian-regularized-regression.html#cb73-16" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb73-17"><a href="bayesian-regularized-regression.html#cb73-17" tabindex="-1"></a><span class="st">model {</span></span>
+<span id="cb73-18"><a href="bayesian-regularized-regression.html#cb73-18" tabindex="-1"></a><span class="st">  // Priors</span></span>
+<span id="cb73-19"><a href="bayesian-regularized-regression.html#cb73-19" tabindex="-1"></a><span class="st">  alpha ~ normal(0, 10);</span></span>
+<span id="cb73-20"><a href="bayesian-regularized-regression.html#cb73-20" tabindex="-1"></a><span class="st">  b ~ cauchy(0, 1);</span></span>
+<span id="cb73-21"><a href="bayesian-regularized-regression.html#cb73-21" tabindex="-1"></a><span class="st">  sigma ~ cauchy(0, 5);</span></span>
+<span id="cb73-22"><a href="bayesian-regularized-regression.html#cb73-22" tabindex="-1"></a><span class="st">  beta ~ double_exponential(0, b);  // LASSO prior</span></span>
+<span id="cb73-23"><a href="bayesian-regularized-regression.html#cb73-23" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb73-24"><a href="bayesian-regularized-regression.html#cb73-24" tabindex="-1"></a><span class="st">  // Likelihood</span></span>
+<span id="cb73-25"><a href="bayesian-regularized-regression.html#cb73-25" tabindex="-1"></a><span class="st">  y_train ~ normal(alpha + X_train * beta, sigma);</span></span>
+<span id="cb73-26"><a href="bayesian-regularized-regression.html#cb73-26" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb73-27"><a href="bayesian-regularized-regression.html#cb73-27" tabindex="-1"></a><span class="st">generated quantities {</span></span>
+<span id="cb73-28"><a href="bayesian-regularized-regression.html#cb73-28" tabindex="-1"></a><span class="st">  vector[N_test] y_pred;</span></span>
+<span id="cb73-29"><a href="bayesian-regularized-regression.html#cb73-29" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb73-30"><a href="bayesian-regularized-regression.html#cb73-30" tabindex="-1"></a><span class="st">  for (i in 1:N_test) {</span></span>
+<span id="cb73-31"><a href="bayesian-regularized-regression.html#cb73-31" tabindex="-1"></a><span class="st">    y_pred[i] = normal_rng(alpha + X_test[i] * beta, sigma);</span></span>
+<span id="cb73-32"><a href="bayesian-regularized-regression.html#cb73-32" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb73-33"><a href="bayesian-regularized-regression.html#cb73-33" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb73-34"><a href="bayesian-regularized-regression.html#cb73-34" tabindex="-1"></a><span class="st">&quot;</span></span>
+<span id="cb73-35"><a href="bayesian-regularized-regression.html#cb73-35" tabindex="-1"></a></span>
+<span id="cb73-36"><a href="bayesian-regularized-regression.html#cb73-36" tabindex="-1"></a><span class="co"># Prepare data (same as Ridge)</span></span>
+<span id="cb73-37"><a href="bayesian-regularized-regression.html#cb73-37" tabindex="-1"></a>stan_data_lasso <span class="ot">&lt;-</span> stan_data_ridge</span>
+<span id="cb73-38"><a href="bayesian-regularized-regression.html#cb73-38" tabindex="-1"></a></span>
+<span id="cb73-39"><a href="bayesian-regularized-regression.html#cb73-39" tabindex="-1"></a><span class="co"># Fit model</span></span>
+<span id="cb73-40"><a href="bayesian-regularized-regression.html#cb73-40" tabindex="-1"></a>fit_lasso <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">model_code =</span> stan_lasso,</span>
+<span id="cb73-41"><a href="bayesian-regularized-regression.html#cb73-41" tabindex="-1"></a>                  <span class="at">data =</span> stan_data_lasso,</span>
+<span id="cb73-42"><a href="bayesian-regularized-regression.html#cb73-42" tabindex="-1"></a>                  <span class="at">chains =</span> <span class="dv">4</span>, <span class="at">iter =</span> <span class="dv">2000</span>,</span>
+<span id="cb73-43"><a href="bayesian-regularized-regression.html#cb73-43" tabindex="-1"></a>                  <span class="at">cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>())</span>
+<span id="cb73-44"><a href="bayesian-regularized-regression.html#cb73-44" tabindex="-1"></a></span>
+<span id="cb73-45"><a href="bayesian-regularized-regression.html#cb73-45" tabindex="-1"></a><span class="fu">print</span>(fit_lasso, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;alpha&quot;</span>, <span class="st">&quot;beta&quot;</span>, <span class="st">&quot;sigma&quot;</span>, <span class="st">&quot;b&quot;</span>))</span></code></pre></div>
+</div>
+<div id="hierarchical-shrinkage-horseshoe-prior" class="section level3 hasAnchor" number="5.5.3">
+<h3><span class="header-section-number">5.5.3</span> Hierarchical Shrinkage (Horseshoe Prior)<a href="bayesian-regularized-regression.html#hierarchical-shrinkage-horseshoe-prior" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb74"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb74-1"><a href="bayesian-regularized-regression.html#cb74-1" tabindex="-1"></a><span class="co"># Stan model for Horseshoe prior</span></span>
+<span id="cb74-2"><a href="bayesian-regularized-regression.html#cb74-2" tabindex="-1"></a>stan_horseshoe <span class="ot">&lt;-</span> <span class="st">&quot;</span></span>
+<span id="cb74-3"><a href="bayesian-regularized-regression.html#cb74-3" tabindex="-1"></a><span class="st">data {</span></span>
+<span id="cb74-4"><a href="bayesian-regularized-regression.html#cb74-4" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; N_train;</span></span>
+<span id="cb74-5"><a href="bayesian-regularized-regression.html#cb74-5" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; N_test;</span></span>
+<span id="cb74-6"><a href="bayesian-regularized-regression.html#cb74-6" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; p;</span></span>
+<span id="cb74-7"><a href="bayesian-regularized-regression.html#cb74-7" tabindex="-1"></a><span class="st">  matrix[N_train, p] X_train;</span></span>
+<span id="cb74-8"><a href="bayesian-regularized-regression.html#cb74-8" tabindex="-1"></a><span class="st">  matrix[N_test, p] X_test;</span></span>
+<span id="cb74-9"><a href="bayesian-regularized-regression.html#cb74-9" tabindex="-1"></a><span class="st">  vector[N_train] y_train;</span></span>
+<span id="cb74-10"><a href="bayesian-regularized-regression.html#cb74-10" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb74-11"><a href="bayesian-regularized-regression.html#cb74-11" tabindex="-1"></a><span class="st">parameters {</span></span>
+<span id="cb74-12"><a href="bayesian-regularized-regression.html#cb74-12" tabindex="-1"></a><span class="st">  real alpha;</span></span>
+<span id="cb74-13"><a href="bayesian-regularized-regression.html#cb74-13" tabindex="-1"></a><span class="st">  vector[p] beta_raw;</span></span>
+<span id="cb74-14"><a href="bayesian-regularized-regression.html#cb74-14" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma;</span></span>
+<span id="cb74-15"><a href="bayesian-regularized-regression.html#cb74-15" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; tau;  // global shrinkage</span></span>
+<span id="cb74-16"><a href="bayesian-regularized-regression.html#cb74-16" tabindex="-1"></a><span class="st">  vector&lt;lower=0&gt;[p] lambda;  // local shrinkage</span></span>
+<span id="cb74-17"><a href="bayesian-regularized-regression.html#cb74-17" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb74-18"><a href="bayesian-regularized-regression.html#cb74-18" tabindex="-1"></a><span class="st">transformed parameters {</span></span>
+<span id="cb74-19"><a href="bayesian-regularized-regression.html#cb74-19" tabindex="-1"></a><span class="st">  vector[p] beta;</span></span>
+<span id="cb74-20"><a href="bayesian-regularized-regression.html#cb74-20" tabindex="-1"></a><span class="st">  beta = beta_raw .* lambda * tau;  // hierarchical shrinkage</span></span>
+<span id="cb74-21"><a href="bayesian-regularized-regression.html#cb74-21" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb74-22"><a href="bayesian-regularized-regression.html#cb74-22" tabindex="-1"></a><span class="st">model {</span></span>
+<span id="cb74-23"><a href="bayesian-regularized-regression.html#cb74-23" tabindex="-1"></a><span class="st">  // Priors</span></span>
+<span id="cb74-24"><a href="bayesian-regularized-regression.html#cb74-24" tabindex="-1"></a><span class="st">  alpha ~ normal(0, 10);</span></span>
+<span id="cb74-25"><a href="bayesian-regularized-regression.html#cb74-25" tabindex="-1"></a><span class="st">  tau ~ cauchy(0, 1);  // global shrinkage</span></span>
+<span id="cb74-26"><a href="bayesian-regularized-regression.html#cb74-26" tabindex="-1"></a><span class="st">  lambda ~ cauchy(0, 1);  // local shrinkage</span></span>
+<span id="cb74-27"><a href="bayesian-regularized-regression.html#cb74-27" tabindex="-1"></a><span class="st">  beta_raw ~ normal(0, 1);</span></span>
+<span id="cb74-28"><a href="bayesian-regularized-regression.html#cb74-28" tabindex="-1"></a><span class="st">  sigma ~ cauchy(0, 5);</span></span>
+<span id="cb74-29"><a href="bayesian-regularized-regression.html#cb74-29" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb74-30"><a href="bayesian-regularized-regression.html#cb74-30" tabindex="-1"></a><span class="st">  // Likelihood</span></span>
+<span id="cb74-31"><a href="bayesian-regularized-regression.html#cb74-31" tabindex="-1"></a><span class="st">  y_train ~ normal(alpha + X_train * beta, sigma);</span></span>
+<span id="cb74-32"><a href="bayesian-regularized-regression.html#cb74-32" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb74-33"><a href="bayesian-regularized-regression.html#cb74-33" tabindex="-1"></a><span class="st">generated quantities {</span></span>
+<span id="cb74-34"><a href="bayesian-regularized-regression.html#cb74-34" tabindex="-1"></a><span class="st">  vector[N_test] y_pred;</span></span>
+<span id="cb74-35"><a href="bayesian-regularized-regression.html#cb74-35" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb74-36"><a href="bayesian-regularized-regression.html#cb74-36" tabindex="-1"></a><span class="st">  for (i in 1:N_test) {</span></span>
+<span id="cb74-37"><a href="bayesian-regularized-regression.html#cb74-37" tabindex="-1"></a><span class="st">    y_pred[i] = normal_rng(alpha + X_test[i] * beta, sigma);</span></span>
+<span id="cb74-38"><a href="bayesian-regularized-regression.html#cb74-38" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb74-39"><a href="bayesian-regularized-regression.html#cb74-39" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb74-40"><a href="bayesian-regularized-regression.html#cb74-40" tabindex="-1"></a><span class="st">&quot;</span></span>
+<span id="cb74-41"><a href="bayesian-regularized-regression.html#cb74-41" tabindex="-1"></a></span>
+<span id="cb74-42"><a href="bayesian-regularized-regression.html#cb74-42" tabindex="-1"></a><span class="co"># Prepare data (same as before)</span></span>
+<span id="cb74-43"><a href="bayesian-regularized-regression.html#cb74-43" tabindex="-1"></a>stan_data_horseshoe <span class="ot">&lt;-</span> stan_data_ridge</span>
+<span id="cb74-44"><a href="bayesian-regularized-regression.html#cb74-44" tabindex="-1"></a></span>
+<span id="cb74-45"><a href="bayesian-regularized-regression.html#cb74-45" tabindex="-1"></a><span class="co"># Fit model</span></span>
+<span id="cb74-46"><a href="bayesian-regularized-regression.html#cb74-46" tabindex="-1"></a>fit_horseshoe <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">model_code =</span> stan_horseshoe,</span>
+<span id="cb74-47"><a href="bayesian-regularized-regression.html#cb74-47" tabindex="-1"></a>                      <span class="at">data =</span> stan_data_horseshoe,</span>
+<span id="cb74-48"><a href="bayesian-regularized-regression.html#cb74-48" tabindex="-1"></a>                      <span class="at">chains =</span> <span class="dv">4</span>, <span class="at">iter =</span> <span class="dv">2000</span>,</span>
+<span id="cb74-49"><a href="bayesian-regularized-regression.html#cb74-49" tabindex="-1"></a>                      <span class="at">cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>())</span>
+<span id="cb74-50"><a href="bayesian-regularized-regression.html#cb74-50" tabindex="-1"></a></span>
+<span id="cb74-51"><a href="bayesian-regularized-regression.html#cb74-51" tabindex="-1"></a><span class="fu">print</span>(fit_horseshoe, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;alpha&quot;</span>, <span class="st">&quot;beta&quot;</span>, <span class="st">&quot;sigma&quot;</span>, <span class="st">&quot;tau&quot;</span>))</span></code></pre></div>
 </div>
 </div>
-<div id="conclusion-2" class="section level2 hasAnchor" number="5.3">
-<h2><span class="header-section-number">5.3</span> Conclusion<a href="bayesian-regularized-regression.html#conclusion-2" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>In this post, we learned about the benefits of using regularized/penalized regression models over traditional regression. We determined that in low and/or noisy data settings, the so-called unbiased estimates given by non-regularized regression modeling actually lead to worse-off model performance. Importantly, we learned that this occurs because being ubiased allows a model to learn a lot from the data, including learning patterns of noise. Then, we learned that biased methods such as ridge and LASSO regression restrict the amount of learning that we get from data, which leads to better estimates in low and/or noisy data settings. Finally, hierarchical Bayesian models can choose a prior distribution across the weights that gives us a solution that is equivalent to that of the frequentist ridge or LASSO methods, with a full posterior distribution for each parameter, thus circumventing problems with frequentist regularization that require the use of bootstrapping to estimate confidence intervals.</p>
+<div id="empirical-comparison-and-model-evaluation" class="section level2 hasAnchor" number="5.6">
+<h2><span class="header-section-number">5.6</span> Empirical Comparison and Model Evaluation<a href="bayesian-regularized-regression.html#empirical-comparison-and-model-evaluation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Understanding the theoretical properties of different regularization approaches provides essential intuition, but empirical evaluation reveals how these methods perform in practice. The code below demonstrates how to compare ridge regression, LASSO, and horseshoe priors using both predictive accuracy and coefficient recovery metrics.</p>
+<div class="sourceCode" id="cb75"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb75-1"><a href="bayesian-regularized-regression.html#cb75-1" tabindex="-1"></a><span class="co"># Extract predictions and compute metrics</span></span>
+<span id="cb75-2"><a href="bayesian-regularized-regression.html#cb75-2" tabindex="-1"></a>extract_metrics <span class="ot">&lt;-</span> <span class="cf">function</span>(fit, true_values) {</span>
+<span id="cb75-3"><a href="bayesian-regularized-regression.html#cb75-3" tabindex="-1"></a>  y_pred <span class="ot">&lt;-</span> <span class="fu">extract</span>(fit)<span class="sc">$</span>y_pred</span>
+<span id="cb75-4"><a href="bayesian-regularized-regression.html#cb75-4" tabindex="-1"></a>  y_pred_mean <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(y_pred)</span>
+<span id="cb75-5"><a href="bayesian-regularized-regression.html#cb75-5" tabindex="-1"></a>  </span>
+<span id="cb75-6"><a href="bayesian-regularized-regression.html#cb75-6" tabindex="-1"></a>  <span class="co"># RMSE</span></span>
+<span id="cb75-7"><a href="bayesian-regularized-regression.html#cb75-7" tabindex="-1"></a>  rmse <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>((y_pred_mean <span class="sc">-</span> true_values)<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb75-8"><a href="bayesian-regularized-regression.html#cb75-8" tabindex="-1"></a>  </span>
+<span id="cb75-9"><a href="bayesian-regularized-regression.html#cb75-9" tabindex="-1"></a>  <span class="co"># Coverage (95% credible intervals)</span></span>
+<span id="cb75-10"><a href="bayesian-regularized-regression.html#cb75-10" tabindex="-1"></a>  y_pred_lower <span class="ot">&lt;-</span> <span class="fu">apply</span>(y_pred, <span class="dv">2</span>, quantile, <span class="fl">0.025</span>)</span>
+<span id="cb75-11"><a href="bayesian-regularized-regression.html#cb75-11" tabindex="-1"></a>  y_pred_upper <span class="ot">&lt;-</span> <span class="fu">apply</span>(y_pred, <span class="dv">2</span>, quantile, <span class="fl">0.975</span>)</span>
+<span id="cb75-12"><a href="bayesian-regularized-regression.html#cb75-12" tabindex="-1"></a>  coverage <span class="ot">&lt;-</span> <span class="fu">mean</span>(true_values <span class="sc">&gt;=</span> y_pred_lower <span class="sc">&amp;</span> true_values <span class="sc">&lt;=</span> y_pred_upper)</span>
+<span id="cb75-13"><a href="bayesian-regularized-regression.html#cb75-13" tabindex="-1"></a>  </span>
+<span id="cb75-14"><a href="bayesian-regularized-regression.html#cb75-14" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">rmse =</span> rmse, <span class="at">coverage =</span> coverage))</span>
+<span id="cb75-15"><a href="bayesian-regularized-regression.html#cb75-15" tabindex="-1"></a>}</span>
+<span id="cb75-16"><a href="bayesian-regularized-regression.html#cb75-16" tabindex="-1"></a></span>
+<span id="cb75-17"><a href="bayesian-regularized-regression.html#cb75-17" tabindex="-1"></a><span class="co"># True test values (computed in R, not passed to Stan)</span></span>
+<span id="cb75-18"><a href="bayesian-regularized-regression.html#cb75-18" tabindex="-1"></a>y_test_true <span class="ot">&lt;-</span> alpha_true <span class="sc">+</span> X_test <span class="sc">%*%</span> beta_true</span>
+<span id="cb75-19"><a href="bayesian-regularized-regression.html#cb75-19" tabindex="-1"></a></span>
+<span id="cb75-20"><a href="bayesian-regularized-regression.html#cb75-20" tabindex="-1"></a><span class="co"># Compare models</span></span>
+<span id="cb75-21"><a href="bayesian-regularized-regression.html#cb75-21" tabindex="-1"></a>metrics_ridge <span class="ot">&lt;-</span> <span class="fu">extract_metrics</span>(fit_ridge, y_test_true)</span>
+<span id="cb75-22"><a href="bayesian-regularized-regression.html#cb75-22" tabindex="-1"></a>metrics_lasso <span class="ot">&lt;-</span> <span class="fu">extract_metrics</span>(fit_lasso, y_test_true)</span>
+<span id="cb75-23"><a href="bayesian-regularized-regression.html#cb75-23" tabindex="-1"></a>metrics_horseshoe <span class="ot">&lt;-</span> <span class="fu">extract_metrics</span>(fit_horseshoe, y_test_true)</span>
+<span id="cb75-24"><a href="bayesian-regularized-regression.html#cb75-24" tabindex="-1"></a></span>
+<span id="cb75-25"><a href="bayesian-regularized-regression.html#cb75-25" tabindex="-1"></a></span>
+<span id="cb75-26"><a href="bayesian-regularized-regression.html#cb75-26" tabindex="-1"></a><span class="co"># Print comparison</span></span>
+<span id="cb75-27"><a href="bayesian-regularized-regression.html#cb75-27" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Model Comparison (Test Set):</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb75-28"><a href="bayesian-regularized-regression.html#cb75-28" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Ridge - RMSE:&quot;</span>, <span class="fu">round</span>(metrics_ridge<span class="sc">$</span>rmse, <span class="dv">3</span>), </span>
+<span id="cb75-29"><a href="bayesian-regularized-regression.html#cb75-29" tabindex="-1"></a>    <span class="st">&quot;Coverage:&quot;</span>, <span class="fu">round</span>(metrics_ridge<span class="sc">$</span>coverage, <span class="dv">3</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb75-30"><a href="bayesian-regularized-regression.html#cb75-30" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;LASSO - RMSE:&quot;</span>, <span class="fu">round</span>(metrics_lasso<span class="sc">$</span>rmse, <span class="dv">3</span>), </span>
+<span id="cb75-31"><a href="bayesian-regularized-regression.html#cb75-31" tabindex="-1"></a>    <span class="st">&quot;Coverage:&quot;</span>, <span class="fu">round</span>(metrics_lasso<span class="sc">$</span>coverage, <span class="dv">3</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb75-32"><a href="bayesian-regularized-regression.html#cb75-32" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Horseshoe - RMSE:&quot;</span>, <span class="fu">round</span>(metrics_horseshoe<span class="sc">$</span>rmse, <span class="dv">3</span>), </span>
+<span id="cb75-33"><a href="bayesian-regularized-regression.html#cb75-33" tabindex="-1"></a>    <span class="st">&quot;Coverage:&quot;</span>, <span class="fu">round</span>(metrics_horseshoe<span class="sc">$</span>coverage, <span class="dv">3</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb75-34"><a href="bayesian-regularized-regression.html#cb75-34" tabindex="-1"></a></span>
+<span id="cb75-35"><a href="bayesian-regularized-regression.html#cb75-35" tabindex="-1"></a><span class="co"># Plot coefficient estimates</span></span>
+<span id="cb75-36"><a href="bayesian-regularized-regression.html#cb75-36" tabindex="-1"></a><span class="fu">library</span>(bayesplot)</span>
+<span id="cb75-37"><a href="bayesian-regularized-regression.html#cb75-37" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb75-38"><a href="bayesian-regularized-regression.html#cb75-38" tabindex="-1"></a></span>
+<span id="cb75-39"><a href="bayesian-regularized-regression.html#cb75-39" tabindex="-1"></a><span class="co"># Extract posterior samples</span></span>
+<span id="cb75-40"><a href="bayesian-regularized-regression.html#cb75-40" tabindex="-1"></a>beta_ridge <span class="ot">&lt;-</span> <span class="fu">extract</span>(fit_ridge)<span class="sc">$</span>beta</span>
+<span id="cb75-41"><a href="bayesian-regularized-regression.html#cb75-41" tabindex="-1"></a>beta_lasso <span class="ot">&lt;-</span> <span class="fu">extract</span>(fit_lasso)<span class="sc">$</span>beta</span>
+<span id="cb75-42"><a href="bayesian-regularized-regression.html#cb75-42" tabindex="-1"></a>beta_horseshoe <span class="ot">&lt;-</span> <span class="fu">extract</span>(fit_horseshoe)<span class="sc">$</span>beta</span>
+<span id="cb75-43"><a href="bayesian-regularized-regression.html#cb75-43" tabindex="-1"></a></span>
+<span id="cb75-44"><a href="bayesian-regularized-regression.html#cb75-44" tabindex="-1"></a><span class="co"># Create comparison plot</span></span>
+<span id="cb75-45"><a href="bayesian-regularized-regression.html#cb75-45" tabindex="-1"></a>beta_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb75-46"><a href="bayesian-regularized-regression.html#cb75-46" tabindex="-1"></a>  <span class="at">coefficient =</span> <span class="fu">rep</span>(<span class="fu">paste0</span>(<span class="st">&quot;beta&quot;</span>, <span class="dv">1</span><span class="sc">:</span>p), <span class="dv">3</span>),</span>
+<span id="cb75-47"><a href="bayesian-regularized-regression.html#cb75-47" tabindex="-1"></a>  <span class="at">method =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">&quot;Ridge&quot;</span>, <span class="st">&quot;LASSO&quot;</span>, <span class="st">&quot;Horseshoe&quot;</span>), <span class="at">each =</span> p),</span>
+<span id="cb75-48"><a href="bayesian-regularized-regression.html#cb75-48" tabindex="-1"></a>  <span class="at">mean =</span> <span class="fu">c</span>(<span class="fu">colMeans</span>(beta_ridge), <span class="fu">colMeans</span>(beta_lasso), <span class="fu">colMeans</span>(beta_horseshoe)),</span>
+<span id="cb75-49"><a href="bayesian-regularized-regression.html#cb75-49" tabindex="-1"></a>  <span class="at">lower =</span> <span class="fu">c</span>(<span class="fu">apply</span>(beta_ridge, <span class="dv">2</span>, quantile, <span class="fl">0.025</span>),</span>
+<span id="cb75-50"><a href="bayesian-regularized-regression.html#cb75-50" tabindex="-1"></a>            <span class="fu">apply</span>(beta_lasso, <span class="dv">2</span>, quantile, <span class="fl">0.025</span>),</span>
+<span id="cb75-51"><a href="bayesian-regularized-regression.html#cb75-51" tabindex="-1"></a>            <span class="fu">apply</span>(beta_horseshoe, <span class="dv">2</span>, quantile, <span class="fl">0.025</span>)),</span>
+<span id="cb75-52"><a href="bayesian-regularized-regression.html#cb75-52" tabindex="-1"></a>  <span class="at">upper =</span> <span class="fu">c</span>(<span class="fu">apply</span>(beta_ridge, <span class="dv">2</span>, quantile, <span class="fl">0.975</span>),</span>
+<span id="cb75-53"><a href="bayesian-regularized-regression.html#cb75-53" tabindex="-1"></a>            <span class="fu">apply</span>(beta_lasso, <span class="dv">2</span>, quantile, <span class="fl">0.975</span>),</span>
+<span id="cb75-54"><a href="bayesian-regularized-regression.html#cb75-54" tabindex="-1"></a>            <span class="fu">apply</span>(beta_horseshoe, <span class="dv">2</span>, quantile, <span class="fl">0.975</span>)),</span>
+<span id="cb75-55"><a href="bayesian-regularized-regression.html#cb75-55" tabindex="-1"></a>  <span class="at">true_value =</span> <span class="fu">rep</span>(beta_true, <span class="dv">3</span>)</span>
+<span id="cb75-56"><a href="bayesian-regularized-regression.html#cb75-56" tabindex="-1"></a>)</span>
+<span id="cb75-57"><a href="bayesian-regularized-regression.html#cb75-57" tabindex="-1"></a></span>
+<span id="cb75-58"><a href="bayesian-regularized-regression.html#cb75-58" tabindex="-1"></a><span class="fu">ggplot</span>(beta_df, <span class="fu">aes</span>(<span class="at">x =</span> coefficient, <span class="at">y =</span> mean, <span class="at">color =</span> method)) <span class="sc">+</span></span>
+<span id="cb75-59"><a href="bayesian-regularized-regression.html#cb75-59" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">position =</span> <span class="fu">position_dodge</span>(<span class="fl">0.3</span>)) <span class="sc">+</span></span>
+<span id="cb75-60"><a href="bayesian-regularized-regression.html#cb75-60" tabindex="-1"></a>  <span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> lower, <span class="at">ymax =</span> upper), </span>
+<span id="cb75-61"><a href="bayesian-regularized-regression.html#cb75-61" tabindex="-1"></a>                <span class="at">position =</span> <span class="fu">position_dodge</span>(<span class="fl">0.3</span>), <span class="at">width =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb75-62"><a href="bayesian-regularized-regression.html#cb75-62" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">y =</span> true_value), <span class="at">color =</span> <span class="st">&quot;black&quot;</span>, <span class="at">shape =</span> <span class="dv">4</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb75-63"><a href="bayesian-regularized-regression.html#cb75-63" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Coefficient Estimates Comparison&quot;</span>,</span>
+<span id="cb75-64"><a href="bayesian-regularized-regression.html#cb75-64" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">&quot;Black crosses show true values&quot;</span>,</span>
+<span id="cb75-65"><a href="bayesian-regularized-regression.html#cb75-65" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Coefficient&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Estimate&quot;</span>) <span class="sc">+</span></span>
+<span id="cb75-66"><a href="bayesian-regularized-regression.html#cb75-66" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb75-67"><a href="bayesian-regularized-regression.html#cb75-67" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span></code></pre></div>
+<p>The empirical comparison typically reveals distinct patterns in how each method handles different types of signals. Ridge regression tends to shrink all coefficients proportionally, maintaining the relative magnitudes while reducing overall scale. This behavior works well when most predictors contribute meaningfully to the response, even if their individual effects are modest. LASSO regression exhibits more dramatic behavior, often setting smaller coefficients to exactly zero while leaving larger ones relatively unshrunk. This creates sparse solutions that can be easier to interpret but may sacrifice some predictive accuracy when the true model is dense.</p>
+<p>Hierarchical shrinkage methods like the horseshoe prior attempt to get the best of both worlds by adapting the amount of shrinkage to each coefficient individually. Large coefficients experience minimal shrinkage, allowing them to maintain their full predictive power, while small coefficients get shrunk aggressively toward zero, reducing noise in the model. This adaptivity often leads to superior predictive performance, especially in settings where the true coefficient vector contains a mixture of large, moderate, and negligible effects.</p>
 </div>
-<div id="references-3" class="section level2 hasAnchor" number="5.4">
-<h2><span class="header-section-number">5.4</span> References<a href="bayesian-regularized-regression.html#references-3" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="understanding-posterior-behavior" class="section level2 hasAnchor" number="5.7">
+<h2><span class="header-section-number">5.7</span> Understanding Posterior Behavior<a href="bayesian-regularized-regression.html#understanding-posterior-behavior" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The mathematical structure of each prior determines not just point estimates but the entire posterior distribution. Ridge regression produces a posterior mean with the closed form <span class="math inline">\(E[\boldsymbol{\beta}|\mathbf{y}] = \left(\frac{1}{\sigma^2}\mathbf{X}^T\mathbf{X} + \frac{1}{\tau^2}\mathbf{I}\right)^{-1}\frac{1}{\sigma^2}\mathbf{X}^T\mathbf{y}\)</span>, which clearly shows how the prior variance <span class="math inline">\(\tau^2\)</span> balances against the data-driven term <span class="math inline">\(\mathbf{X}^T\mathbf{X}\)</span>. When <span class="math inline">\(\tau^2\)</span> is small relative to <span class="math inline">\(\sigma^2\)</span>, the prior dominates and coefficients shrink strongly toward zero. When <span class="math inline">\(\tau^2\)</span> is large, the data term dominates and estimates approach ordinary least squares.</p>
+<p>LASSO regression does not admit a closed-form posterior mean due to the non-conjugate Laplace prior, but the posterior mode corresponds exactly to the frequentist LASSO solution. The full posterior distribution, obtained through MCMC sampling, provides uncertainty intervals that properly account for both the sparsity-inducing prior and the inherent variability in coefficient estimates. This represents a substantial improvement over frequentist LASSO inference, which requires complex procedures to obtain valid confidence intervals for selected variables.</p>
+<p>The horseshoe prior creates particularly interesting posterior behavior through its adaptive shrinkage mechanism. Each coefficient experiences shrinkage according to <span class="math inline">\(E[\beta_j|\text{data}] \approx (1 - \kappa_j) \hat{\beta}_j^{\text{OLS}}\)</span>, where <span class="math inline">\(\kappa_j \in (0,1)\)</span> represents a data-dependent shrinkage factor. Coefficients with strong signals in the data have shrinkage factors close to zero, leaving them essentially unshrunk, while coefficients with weak signals have shrinkage factors approaching one, causing aggressive shrinkage toward zero.</p>
+</div>
+<div id="choosing-among-regularization-methods" class="section level2 hasAnchor" number="5.8">
+<h2><span class="header-section-number">5.8</span> Choosing Among Regularization Methods<a href="bayesian-regularized-regression.html#choosing-among-regularization-methods" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The choice between ridge regression, LASSO, and hierarchical shrinkage depends critically on the structure expected in the true coefficient vector and the goals of the analysis. Ridge regression works best when most predictors contribute meaningfully to the response, even if some effects are small. This commonly occurs in settings where the predictors represent different aspects of the same underlying phenomenon or when domain knowledge suggests that excluding variables entirely would be inappropriate.</p>
+<p>LASSO regression excels when the true model is sparse, meaning that only a subset of predictors have non-zero effects. The automatic variable selection property makes LASSO particularly attractive for exploratory analyses where identifying the most important predictors is as important as achieving good predictive performance. However, LASSO can struggle when several predictors are highly correlated, as it tends to select one arbitrarily and zero out the others, potentially missing important relationships.</p>
+<p>Hierarchical shrinkage methods like the horseshoe prior offer the most flexibility by allowing the data to determine the appropriate level of sparsity. These methods work well across a wide range of scenarios, from dense models where most predictors matter to sparse models where only a few predictors have substantial effects. The primary cost of this flexibility is computational complexity, as hierarchical models typically require more sophisticated MCMC sampling schemes and longer chains to achieve convergence.</p>
+</div>
+<div id="conclusion-2" class="section level2 hasAnchor" number="5.9">
+<h2><span class="header-section-number">5.9</span> Conclusion<a href="bayesian-regularized-regression.html#conclusion-2" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Bayesian regularized regression represents a natural and principled approach to handling the challenges that arise in modern statistical modeling. By reformulating penalty-based methods in terms of prior distributions, the Bayesian framework provides not only point estimates equivalent to their frequentist counterparts but also full posterior distributions that enable proper uncertainty quantification and model comparison. The connection between prior specifications and regularization behavior offers valuable insight into why different methods work well in different contexts and how to choose appropriately among them.</p>
+<p>The three approaches examined here span a useful range of assumptions about coefficient behavior. Ridge regression assumes all coefficients are a priori similar and should be shrunk proportionally, LASSO assumes that many coefficients are exactly zero and should be eliminated entirely, and hierarchical shrinkage assumes that coefficients vary in importance and should be shrunk adaptively. Modern computing makes all three approaches feasible for most practical applications, shifting the primary challenge from computational limitations to thoughtful model selection based on domain knowledge and data characteristics.</p>
+<p>These Bayesian methods also integrate naturally into larger modeling workflows that require uncertainty quantification, model averaging, or decision-making under uncertainty. The posterior distributions provide the building blocks for more complex analyses while maintaining the computational efficiency and theoretical elegance that make regularized regression so appealing in the first place.</p>
+</div>
+<div id="references-3" class="section level2 hasAnchor" number="5.10">
+<h2><span class="header-section-number">5.10</span> References<a href="bayesian-regularized-regression.html#references-3" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <ul>
-<li><p><a href="http://haines-lab.com/post/2019-05-06-on-the-equivalency-between-the-lasso-ridge-regression-and-specific-bayesian-priors/on-the-equivalency-between-the-lasso-ridge-regression-and-specific-bayesian-priors/">Blogpost on the equivalency between frequentist Ridge (and LASSO) regression and hierarchial Bayesian regression</a></p></li>
-<li><p><a href="https://jrnold.github.io/bayesian_notes/shrinkage-and-regularized-regression.html">Blogpost on Bayesian regularization 1</a></p></li>
-<li><p><a href="http://ccgilroy.com/csss564-labs-2019/08-regularization/08-regularization.html">Blogpost on Bayesian regularization 2</a></p></li>
-<li><p><a href="https://github.com/ccgilroy/csss564-labs-2019">Github code examples</a></p></li>
+<li>Carvalho, C. M., Polson, N. G., &amp; Scott, J. G. (2010). The horseshoe estimator for sparse signals. <em>Biometrika</em>, 97(2), 465-480.</li>
+<li>Park, T., &amp; Casella, G. (2008). The Bayesian lasso. <em>Journal of the American Statistical Association</em>, 103(482), 681-686.</li>
+<li>Piironen, J., &amp; Vehtari, A. (2017). Sparsity information and regularization in the horseshoe and other shrinkage priors. <em>Electronic Journal of Statistics</em>, 11(2), 5018-5051.</li>
+<li>Tibshirani, R. (1996). Regression shrinkage and selection via the lasso. <em>Journal of the Royal Statistical Society</em>, 58(1), 267-288.</li>
 </ul>
 
 </div>

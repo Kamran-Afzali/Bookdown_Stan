@@ -23,7 +23,7 @@
 <meta name="author" content="Kamran Afzali" />
 
 
-<meta name="date" content="2025-08-14" />
+<meta name="date" content="2025-08-19" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -168,14 +168,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="5" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html"><i class="fa fa-check"></i><b>5</b> Bayesian Regularized Regression</a>
 <ul>
 <li class="chapter" data-level="5.1" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#introduction"><i class="fa fa-check"></i><b>5.1</b> Introduction</a></li>
-<li class="chapter" data-level="5.2" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#regularized-regression"><i class="fa fa-check"></i><b>5.2</b> Regularized Regression</a>
+<li class="chapter" data-level="5.2" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#ridge-regression-and-gaussian-priors"><i class="fa fa-check"></i><b>5.2</b> Ridge Regression and Gaussian Priors</a></li>
+<li class="chapter" data-level="5.3" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#lasso-regression-and-laplace-priors"><i class="fa fa-check"></i><b>5.3</b> LASSO Regression and Laplace Priors</a></li>
+<li class="chapter" data-level="5.4" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#hierarchical-shrinkage-and-adaptive-priors"><i class="fa fa-check"></i><b>5.4</b> Hierarchical Shrinkage and Adaptive Priors</a></li>
+<li class="chapter" data-level="5.5" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#implementation"><i class="fa fa-check"></i><b>5.5</b> Implementation</a>
 <ul>
-<li class="chapter" data-level="5.2.1" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#bayesian-ridge-regression"><i class="fa fa-check"></i><b>5.2.1</b> Bayesian Ridge Regression</a></li>
-<li class="chapter" data-level="5.2.2" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#bayesian-lasso-regression"><i class="fa fa-check"></i><b>5.2.2</b> Bayesian LASSO Regression</a></li>
-<li class="chapter" data-level="5.2.3" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#hierarchical-shrinkage"><i class="fa fa-check"></i><b>5.2.3</b> Hierarchical shrinkage</a></li>
+<li class="chapter" data-level="5.5.1" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#bayesian-ridge-regression"><i class="fa fa-check"></i><b>5.5.1</b> Bayesian Ridge Regression</a></li>
+<li class="chapter" data-level="5.5.2" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#bayesian-lasso-regression"><i class="fa fa-check"></i><b>5.5.2</b> Bayesian LASSO Regression</a></li>
+<li class="chapter" data-level="5.5.3" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#hierarchical-shrinkage-horseshoe-prior"><i class="fa fa-check"></i><b>5.5.3</b> Hierarchical Shrinkage (Horseshoe Prior)</a></li>
 </ul></li>
-<li class="chapter" data-level="5.3" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#conclusion-2"><i class="fa fa-check"></i><b>5.3</b> Conclusion</a></li>
-<li class="chapter" data-level="5.4" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#references-3"><i class="fa fa-check"></i><b>5.4</b> References</a></li>
+<li class="chapter" data-level="5.6" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#empirical-comparison-and-model-evaluation"><i class="fa fa-check"></i><b>5.6</b> Empirical Comparison and Model Evaluation</a></li>
+<li class="chapter" data-level="5.7" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#understanding-posterior-behavior"><i class="fa fa-check"></i><b>5.7</b> Understanding Posterior Behavior</a></li>
+<li class="chapter" data-level="5.8" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#choosing-among-regularization-methods"><i class="fa fa-check"></i><b>5.8</b> Choosing Among Regularization Methods</a></li>
+<li class="chapter" data-level="5.9" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#conclusion-2"><i class="fa fa-check"></i><b>5.9</b> Conclusion</a></li>
+<li class="chapter" data-level="5.10" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#references-3"><i class="fa fa-check"></i><b>5.10</b> References</a></li>
 </ul></li>
 <li class="chapter" data-level="6" data-path="bayesian-quantile-regression.html"><a href="bayesian-quantile-regression.html"><i class="fa fa-check"></i><b>6</b> Bayesian Quantile Regression</a>
 <ul>
@@ -260,34 +266,44 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="13.3" data-path="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html"><a href="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html#bayesian-arima111-model"><i class="fa fa-check"></i><b>13.3</b> Bayesian ARIMA(1,1,1) Model</a></li>
 <li class="chapter" data-level="13.4" data-path="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html"><a href="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html#conclusion-8"><i class="fa fa-check"></i><b>13.4</b> Conclusion</a></li>
 </ul></li>
-<li class="chapter" data-level="14" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html"><i class="fa fa-check"></i><b>14</b> Model Comparison and Selection in Bayesian Analysis</a>
+<li class="chapter" data-level="14" data-path="bayesian-structural-time-series-models.html"><a href="bayesian-structural-time-series-models.html"><i class="fa fa-check"></i><b>14</b> 14 Bayesian Structural Time Series Models</a>
 <ul>
-<li class="chapter" data-level="14.1" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#introduction-4"><i class="fa fa-check"></i><b>14.1</b> Introduction</a></li>
-<li class="chapter" data-level="14.2" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#posterior-predictive-checks"><i class="fa fa-check"></i><b>14.2</b> Posterior Predictive Checks</a></li>
-<li class="chapter" data-level="14.3" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#information-criteria-waic-and-loo-cv"><i class="fa fa-check"></i><b>14.3</b> Information Criteria: WAIC and LOO-CV</a>
+<li class="chapter" data-level="14.1" data-path="bayesian-structural-time-series-models.html"><a href="bayesian-structural-time-series-models.html#introduction-4"><i class="fa fa-check"></i><b>14.1</b> Introduction</a>
 <ul>
-<li class="chapter" data-level="14.3.1" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#waic-watanabe-akaike-information-criterion"><i class="fa fa-check"></i><b>14.3.1</b> WAIC (Watanabe-Akaike Information Criterion)</a></li>
-<li class="chapter" data-level="14.3.2" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#loo-cv-leave-one-out-cross-validation"><i class="fa fa-check"></i><b>14.3.2</b> LOO-CV (Leave-One-Out Cross-Validation)</a></li>
+<li class="chapter" data-level="14.1.1" data-path="bayesian-structural-time-series-models.html"><a href="bayesian-structural-time-series-models.html#stan-implementation-basic-bsts-model"><i class="fa fa-check"></i><b>14.1.1</b> Stan Implementation: Basic BSTS Model</a></li>
+<li class="chapter" data-level="14.1.2" data-path="bayesian-structural-time-series-models.html"><a href="bayesian-structural-time-series-models.html#stan-implementation-time-varying-trend-volatility"><i class="fa fa-check"></i><b>14.1.2</b> Stan Implementation: Time-Varying Trend Volatility</a></li>
 </ul></li>
-<li class="chapter" data-level="14.4" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#bayes-factors-vs.-information-criteria"><i class="fa fa-check"></i><b>14.4</b> Bayes Factors vs. Information Criteria</a></li>
-<li class="chapter" data-level="14.5" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#summary-of-bayesian-model-comparison-methods"><i class="fa fa-check"></i><b>14.5</b> Summary of Bayesian Model Comparison Methods</a></li>
-<li class="chapter" data-level="14.6" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#practical-example-comparing-models-in-r"><i class="fa fa-check"></i><b>14.6</b> Practical Example: Comparing Models in R</a></li>
+<li class="chapter" data-level="14.2" data-path="bayesian-structural-time-series-models.html"><a href="bayesian-structural-time-series-models.html#model-comparison-and-selection"><i class="fa fa-check"></i><b>14.2</b> Model Comparison and Selection</a></li>
+<li class="chapter" data-level="14.3" data-path="bayesian-structural-time-series-models.html"><a href="bayesian-structural-time-series-models.html#conclusion-9"><i class="fa fa-check"></i><b>14.3</b> Conclusion</a></li>
 </ul></li>
-<li class="chapter" data-level="15" data-path="appendix.html"><a href="appendix.html"><i class="fa fa-check"></i><b>15</b> Appendix</a>
+<li class="chapter" data-level="15" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html"><i class="fa fa-check"></i><b>15</b> Model Comparison and Selection in Bayesian Analysis</a>
 <ul>
-<li class="chapter" data-level="15.1" data-path="appendix.html"><a href="appendix.html#main-stan-distributions-cheatsheet"><i class="fa fa-check"></i><b>15.1</b> Main Stan Distributions Cheatsheet</a></li>
-<li class="chapter" data-level="15.2" data-path="appendix.html"><a href="appendix.html#main-stan-functions-cheatsheet"><i class="fa fa-check"></i><b>15.2</b> Main Stan Functions Cheatsheet</a></li>
-<li class="chapter" data-level="15.3" data-path="appendix.html"><a href="appendix.html#why-non-distribution-functions"><i class="fa fa-check"></i><b>15.3</b> Why Non-Distribution Functions?</a></li>
-<li class="chapter" data-level="15.4" data-path="appendix.html"><a href="appendix.html#stan-functions-cheatsheet"><i class="fa fa-check"></i><b>15.4</b> Stan Functions Cheatsheet</a>
+<li class="chapter" data-level="15.1" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#introduction-5"><i class="fa fa-check"></i><b>15.1</b> Introduction</a></li>
+<li class="chapter" data-level="15.2" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#posterior-predictive-checks"><i class="fa fa-check"></i><b>15.2</b> Posterior Predictive Checks</a></li>
+<li class="chapter" data-level="15.3" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#information-criteria-waic-and-loo-cv"><i class="fa fa-check"></i><b>15.3</b> Information Criteria: WAIC and LOO-CV</a>
 <ul>
-<li class="chapter" data-level="15.4.1" data-path="appendix.html"><a href="appendix.html#mathematical-functions"><i class="fa fa-check"></i><b>15.4.1</b> 1. Mathematical Functions</a></li>
-<li class="chapter" data-level="15.4.2" data-path="appendix.html"><a href="appendix.html#transformation-functions"><i class="fa fa-check"></i><b>15.4.2</b> 2. Transformation Functions</a></li>
-<li class="chapter" data-level="15.4.3" data-path="appendix.html"><a href="appendix.html#matrix-and-vector-operations"><i class="fa fa-check"></i><b>15.4.3</b> 3. Matrix and Vector Operations</a></li>
-<li class="chapter" data-level="15.4.4" data-path="appendix.html"><a href="appendix.html#utility-functions"><i class="fa fa-check"></i><b>15.4.4</b> 4. Utility Functions</a></li>
-<li class="chapter" data-level="15.4.5" data-path="appendix.html"><a href="appendix.html#specialized-solvers"><i class="fa fa-check"></i><b>15.4.5</b> 5. Specialized Solvers</a></li>
+<li class="chapter" data-level="15.3.1" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#waic-watanabe-akaike-information-criterion"><i class="fa fa-check"></i><b>15.3.1</b> WAIC (Watanabe-Akaike Information Criterion)</a></li>
+<li class="chapter" data-level="15.3.2" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#loo-cv-leave-one-out-cross-validation"><i class="fa fa-check"></i><b>15.3.2</b> LOO-CV (Leave-One-Out Cross-Validation)</a></li>
 </ul></li>
-<li class="chapter" data-level="15.5" data-path="appendix.html"><a href="appendix.html#example-hierarchical-linear-regression"><i class="fa fa-check"></i><b>15.5</b> Example: Hierarchical Linear Regression</a></li>
-<li class="chapter" data-level="15.6" data-path="appendix.html"><a href="appendix.html#tips-for-using-stan-functions"><i class="fa fa-check"></i><b>15.6</b> Tips for Using Stan Functions</a></li>
+<li class="chapter" data-level="15.4" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#bayes-factors-vs.-information-criteria"><i class="fa fa-check"></i><b>15.4</b> Bayes Factors vs. Information Criteria</a></li>
+<li class="chapter" data-level="15.5" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#summary-of-bayesian-model-comparison-methods"><i class="fa fa-check"></i><b>15.5</b> Summary of Bayesian Model Comparison Methods</a></li>
+<li class="chapter" data-level="15.6" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#practical-example-comparing-models-in-r"><i class="fa fa-check"></i><b>15.6</b> Practical Example: Comparing Models in R</a></li>
+</ul></li>
+<li class="chapter" data-level="16" data-path="appendix.html"><a href="appendix.html"><i class="fa fa-check"></i><b>16</b> Appendix</a>
+<ul>
+<li class="chapter" data-level="16.1" data-path="appendix.html"><a href="appendix.html#main-stan-distributions-cheatsheet"><i class="fa fa-check"></i><b>16.1</b> Main Stan Distributions Cheatsheet</a></li>
+<li class="chapter" data-level="16.2" data-path="appendix.html"><a href="appendix.html#main-stan-functions-cheatsheet"><i class="fa fa-check"></i><b>16.2</b> Main Stan Functions Cheatsheet</a></li>
+<li class="chapter" data-level="16.3" data-path="appendix.html"><a href="appendix.html#why-non-distribution-functions"><i class="fa fa-check"></i><b>16.3</b> Why Non-Distribution Functions?</a></li>
+<li class="chapter" data-level="16.4" data-path="appendix.html"><a href="appendix.html#stan-functions-cheatsheet"><i class="fa fa-check"></i><b>16.4</b> Stan Functions Cheatsheet</a>
+<ul>
+<li class="chapter" data-level="16.4.1" data-path="appendix.html"><a href="appendix.html#mathematical-functions"><i class="fa fa-check"></i><b>16.4.1</b> 1. Mathematical Functions</a></li>
+<li class="chapter" data-level="16.4.2" data-path="appendix.html"><a href="appendix.html#transformation-functions"><i class="fa fa-check"></i><b>16.4.2</b> 2. Transformation Functions</a></li>
+<li class="chapter" data-level="16.4.3" data-path="appendix.html"><a href="appendix.html#matrix-and-vector-operations"><i class="fa fa-check"></i><b>16.4.3</b> 3. Matrix and Vector Operations</a></li>
+<li class="chapter" data-level="16.4.4" data-path="appendix.html"><a href="appendix.html#utility-functions"><i class="fa fa-check"></i><b>16.4.4</b> 4. Utility Functions</a></li>
+<li class="chapter" data-level="16.4.5" data-path="appendix.html"><a href="appendix.html#specialized-solvers"><i class="fa fa-check"></i><b>16.4.5</b> 5. Specialized Solvers</a></li>
+</ul></li>
+<li class="chapter" data-level="16.5" data-path="appendix.html"><a href="appendix.html#example-hierarchical-linear-regression"><i class="fa fa-check"></i><b>16.5</b> Example: Hierarchical Linear Regression</a></li>
+<li class="chapter" data-level="16.6" data-path="appendix.html"><a href="appendix.html#tips-for-using-stan-functions"><i class="fa fa-check"></i><b>16.6</b> Tips for Using Stan Functions</a></li>
 </ul></li>
 <li class="divider"></li>
 <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
@@ -321,144 +337,144 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="using-bayesqr-package" class="section level3 hasAnchor" number="6.1.1">
 <h3><span class="header-section-number">6.1.1</span> Using bayesQR package<a href="bayesian-quantile-regression.html#using-bayesqr-package" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>Simulate data from heteroskedastic regression</p>
-<div class="sourceCode" id="cb74"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb74-1"><a href="bayesian-quantile-regression.html#cb74-1" tabindex="-1"></a>    <span class="fu">set.seed</span>(<span class="dv">66</span>)</span>
-<span id="cb74-2"><a href="bayesian-quantile-regression.html#cb74-2" tabindex="-1"></a>    n <span class="ot">&lt;-</span> <span class="dv">200</span></span>
-<span id="cb74-3"><a href="bayesian-quantile-regression.html#cb74-3" tabindex="-1"></a>    X <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="at">n=</span>n,<span class="at">min=</span><span class="dv">0</span>,<span class="at">max=</span><span class="dv">10</span>)</span>
-<span id="cb74-4"><a href="bayesian-quantile-regression.html#cb74-4" tabindex="-1"></a>    X <span class="ot">&lt;-</span> X</span>
-<span id="cb74-5"><a href="bayesian-quantile-regression.html#cb74-5" tabindex="-1"></a>    y <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span><span class="sc">*</span>X <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="at">n=</span>n, <span class="at">mean=</span><span class="dv">0</span>, <span class="at">sd=</span>.<span class="dv">6</span><span class="sc">*</span>X)</span></code></pre></div>
+<div class="sourceCode" id="cb76"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb76-1"><a href="bayesian-quantile-regression.html#cb76-1" tabindex="-1"></a>    <span class="fu">set.seed</span>(<span class="dv">66</span>)</span>
+<span id="cb76-2"><a href="bayesian-quantile-regression.html#cb76-2" tabindex="-1"></a>    n <span class="ot">&lt;-</span> <span class="dv">200</span></span>
+<span id="cb76-3"><a href="bayesian-quantile-regression.html#cb76-3" tabindex="-1"></a>    X <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="at">n=</span>n,<span class="at">min=</span><span class="dv">0</span>,<span class="at">max=</span><span class="dv">10</span>)</span>
+<span id="cb76-4"><a href="bayesian-quantile-regression.html#cb76-4" tabindex="-1"></a>    X <span class="ot">&lt;-</span> X</span>
+<span id="cb76-5"><a href="bayesian-quantile-regression.html#cb76-5" tabindex="-1"></a>    y <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span><span class="sc">*</span>X <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="at">n=</span>n, <span class="at">mean=</span><span class="dv">0</span>, <span class="at">sd=</span>.<span class="dv">6</span><span class="sc">*</span>X)</span></code></pre></div>
 <p>Estimate series of quantile regressions with adaptive lasso
 to limit execution time of the example, ndraw is set to a very low value. Set value to 5000 for a better approximation of the posterior distirubtion.</p>
-<div class="sourceCode" id="cb75"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb75-1"><a href="bayesian-quantile-regression.html#cb75-1" tabindex="-1"></a>    out <span class="ot">&lt;-</span> <span class="fu">bayesQR</span>(y<span class="sc">~</span>X, <span class="at">quantile=</span><span class="fu">c</span>(.<span class="dv">05</span>,.<span class="dv">25</span>,.<span class="dv">5</span>,.<span class="dv">75</span>,.<span class="dv">95</span>), <span class="at">alasso=</span><span class="cn">TRUE</span>, <span class="at">ndraw=</span><span class="dv">500</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb77"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb77-1"><a href="bayesian-quantile-regression.html#cb77-1" tabindex="-1"></a>    out <span class="ot">&lt;-</span> <span class="fu">bayesQR</span>(y<span class="sc">~</span>X, <span class="at">quantile=</span><span class="fu">c</span>(.<span class="dv">05</span>,.<span class="dv">25</span>,.<span class="dv">5</span>,.<span class="dv">75</span>,.<span class="dv">95</span>), <span class="at">alasso=</span><span class="cn">TRUE</span>, <span class="at">ndraw=</span><span class="dv">500</span>)</span></code></pre></div>
 <p>Initiate plot</p>
-<div class="sourceCode" id="cb76"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb76-1"><a href="bayesian-quantile-regression.html#cb76-1" tabindex="-1"></a>    <span class="fu">plot</span>(X, y, <span class="at">main=</span><span class="st">&quot;&quot;</span>, <span class="at">cex=</span>.<span class="dv">6</span>, <span class="at">xlab=</span><span class="st">&quot;X&quot;</span>)</span>
-<span id="cb76-2"><a href="bayesian-quantile-regression.html#cb76-2" tabindex="-1"></a>    <span class="do">## Add quantile regression lines to the plot (exclude first 500 burn-in draws)</span></span>
-<span id="cb76-3"><a href="bayesian-quantile-regression.html#cb76-3" tabindex="-1"></a>    sum <span class="ot">&lt;-</span> <span class="fu">summary</span>(out, <span class="at">burnin=</span><span class="dv">50</span>)</span>
-<span id="cb76-4"><a href="bayesian-quantile-regression.html#cb76-4" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(sum)){</span>
-<span id="cb76-5"><a href="bayesian-quantile-regression.html#cb76-5" tabindex="-1"></a>      <span class="fu">abline</span>(<span class="at">a=</span>sum[[i]]<span class="sc">$</span>betadraw[<span class="dv">1</span>,<span class="dv">1</span>],<span class="at">b=</span>sum[[i]]<span class="sc">$</span>betadraw[<span class="dv">2</span>,<span class="dv">1</span>],<span class="at">lty=</span>i,<span class="at">col=</span>i)</span>
-<span id="cb76-6"><a href="bayesian-quantile-regression.html#cb76-6" tabindex="-1"></a>    }</span></code></pre></div>
-<div class="sourceCode" id="cb77"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb77-1"><a href="bayesian-quantile-regression.html#cb77-1" tabindex="-1"></a>outOLS <span class="ot">=</span> <span class="fu">lm</span>(y<span class="sc">~</span>X)</span>
-<span id="cb77-2"><a href="bayesian-quantile-regression.html#cb77-2" tabindex="-1"></a>    <span class="fu">abline</span>(outOLS,<span class="at">lty=</span><span class="dv">1</span>,<span class="at">lwd=</span><span class="dv">2</span>,<span class="at">col=</span><span class="dv">6</span>)</span>
-<span id="cb77-3"><a href="bayesian-quantile-regression.html#cb77-3" tabindex="-1"></a>    <span class="co"># Add legend to plot</span></span>
-<span id="cb77-4"><a href="bayesian-quantile-regression.html#cb77-4" tabindex="-1"></a>    <span class="fu">legend</span>(<span class="at">x=</span><span class="dv">0</span>,<span class="at">y=</span><span class="fu">max</span>(y),<span class="at">legend=</span><span class="fu">c</span>(.<span class="dv">05</span>,.<span class="dv">25</span>,.<span class="dv">50</span>,.<span class="dv">75</span>,.<span class="dv">95</span>,<span class="st">&quot;OLS&quot;</span>),<span class="at">lty=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">1</span>),</span>
-<span id="cb77-5"><a href="bayesian-quantile-regression.html#cb77-5" tabindex="-1"></a>           <span class="at">lwd=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">2</span>),<span class="at">col=</span><span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>),<span class="at">title=</span><span class="st">&quot;Quantile&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb78"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb78-1"><a href="bayesian-quantile-regression.html#cb78-1" tabindex="-1"></a>    <span class="fu">plot</span>(X, y, <span class="at">main=</span><span class="st">&quot;&quot;</span>, <span class="at">cex=</span>.<span class="dv">6</span>, <span class="at">xlab=</span><span class="st">&quot;X&quot;</span>)</span>
+<span id="cb78-2"><a href="bayesian-quantile-regression.html#cb78-2" tabindex="-1"></a>    <span class="do">## Add quantile regression lines to the plot (exclude first 500 burn-in draws)</span></span>
+<span id="cb78-3"><a href="bayesian-quantile-regression.html#cb78-3" tabindex="-1"></a>    sum <span class="ot">&lt;-</span> <span class="fu">summary</span>(out, <span class="at">burnin=</span><span class="dv">50</span>)</span>
+<span id="cb78-4"><a href="bayesian-quantile-regression.html#cb78-4" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(sum)){</span>
+<span id="cb78-5"><a href="bayesian-quantile-regression.html#cb78-5" tabindex="-1"></a>      <span class="fu">abline</span>(<span class="at">a=</span>sum[[i]]<span class="sc">$</span>betadraw[<span class="dv">1</span>,<span class="dv">1</span>],<span class="at">b=</span>sum[[i]]<span class="sc">$</span>betadraw[<span class="dv">2</span>,<span class="dv">1</span>],<span class="at">lty=</span>i,<span class="at">col=</span>i)</span>
+<span id="cb78-6"><a href="bayesian-quantile-regression.html#cb78-6" tabindex="-1"></a>    }</span></code></pre></div>
+<div class="sourceCode" id="cb79"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb79-1"><a href="bayesian-quantile-regression.html#cb79-1" tabindex="-1"></a>outOLS <span class="ot">=</span> <span class="fu">lm</span>(y<span class="sc">~</span>X)</span>
+<span id="cb79-2"><a href="bayesian-quantile-regression.html#cb79-2" tabindex="-1"></a>    <span class="fu">abline</span>(outOLS,<span class="at">lty=</span><span class="dv">1</span>,<span class="at">lwd=</span><span class="dv">2</span>,<span class="at">col=</span><span class="dv">6</span>)</span>
+<span id="cb79-3"><a href="bayesian-quantile-regression.html#cb79-3" tabindex="-1"></a>    <span class="co"># Add legend to plot</span></span>
+<span id="cb79-4"><a href="bayesian-quantile-regression.html#cb79-4" tabindex="-1"></a>    <span class="fu">legend</span>(<span class="at">x=</span><span class="dv">0</span>,<span class="at">y=</span><span class="fu">max</span>(y),<span class="at">legend=</span><span class="fu">c</span>(.<span class="dv">05</span>,.<span class="dv">25</span>,.<span class="dv">50</span>,.<span class="dv">75</span>,.<span class="dv">95</span>,<span class="st">&quot;OLS&quot;</span>),<span class="at">lty=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">1</span>),</span>
+<span id="cb79-5"><a href="bayesian-quantile-regression.html#cb79-5" tabindex="-1"></a>           <span class="at">lwd=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">2</span>),<span class="at">col=</span><span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>),<span class="at">title=</span><span class="st">&quot;Quantile&quot;</span>)</span></code></pre></div>
 </div>
 <div id="using-brms-package" class="section level3 hasAnchor" number="6.1.2">
 <h3><span class="header-section-number">6.1.2</span> Using brms package<a href="bayesian-quantile-regression.html#using-brms-package" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<div class="sourceCode" id="cb78"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb78-1"><a href="bayesian-quantile-regression.html#cb78-1" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">200</span></span>
-<span id="cb78-2"><a href="bayesian-quantile-regression.html#cb78-2" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="at">n =</span> n, <span class="at">min =</span> <span class="dv">0</span>, <span class="at">max =</span> <span class="dv">10</span>)</span>
-<span id="cb78-3"><a href="bayesian-quantile-regression.html#cb78-3" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> x <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="at">n =</span> n, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="fl">0.6</span><span class="sc">*</span>x)</span>
-<span id="cb78-4"><a href="bayesian-quantile-regression.html#cb78-4" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(x, y)</span>
-<span id="cb78-5"><a href="bayesian-quantile-regression.html#cb78-5" tabindex="-1"></a><span class="co"># fit the 20%-quantile</span></span>
-<span id="cb78-6"><a href="bayesian-quantile-regression.html#cb78-6" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">brm</span>(<span class="fu">bf</span>(y <span class="sc">~</span> x, <span class="at">quantile =</span> <span class="fl">0.2</span>), <span class="at">data =</span> dat, <span class="at">family =</span> <span class="fu">asym_laplace</span>())</span>
-<span id="cb78-7"><a href="bayesian-quantile-regression.html#cb78-7" tabindex="-1"></a><span class="fu">summary</span>(fit)</span></code></pre></div>
+<div class="sourceCode" id="cb80"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb80-1"><a href="bayesian-quantile-regression.html#cb80-1" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">200</span></span>
+<span id="cb80-2"><a href="bayesian-quantile-regression.html#cb80-2" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="at">n =</span> n, <span class="at">min =</span> <span class="dv">0</span>, <span class="at">max =</span> <span class="dv">10</span>)</span>
+<span id="cb80-3"><a href="bayesian-quantile-regression.html#cb80-3" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> x <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="at">n =</span> n, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="fl">0.6</span><span class="sc">*</span>x)</span>
+<span id="cb80-4"><a href="bayesian-quantile-regression.html#cb80-4" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(x, y)</span>
+<span id="cb80-5"><a href="bayesian-quantile-regression.html#cb80-5" tabindex="-1"></a><span class="co"># fit the 20%-quantile</span></span>
+<span id="cb80-6"><a href="bayesian-quantile-regression.html#cb80-6" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">brm</span>(<span class="fu">bf</span>(y <span class="sc">~</span> x, <span class="at">quantile =</span> <span class="fl">0.2</span>), <span class="at">data =</span> dat, <span class="at">family =</span> <span class="fu">asym_laplace</span>())</span>
+<span id="cb80-7"><a href="bayesian-quantile-regression.html#cb80-7" tabindex="-1"></a><span class="fu">summary</span>(fit)</span></code></pre></div>
 </div>
 <div id="backend-stan-model" class="section level3 hasAnchor" number="6.1.3">
 <h3><span class="header-section-number">6.1.3</span> Backend stan model<a href="bayesian-quantile-regression.html#backend-stan-model" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<div class="sourceCode" id="cb79"><pre class="sourceCode stan"><code class="sourceCode stan"><span id="cb79-1"><a href="bayesian-quantile-regression.html#cb79-1" tabindex="-1"></a><span class="kw">functions</span> {</span>
-<span id="cb79-2"><a href="bayesian-quantile-regression.html#cb79-2" tabindex="-1"></a>  <span class="co">/* helper function for asym_laplace_lpdf</span></span>
-<span id="cb79-3"><a href="bayesian-quantile-regression.html#cb79-3" tabindex="-1"></a><span class="co">   * Args:</span></span>
-<span id="cb79-4"><a href="bayesian-quantile-regression.html#cb79-4" tabindex="-1"></a><span class="co">   *   y: the response value</span></span>
-<span id="cb79-5"><a href="bayesian-quantile-regression.html#cb79-5" tabindex="-1"></a><span class="co">   *   quantile: quantile parameter in (0, 1)</span></span>
-<span id="cb79-6"><a href="bayesian-quantile-regression.html#cb79-6" tabindex="-1"></a><span class="co">   */</span></span>
-<span id="cb79-7"><a href="bayesian-quantile-regression.html#cb79-7" tabindex="-1"></a>   <span class="dt">real</span> rho_quantile(<span class="dt">real</span> y, <span class="dt">real</span> quantile) {</span>
-<span id="cb79-8"><a href="bayesian-quantile-regression.html#cb79-8" tabindex="-1"></a>     <span class="cf">if</span> (y &lt; <span class="dv">0</span>) {</span>
-<span id="cb79-9"><a href="bayesian-quantile-regression.html#cb79-9" tabindex="-1"></a>       <span class="cf">return</span> y * (quantile - <span class="dv">1</span>);</span>
-<span id="cb79-10"><a href="bayesian-quantile-regression.html#cb79-10" tabindex="-1"></a>     } <span class="cf">else</span> {</span>
-<span id="cb79-11"><a href="bayesian-quantile-regression.html#cb79-11" tabindex="-1"></a>       <span class="cf">return</span> y * quantile;</span>
-<span id="cb79-12"><a href="bayesian-quantile-regression.html#cb79-12" tabindex="-1"></a>     }</span>
-<span id="cb79-13"><a href="bayesian-quantile-regression.html#cb79-13" tabindex="-1"></a>   }</span>
-<span id="cb79-14"><a href="bayesian-quantile-regression.html#cb79-14" tabindex="-1"></a>  <span class="co">/* asymmetric laplace log-PDF for a single response</span></span>
-<span id="cb79-15"><a href="bayesian-quantile-regression.html#cb79-15" tabindex="-1"></a><span class="co">   * Args:</span></span>
-<span id="cb79-16"><a href="bayesian-quantile-regression.html#cb79-16" tabindex="-1"></a><span class="co">   *   y: the response value</span></span>
-<span id="cb79-17"><a href="bayesian-quantile-regression.html#cb79-17" tabindex="-1"></a><span class="co">   *   mu: location parameter</span></span>
-<span id="cb79-18"><a href="bayesian-quantile-regression.html#cb79-18" tabindex="-1"></a><span class="co">   *   sigma: positive scale parameter</span></span>
-<span id="cb79-19"><a href="bayesian-quantile-regression.html#cb79-19" tabindex="-1"></a><span class="co">   *   quantile: quantile parameter in (0, 1)</span></span>
-<span id="cb79-20"><a href="bayesian-quantile-regression.html#cb79-20" tabindex="-1"></a><span class="co">   * Returns:</span></span>
-<span id="cb79-21"><a href="bayesian-quantile-regression.html#cb79-21" tabindex="-1"></a><span class="co">   *   a scalar to be added to the log posterior</span></span>
-<span id="cb79-22"><a href="bayesian-quantile-regression.html#cb79-22" tabindex="-1"></a><span class="co">   */</span></span>
-<span id="cb79-23"><a href="bayesian-quantile-regression.html#cb79-23" tabindex="-1"></a>   <span class="dt">real</span> asym_laplace_lpdf(<span class="dt">real</span> y, <span class="dt">real</span> mu, <span class="dt">real</span> sigma, <span class="dt">real</span> quantile) {</span>
-<span id="cb79-24"><a href="bayesian-quantile-regression.html#cb79-24" tabindex="-1"></a>     <span class="cf">return</span> log(quantile * (<span class="dv">1</span> - quantile)) -</span>
-<span id="cb79-25"><a href="bayesian-quantile-regression.html#cb79-25" tabindex="-1"></a>            log(sigma) -</span>
-<span id="cb79-26"><a href="bayesian-quantile-regression.html#cb79-26" tabindex="-1"></a>            rho_quantile((y - mu) / sigma, quantile);</span>
-<span id="cb79-27"><a href="bayesian-quantile-regression.html#cb79-27" tabindex="-1"></a>   }</span>
-<span id="cb79-28"><a href="bayesian-quantile-regression.html#cb79-28" tabindex="-1"></a>  <span class="co">/* asymmetric laplace log-CDF for a single quantile</span></span>
-<span id="cb79-29"><a href="bayesian-quantile-regression.html#cb79-29" tabindex="-1"></a><span class="co">   * Args:</span></span>
-<span id="cb79-30"><a href="bayesian-quantile-regression.html#cb79-30" tabindex="-1"></a><span class="co">   *   y: a quantile</span></span>
-<span id="cb79-31"><a href="bayesian-quantile-regression.html#cb79-31" tabindex="-1"></a><span class="co">   *   mu: location parameter</span></span>
-<span id="cb79-32"><a href="bayesian-quantile-regression.html#cb79-32" tabindex="-1"></a><span class="co">   *   sigma: positive scale parameter</span></span>
-<span id="cb79-33"><a href="bayesian-quantile-regression.html#cb79-33" tabindex="-1"></a><span class="co">   *   quantile: quantile parameter in (0, 1)</span></span>
-<span id="cb79-34"><a href="bayesian-quantile-regression.html#cb79-34" tabindex="-1"></a><span class="co">   * Returns:</span></span>
-<span id="cb79-35"><a href="bayesian-quantile-regression.html#cb79-35" tabindex="-1"></a><span class="co">   *   a scalar to be added to the log posterior</span></span>
-<span id="cb79-36"><a href="bayesian-quantile-regression.html#cb79-36" tabindex="-1"></a><span class="co">   */</span></span>
-<span id="cb79-37"><a href="bayesian-quantile-regression.html#cb79-37" tabindex="-1"></a>   <span class="dt">real</span> asym_laplace_lcdf(<span class="dt">real</span> y, <span class="dt">real</span> mu, <span class="dt">real</span> sigma, <span class="dt">real</span> quantile) {</span>
-<span id="cb79-38"><a href="bayesian-quantile-regression.html#cb79-38" tabindex="-1"></a>     <span class="cf">if</span> (y &lt; mu) {</span>
-<span id="cb79-39"><a href="bayesian-quantile-regression.html#cb79-39" tabindex="-1"></a>       <span class="cf">return</span> log(quantile) + (<span class="dv">1</span> - quantile) * (y - mu) / sigma;</span>
-<span id="cb79-40"><a href="bayesian-quantile-regression.html#cb79-40" tabindex="-1"></a>     } <span class="cf">else</span> {</span>
-<span id="cb79-41"><a href="bayesian-quantile-regression.html#cb79-41" tabindex="-1"></a>       <span class="cf">return</span> log1m((<span class="dv">1</span> - quantile) * exp(-quantile * (y - mu) / sigma));</span>
-<span id="cb79-42"><a href="bayesian-quantile-regression.html#cb79-42" tabindex="-1"></a>     }</span>
-<span id="cb79-43"><a href="bayesian-quantile-regression.html#cb79-43" tabindex="-1"></a>   }</span>
-<span id="cb79-44"><a href="bayesian-quantile-regression.html#cb79-44" tabindex="-1"></a>  <span class="co">/* asymmetric laplace log-CCDF for a single quantile</span></span>
-<span id="cb79-45"><a href="bayesian-quantile-regression.html#cb79-45" tabindex="-1"></a><span class="co">   * Args:</span></span>
-<span id="cb79-46"><a href="bayesian-quantile-regression.html#cb79-46" tabindex="-1"></a><span class="co">   *   y: a quantile</span></span>
-<span id="cb79-47"><a href="bayesian-quantile-regression.html#cb79-47" tabindex="-1"></a><span class="co">   *   mu: location parameter</span></span>
-<span id="cb79-48"><a href="bayesian-quantile-regression.html#cb79-48" tabindex="-1"></a><span class="co">   *   sigma: positive scale parameter</span></span>
-<span id="cb79-49"><a href="bayesian-quantile-regression.html#cb79-49" tabindex="-1"></a><span class="co">   *   quantile: quantile parameter in (0, 1)</span></span>
-<span id="cb79-50"><a href="bayesian-quantile-regression.html#cb79-50" tabindex="-1"></a><span class="co">   * Returns:</span></span>
-<span id="cb79-51"><a href="bayesian-quantile-regression.html#cb79-51" tabindex="-1"></a><span class="co">   *   a scalar to be added to the log posterior</span></span>
-<span id="cb79-52"><a href="bayesian-quantile-regression.html#cb79-52" tabindex="-1"></a><span class="co">   */</span></span>
-<span id="cb79-53"><a href="bayesian-quantile-regression.html#cb79-53" tabindex="-1"></a>   <span class="dt">real</span> asym_laplace_lccdf(<span class="dt">real</span> y, <span class="dt">real</span> mu, <span class="dt">real</span> sigma, <span class="dt">real</span> quantile) {</span>
-<span id="cb79-54"><a href="bayesian-quantile-regression.html#cb79-54" tabindex="-1"></a>     <span class="cf">if</span> (y &lt; mu) {</span>
-<span id="cb79-55"><a href="bayesian-quantile-regression.html#cb79-55" tabindex="-1"></a>       <span class="cf">return</span> log1m(quantile * exp((<span class="dv">1</span> - quantile) * (y - mu) / sigma));</span>
-<span id="cb79-56"><a href="bayesian-quantile-regression.html#cb79-56" tabindex="-1"></a>     } <span class="cf">else</span> {</span>
-<span id="cb79-57"><a href="bayesian-quantile-regression.html#cb79-57" tabindex="-1"></a>       <span class="cf">return</span> log1m(quantile) - quantile * (y - mu) / sigma;</span>
-<span id="cb79-58"><a href="bayesian-quantile-regression.html#cb79-58" tabindex="-1"></a>     }</span>
-<span id="cb79-59"><a href="bayesian-quantile-regression.html#cb79-59" tabindex="-1"></a>   }</span>
-<span id="cb79-60"><a href="bayesian-quantile-regression.html#cb79-60" tabindex="-1"></a>}</span>
-<span id="cb79-61"><a href="bayesian-quantile-regression.html#cb79-61" tabindex="-1"></a><span class="kw">data</span> {</span>
-<span id="cb79-62"><a href="bayesian-quantile-regression.html#cb79-62" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; N;  <span class="co">// total number of observations</span></span>
-<span id="cb79-63"><a href="bayesian-quantile-regression.html#cb79-63" tabindex="-1"></a>  <span class="dt">vector</span>[N] Y;  <span class="co">// response variable</span></span>
-<span id="cb79-64"><a href="bayesian-quantile-regression.html#cb79-64" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; K;  <span class="co">// number of population-level effects</span></span>
-<span id="cb79-65"><a href="bayesian-quantile-regression.html#cb79-65" tabindex="-1"></a>  <span class="dt">matrix</span>[N, K] X;  <span class="co">// population-level design matrix</span></span>
-<span id="cb79-66"><a href="bayesian-quantile-regression.html#cb79-66" tabindex="-1"></a>  <span class="dt">int</span> prior_only;  <span class="co">// should the likelihood be ignored?</span></span>
-<span id="cb79-67"><a href="bayesian-quantile-regression.html#cb79-67" tabindex="-1"></a>}</span>
-<span id="cb79-68"><a href="bayesian-quantile-regression.html#cb79-68" tabindex="-1"></a><span class="kw">transformed data</span> {</span>
-<span id="cb79-69"><a href="bayesian-quantile-regression.html#cb79-69" tabindex="-1"></a>  <span class="dt">int</span> Kc = K - <span class="dv">1</span>;</span>
-<span id="cb79-70"><a href="bayesian-quantile-regression.html#cb79-70" tabindex="-1"></a>  <span class="dt">matrix</span>[N, Kc] Xc;  <span class="co">// centered version of X without an intercept</span></span>
-<span id="cb79-71"><a href="bayesian-quantile-regression.html#cb79-71" tabindex="-1"></a>  <span class="dt">vector</span>[Kc] means_X;  <span class="co">// column means of X before centering</span></span>
-<span id="cb79-72"><a href="bayesian-quantile-regression.html#cb79-72" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span>:K) {</span>
-<span id="cb79-73"><a href="bayesian-quantile-regression.html#cb79-73" tabindex="-1"></a>    means_X[i - <span class="dv">1</span>] = mean(X[, i]);</span>
-<span id="cb79-74"><a href="bayesian-quantile-regression.html#cb79-74" tabindex="-1"></a>    Xc[, i - <span class="dv">1</span>] = X[, i] - means_X[i - <span class="dv">1</span>];</span>
-<span id="cb79-75"><a href="bayesian-quantile-regression.html#cb79-75" tabindex="-1"></a>  }</span>
-<span id="cb79-76"><a href="bayesian-quantile-regression.html#cb79-76" tabindex="-1"></a>}</span>
-<span id="cb79-77"><a href="bayesian-quantile-regression.html#cb79-77" tabindex="-1"></a><span class="kw">parameters</span> {</span>
-<span id="cb79-78"><a href="bayesian-quantile-regression.html#cb79-78" tabindex="-1"></a>  <span class="dt">vector</span>[Kc] b;  <span class="co">// population-level effects</span></span>
-<span id="cb79-79"><a href="bayesian-quantile-regression.html#cb79-79" tabindex="-1"></a>  <span class="dt">real</span> Intercept;  <span class="co">// temporary intercept for centered predictors</span></span>
-<span id="cb79-80"><a href="bayesian-quantile-regression.html#cb79-80" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma;  <span class="co">// dispersion parameter</span></span>
-<span id="cb79-81"><a href="bayesian-quantile-regression.html#cb79-81" tabindex="-1"></a>}</span>
-<span id="cb79-82"><a href="bayesian-quantile-regression.html#cb79-82" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
-<span id="cb79-83"><a href="bayesian-quantile-regression.html#cb79-83" tabindex="-1"></a>  <span class="dt">real</span> quantile = <span class="fl">0.2</span>;  <span class="co">// quantile parameter</span></span>
-<span id="cb79-84"><a href="bayesian-quantile-regression.html#cb79-84" tabindex="-1"></a>  <span class="dt">real</span> lprior = <span class="dv">0</span>;  <span class="co">// prior contributions to the log posterior</span></span>
-<span id="cb79-85"><a href="bayesian-quantile-regression.html#cb79-85" tabindex="-1"></a>  lprior += student_t_lpdf(Intercept | <span class="dv">3</span>, <span class="dv">11</span>, <span class="fl">7.8</span>);</span>
-<span id="cb79-86"><a href="bayesian-quantile-regression.html#cb79-86" tabindex="-1"></a>  lprior += student_t_lpdf(sigma | <span class="dv">3</span>, <span class="dv">0</span>, <span class="fl">7.8</span>)</span>
-<span id="cb79-87"><a href="bayesian-quantile-regression.html#cb79-87" tabindex="-1"></a>    - <span class="dv">1</span> * student_t_lccdf(<span class="dv">0</span> | <span class="dv">3</span>, <span class="dv">0</span>, <span class="fl">7.8</span>);</span>
-<span id="cb79-88"><a href="bayesian-quantile-regression.html#cb79-88" tabindex="-1"></a>}</span>
-<span id="cb79-89"><a href="bayesian-quantile-regression.html#cb79-89" tabindex="-1"></a><span class="kw">model</span> {</span>
-<span id="cb79-90"><a href="bayesian-quantile-regression.html#cb79-90" tabindex="-1"></a>  <span class="co">// likelihood including constants</span></span>
-<span id="cb79-91"><a href="bayesian-quantile-regression.html#cb79-91" tabindex="-1"></a>  <span class="cf">if</span> (!prior_only) {</span>
-<span id="cb79-92"><a href="bayesian-quantile-regression.html#cb79-92" tabindex="-1"></a>    <span class="co">// initialize linear predictor term</span></span>
-<span id="cb79-93"><a href="bayesian-quantile-regression.html#cb79-93" tabindex="-1"></a>    <span class="dt">vector</span>[N] mu = rep_vector(<span class="fl">0.0</span>, N);</span>
-<span id="cb79-94"><a href="bayesian-quantile-regression.html#cb79-94" tabindex="-1"></a>    mu += Intercept + Xc * b;</span>
-<span id="cb79-95"><a href="bayesian-quantile-regression.html#cb79-95" tabindex="-1"></a>    <span class="cf">for</span> (n <span class="cf">in</span> <span class="dv">1</span>:N) {</span>
-<span id="cb79-96"><a href="bayesian-quantile-regression.html#cb79-96" tabindex="-1"></a>      <span class="kw">target +=</span> asym_laplace_lpdf(Y[n] | mu[n], sigma, quantile);</span>
-<span id="cb79-97"><a href="bayesian-quantile-regression.html#cb79-97" tabindex="-1"></a>    }</span>
-<span id="cb79-98"><a href="bayesian-quantile-regression.html#cb79-98" tabindex="-1"></a>  }</span>
-<span id="cb79-99"><a href="bayesian-quantile-regression.html#cb79-99" tabindex="-1"></a>  <span class="co">// priors including constants</span></span>
-<span id="cb79-100"><a href="bayesian-quantile-regression.html#cb79-100" tabindex="-1"></a>  <span class="kw">target +=</span> lprior;</span>
-<span id="cb79-101"><a href="bayesian-quantile-regression.html#cb79-101" tabindex="-1"></a>}</span>
-<span id="cb79-102"><a href="bayesian-quantile-regression.html#cb79-102" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
-<span id="cb79-103"><a href="bayesian-quantile-regression.html#cb79-103" tabindex="-1"></a>  <span class="co">// actual population-level intercept</span></span>
-<span id="cb79-104"><a href="bayesian-quantile-regression.html#cb79-104" tabindex="-1"></a>  <span class="dt">real</span> b_Intercept = Intercept - dot_product(means_X, b);</span>
-<span id="cb79-105"><a href="bayesian-quantile-regression.html#cb79-105" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb81"><pre class="sourceCode stan"><code class="sourceCode stan"><span id="cb81-1"><a href="bayesian-quantile-regression.html#cb81-1" tabindex="-1"></a><span class="kw">functions</span> {</span>
+<span id="cb81-2"><a href="bayesian-quantile-regression.html#cb81-2" tabindex="-1"></a>  <span class="co">/* helper function for asym_laplace_lpdf</span></span>
+<span id="cb81-3"><a href="bayesian-quantile-regression.html#cb81-3" tabindex="-1"></a><span class="co">   * Args:</span></span>
+<span id="cb81-4"><a href="bayesian-quantile-regression.html#cb81-4" tabindex="-1"></a><span class="co">   *   y: the response value</span></span>
+<span id="cb81-5"><a href="bayesian-quantile-regression.html#cb81-5" tabindex="-1"></a><span class="co">   *   quantile: quantile parameter in (0, 1)</span></span>
+<span id="cb81-6"><a href="bayesian-quantile-regression.html#cb81-6" tabindex="-1"></a><span class="co">   */</span></span>
+<span id="cb81-7"><a href="bayesian-quantile-regression.html#cb81-7" tabindex="-1"></a>   <span class="dt">real</span> rho_quantile(<span class="dt">real</span> y, <span class="dt">real</span> quantile) {</span>
+<span id="cb81-8"><a href="bayesian-quantile-regression.html#cb81-8" tabindex="-1"></a>     <span class="cf">if</span> (y &lt; <span class="dv">0</span>) {</span>
+<span id="cb81-9"><a href="bayesian-quantile-regression.html#cb81-9" tabindex="-1"></a>       <span class="cf">return</span> y * (quantile - <span class="dv">1</span>);</span>
+<span id="cb81-10"><a href="bayesian-quantile-regression.html#cb81-10" tabindex="-1"></a>     } <span class="cf">else</span> {</span>
+<span id="cb81-11"><a href="bayesian-quantile-regression.html#cb81-11" tabindex="-1"></a>       <span class="cf">return</span> y * quantile;</span>
+<span id="cb81-12"><a href="bayesian-quantile-regression.html#cb81-12" tabindex="-1"></a>     }</span>
+<span id="cb81-13"><a href="bayesian-quantile-regression.html#cb81-13" tabindex="-1"></a>   }</span>
+<span id="cb81-14"><a href="bayesian-quantile-regression.html#cb81-14" tabindex="-1"></a>  <span class="co">/* asymmetric laplace log-PDF for a single response</span></span>
+<span id="cb81-15"><a href="bayesian-quantile-regression.html#cb81-15" tabindex="-1"></a><span class="co">   * Args:</span></span>
+<span id="cb81-16"><a href="bayesian-quantile-regression.html#cb81-16" tabindex="-1"></a><span class="co">   *   y: the response value</span></span>
+<span id="cb81-17"><a href="bayesian-quantile-regression.html#cb81-17" tabindex="-1"></a><span class="co">   *   mu: location parameter</span></span>
+<span id="cb81-18"><a href="bayesian-quantile-regression.html#cb81-18" tabindex="-1"></a><span class="co">   *   sigma: positive scale parameter</span></span>
+<span id="cb81-19"><a href="bayesian-quantile-regression.html#cb81-19" tabindex="-1"></a><span class="co">   *   quantile: quantile parameter in (0, 1)</span></span>
+<span id="cb81-20"><a href="bayesian-quantile-regression.html#cb81-20" tabindex="-1"></a><span class="co">   * Returns:</span></span>
+<span id="cb81-21"><a href="bayesian-quantile-regression.html#cb81-21" tabindex="-1"></a><span class="co">   *   a scalar to be added to the log posterior</span></span>
+<span id="cb81-22"><a href="bayesian-quantile-regression.html#cb81-22" tabindex="-1"></a><span class="co">   */</span></span>
+<span id="cb81-23"><a href="bayesian-quantile-regression.html#cb81-23" tabindex="-1"></a>   <span class="dt">real</span> asym_laplace_lpdf(<span class="dt">real</span> y, <span class="dt">real</span> mu, <span class="dt">real</span> sigma, <span class="dt">real</span> quantile) {</span>
+<span id="cb81-24"><a href="bayesian-quantile-regression.html#cb81-24" tabindex="-1"></a>     <span class="cf">return</span> log(quantile * (<span class="dv">1</span> - quantile)) -</span>
+<span id="cb81-25"><a href="bayesian-quantile-regression.html#cb81-25" tabindex="-1"></a>            log(sigma) -</span>
+<span id="cb81-26"><a href="bayesian-quantile-regression.html#cb81-26" tabindex="-1"></a>            rho_quantile((y - mu) / sigma, quantile);</span>
+<span id="cb81-27"><a href="bayesian-quantile-regression.html#cb81-27" tabindex="-1"></a>   }</span>
+<span id="cb81-28"><a href="bayesian-quantile-regression.html#cb81-28" tabindex="-1"></a>  <span class="co">/* asymmetric laplace log-CDF for a single quantile</span></span>
+<span id="cb81-29"><a href="bayesian-quantile-regression.html#cb81-29" tabindex="-1"></a><span class="co">   * Args:</span></span>
+<span id="cb81-30"><a href="bayesian-quantile-regression.html#cb81-30" tabindex="-1"></a><span class="co">   *   y: a quantile</span></span>
+<span id="cb81-31"><a href="bayesian-quantile-regression.html#cb81-31" tabindex="-1"></a><span class="co">   *   mu: location parameter</span></span>
+<span id="cb81-32"><a href="bayesian-quantile-regression.html#cb81-32" tabindex="-1"></a><span class="co">   *   sigma: positive scale parameter</span></span>
+<span id="cb81-33"><a href="bayesian-quantile-regression.html#cb81-33" tabindex="-1"></a><span class="co">   *   quantile: quantile parameter in (0, 1)</span></span>
+<span id="cb81-34"><a href="bayesian-quantile-regression.html#cb81-34" tabindex="-1"></a><span class="co">   * Returns:</span></span>
+<span id="cb81-35"><a href="bayesian-quantile-regression.html#cb81-35" tabindex="-1"></a><span class="co">   *   a scalar to be added to the log posterior</span></span>
+<span id="cb81-36"><a href="bayesian-quantile-regression.html#cb81-36" tabindex="-1"></a><span class="co">   */</span></span>
+<span id="cb81-37"><a href="bayesian-quantile-regression.html#cb81-37" tabindex="-1"></a>   <span class="dt">real</span> asym_laplace_lcdf(<span class="dt">real</span> y, <span class="dt">real</span> mu, <span class="dt">real</span> sigma, <span class="dt">real</span> quantile) {</span>
+<span id="cb81-38"><a href="bayesian-quantile-regression.html#cb81-38" tabindex="-1"></a>     <span class="cf">if</span> (y &lt; mu) {</span>
+<span id="cb81-39"><a href="bayesian-quantile-regression.html#cb81-39" tabindex="-1"></a>       <span class="cf">return</span> log(quantile) + (<span class="dv">1</span> - quantile) * (y - mu) / sigma;</span>
+<span id="cb81-40"><a href="bayesian-quantile-regression.html#cb81-40" tabindex="-1"></a>     } <span class="cf">else</span> {</span>
+<span id="cb81-41"><a href="bayesian-quantile-regression.html#cb81-41" tabindex="-1"></a>       <span class="cf">return</span> log1m((<span class="dv">1</span> - quantile) * exp(-quantile * (y - mu) / sigma));</span>
+<span id="cb81-42"><a href="bayesian-quantile-regression.html#cb81-42" tabindex="-1"></a>     }</span>
+<span id="cb81-43"><a href="bayesian-quantile-regression.html#cb81-43" tabindex="-1"></a>   }</span>
+<span id="cb81-44"><a href="bayesian-quantile-regression.html#cb81-44" tabindex="-1"></a>  <span class="co">/* asymmetric laplace log-CCDF for a single quantile</span></span>
+<span id="cb81-45"><a href="bayesian-quantile-regression.html#cb81-45" tabindex="-1"></a><span class="co">   * Args:</span></span>
+<span id="cb81-46"><a href="bayesian-quantile-regression.html#cb81-46" tabindex="-1"></a><span class="co">   *   y: a quantile</span></span>
+<span id="cb81-47"><a href="bayesian-quantile-regression.html#cb81-47" tabindex="-1"></a><span class="co">   *   mu: location parameter</span></span>
+<span id="cb81-48"><a href="bayesian-quantile-regression.html#cb81-48" tabindex="-1"></a><span class="co">   *   sigma: positive scale parameter</span></span>
+<span id="cb81-49"><a href="bayesian-quantile-regression.html#cb81-49" tabindex="-1"></a><span class="co">   *   quantile: quantile parameter in (0, 1)</span></span>
+<span id="cb81-50"><a href="bayesian-quantile-regression.html#cb81-50" tabindex="-1"></a><span class="co">   * Returns:</span></span>
+<span id="cb81-51"><a href="bayesian-quantile-regression.html#cb81-51" tabindex="-1"></a><span class="co">   *   a scalar to be added to the log posterior</span></span>
+<span id="cb81-52"><a href="bayesian-quantile-regression.html#cb81-52" tabindex="-1"></a><span class="co">   */</span></span>
+<span id="cb81-53"><a href="bayesian-quantile-regression.html#cb81-53" tabindex="-1"></a>   <span class="dt">real</span> asym_laplace_lccdf(<span class="dt">real</span> y, <span class="dt">real</span> mu, <span class="dt">real</span> sigma, <span class="dt">real</span> quantile) {</span>
+<span id="cb81-54"><a href="bayesian-quantile-regression.html#cb81-54" tabindex="-1"></a>     <span class="cf">if</span> (y &lt; mu) {</span>
+<span id="cb81-55"><a href="bayesian-quantile-regression.html#cb81-55" tabindex="-1"></a>       <span class="cf">return</span> log1m(quantile * exp((<span class="dv">1</span> - quantile) * (y - mu) / sigma));</span>
+<span id="cb81-56"><a href="bayesian-quantile-regression.html#cb81-56" tabindex="-1"></a>     } <span class="cf">else</span> {</span>
+<span id="cb81-57"><a href="bayesian-quantile-regression.html#cb81-57" tabindex="-1"></a>       <span class="cf">return</span> log1m(quantile) - quantile * (y - mu) / sigma;</span>
+<span id="cb81-58"><a href="bayesian-quantile-regression.html#cb81-58" tabindex="-1"></a>     }</span>
+<span id="cb81-59"><a href="bayesian-quantile-regression.html#cb81-59" tabindex="-1"></a>   }</span>
+<span id="cb81-60"><a href="bayesian-quantile-regression.html#cb81-60" tabindex="-1"></a>}</span>
+<span id="cb81-61"><a href="bayesian-quantile-regression.html#cb81-61" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb81-62"><a href="bayesian-quantile-regression.html#cb81-62" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; N;  <span class="co">// total number of observations</span></span>
+<span id="cb81-63"><a href="bayesian-quantile-regression.html#cb81-63" tabindex="-1"></a>  <span class="dt">vector</span>[N] Y;  <span class="co">// response variable</span></span>
+<span id="cb81-64"><a href="bayesian-quantile-regression.html#cb81-64" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; K;  <span class="co">// number of population-level effects</span></span>
+<span id="cb81-65"><a href="bayesian-quantile-regression.html#cb81-65" tabindex="-1"></a>  <span class="dt">matrix</span>[N, K] X;  <span class="co">// population-level design matrix</span></span>
+<span id="cb81-66"><a href="bayesian-quantile-regression.html#cb81-66" tabindex="-1"></a>  <span class="dt">int</span> prior_only;  <span class="co">// should the likelihood be ignored?</span></span>
+<span id="cb81-67"><a href="bayesian-quantile-regression.html#cb81-67" tabindex="-1"></a>}</span>
+<span id="cb81-68"><a href="bayesian-quantile-regression.html#cb81-68" tabindex="-1"></a><span class="kw">transformed data</span> {</span>
+<span id="cb81-69"><a href="bayesian-quantile-regression.html#cb81-69" tabindex="-1"></a>  <span class="dt">int</span> Kc = K - <span class="dv">1</span>;</span>
+<span id="cb81-70"><a href="bayesian-quantile-regression.html#cb81-70" tabindex="-1"></a>  <span class="dt">matrix</span>[N, Kc] Xc;  <span class="co">// centered version of X without an intercept</span></span>
+<span id="cb81-71"><a href="bayesian-quantile-regression.html#cb81-71" tabindex="-1"></a>  <span class="dt">vector</span>[Kc] means_X;  <span class="co">// column means of X before centering</span></span>
+<span id="cb81-72"><a href="bayesian-quantile-regression.html#cb81-72" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span>:K) {</span>
+<span id="cb81-73"><a href="bayesian-quantile-regression.html#cb81-73" tabindex="-1"></a>    means_X[i - <span class="dv">1</span>] = mean(X[, i]);</span>
+<span id="cb81-74"><a href="bayesian-quantile-regression.html#cb81-74" tabindex="-1"></a>    Xc[, i - <span class="dv">1</span>] = X[, i] - means_X[i - <span class="dv">1</span>];</span>
+<span id="cb81-75"><a href="bayesian-quantile-regression.html#cb81-75" tabindex="-1"></a>  }</span>
+<span id="cb81-76"><a href="bayesian-quantile-regression.html#cb81-76" tabindex="-1"></a>}</span>
+<span id="cb81-77"><a href="bayesian-quantile-regression.html#cb81-77" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb81-78"><a href="bayesian-quantile-regression.html#cb81-78" tabindex="-1"></a>  <span class="dt">vector</span>[Kc] b;  <span class="co">// population-level effects</span></span>
+<span id="cb81-79"><a href="bayesian-quantile-regression.html#cb81-79" tabindex="-1"></a>  <span class="dt">real</span> Intercept;  <span class="co">// temporary intercept for centered predictors</span></span>
+<span id="cb81-80"><a href="bayesian-quantile-regression.html#cb81-80" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma;  <span class="co">// dispersion parameter</span></span>
+<span id="cb81-81"><a href="bayesian-quantile-regression.html#cb81-81" tabindex="-1"></a>}</span>
+<span id="cb81-82"><a href="bayesian-quantile-regression.html#cb81-82" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb81-83"><a href="bayesian-quantile-regression.html#cb81-83" tabindex="-1"></a>  <span class="dt">real</span> quantile = <span class="fl">0.2</span>;  <span class="co">// quantile parameter</span></span>
+<span id="cb81-84"><a href="bayesian-quantile-regression.html#cb81-84" tabindex="-1"></a>  <span class="dt">real</span> lprior = <span class="dv">0</span>;  <span class="co">// prior contributions to the log posterior</span></span>
+<span id="cb81-85"><a href="bayesian-quantile-regression.html#cb81-85" tabindex="-1"></a>  lprior += student_t_lpdf(Intercept | <span class="dv">3</span>, <span class="dv">11</span>, <span class="fl">7.8</span>);</span>
+<span id="cb81-86"><a href="bayesian-quantile-regression.html#cb81-86" tabindex="-1"></a>  lprior += student_t_lpdf(sigma | <span class="dv">3</span>, <span class="dv">0</span>, <span class="fl">7.8</span>)</span>
+<span id="cb81-87"><a href="bayesian-quantile-regression.html#cb81-87" tabindex="-1"></a>    - <span class="dv">1</span> * student_t_lccdf(<span class="dv">0</span> | <span class="dv">3</span>, <span class="dv">0</span>, <span class="fl">7.8</span>);</span>
+<span id="cb81-88"><a href="bayesian-quantile-regression.html#cb81-88" tabindex="-1"></a>}</span>
+<span id="cb81-89"><a href="bayesian-quantile-regression.html#cb81-89" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb81-90"><a href="bayesian-quantile-regression.html#cb81-90" tabindex="-1"></a>  <span class="co">// likelihood including constants</span></span>
+<span id="cb81-91"><a href="bayesian-quantile-regression.html#cb81-91" tabindex="-1"></a>  <span class="cf">if</span> (!prior_only) {</span>
+<span id="cb81-92"><a href="bayesian-quantile-regression.html#cb81-92" tabindex="-1"></a>    <span class="co">// initialize linear predictor term</span></span>
+<span id="cb81-93"><a href="bayesian-quantile-regression.html#cb81-93" tabindex="-1"></a>    <span class="dt">vector</span>[N] mu = rep_vector(<span class="fl">0.0</span>, N);</span>
+<span id="cb81-94"><a href="bayesian-quantile-regression.html#cb81-94" tabindex="-1"></a>    mu += Intercept + Xc * b;</span>
+<span id="cb81-95"><a href="bayesian-quantile-regression.html#cb81-95" tabindex="-1"></a>    <span class="cf">for</span> (n <span class="cf">in</span> <span class="dv">1</span>:N) {</span>
+<span id="cb81-96"><a href="bayesian-quantile-regression.html#cb81-96" tabindex="-1"></a>      <span class="kw">target +=</span> asym_laplace_lpdf(Y[n] | mu[n], sigma, quantile);</span>
+<span id="cb81-97"><a href="bayesian-quantile-regression.html#cb81-97" tabindex="-1"></a>    }</span>
+<span id="cb81-98"><a href="bayesian-quantile-regression.html#cb81-98" tabindex="-1"></a>  }</span>
+<span id="cb81-99"><a href="bayesian-quantile-regression.html#cb81-99" tabindex="-1"></a>  <span class="co">// priors including constants</span></span>
+<span id="cb81-100"><a href="bayesian-quantile-regression.html#cb81-100" tabindex="-1"></a>  <span class="kw">target +=</span> lprior;</span>
+<span id="cb81-101"><a href="bayesian-quantile-regression.html#cb81-101" tabindex="-1"></a>}</span>
+<span id="cb81-102"><a href="bayesian-quantile-regression.html#cb81-102" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb81-103"><a href="bayesian-quantile-regression.html#cb81-103" tabindex="-1"></a>  <span class="co">// actual population-level intercept</span></span>
+<span id="cb81-104"><a href="bayesian-quantile-regression.html#cb81-104" tabindex="-1"></a>  <span class="dt">real</span> b_Intercept = Intercept - dot_product(means_X, b);</span>
+<span id="cb81-105"><a href="bayesian-quantile-regression.html#cb81-105" tabindex="-1"></a>}</span></code></pre></div>
 <p>This Stan code specifies a Bayesian model for asymmetric Laplace regression, where the main goal is to estimate the population-level effects and dispersion parameter of the model from the provided data. The asymmetric Laplace distribution is used as the likelihood function for the response variable.</p>
 <ol style="list-style-type: decimal">
 <li><p>The <code>functions</code> block contains three helper functions: <code>rho_quantile</code>, <code>asym_laplace_lpdf</code>, and <code>asym_laplace_lccdf</code>. These functions are used to calculate the asymmetric Laplace log-PDF, log-CDF, and log-CCDF for a single response variable.</p></li>

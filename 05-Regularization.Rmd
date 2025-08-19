@@ -1,279 +1,346 @@
-
 # Bayesian Regularized Regression
 
 ## Introduction
 
-In this post, we will explore Bayesian analogues of regularized/penalized linear regression models (e.g., LASSO, Ridge regression), which are an extention of traditional linear regression models of the form. First we will discuss shrinkage and regularization in regression problems. These methods are useful for improving prediction, estimating regression models with many variables, and as an alternative to model selection methods. Our goal is to
-understand shrinkage/regularization of coefficients as an alternative/complement to variable selection. Use three specific approaches to regularization—ridge, LASSO, hierarchical shrinkage—which regularize through different priors, with different consequences for sparsity, and to recognize connections between Bayesian regularized regression and regularized regression in a machine learning/penalized maximum likelihood estimation (MLE) framework. Traditional linear regression models assume that  weights share no group-level information (i.e. they are independent), which leads to so-called unbiased estimates. Unlike traditional linear regression models, regularized linear regression models produce biased estimates for the  weights. Specifically, Bayesian regularized linear regression models pool information across weights, resulting in regression toward a common mean. When the common mean is centered at 0, this pooling of information produces more conservative estimates for each  weight (they are biased toward 0). Shrinkage estimation deliberately increases the bias of the model in order to reduce variance and improve overall model performance, often at the cost of individual estimates. In other words, by adding bias to the model, shrinkage estimators provide a means to adjust the bias-variance in the model in order to achieve lower generalization error. Bayesian models with non-informative priors will produce similar to the MLE. However, parameters are modeled as exchangeable and given a proper prior, it induces some amount of shrinkage. But stronger priors can produce estimate much different estimtes than MLE.
+In this post, we will explore Bayesian analogues of regularized linear regression models such as LASSO and Ridge regression, which extend traditional linear regression to handle challenging modeling scenarios. These methods prove particularly valuable for improving prediction accuracy, estimating regression models with many variables, and providing alternatives to traditional model selection approaches.
 
-## Regularized Regression
-As described above, regularized linear regression models aim to estimate more conservative values for the  weights in a model, and this is true for both frequentist and Bayesian versions of regularization. While there are many methods that can be used to regularize your estimation procedure, we will focus specifically on two popular forms—namely, ridge and LASSO regression. We start below by describing each regression generally, and then proceed to implement both the frequentist and Bayesian versions.
+The foundation of our discussion rests on the standard linear regression model $\mathbf{y} = \mathbf{X}\boldsymbol{\beta} + \boldsymbol{\epsilon}$, where $\mathbf{y} \in \mathbb{R}^n$ represents the response vector, $\mathbf{X} \in \mathbb{R}^{n \times p}$ is the design matrix, $\boldsymbol{\beta} \in \mathbb{R}^p$ contains the coefficients of interest, and $\boldsymbol{\epsilon} \sim \mathcal{N}(0, \sigma^2\mathbf{I})$ captures the random error. Traditional linear regression treats coefficients as independent, producing what statisticians call "unbiased" estimates. However, this independence assumption can lead to poor performance in settings with limited data, high-dimensional predictor spaces, or substantial noise.
+
+Regularized linear regression models deliberately introduce bias into coefficient estimates by pooling information across parameters, causing them to shrink toward a common value, typically zero. This shrinkage represents a fundamental trade-off captured by the bias-variance decomposition: $\text{MSE}(\hat{\boldsymbol{\beta}}) = \text{Bias}^2(\hat{\boldsymbol{\beta}}) + \text{Var}(\hat{\boldsymbol{\beta}})$. While regularization increases bias, it often reduces variance substantially enough that the overall mean squared error decreases, particularly in high-dimensional or noisy settings where traditional methods tend to overfit.
+
+The Bayesian perspective reframes regularization as a problem of specifying appropriate prior distributions for model parameters. Rather than viewing penalty terms as arbitrary constraints on optimization, Bayesian regularization emerges naturally from the choice of prior distribution over coefficients. This connection provides both theoretical insight into why regularization works and practical advantages through full posterior distributions for all parameters.
+
+## Ridge Regression and Gaussian Priors
+
+Ridge regression modifies the ordinary least squares objective by adding a penalty proportional to the sum of squared coefficients. In the frequentist framework, ridge regression minimizes $\|\mathbf{y} - \mathbf{X}\boldsymbol{\beta}\|_2^2 + \lambda \|\boldsymbol{\beta}\|_2^2$, yielding the closed-form solution $\hat{\boldsymbol{\beta}}_{\text{ridge}} = (\mathbf{X}^T\mathbf{X} + \lambda\mathbf{I})^{-1}\mathbf{X}^T\mathbf{y}$. The penalty parameter $\lambda$ controls the strength of regularization, with larger values producing more shrinkage toward zero.
+
+The Bayesian equivalent emerges by placing independent Gaussian priors on each coefficient: $\beta_j \sim \mathcal{N}(0, \tau^2)$ for $j = 1, \ldots, p$. Under this prior specification, the posterior distribution becomes $p(\boldsymbol{\beta}|\mathbf{y}, \mathbf{X}, \sigma^2, \tau^2) \propto \exp\left(-\frac{1}{2\sigma^2}\|\mathbf{y} - \mathbf{X}\boldsymbol{\beta}\|_2^2 - \frac{1}{2\tau^2}\|\boldsymbol{\beta}\|_2^2\right)$. The mathematical equivalence becomes clear when we recognize that $\lambda = \sigma^2/\tau^2$, establishing a direct correspondence between the frequentist penalty parameter and the ratio of error variance to prior variance.
+
+This Bayesian formulation offers several advantages over its frequentist counterpart. Most importantly, it provides full posterior distributions for all parameters rather than just point estimates, enabling principled uncertainty quantification without requiring bootstrap procedures. The prior variance $\tau^2$ also admits a natural hierarchical extension by treating it as an unknown parameter with its own prior distribution, allowing the data to inform the appropriate level of shrinkage.
+
+## LASSO Regression and Laplace Priors
+
+LASSO regression replaces the ridge penalty with an L1 penalty on the coefficient magnitudes, minimizing $\|\mathbf{y} - \mathbf{X}\boldsymbol{\beta}\|_2^2 + \lambda \|\boldsymbol{\beta}\|_1$. This seemingly minor modification produces dramatically different behavior: while ridge regression shrinks coefficients toward zero, LASSO can set them exactly to zero, performing automatic variable selection. The geometric intuition reveals that the L1 penalty creates a diamond-shaped constraint region whose corners lie on the coordinate axes, making exact zeros more likely when the unconstrained optimum lies in particular regions of the parameter space.
+
+The Bayesian LASSO emerges by specifying independent Laplace priors for each coefficient: $\beta_j \sim \text{Laplace}(0, b)$ for $j = 1, \ldots, p$. The Laplace density $p(\beta_j|b) = \frac{1}{2b}\exp\left(-\frac{|\beta_j|}{b}\right)$ places much more probability mass at zero compared to a Gaussian distribution with the same variance, naturally encouraging sparsity. The relationship between the frequentist penalty and Bayesian scale parameter follows $\lambda = \sigma^2/b$.
+
+While the Bayesian LASSO provides the same point estimates as its frequentist counterpart through the posterior mode, its real advantage lies in proper uncertainty quantification for the selected variables. The full posterior distribution accounts for both parameter uncertainty and model uncertainty, providing more honest assessments of prediction intervals and coefficient significance than frequentist methods that condition on the selected model.
+
+## Hierarchical Shrinkage and Adaptive Priors
+
+Both ridge and LASSO impose uniform shrinkage across all coefficients, but real data often contains a mixture of large, moderate, and negligible effects that would benefit from adaptive shrinkage. Hierarchical shrinkage priors address this limitation by allowing different coefficients to experience different amounts of shrinkage based on their apparent signal strength in the data.
+
+The general framework specifies $\beta_j \sim \mathcal{N}(0, \tau^2 \lambda_j^2)$ for $j = 1, \ldots, p$, where $\tau$ represents a global shrinkage parameter affecting all coefficients and $\lambda_j$ represents local shrinkage parameters that can vary across coefficients. This hierarchical structure enables the model to shrink small coefficients aggressively while leaving large coefficients relatively unshrunk.
+
+The horseshoe prior represents one particularly successful implementation of this idea, specifying $\lambda_j \sim \text{Cauchy}^+(0, 1)$ and $\tau \sim \text{Cauchy}^+(0, 1)$. The Cauchy distribution's heavy tails ensure that large coefficients can escape shrinkage while still encouraging small coefficients toward zero. The horseshoe prior gets its name from the shape of its shrinkage function, which resembles an inverted horseshoe when plotted against the signal-to-noise ratio.
+
+## Implementation
+
+```r
+library(tidymodels)
+library(rstan)
+library(tidyverse)
+
+# Data simulation
+set.seed(123)
+n <- 1000
+n_train <- 700
+n_test <- 300
+alpha_true <- 40  # intercept
+beta_true <- c(-2, 3, 4, 1, 0.25)  # slopes
+sigma_true <- 5  # residual standard deviation
+p <- length(beta_true)
+
+# Generate design matrix and response
+X <- matrix(rnorm(n * p), n, p)
+epsilon <- rnorm(n, mean = 0, sd = sigma_true)
+y <- alpha_true + X %*% beta_true + epsilon
+
+# Create dataset
+data <- data.frame(y = y, X)
+colnames(data) <- c("y", paste0("X", 1:p))
+
+# Train-test split
+set.seed(42)
+data_split <- initial_split(data, prop = 0.7)
+train_data <- training(data_split)
+test_data <- testing(data_split)
+
+# Prepare data for Stan
+X_train <- as.matrix(train_data[, -1])
+X_test <- as.matrix(test_data[, -1])
+y_train <- train_data$y
+y_test <- test_data$y
+```
 
 ### Bayesian Ridge Regression
 
-Ridge regression modifies the loss function to include a penalty term for model complexity, where model complexity is operationalized as the sum of squared  weights. Bayesian Ridge regression differs from the frequentist variant in only one way, and it is with how we think of the penalty term. In the frequentist perspective, we showed that effectively tells our model how much it is allowed to learn from the data. Bayesian models view estimation as a problem of integrating prior information with information gained from data, which we formalize using probability distributions. The Bayesian estimation captures this in the form of a prior distribution over our  weights the choice of prior distribution on is what determines how much information we learn from the data, analagous to the penalty term used for MLE regularization.
-
-```
-
-library(tidymodels)
-
-set.seed(123)
-n <- 1000
-ntr=700
-nts=300
-a <- 40  #intercept
-b <- c(-2, 3, 4, 1 , 0.25) #slopes
-sigma2 <- 25  #residual variance (sd=5)
-x <- matrix(rnorm(5000),1000,5)
-eps <- rnorm(n, mean = 0, sd = sqrt(sigma2))  #residuals
-y <- a +x%*%b+ eps  #response variable
-data <- data.frame(y, x)  #dataset
-head(data)
-
-set.seed(42)
-data_split <- initial_split(data, prop = 0.7)
-train_data <- training(data_split )
-test_data <- testing(data_split )
-
-stan_mod = "data {
-  int<lower=0> N;   // number of observations
-  int<lower=0> K;   // number of predictors
-  matrix[N, K] X;   // predictor matrix
-  vector[N] y;      // outcome vector
+```r
+# Stan model for Bayesian Ridge Regression
+stan_ridge <- "
+data {
+  int<lower=0> N_train;
+  int<lower=0> N_test;
+  int<lower=0> p;
+  matrix[N_train, p] X_train;
+  matrix[N_test, p] X_test;
+  vector[N_train] y_train;
 }
 parameters {
-  real alpha;           // intercept
-  vector[K] beta;       // coefficients for predictors
-  real<lower=0> sigma;  // error scale
+  real alpha;
+  vector[p] beta;
+  real<lower=0> sigma;
+  real<lower=0> tau;  // prior standard deviation for beta
 }
 model {
-  y ~ normal(alpha + X * beta, sigma);  // target density
-}"
-
-writeLines(stan_mod, con = "stan_mod.stan")
-
-cat(stan_mod)
-
-
-
-stan_mod_ridge = "data{
-  int N_train;             //  training observations
-  int N_test;              // test observations
-  int N_pred;              //  predictor variables
-  vector[N_train] y_train; // training outcomes
-  matrix[N_train, N_pred] X_train; // training data
-  matrix[N_test, N_pred] X_test;   // testing data
-}
-parameters{
-  real alpha;           // intercept
-  real<lower=0> sigma;   // error SD
-  real<lower=0> sigma_B; // hierarchical SD across betas
-  vector[N_pred] beta;   // regression beta weights
-}
-model{
-  // group-level (hierarchical) SD across betas
-  sigma_B ~ cauchy(0, 1);
+  // Priors
+  alpha ~ normal(0, 10);
+  tau ~ cauchy(0, 1);
+  sigma ~ cauchy(0, 5);
+  beta ~ normal(0, tau);  // Ridge prior
   
-  // model error SD
-  sigma ~ normal(0, 1);
-  
-  // beta prior 
-  beta ~ normal(0, sigma_B);
-  
-  // model likelihood
-  y_train ~ normal(alpha+X_train*beta, sigma);
+  // Likelihood
+  y_train ~ normal(alpha + X_train * beta, sigma);
 }
-generated quantities{ 
-  real y_test[N_test]; // test data predictions
-  for(i in 1:N_test){
-    y_test[i] = normal_rng(alpha+ X_test[i,] * beta, sigma);
+generated quantities {
+  vector[N_test] y_pred;
+  
+  for (i in 1:N_test) {
+    y_pred[i] = normal_rng(alpha + X_test[i] * beta, sigma);
   }
-}"
+}
+"
 
-writeLines(stan_mod_ridge, con = "stan_mod_ridge.stan")
-
-cat(stan_mod_ridge)
-
-library(tidyverse)
-X_trt <- train_data %>%
-  select(-y)
-X_tst <- test_data %>%
-  select(-y)
-Y_trt <- train_data %>%
-  select(y)
-stan_data <- list(
-  N_train=ntr,             
-  N_test=nts,            
-  N_pred=5,             
-  y_train=Y_trt,
-  X_train=X_trt, 
-  X_test=X_tst  
+# Prepare data
+stan_data_ridge <- list(
+  N_train = n_train,
+  N_test = n_test,
+  p = p,
+  X_train = X_train,
+  X_test = X_test,
+  y_train = y_train
 )
 
-fit_rstan <- rstan::stan(
-  file = "stan_mod_ridge.stan",
-  data = stan_data
-)
+# Fit model
+fit_ridge <- stan(model_code = stan_ridge, 
+                  data = stan_data_ridge,
+                  chains = 4, iter = 2000,
+                  cores = parallel::detectCores())
 
+print(fit_ridge, pars = c("alpha", "beta", "sigma", "tau"))
 ```
 
 ### Bayesian LASSO Regression
 
-LASSO regression only involves a minor change to the loss function compared to ridge regression. Specifically, as opposed to penalizing the model based on the sum of squared  weights, it will penalize the model by the sum of the absolute value of  weights. As for Bayesian ridge regression, we only needed to specifiy a normal prior distribution to the weights that we were aiming to regularize, for Bayesian LASSO regression, the only difference is in the form of the prior distribution by setting it to a double-exponential prior on the  weights is mathematically equivalent in expectation to the frequentist LASSO penalty. Laplace distribiution places much more probability mass directly on 0, which produces the variable selection effect specific to LASSO regression. 
-
-```
-
-
-stan_mod_lasso = "data{
-  int N_train;             //  training observations
-  int N_test;              // test observations
-  int N_pred;              //  predictor variables
-  vector[N_train] y_train; // training outcomes
-  matrix[N_train, N_pred] X_train; // training data
-  matrix[N_test, N_pred] X_test;   // testing data
-}
-parameters{
-  real alpha;           // intercept
-  real<lower=0> sigma;   // error SD
-  real<lower=0> sigma_B; // hierarchical SD across betas
-  vector[N_pred] beta;   // regression beta weights
-}
-model{
-  // group-level (hierarchical) SD across betas
-  sigma_B ~ cauchy(0, 1);
-  
-  // model error SD
-  sigma ~ normal(0, 1);
-  
-  // beta prior 
-  beta ~ double_exponential(0, sigma_B);
-  
-  // model likelihood
-  y_train ~ normal(alpha + X_train*beta, sigma);
-}
-generated quantities{ 
-  real y_test[N_test]; // test data predictions
-  for(i in 1:N_test){
-    y_test[i] = normal_rng(alpha + X_test[i,] * beta, sigma);
-  }
-}"
-
-writeLines(stan_mod_lasso, con = "stan_mod_lasso.stan")
-
-cat(stan_mod_lasso)
-
-
-
-
-
-library(tidyverse)
-X_trt <- train_data %>%
-  select(-y)
-X_tst <- test_data %>%
-  select(-y)
-Y_trt <- train_data$y
-stan_data <- list(
-  N_train=ntr,             
-  N_test=nts,            
-  N_pred=5,             
-  y_train=Y_trt,
-  X_train=X_trt, 
-  X_test=X_tst  
-)
-
-fit_rstan2 <- rstan::stan(
-  file = "stan_mod_lasso.stan",
-  data = stan_data
-)
-
-fit_rstan2
-
-```
-
-### Hierarchical shrinkage
-
-IF The Bayesian LASSO doesn’t get us sparsity with a few relatively large coefficients, and many coefficients very close to zero it is possible to use different global-local scale mixtures of normal distributions as our priors to encourage more sparsity. In that case it is possible to combine the global scale for all coefficient priors along with a local scale for each coefficient. 
-
-```
-
-stan_mod_hr = "data {
-  
-  int N; //  observations
-  vector[N] y; // outcome
-  int K;   // number of columns in the design matrix X
-  matrix [N, K] X;  // design matrix X
-  real<lower = 0> tau;   // global scale prior scale
-}
-transformed data {
-  real<lower = 0> y_sd;
-  real a_pr_scale;
-  real sigma_pr_scale;
-  y_sd = sd(y);
-  sigma_pr_scale = y_sd * 5;
-  a_pr_scale = 10;
+```r
+# Stan model for Bayesian LASSO
+stan_lasso <- "
+data {
+  int<lower=0> N_train;
+  int<lower=0> N_test;
+  int<lower=0> p;
+  matrix[N_train, p] X_train;
+  matrix[N_test, p] X_test;
+  vector[N_train] y_train;
 }
 parameters {
-  real a;   // regression coefficient vector
-  vector[K] b_raw;   // scale of the regression errors
-  real<lower = 0> sigma;   // local scales of coefficients
-  vector<lower = 0>[K] lambda;
-}
-transformed parameters {
-  vector[N] mu;   // mu is the observation fitted/predicted value
-  vector[K] b;   // b is the transformed beta
-  b = b_raw * tau .* lambda;
-  mu = a + X * b;
+  real alpha;
+  vector[p] beta;
+  real<lower=0> sigma;
+  real<lower=0> b;  // Laplace scale parameter
 }
 model {
-  lambda ~ cauchy(0, 1);   // priors
-  a ~ normal(0, a_pr_scale);
-  b_raw ~ normal(0, 1);
-  sigma ~ cauchy(0, sigma_pr_scale);
-  y ~ normal(mu, sigma);   // likelihood
+  // Priors
+  alpha ~ normal(0, 10);
+  b ~ cauchy(0, 1);
+  sigma ~ cauchy(0, 5);
+  beta ~ double_exponential(0, b);  // LASSO prior
+  
+  // Likelihood
+  y_train ~ normal(alpha + X_train * beta, sigma);
 }
 generated quantities {
-  vector[N] y_rep;   // simulate data from the posterior
-  vector[N] log_lik;   // log-likelihood posterior
-  for (n in 1:N) {
-    y_rep[n] = normal_rng(mu[n], sigma);
-    log_lik[n] = normal_lpdf(y[n] | mu[n], sigma);
+  vector[N_test] y_pred;
+  
+  for (i in 1:N_test) {
+    y_pred[i] = normal_rng(alpha + X_test[i] * beta, sigma);
   }
-}"
+}
+"
 
-writeLines(stan_mod_hr, con = "stan_mod_hr.stan")
+# Prepare data (same as Ridge)
+stan_data_lasso <- stan_data_ridge
 
-cat(stan_mod_hr)
+# Fit model
+fit_lasso <- stan(model_code = stan_lasso,
+                  data = stan_data_lasso,
+                  chains = 4, iter = 2000,
+                  cores = parallel::detectCores())
 
-
-
-stan_data <- list(
-  N=ntr,             
-  y=Y_trt,
-  K=5,     
-  X=X_trt, 
-  tau=1  
-)
-
-fit_rstan3 <- rstan::stan(
-  file = "stan_mod_hr.stan",
-  data = stan_data
-)
-
-fit_rstan3
-
+print(fit_lasso, pars = c("alpha", "beta", "sigma", "b"))
 ```
 
-## Conclusion 
+### Hierarchical Shrinkage (Horseshoe Prior)
 
-In this post, we learned about the benefits of using regularized/penalized regression models over traditional regression. We determined that in low and/or noisy data settings, the so-called unbiased estimates given by non-regularized regression modeling actually lead to worse-off model performance. Importantly, we learned that this occurs because being ubiased allows a model to learn a lot from the data, including learning patterns of noise. Then, we learned that biased methods such as ridge and LASSO regression restrict the amount of learning that we get from data, which leads to better estimates in low and/or noisy data settings. Finally, hierarchical Bayesian models can choose a prior distribution across the  weights that gives us a solution that is equivalent to that of the frequentist ridge or LASSO methods, with a full posterior distribution for each parameter, thus circumventing problems with frequentist regularization that require the use of bootstrapping to estimate confidence intervals.
+```r
+# Stan model for Horseshoe prior
+stan_horseshoe <- "
+data {
+  int<lower=0> N_train;
+  int<lower=0> N_test;
+  int<lower=0> p;
+  matrix[N_train, p] X_train;
+  matrix[N_test, p] X_test;
+  vector[N_train] y_train;
+}
+parameters {
+  real alpha;
+  vector[p] beta_raw;
+  real<lower=0> sigma;
+  real<lower=0> tau;  // global shrinkage
+  vector<lower=0>[p] lambda;  // local shrinkage
+}
+transformed parameters {
+  vector[p] beta;
+  beta = beta_raw .* lambda * tau;  // hierarchical shrinkage
+}
+model {
+  // Priors
+  alpha ~ normal(0, 10);
+  tau ~ cauchy(0, 1);  // global shrinkage
+  lambda ~ cauchy(0, 1);  // local shrinkage
+  beta_raw ~ normal(0, 1);
+  sigma ~ cauchy(0, 5);
+  
+  // Likelihood
+  y_train ~ normal(alpha + X_train * beta, sigma);
+}
+generated quantities {
+  vector[N_test] y_pred;
+  
+  for (i in 1:N_test) {
+    y_pred[i] = normal_rng(alpha + X_test[i] * beta, sigma);
+  }
+}
+"
+
+# Prepare data (same as before)
+stan_data_horseshoe <- stan_data_ridge
+
+# Fit model
+fit_horseshoe <- stan(model_code = stan_horseshoe,
+                      data = stan_data_horseshoe,
+                      chains = 4, iter = 2000,
+                      cores = parallel::detectCores())
+
+print(fit_horseshoe, pars = c("alpha", "beta", "sigma", "tau"))
+```
+
+## Empirical Comparison and Model Evaluation
+
+Understanding the theoretical properties of different regularization approaches provides essential intuition, but empirical evaluation reveals how these methods perform in practice. The code below demonstrates how to compare ridge regression, LASSO, and horseshoe priors using both predictive accuracy and coefficient recovery metrics.
+
+```r
+# Extract predictions and compute metrics
+extract_metrics <- function(fit, true_values) {
+  y_pred <- extract(fit)$y_pred
+  y_pred_mean <- colMeans(y_pred)
+  
+  # RMSE
+  rmse <- sqrt(mean((y_pred_mean - true_values)^2))
+  
+  # Coverage (95% credible intervals)
+  y_pred_lower <- apply(y_pred, 2, quantile, 0.025)
+  y_pred_upper <- apply(y_pred, 2, quantile, 0.975)
+  coverage <- mean(true_values >= y_pred_lower & true_values <= y_pred_upper)
+  
+  return(list(rmse = rmse, coverage = coverage))
+}
+
+# True test values (computed in R, not passed to Stan)
+y_test_true <- alpha_true + X_test %*% beta_true
+
+# Compare models
+metrics_ridge <- extract_metrics(fit_ridge, y_test_true)
+metrics_lasso <- extract_metrics(fit_lasso, y_test_true)
+metrics_horseshoe <- extract_metrics(fit_horseshoe, y_test_true)
+
+
+# Print comparison
+cat("Model Comparison (Test Set):\n")
+cat("Ridge - RMSE:", round(metrics_ridge$rmse, 3), 
+    "Coverage:", round(metrics_ridge$coverage, 3), "\n")
+cat("LASSO - RMSE:", round(metrics_lasso$rmse, 3), 
+    "Coverage:", round(metrics_lasso$coverage, 3), "\n")
+cat("Horseshoe - RMSE:", round(metrics_horseshoe$rmse, 3), 
+    "Coverage:", round(metrics_horseshoe$coverage, 3), "\n")
+
+# Plot coefficient estimates
+library(bayesplot)
+library(ggplot2)
+
+# Extract posterior samples
+beta_ridge <- extract(fit_ridge)$beta
+beta_lasso <- extract(fit_lasso)$beta
+beta_horseshoe <- extract(fit_horseshoe)$beta
+
+# Create comparison plot
+beta_df <- data.frame(
+  coefficient = rep(paste0("beta", 1:p), 3),
+  method = rep(c("Ridge", "LASSO", "Horseshoe"), each = p),
+  mean = c(colMeans(beta_ridge), colMeans(beta_lasso), colMeans(beta_horseshoe)),
+  lower = c(apply(beta_ridge, 2, quantile, 0.025),
+            apply(beta_lasso, 2, quantile, 0.025),
+            apply(beta_horseshoe, 2, quantile, 0.025)),
+  upper = c(apply(beta_ridge, 2, quantile, 0.975),
+            apply(beta_lasso, 2, quantile, 0.975),
+            apply(beta_horseshoe, 2, quantile, 0.975)),
+  true_value = rep(beta_true, 3)
+)
+
+ggplot(beta_df, aes(x = coefficient, y = mean, color = method)) +
+  geom_point(position = position_dodge(0.3)) +
+  geom_errorbar(aes(ymin = lower, ymax = upper), 
+                position = position_dodge(0.3), width = 0.2) +
+  geom_point(aes(y = true_value), color = "black", shape = 4, size = 3) +
+  labs(title = "Coefficient Estimates Comparison",
+       subtitle = "Black crosses show true values",
+       x = "Coefficient", y = "Estimate") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+The empirical comparison typically reveals distinct patterns in how each method handles different types of signals. Ridge regression tends to shrink all coefficients proportionally, maintaining the relative magnitudes while reducing overall scale. This behavior works well when most predictors contribute meaningfully to the response, even if their individual effects are modest. LASSO regression exhibits more dramatic behavior, often setting smaller coefficients to exactly zero while leaving larger ones relatively unshrunk. This creates sparse solutions that can be easier to interpret but may sacrifice some predictive accuracy when the true model is dense.
+
+Hierarchical shrinkage methods like the horseshoe prior attempt to get the best of both worlds by adapting the amount of shrinkage to each coefficient individually. Large coefficients experience minimal shrinkage, allowing them to maintain their full predictive power, while small coefficients get shrunk aggressively toward zero, reducing noise in the model. This adaptivity often leads to superior predictive performance, especially in settings where the true coefficient vector contains a mixture of large, moderate, and negligible effects.
+
+## Understanding Posterior Behavior
+
+The mathematical structure of each prior determines not just point estimates but the entire posterior distribution. Ridge regression produces a posterior mean with the closed form $E[\boldsymbol{\beta}|\mathbf{y}] = \left(\frac{1}{\sigma^2}\mathbf{X}^T\mathbf{X} + \frac{1}{\tau^2}\mathbf{I}\right)^{-1}\frac{1}{\sigma^2}\mathbf{X}^T\mathbf{y}$, which clearly shows how the prior variance $\tau^2$ balances against the data-driven term $\mathbf{X}^T\mathbf{X}$. When $\tau^2$ is small relative to $\sigma^2$, the prior dominates and coefficients shrink strongly toward zero. When $\tau^2$ is large, the data term dominates and estimates approach ordinary least squares.
+
+LASSO regression does not admit a closed-form posterior mean due to the non-conjugate Laplace prior, but the posterior mode corresponds exactly to the frequentist LASSO solution. The full posterior distribution, obtained through MCMC sampling, provides uncertainty intervals that properly account for both the sparsity-inducing prior and the inherent variability in coefficient estimates. This represents a substantial improvement over frequentist LASSO inference, which requires complex procedures to obtain valid confidence intervals for selected variables.
+
+The horseshoe prior creates particularly interesting posterior behavior through its adaptive shrinkage mechanism. Each coefficient experiences shrinkage according to $E[\beta_j|\text{data}] \approx (1 - \kappa_j) \hat{\beta}_j^{\text{OLS}}$, where $\kappa_j \in (0,1)$ represents a data-dependent shrinkage factor. Coefficients with strong signals in the data have shrinkage factors close to zero, leaving them essentially unshrunk, while coefficients with weak signals have shrinkage factors approaching one, causing aggressive shrinkage toward zero.
+
+## Choosing Among Regularization Methods
+
+The choice between ridge regression, LASSO, and hierarchical shrinkage depends critically on the structure expected in the true coefficient vector and the goals of the analysis. Ridge regression works best when most predictors contribute meaningfully to the response, even if some effects are small. This commonly occurs in settings where the predictors represent different aspects of the same underlying phenomenon or when domain knowledge suggests that excluding variables entirely would be inappropriate.
+
+LASSO regression excels when the true model is sparse, meaning that only a subset of predictors have non-zero effects. The automatic variable selection property makes LASSO particularly attractive for exploratory analyses where identifying the most important predictors is as important as achieving good predictive performance. However, LASSO can struggle when several predictors are highly correlated, as it tends to select one arbitrarily and zero out the others, potentially missing important relationships.
+
+Hierarchical shrinkage methods like the horseshoe prior offer the most flexibility by allowing the data to determine the appropriate level of sparsity. These methods work well across a wide range of scenarios, from dense models where most predictors matter to sparse models where only a few predictors have substantial effects. The primary cost of this flexibility is computational complexity, as hierarchical models typically require more sophisticated MCMC sampling schemes and longer chains to achieve convergence.
+
+## Conclusion
+
+Bayesian regularized regression represents a natural and principled approach to handling the challenges that arise in modern statistical modeling. By reformulating penalty-based methods in terms of prior distributions, the Bayesian framework provides not only point estimates equivalent to their frequentist counterparts but also full posterior distributions that enable proper uncertainty quantification and model comparison. The connection between prior specifications and regularization behavior offers valuable insight into why different methods work well in different contexts and how to choose appropriately among them.
+
+The three approaches examined here span a useful range of assumptions about coefficient behavior. Ridge regression assumes all coefficients are a priori similar and should be shrunk proportionally, LASSO assumes that many coefficients are exactly zero and should be eliminated entirely, and hierarchical shrinkage assumes that coefficients vary in importance and should be shrunk adaptively. Modern computing makes all three approaches feasible for most practical applications, shifting the primary challenge from computational limitations to thoughtful model selection based on domain knowledge and data characteristics.
+
+These Bayesian methods also integrate naturally into larger modeling workflows that require uncertainty quantification, model averaging, or decision-making under uncertainty. The posterior distributions provide the building blocks for more complex analyses while maintaining the computational efficiency and theoretical elegance that make regularized regression so appealing in the first place.
 
 ## References
 
-+ [Blogpost on the equivalency between frequentist Ridge (and LASSO) regression and hierarchial Bayesian regression](http://haines-lab.com/post/2019-05-06-on-the-equivalency-between-the-lasso-ridge-regression-and-specific-bayesian-priors/on-the-equivalency-between-the-lasso-ridge-regression-and-specific-bayesian-priors/)
-
-+ [Blogpost on Bayesian regularization 1](https://jrnold.github.io/bayesian_notes/shrinkage-and-regularized-regression.html)
-
-+ [Blogpost on Bayesian regularization 2](http://ccgilroy.com/csss564-labs-2019/08-regularization/08-regularization.html)
-
-+ [Github code examples](https://github.com/ccgilroy/csss564-labs-2019)
-
+- Carvalho, C. M., Polson, N. G., & Scott, J. G. (2010). The horseshoe estimator for sparse signals. *Biometrika*, 97(2), 465-480.
+- Park, T., & Casella, G. (2008). The Bayesian lasso. *Journal of the American Statistical Association*, 103(482), 681-686.
+- Piironen, J., & Vehtari, A. (2017). Sparsity information and regularization in the horseshoe and other shrinkage priors. *Electronic Journal of Statistics*, 11(2), 5018-5051.
+- Tibshirani, R. (1996). Regression shrinkage and selection via the lasso. *Journal of the Royal Statistical Society*, 58(1), 267-288.

@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 14 14 Bayesian Structural Time Series Models | Stan Bookdown</title>
+  <meta name="description" content="Chapter 14 14 Bayesian Structural Time Series Models | Stan Bookdown" />
+  <meta name="generator" content="bookdown 0.43 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 14 14 Bayesian Structural Time Series Models | Stan Bookdown" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 14 14 Bayesian Structural Time Series Models | Stan Bookdown" />
+  
+  
+  
+
+<meta name="author" content="Kamran Afzali" />
+
+
+<meta name="date" content="2025-08-19" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html"/>
+<link rel="next" href="model-comparison-and-selection-in-bayesian-analysis.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Stan</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Choosing the Right Bayesian Model</a></li>
+<li class="chapter" data-level="2" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html"><i class="fa fa-check"></i><b>2</b> Bayesian Modeling in R and Stan</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#what-is-stan"><i class="fa fa-check"></i><b>2.1</b> What is STAN?</a></li>
+<li class="chapter" data-level="2.2" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#model-file"><i class="fa fa-check"></i><b>2.2</b> Model file</a></li>
+<li class="chapter" data-level="2.3" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#fit-the-model"><i class="fa fa-check"></i><b>2.3</b> Fit the model</a></li>
+<li class="chapter" data-level="2.4" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#mcmc-diagnostics"><i class="fa fa-check"></i><b>2.4</b> MCMC diagnostics</a></li>
+<li class="chapter" data-level="2.5" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#parting-thoughts"><i class="fa fa-check"></i><b>2.5</b> Parting thoughts</a></li>
+<li class="chapter" data-level="2.6" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#conclusions"><i class="fa fa-check"></i><b>2.6</b> Conclusions</a></li>
+<li class="chapter" data-level="2.7" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#references"><i class="fa fa-check"></i><b>2.7</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="bayesian-regression-models-for-non-normal-data.html"><a href="bayesian-regression-models-for-non-normal-data.html"><i class="fa fa-check"></i><b>3</b> Bayesian Regression Models for Non-Normal Data</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="bayesian-regression-models-for-non-normal-data.html"><a href="bayesian-regression-models-for-non-normal-data.html#logistic-regression"><i class="fa fa-check"></i><b>3.1</b> Logistic Regression</a></li>
+<li class="chapter" data-level="3.2" data-path="bayesian-regression-models-for-non-normal-data.html"><a href="bayesian-regression-models-for-non-normal-data.html#negative-binomial"><i class="fa fa-check"></i><b>3.2</b> Negative Binomial</a></li>
+<li class="chapter" data-level="3.3" data-path="bayesian-regression-models-for-non-normal-data.html"><a href="bayesian-regression-models-for-non-normal-data.html#conclusion"><i class="fa fa-check"></i><b>3.3</b> Conclusion</a></li>
+<li class="chapter" data-level="3.4" data-path="bayesian-regression-models-for-non-normal-data.html"><a href="bayesian-regression-models-for-non-normal-data.html#references-1"><i class="fa fa-check"></i><b>3.4</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="robust-t-regression.html"><a href="robust-t-regression.html"><i class="fa fa-check"></i><b>4</b> Robust t-regression</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="robust-t-regression.html"><a href="robust-t-regression.html#motivation"><i class="fa fa-check"></i><b>4.1</b> Motivation</a></li>
+<li class="chapter" data-level="4.2" data-path="robust-t-regression.html"><a href="robust-t-regression.html#concepts-and-code"><i class="fa fa-check"></i><b>4.2</b> Concepts and code</a></li>
+<li class="chapter" data-level="4.3" data-path="robust-t-regression.html"><a href="robust-t-regression.html#conclusion-1"><i class="fa fa-check"></i><b>4.3</b> Conclusion</a></li>
+<li class="chapter" data-level="4.4" data-path="robust-t-regression.html"><a href="robust-t-regression.html#references-2"><i class="fa fa-check"></i><b>4.4</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html"><i class="fa fa-check"></i><b>5</b> Bayesian Regularized Regression</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#introduction"><i class="fa fa-check"></i><b>5.1</b> Introduction</a></li>
+<li class="chapter" data-level="5.2" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#ridge-regression-and-gaussian-priors"><i class="fa fa-check"></i><b>5.2</b> Ridge Regression and Gaussian Priors</a></li>
+<li class="chapter" data-level="5.3" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#lasso-regression-and-laplace-priors"><i class="fa fa-check"></i><b>5.3</b> LASSO Regression and Laplace Priors</a></li>
+<li class="chapter" data-level="5.4" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#hierarchical-shrinkage-and-adaptive-priors"><i class="fa fa-check"></i><b>5.4</b> Hierarchical Shrinkage and Adaptive Priors</a></li>
+<li class="chapter" data-level="5.5" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#implementation"><i class="fa fa-check"></i><b>5.5</b> Implementation</a>
+<ul>
+<li class="chapter" data-level="5.5.1" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#bayesian-ridge-regression"><i class="fa fa-check"></i><b>5.5.1</b> Bayesian Ridge Regression</a></li>
+<li class="chapter" data-level="5.5.2" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#bayesian-lasso-regression"><i class="fa fa-check"></i><b>5.5.2</b> Bayesian LASSO Regression</a></li>
+<li class="chapter" data-level="5.5.3" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#hierarchical-shrinkage-horseshoe-prior"><i class="fa fa-check"></i><b>5.5.3</b> Hierarchical Shrinkage (Horseshoe Prior)</a></li>
+</ul></li>
+<li class="chapter" data-level="5.6" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#empirical-comparison-and-model-evaluation"><i class="fa fa-check"></i><b>5.6</b> Empirical Comparison and Model Evaluation</a></li>
+<li class="chapter" data-level="5.7" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#understanding-posterior-behavior"><i class="fa fa-check"></i><b>5.7</b> Understanding Posterior Behavior</a></li>
+<li class="chapter" data-level="5.8" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#choosing-among-regularization-methods"><i class="fa fa-check"></i><b>5.8</b> Choosing Among Regularization Methods</a></li>
+<li class="chapter" data-level="5.9" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#conclusion-2"><i class="fa fa-check"></i><b>5.9</b> Conclusion</a></li>
+<li class="chapter" data-level="5.10" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#references-3"><i class="fa fa-check"></i><b>5.10</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="bayesian-quantile-regression.html"><a href="bayesian-quantile-regression.html"><i class="fa fa-check"></i><b>6</b> Bayesian Quantile Regression</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="bayesian-quantile-regression.html"><a href="bayesian-quantile-regression.html#model-specification"><i class="fa fa-check"></i><b>6.1</b> Model Specification</a>
+<ul>
+<li class="chapter" data-level="6.1.1" data-path="bayesian-quantile-regression.html"><a href="bayesian-quantile-regression.html#using-bayesqr-package"><i class="fa fa-check"></i><b>6.1.1</b> Using bayesQR package</a></li>
+<li class="chapter" data-level="6.1.2" data-path="bayesian-quantile-regression.html"><a href="bayesian-quantile-regression.html#using-brms-package"><i class="fa fa-check"></i><b>6.1.2</b> Using brms package</a></li>
+<li class="chapter" data-level="6.1.3" data-path="bayesian-quantile-regression.html"><a href="bayesian-quantile-regression.html#backend-stan-model"><i class="fa fa-check"></i><b>6.1.3</b> Backend stan model</a></li>
+</ul></li>
+<li class="chapter" data-level="6.2" data-path="bayesian-quantile-regression.html"><a href="bayesian-quantile-regression.html#references-4"><i class="fa fa-check"></i><b>6.2</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="bayesian-multilevel-mixed-effects-regression-in-stan.html"><a href="bayesian-multilevel-mixed-effects-regression-in-stan.html"><i class="fa fa-check"></i><b>7</b> Bayesian Multilevel (Mixed Effects) Regression in Stan</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="bayesian-multilevel-mixed-effects-regression-in-stan.html"><a href="bayesian-multilevel-mixed-effects-regression-in-stan.html#introduction-1"><i class="fa fa-check"></i><b>7.1</b> Introduction</a></li>
+<li class="chapter" data-level="7.2" data-path="bayesian-multilevel-mixed-effects-regression-in-stan.html"><a href="bayesian-multilevel-mixed-effects-regression-in-stan.html#multilevel-regression"><i class="fa fa-check"></i><b>7.2</b> Multilevel Regression</a>
+<ul>
+<li class="chapter" data-level="7.2.1" data-path="bayesian-multilevel-mixed-effects-regression-in-stan.html"><a href="bayesian-multilevel-mixed-effects-regression-in-stan.html#bayesian-random-intercepts-model"><i class="fa fa-check"></i><b>7.2.1</b> Bayesian Random Intercepts Model</a></li>
+<li class="chapter" data-level="7.2.2" data-path="bayesian-multilevel-mixed-effects-regression-in-stan.html"><a href="bayesian-multilevel-mixed-effects-regression-in-stan.html#bayesian-random-slopes-model"><i class="fa fa-check"></i><b>7.2.2</b> Bayesian Random Slopes Model</a></li>
+<li class="chapter" data-level="7.2.3" data-path="bayesian-multilevel-mixed-effects-regression-in-stan.html"><a href="bayesian-multilevel-mixed-effects-regression-in-stan.html#hierarchical-priors-model"><i class="fa fa-check"></i><b>7.2.3</b> Hierarchical Priors Model</a></li>
+</ul></li>
+<li class="chapter" data-level="7.3" data-path="bayesian-multilevel-mixed-effects-regression-in-stan.html"><a href="bayesian-multilevel-mixed-effects-regression-in-stan.html#conclusion-3"><i class="fa fa-check"></i><b>7.3</b> Conclusion</a></li>
+<li class="chapter" data-level="7.4" data-path="bayesian-multilevel-mixed-effects-regression-in-stan.html"><a href="bayesian-multilevel-mixed-effects-regression-in-stan.html#references-5"><i class="fa fa-check"></i><b>7.4</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html"><i class="fa fa-check"></i><b>8</b> Gaussian Process Regression (GPR)</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#introduction-2"><i class="fa fa-check"></i><b>8.1</b> Introduction</a></li>
+<li class="chapter" data-level="8.2" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#challenges"><i class="fa fa-check"></i><b>8.2</b> Challenges</a></li>
+<li class="chapter" data-level="8.3" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#gpfit-package"><i class="fa fa-check"></i><b>8.3</b> GPfit package</a></li>
+<li class="chapter" data-level="8.4" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#bayesian-stan"><i class="fa fa-check"></i><b>8.4</b> Bayesian Stan</a></li>
+<li class="chapter" data-level="8.5" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#references-6"><i class="fa fa-check"></i><b>8.5</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="bayesian-gaussian-mixture-models.html"><a href="bayesian-gaussian-mixture-models.html"><i class="fa fa-check"></i><b>9</b> Bayesian Gaussian Mixture Models</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="bayesian-gaussian-mixture-models.html"><a href="bayesian-gaussian-mixture-models.html#single-varaible-example"><i class="fa fa-check"></i><b>9.1</b> Single varaible example</a></li>
+<li class="chapter" data-level="9.2" data-path="bayesian-gaussian-mixture-models.html"><a href="bayesian-gaussian-mixture-models.html#example-with-multiple-variable"><i class="fa fa-check"></i><b>9.2</b> Example with multiple variable</a></li>
+<li class="chapter" data-level="9.3" data-path="bayesian-gaussian-mixture-models.html"><a href="bayesian-gaussian-mixture-models.html#conclusion-4"><i class="fa fa-check"></i><b>9.3</b> Conclusion</a></li>
+<li class="chapter" data-level="9.4" data-path="bayesian-gaussian-mixture-models.html"><a href="bayesian-gaussian-mixture-models.html#references-7"><i class="fa fa-check"></i><b>9.4</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="bayesian-canonical-correlation-analysis-in-stan.html"><a href="bayesian-canonical-correlation-analysis-in-stan.html"><i class="fa fa-check"></i><b>10</b> Bayesian Canonical Correlation Analysis in Stan</a>
+<ul>
+<li class="chapter" data-level="10.1" data-path="bayesian-canonical-correlation-analysis-in-stan.html"><a href="bayesian-canonical-correlation-analysis-in-stan.html#introduction-3"><i class="fa fa-check"></i><b>10.1</b> Introduction</a>
+<ul>
+<li class="chapter" data-level="10.1.1" data-path="bayesian-canonical-correlation-analysis-in-stan.html"><a href="bayesian-canonical-correlation-analysis-in-stan.html#canonical-correlation-analysis"><i class="fa fa-check"></i><b>10.1.1</b> Canonical Correlation Analysis</a></li>
+<li class="chapter" data-level="10.1.2" data-path="bayesian-canonical-correlation-analysis-in-stan.html"><a href="bayesian-canonical-correlation-analysis-in-stan.html#stan-model"><i class="fa fa-check"></i><b>10.1.2</b> Stan Model</a></li>
+<li class="chapter" data-level="10.1.3" data-path="bayesian-canonical-correlation-analysis-in-stan.html"><a href="bayesian-canonical-correlation-analysis-in-stan.html#model-validation-on-test-set"><i class="fa fa-check"></i><b>10.1.3</b> Model validation on test set</a></li>
+</ul></li>
+<li class="chapter" data-level="10.2" data-path="bayesian-canonical-correlation-analysis-in-stan.html"><a href="bayesian-canonical-correlation-analysis-in-stan.html#conclusion-5"><i class="fa fa-check"></i><b>10.2</b> Conclusion</a></li>
+<li class="chapter" data-level="10.3" data-path="bayesian-canonical-correlation-analysis-in-stan.html"><a href="bayesian-canonical-correlation-analysis-in-stan.html#references-8"><i class="fa fa-check"></i><b>10.3</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><i class="fa fa-check"></i><b>11</b> Bayesian Seasonal Decomposition in Stan and RStan</a>
+<ul>
+<li class="chapter" data-level="11.1" data-path="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#simulating-seasonal-time-series-data"><i class="fa fa-check"></i><b>11.1</b> Simulating Seasonal Time Series Data*</a></li>
+<li class="chapter" data-level="11.2" data-path="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#bayesian-seasonal-decomposition-model-in-stan"><i class="fa fa-check"></i><b>11.2</b> Bayesian Seasonal Decomposition Model in Stan</a></li>
+<li class="chapter" data-level="11.3" data-path="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#fitting-the-model-in-r"><i class="fa fa-check"></i><b>11.3</b> Fitting the Model in R</a></li>
+<li class="chapter" data-level="11.4" data-path="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#extracting-and-visualizing-components"><i class="fa fa-check"></i><b>11.4</b> Extracting and Visualizing Components</a></li>
+<li class="chapter" data-level="11.5" data-path="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#extensions-and-applications"><i class="fa fa-check"></i><b>11.5</b> Extensions and Applications</a></li>
+<li class="chapter" data-level="11.6" data-path="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#conclusion-6"><i class="fa fa-check"></i><b>11.6</b> Conclusion</a></li>
+</ul></li>
+<li class="chapter" data-level="12" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><i class="fa fa-check"></i><b>12</b> Bayesian Exponential Smoothing and Holt-Winters Models in Stan and RStan</a>
+<ul>
+<li class="chapter" data-level="12.1" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#bayesian-simple-exponential-smoothing-ses"><i class="fa fa-check"></i><b>12.1</b> Bayesian Simple Exponential Smoothing (SES)</a>
+<ul>
+<li class="chapter" data-level="12.1.1" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#stan-model-1"><i class="fa fa-check"></i><b>12.1.1</b> Stan Model</a></li>
+<li class="chapter" data-level="12.1.2" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#fitting-in-r"><i class="fa fa-check"></i><b>12.1.2</b> Fitting in R</a></li>
+<li class="chapter" data-level="12.1.3" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#visualization"><i class="fa fa-check"></i><b>12.1.3</b> Visualization</a></li>
+</ul></li>
+<li class="chapter" data-level="12.2" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#bayesian-holt-winters-models"><i class="fa fa-check"></i><b>12.2</b> Bayesian Holt-Winters Models</a>
+<ul>
+<li class="chapter" data-level="12.2.1" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#without-seasonality-additive-trend"><i class="fa fa-check"></i><b>12.2.1</b> Without Seasonality (Additive Trend)</a></li>
+<li class="chapter" data-level="12.2.2" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#stan-model-2"><i class="fa fa-check"></i><b>12.2.2</b> Stan Model</a></li>
+<li class="chapter" data-level="12.2.3" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#visualization-1"><i class="fa fa-check"></i><b>12.2.3</b> Visualization</a></li>
+<li class="chapter" data-level="12.2.4" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#with-seasonality-additive-seasonal-component"><i class="fa fa-check"></i><b>12.2.4</b> With Seasonality (Additive Seasonal Component)</a></li>
+<li class="chapter" data-level="12.2.5" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#fit"><i class="fa fa-check"></i><b>12.2.5</b> Fit</a></li>
+<li class="chapter" data-level="12.2.6" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#visualization-2"><i class="fa fa-check"></i><b>12.2.6</b> Visualization</a></li>
+</ul></li>
+<li class="chapter" data-level="12.3" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#conclusion-7"><i class="fa fa-check"></i><b>12.3</b> Conclusion</a></li>
+</ul></li>
+<li class="chapter" data-level="13" data-path="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html"><a href="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html"><i class="fa fa-check"></i><b>13</b> Bayesian AR, ARMA, and ARIMA Models in Stan and RStan</a>
+<ul>
+<li class="chapter" data-level="13.1" data-path="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html"><a href="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html#bayesian-ar1-model"><i class="fa fa-check"></i><b>13.1</b> Bayesian AR(1) Model</a></li>
+<li class="chapter" data-level="13.2" data-path="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html"><a href="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html#bayesian-arma11-model"><i class="fa fa-check"></i><b>13.2</b> Bayesian ARMA(1,1) Model</a></li>
+<li class="chapter" data-level="13.3" data-path="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html"><a href="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html#bayesian-arima111-model"><i class="fa fa-check"></i><b>13.3</b> Bayesian ARIMA(1,1,1) Model</a></li>
+<li class="chapter" data-level="13.4" data-path="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html"><a href="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html#conclusion-8"><i class="fa fa-check"></i><b>13.4</b> Conclusion</a></li>
+</ul></li>
+<li class="chapter" data-level="14" data-path="bayesian-structural-time-series-models.html"><a href="bayesian-structural-time-series-models.html"><i class="fa fa-check"></i><b>14</b> 14 Bayesian Structural Time Series Models</a>
+<ul>
+<li class="chapter" data-level="14.1" data-path="bayesian-structural-time-series-models.html"><a href="bayesian-structural-time-series-models.html#introduction-4"><i class="fa fa-check"></i><b>14.1</b> Introduction</a>
+<ul>
+<li class="chapter" data-level="14.1.1" data-path="bayesian-structural-time-series-models.html"><a href="bayesian-structural-time-series-models.html#stan-implementation-basic-bsts-model"><i class="fa fa-check"></i><b>14.1.1</b> Stan Implementation: Basic BSTS Model</a></li>
+<li class="chapter" data-level="14.1.2" data-path="bayesian-structural-time-series-models.html"><a href="bayesian-structural-time-series-models.html#stan-implementation-time-varying-trend-volatility"><i class="fa fa-check"></i><b>14.1.2</b> Stan Implementation: Time-Varying Trend Volatility</a></li>
+</ul></li>
+<li class="chapter" data-level="14.2" data-path="bayesian-structural-time-series-models.html"><a href="bayesian-structural-time-series-models.html#model-comparison-and-selection"><i class="fa fa-check"></i><b>14.2</b> Model Comparison and Selection</a></li>
+<li class="chapter" data-level="14.3" data-path="bayesian-structural-time-series-models.html"><a href="bayesian-structural-time-series-models.html#conclusion-9"><i class="fa fa-check"></i><b>14.3</b> Conclusion</a></li>
+</ul></li>
+<li class="chapter" data-level="15" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html"><i class="fa fa-check"></i><b>15</b> Model Comparison and Selection in Bayesian Analysis</a>
+<ul>
+<li class="chapter" data-level="15.1" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#introduction-5"><i class="fa fa-check"></i><b>15.1</b> Introduction</a></li>
+<li class="chapter" data-level="15.2" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#posterior-predictive-checks"><i class="fa fa-check"></i><b>15.2</b> Posterior Predictive Checks</a></li>
+<li class="chapter" data-level="15.3" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#information-criteria-waic-and-loo-cv"><i class="fa fa-check"></i><b>15.3</b> Information Criteria: WAIC and LOO-CV</a>
+<ul>
+<li class="chapter" data-level="15.3.1" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#waic-watanabe-akaike-information-criterion"><i class="fa fa-check"></i><b>15.3.1</b> WAIC (Watanabe-Akaike Information Criterion)</a></li>
+<li class="chapter" data-level="15.3.2" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#loo-cv-leave-one-out-cross-validation"><i class="fa fa-check"></i><b>15.3.2</b> LOO-CV (Leave-One-Out Cross-Validation)</a></li>
+</ul></li>
+<li class="chapter" data-level="15.4" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#bayes-factors-vs.-information-criteria"><i class="fa fa-check"></i><b>15.4</b> Bayes Factors vs. Information Criteria</a></li>
+<li class="chapter" data-level="15.5" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#summary-of-bayesian-model-comparison-methods"><i class="fa fa-check"></i><b>15.5</b> Summary of Bayesian Model Comparison Methods</a></li>
+<li class="chapter" data-level="15.6" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#practical-example-comparing-models-in-r"><i class="fa fa-check"></i><b>15.6</b> Practical Example: Comparing Models in R</a></li>
+</ul></li>
+<li class="chapter" data-level="16" data-path="appendix.html"><a href="appendix.html"><i class="fa fa-check"></i><b>16</b> Appendix</a>
+<ul>
+<li class="chapter" data-level="16.1" data-path="appendix.html"><a href="appendix.html#main-stan-distributions-cheatsheet"><i class="fa fa-check"></i><b>16.1</b> Main Stan Distributions Cheatsheet</a></li>
+<li class="chapter" data-level="16.2" data-path="appendix.html"><a href="appendix.html#main-stan-functions-cheatsheet"><i class="fa fa-check"></i><b>16.2</b> Main Stan Functions Cheatsheet</a></li>
+<li class="chapter" data-level="16.3" data-path="appendix.html"><a href="appendix.html#why-non-distribution-functions"><i class="fa fa-check"></i><b>16.3</b> Why Non-Distribution Functions?</a></li>
+<li class="chapter" data-level="16.4" data-path="appendix.html"><a href="appendix.html#stan-functions-cheatsheet"><i class="fa fa-check"></i><b>16.4</b> Stan Functions Cheatsheet</a>
+<ul>
+<li class="chapter" data-level="16.4.1" data-path="appendix.html"><a href="appendix.html#mathematical-functions"><i class="fa fa-check"></i><b>16.4.1</b> 1. Mathematical Functions</a></li>
+<li class="chapter" data-level="16.4.2" data-path="appendix.html"><a href="appendix.html#transformation-functions"><i class="fa fa-check"></i><b>16.4.2</b> 2. Transformation Functions</a></li>
+<li class="chapter" data-level="16.4.3" data-path="appendix.html"><a href="appendix.html#matrix-and-vector-operations"><i class="fa fa-check"></i><b>16.4.3</b> 3. Matrix and Vector Operations</a></li>
+<li class="chapter" data-level="16.4.4" data-path="appendix.html"><a href="appendix.html#utility-functions"><i class="fa fa-check"></i><b>16.4.4</b> 4. Utility Functions</a></li>
+<li class="chapter" data-level="16.4.5" data-path="appendix.html"><a href="appendix.html#specialized-solvers"><i class="fa fa-check"></i><b>16.4.5</b> 5. Specialized Solvers</a></li>
+</ul></li>
+<li class="chapter" data-level="16.5" data-path="appendix.html"><a href="appendix.html#example-hierarchical-linear-regression"><i class="fa fa-check"></i><b>16.5</b> Example: Hierarchical Linear Regression</a></li>
+<li class="chapter" data-level="16.6" data-path="appendix.html"><a href="appendix.html#tips-for-using-stan-functions"><i class="fa fa-check"></i><b>16.6</b> Tips for Using Stan Functions</a></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Stan Bookdown</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="bayesian-structural-time-series-models" class="section level1 hasAnchor" number="14">
+<h1><span class="header-section-number">Chapter 14</span> 14 Bayesian Structural Time Series Models<a href="bayesian-structural-time-series-models.html#bayesian-structural-time-series-models" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="introduction-4" class="section level2 hasAnchor" number="14.1">
+<h2><span class="header-section-number">14.1</span> Introduction<a href="bayesian-structural-time-series-models.html#introduction-4" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Time series data pervade scientific and applied domains, from economics and epidemiology to environmental monitoring and finance. Extracting meaningful patterns from such data requires statistical models that can handle temporal dependencies, seasonality, trends, and structural breaks while providing interpretable decompositions. Bayesian Structural Time Series (BSTS) models offer a principled framework for addressing these challenges by decomposing time series into latent components while incorporating prior information and quantifying uncertainty.</p>
+<p>Initially popularized by Google for causal impact analysis, BSTS models extend classical structural time series approaches by embedding them within a fully Bayesian inference framework. However, many real-world time series exhibit periods of varying volatility—economic indicators may experience stable growth followed by high volatility due to macroeconomic shocks, while financial markets alternate between calm and turbulent periods. Standard BSTS models assume constant volatility in trend components, which can be overly restrictive and obscure critical temporal dynamics.</p>
+<p>In this comprehensive post, we explore both canonical BSTS models and their extension to time-varying trend volatility. We provide complete implementations in Stan, demonstrate fitting procedures in R using RStan, and illustrate applications across different scenarios. This unified treatment enables practitioners to understand the full spectrum of BSTS modeling capabilities and choose appropriate specifications for their specific time series challenges.</p>
+<div id="model-specification-core-bsts-framework" class="section level4 hasAnchor" number="14.1.0.1">
+<h4><span class="header-section-number">14.1.0.1</span> Model Specification: Core BSTS Framework<a href="bayesian-structural-time-series-models.html#model-specification-core-bsts-framework" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>The canonical BSTS model represents an observed time series as the sum of interpretable latent components:</p>
+<p><span class="math display">\[y_t = \mu_t + \tau_t + \gamma_t + \varepsilon_t, \quad \varepsilon_t \sim \mathcal{N}(0, \sigma^2)\]</span></p>
+<p>where:
+- <span class="math inline">\(\mu_t\)</span> is the local level component
+- <span class="math inline">\(\tau_t\)</span> represents the stochastic trend (slope or drift)
+- <span class="math inline">\(\gamma_t\)</span> captures seasonal effects
+- <span class="math inline">\(\varepsilon_t\)</span> is the observation error term</p>
+<p>The local level and trend components follow a local linear trend specification:</p>
+<p><span class="math display">\[\mu_t = \mu_{t-1} + \tau_{t-1} + \eta_t, \quad \eta_t \sim \mathcal{N}(0, \sigma_\mu^2)\]</span></p>
+<p><span class="math display">\[\tau_t = \tau_{t-1} + \zeta_t, \quad \zeta_t \sim \mathcal{N}(0, \sigma_\tau^2)\]</span></p>
+<p>This formulation allows the trend to evolve smoothly over time while maintaining flexibility in both level and slope dynamics. The seasonal component <span class="math inline">\(\gamma_t\)</span> is typically modeled using periodic structures that ensure the seasonal effects sum to zero over each complete cycle.</p>
+</div>
+<div id="extension-to-time-varying-trend-volatility" class="section level4 hasAnchor" number="14.1.0.2">
+<h4><span class="header-section-number">14.1.0.2</span> Extension to Time-Varying Trend Volatility<a href="bayesian-structural-time-series-models.html#extension-to-time-varying-trend-volatility" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>In many applications, the assumption of constant trend volatility (<span class="math inline">\(\sigma_\tau^2\)</span>) proves inadequate. Economic time series, for instance, may exhibit stable growth periods punctuated by high-volatility episodes during recessions or policy changes. To accommodate such dynamics, we extend the standard framework by allowing the volatility of the trend innovation to evolve over time.</p>
+<p>We introduce a stochastic volatility process for the trend innovation variance:</p>
+<p><span class="math display">\[\log \sigma_{\tau, t}^2 = h_t, \quad h_t = h_{t-1} + \nu_t, \quad \nu_t \sim \mathcal{N}(0, \sigma_h^2)\]</span></p>
+<p><span class="math display">\[\zeta_t \sim \mathcal{N}(0, \exp(h_t))\]</span></p>
+<p>This specification implements a log-random walk for the trend volatility, ensuring positive variance while allowing for gradual or abrupt changes in trend smoothness. The parameter <span class="math inline">\(\sigma_h^2\)</span> controls how quickly the trend volatility can change: larger values permit more rapid volatility shifts, while smaller values enforce smoother volatility evolution.</p>
+</div>
+<div id="data-simulation-building-synthetic-time-series" class="section level4 hasAnchor" number="14.1.0.3">
+<h4><span class="header-section-number">14.1.0.3</span> Data Simulation: Building Synthetic Time Series<a href="bayesian-structural-time-series-models.html#data-simulation-building-synthetic-time-series" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>To demonstrate both modeling approaches, we begin by simulating realistic time series data that incorporates the key components of interest.</p>
+<ul>
+<li>Basic BSTS Simulation</li>
+</ul>
+<div class="sourceCode" id="cb137"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb137-1"><a href="bayesian-structural-time-series-models.html#cb137-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb137-2"><a href="bayesian-structural-time-series-models.html#cb137-2" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">120</span>  <span class="co"># number of time points</span></span>
+<span id="cb137-3"><a href="bayesian-structural-time-series-models.html#cb137-3" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="dv">12</span>   <span class="co"># seasonal period</span></span>
+<span id="cb137-4"><a href="bayesian-structural-time-series-models.html#cb137-4" tabindex="-1"></a></span>
+<span id="cb137-5"><a href="bayesian-structural-time-series-models.html#cb137-5" tabindex="-1"></a>level <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb137-6"><a href="bayesian-structural-time-series-models.html#cb137-6" tabindex="-1"></a>trend <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb137-7"><a href="bayesian-structural-time-series-models.html#cb137-7" tabindex="-1"></a>season <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb137-8"><a href="bayesian-structural-time-series-models.html#cb137-8" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb137-9"><a href="bayesian-structural-time-series-models.html#cb137-9" tabindex="-1"></a></span>
+<span id="cb137-10"><a href="bayesian-structural-time-series-models.html#cb137-10" tabindex="-1"></a><span class="co"># Initialize components</span></span>
+<span id="cb137-11"><a href="bayesian-structural-time-series-models.html#cb137-11" tabindex="-1"></a>level[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb137-12"><a href="bayesian-structural-time-series-models.html#cb137-12" tabindex="-1"></a>trend[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb137-13"><a href="bayesian-structural-time-series-models.html#cb137-13" tabindex="-1"></a>seasonal_pattern <span class="ot">&lt;-</span> <span class="fu">sin</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> (<span class="dv">1</span><span class="sc">:</span>m) <span class="sc">/</span> m)</span>
+<span id="cb137-14"><a href="bayesian-structural-time-series-models.html#cb137-14" tabindex="-1"></a>season[<span class="dv">1</span><span class="sc">:</span>m] <span class="ot">&lt;-</span> seasonal_pattern</span>
+<span id="cb137-15"><a href="bayesian-structural-time-series-models.html#cb137-15" tabindex="-1"></a></span>
+<span id="cb137-16"><a href="bayesian-structural-time-series-models.html#cb137-16" tabindex="-1"></a><span class="co"># Generate time series</span></span>
+<span id="cb137-17"><a href="bayesian-structural-time-series-models.html#cb137-17" tabindex="-1"></a><span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>n) {</span>
+<span id="cb137-18"><a href="bayesian-structural-time-series-models.html#cb137-18" tabindex="-1"></a>  level[t] <span class="ot">&lt;-</span> level[t<span class="dv">-1</span>] <span class="sc">+</span> trend[t<span class="dv">-1</span>] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="fl">0.3</span>)</span>
+<span id="cb137-19"><a href="bayesian-structural-time-series-models.html#cb137-19" tabindex="-1"></a>  trend[t] <span class="ot">&lt;-</span> trend[t<span class="dv">-1</span>] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="fl">0.05</span>)</span>
+<span id="cb137-20"><a href="bayesian-structural-time-series-models.html#cb137-20" tabindex="-1"></a>  season[t] <span class="ot">&lt;-</span> season[t <span class="sc">%%</span> m <span class="sc">+</span> <span class="dv">1</span>]  <span class="co"># repeat seasonal pattern</span></span>
+<span id="cb137-21"><a href="bayesian-structural-time-series-models.html#cb137-21" tabindex="-1"></a>  y[t] <span class="ot">&lt;-</span> level[t] <span class="sc">+</span> season[t] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb137-22"><a href="bayesian-structural-time-series-models.html#cb137-22" tabindex="-1"></a>}</span>
+<span id="cb137-23"><a href="bayesian-structural-time-series-models.html#cb137-23" tabindex="-1"></a></span>
+<span id="cb137-24"><a href="bayesian-structural-time-series-models.html#cb137-24" tabindex="-1"></a><span class="fu">ts.plot</span>(y, <span class="at">main =</span> <span class="st">&quot;Simulated BSTS Time Series&quot;</span>)</span></code></pre></div>
+<ul>
+<li>Time-Varying Volatility Simulation</li>
+</ul>
+<p>For the extended model with stochastic volatility, we modify the simulation to include time-varying trend volatility:</p>
+<div class="sourceCode" id="cb138"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb138-1"><a href="bayesian-structural-time-series-models.html#cb138-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb138-2"><a href="bayesian-structural-time-series-models.html#cb138-2" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">120</span></span>
+<span id="cb138-3"><a href="bayesian-structural-time-series-models.html#cb138-3" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="dv">12</span></span>
+<span id="cb138-4"><a href="bayesian-structural-time-series-models.html#cb138-4" tabindex="-1"></a></span>
+<span id="cb138-5"><a href="bayesian-structural-time-series-models.html#cb138-5" tabindex="-1"></a>level <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb138-6"><a href="bayesian-structural-time-series-models.html#cb138-6" tabindex="-1"></a>trend <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb138-7"><a href="bayesian-structural-time-series-models.html#cb138-7" tabindex="-1"></a>h <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb138-8"><a href="bayesian-structural-time-series-models.html#cb138-8" tabindex="-1"></a>sigma_trend_t <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb138-9"><a href="bayesian-structural-time-series-models.html#cb138-9" tabindex="-1"></a>season <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb138-10"><a href="bayesian-structural-time-series-models.html#cb138-10" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb138-11"><a href="bayesian-structural-time-series-models.html#cb138-11" tabindex="-1"></a></span>
+<span id="cb138-12"><a href="bayesian-structural-time-series-models.html#cb138-12" tabindex="-1"></a><span class="co"># Initialize components</span></span>
+<span id="cb138-13"><a href="bayesian-structural-time-series-models.html#cb138-13" tabindex="-1"></a>level[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb138-14"><a href="bayesian-structural-time-series-models.html#cb138-14" tabindex="-1"></a>trend[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb138-15"><a href="bayesian-structural-time-series-models.html#cb138-15" tabindex="-1"></a>h[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">log</span>(<span class="fl">0.05</span><span class="sc">^</span><span class="dv">2</span>)  <span class="co"># initial log-variance</span></span>
+<span id="cb138-16"><a href="bayesian-structural-time-series-models.html#cb138-16" tabindex="-1"></a>seasonal_pattern <span class="ot">&lt;-</span> <span class="fu">sin</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> (<span class="dv">1</span><span class="sc">:</span>m) <span class="sc">/</span> m)</span>
+<span id="cb138-17"><a href="bayesian-structural-time-series-models.html#cb138-17" tabindex="-1"></a>season[<span class="dv">1</span><span class="sc">:</span>m] <span class="ot">&lt;-</span> seasonal_pattern</span>
+<span id="cb138-18"><a href="bayesian-structural-time-series-models.html#cb138-18" tabindex="-1"></a></span>
+<span id="cb138-19"><a href="bayesian-structural-time-series-models.html#cb138-19" tabindex="-1"></a><span class="co"># Generate time series with time-varying trend volatility</span></span>
+<span id="cb138-20"><a href="bayesian-structural-time-series-models.html#cb138-20" tabindex="-1"></a><span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>n) {</span>
+<span id="cb138-21"><a href="bayesian-structural-time-series-models.html#cb138-21" tabindex="-1"></a>  <span class="co"># Update log-volatility</span></span>
+<span id="cb138-22"><a href="bayesian-structural-time-series-models.html#cb138-22" tabindex="-1"></a>  h[t] <span class="ot">&lt;-</span> h[t <span class="sc">-</span> <span class="dv">1</span>] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="fl">0.1</span>)</span>
+<span id="cb138-23"><a href="bayesian-structural-time-series-models.html#cb138-23" tabindex="-1"></a>  sigma_trend_t[t] <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">exp</span>(h[t]))</span>
+<span id="cb138-24"><a href="bayesian-structural-time-series-models.html#cb138-24" tabindex="-1"></a>  </span>
+<span id="cb138-25"><a href="bayesian-structural-time-series-models.html#cb138-25" tabindex="-1"></a>  <span class="co"># Update components</span></span>
+<span id="cb138-26"><a href="bayesian-structural-time-series-models.html#cb138-26" tabindex="-1"></a>  trend[t] <span class="ot">&lt;-</span> trend[t <span class="sc">-</span> <span class="dv">1</span>] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, sigma_trend_t[t])</span>
+<span id="cb138-27"><a href="bayesian-structural-time-series-models.html#cb138-27" tabindex="-1"></a>  level[t] <span class="ot">&lt;-</span> level[t <span class="sc">-</span> <span class="dv">1</span>] <span class="sc">+</span> trend[t <span class="sc">-</span> <span class="dv">1</span>] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="fl">0.3</span>)</span>
+<span id="cb138-28"><a href="bayesian-structural-time-series-models.html#cb138-28" tabindex="-1"></a>  season[t] <span class="ot">&lt;-</span> season[t <span class="sc">%%</span> m <span class="sc">+</span> <span class="dv">1</span>]</span>
+<span id="cb138-29"><a href="bayesian-structural-time-series-models.html#cb138-29" tabindex="-1"></a>  y[t] <span class="ot">&lt;-</span> level[t] <span class="sc">+</span> season[t] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb138-30"><a href="bayesian-structural-time-series-models.html#cb138-30" tabindex="-1"></a>}</span>
+<span id="cb138-31"><a href="bayesian-structural-time-series-models.html#cb138-31" tabindex="-1"></a></span>
+<span id="cb138-32"><a href="bayesian-structural-time-series-models.html#cb138-32" tabindex="-1"></a><span class="fu">ts.plot</span>(y, <span class="at">main =</span> <span class="st">&quot;Simulated Time Series with Time-Varying Trend Volatility&quot;</span>)</span></code></pre></div>
+<p>This simulation generates periods of varying trend smoothness, providing a realistic testbed for the extended model.
+## Stan Implementation</p>
+</div>
+<div id="stan-implementation-basic-bsts-model" class="section level3 hasAnchor" number="14.1.1">
+<h3><span class="header-section-number">14.1.1</span> Stan Implementation: Basic BSTS Model<a href="bayesian-structural-time-series-models.html#stan-implementation-basic-bsts-model" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>We implement the core BSTS model in Stan, emphasizing clarity and computational efficiency:</p>
+<div class="sourceCode" id="cb139"><pre class="sourceCode stan"><code class="sourceCode stan"><span id="cb139-1"><a href="bayesian-structural-time-series-models.html#cb139-1" tabindex="-1"></a><span class="kw">functions</span> {</span>
+<span id="cb139-2"><a href="bayesian-structural-time-series-models.html#cb139-2" tabindex="-1"></a>  <span class="dt">vector</span> seasonal_component(<span class="dt">vector</span> s, <span class="dt">int</span> N, <span class="dt">int</span> m) {</span>
+<span id="cb139-3"><a href="bayesian-structural-time-series-models.html#cb139-3" tabindex="-1"></a>    <span class="dt">vector</span>[N] seasonal;</span>
+<span id="cb139-4"><a href="bayesian-structural-time-series-models.html#cb139-4" tabindex="-1"></a>    <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span>:N) {</span>
+<span id="cb139-5"><a href="bayesian-structural-time-series-models.html#cb139-5" tabindex="-1"></a>      <span class="cf">if</span> (t &gt; m)</span>
+<span id="cb139-6"><a href="bayesian-structural-time-series-models.html#cb139-6" tabindex="-1"></a>        seasonal[t] = s[t - m];</span>
+<span id="cb139-7"><a href="bayesian-structural-time-series-models.html#cb139-7" tabindex="-1"></a>      <span class="cf">else</span></span>
+<span id="cb139-8"><a href="bayesian-structural-time-series-models.html#cb139-8" tabindex="-1"></a>        seasonal[t] = s[t];</span>
+<span id="cb139-9"><a href="bayesian-structural-time-series-models.html#cb139-9" tabindex="-1"></a>    }</span>
+<span id="cb139-10"><a href="bayesian-structural-time-series-models.html#cb139-10" tabindex="-1"></a>    <span class="cf">return</span> seasonal;</span>
+<span id="cb139-11"><a href="bayesian-structural-time-series-models.html#cb139-11" tabindex="-1"></a>  }</span>
+<span id="cb139-12"><a href="bayesian-structural-time-series-models.html#cb139-12" tabindex="-1"></a>}</span>
+<span id="cb139-13"><a href="bayesian-structural-time-series-models.html#cb139-13" tabindex="-1"></a></span>
+<span id="cb139-14"><a href="bayesian-structural-time-series-models.html#cb139-14" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb139-15"><a href="bayesian-structural-time-series-models.html#cb139-15" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; N;</span>
+<span id="cb139-16"><a href="bayesian-structural-time-series-models.html#cb139-16" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; m; <span class="co">// seasonal period</span></span>
+<span id="cb139-17"><a href="bayesian-structural-time-series-models.html#cb139-17" tabindex="-1"></a>  <span class="dt">vector</span>[N] y;</span>
+<span id="cb139-18"><a href="bayesian-structural-time-series-models.html#cb139-18" tabindex="-1"></a>}</span>
+<span id="cb139-19"><a href="bayesian-structural-time-series-models.html#cb139-19" tabindex="-1"></a></span>
+<span id="cb139-20"><a href="bayesian-structural-time-series-models.html#cb139-20" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb139-21"><a href="bayesian-structural-time-series-models.html#cb139-21" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_obs;</span>
+<span id="cb139-22"><a href="bayesian-structural-time-series-models.html#cb139-22" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_level;</span>
+<span id="cb139-23"><a href="bayesian-structural-time-series-models.html#cb139-23" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_trend;</span>
+<span id="cb139-24"><a href="bayesian-structural-time-series-models.html#cb139-24" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_seasonal;</span>
+<span id="cb139-25"><a href="bayesian-structural-time-series-models.html#cb139-25" tabindex="-1"></a>  </span>
+<span id="cb139-26"><a href="bayesian-structural-time-series-models.html#cb139-26" tabindex="-1"></a>  <span class="dt">vector</span>[N] level;</span>
+<span id="cb139-27"><a href="bayesian-structural-time-series-models.html#cb139-27" tabindex="-1"></a>  <span class="dt">vector</span>[N] trend;</span>
+<span id="cb139-28"><a href="bayesian-structural-time-series-models.html#cb139-28" tabindex="-1"></a>  <span class="dt">vector</span>[N] seasonal;</span>
+<span id="cb139-29"><a href="bayesian-structural-time-series-models.html#cb139-29" tabindex="-1"></a>}</span>
+<span id="cb139-30"><a href="bayesian-structural-time-series-models.html#cb139-30" tabindex="-1"></a></span>
+<span id="cb139-31"><a href="bayesian-structural-time-series-models.html#cb139-31" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb139-32"><a href="bayesian-structural-time-series-models.html#cb139-32" tabindex="-1"></a>  <span class="co">// State evolution equations</span></span>
+<span id="cb139-33"><a href="bayesian-structural-time-series-models.html#cb139-33" tabindex="-1"></a>  level[<span class="dv">2</span>:N] ~ normal(level[<span class="dv">1</span>:(N<span class="dv">-1</span>)] + trend[<span class="dv">1</span>:(N<span class="dv">-1</span>)], sigma_level);</span>
+<span id="cb139-34"><a href="bayesian-structural-time-series-models.html#cb139-34" tabindex="-1"></a>  trend[<span class="dv">2</span>:N] ~ normal(trend[<span class="dv">1</span>:(N<span class="dv">-1</span>)], sigma_trend);</span>
+<span id="cb139-35"><a href="bayesian-structural-time-series-models.html#cb139-35" tabindex="-1"></a>  seasonal[(m+<span class="dv">1</span>):N] ~ normal(seasonal[<span class="dv">1</span>:(N-m)], sigma_seasonal);</span>
+<span id="cb139-36"><a href="bayesian-structural-time-series-models.html#cb139-36" tabindex="-1"></a>  </span>
+<span id="cb139-37"><a href="bayesian-structural-time-series-models.html#cb139-37" tabindex="-1"></a>  <span class="co">// Observation equation</span></span>
+<span id="cb139-38"><a href="bayesian-structural-time-series-models.html#cb139-38" tabindex="-1"></a>  y ~ normal(level + seasonal_component(seasonal, N, m), sigma_obs);</span>
+<span id="cb139-39"><a href="bayesian-structural-time-series-models.html#cb139-39" tabindex="-1"></a>  </span>
+<span id="cb139-40"><a href="bayesian-structural-time-series-models.html#cb139-40" tabindex="-1"></a>  <span class="co">// Priors</span></span>
+<span id="cb139-41"><a href="bayesian-structural-time-series-models.html#cb139-41" tabindex="-1"></a>  sigma_obs ~ normal(<span class="dv">0</span>, <span class="dv">1</span>);</span>
+<span id="cb139-42"><a href="bayesian-structural-time-series-models.html#cb139-42" tabindex="-1"></a>  sigma_level ~ normal(<span class="dv">0</span>, <span class="fl">0.5</span>);</span>
+<span id="cb139-43"><a href="bayesian-structural-time-series-models.html#cb139-43" tabindex="-1"></a>  sigma_trend ~ normal(<span class="dv">0</span>, <span class="fl">0.1</span>);</span>
+<span id="cb139-44"><a href="bayesian-structural-time-series-models.html#cb139-44" tabindex="-1"></a>  sigma_seasonal ~ normal(<span class="dv">0</span>, <span class="fl">0.5</span>);</span>
+<span id="cb139-45"><a href="bayesian-structural-time-series-models.html#cb139-45" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div id="stan-implementation-time-varying-trend-volatility" class="section level3 hasAnchor" number="14.1.2">
+<h3><span class="header-section-number">14.1.2</span> Stan Implementation: Time-Varying Trend Volatility<a href="bayesian-structural-time-series-models.html#stan-implementation-time-varying-trend-volatility" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>The extended model incorporates stochastic volatility into the trend component:</p>
+<div class="sourceCode" id="cb140"><pre class="sourceCode stan"><code class="sourceCode stan"><span id="cb140-1"><a href="bayesian-structural-time-series-models.html#cb140-1" tabindex="-1"></a><span class="kw">functions</span> {</span>
+<span id="cb140-2"><a href="bayesian-structural-time-series-models.html#cb140-2" tabindex="-1"></a>  <span class="dt">vector</span> seasonal_component(<span class="dt">vector</span> s, <span class="dt">int</span> N, <span class="dt">int</span> m) {</span>
+<span id="cb140-3"><a href="bayesian-structural-time-series-models.html#cb140-3" tabindex="-1"></a>    <span class="dt">vector</span>[N] seasonal;</span>
+<span id="cb140-4"><a href="bayesian-structural-time-series-models.html#cb140-4" tabindex="-1"></a>    <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span>:N) {</span>
+<span id="cb140-5"><a href="bayesian-structural-time-series-models.html#cb140-5" tabindex="-1"></a>      <span class="cf">if</span> (t &gt; m)</span>
+<span id="cb140-6"><a href="bayesian-structural-time-series-models.html#cb140-6" tabindex="-1"></a>        seasonal[t] = s[t - m];</span>
+<span id="cb140-7"><a href="bayesian-structural-time-series-models.html#cb140-7" tabindex="-1"></a>      <span class="cf">else</span></span>
+<span id="cb140-8"><a href="bayesian-structural-time-series-models.html#cb140-8" tabindex="-1"></a>        seasonal[t] = s[t];</span>
+<span id="cb140-9"><a href="bayesian-structural-time-series-models.html#cb140-9" tabindex="-1"></a>    }</span>
+<span id="cb140-10"><a href="bayesian-structural-time-series-models.html#cb140-10" tabindex="-1"></a>    <span class="cf">return</span> seasonal;</span>
+<span id="cb140-11"><a href="bayesian-structural-time-series-models.html#cb140-11" tabindex="-1"></a>  }</span>
+<span id="cb140-12"><a href="bayesian-structural-time-series-models.html#cb140-12" tabindex="-1"></a>}</span>
+<span id="cb140-13"><a href="bayesian-structural-time-series-models.html#cb140-13" tabindex="-1"></a></span>
+<span id="cb140-14"><a href="bayesian-structural-time-series-models.html#cb140-14" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb140-15"><a href="bayesian-structural-time-series-models.html#cb140-15" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; N;</span>
+<span id="cb140-16"><a href="bayesian-structural-time-series-models.html#cb140-16" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; m;</span>
+<span id="cb140-17"><a href="bayesian-structural-time-series-models.html#cb140-17" tabindex="-1"></a>  <span class="dt">vector</span>[N] y;</span>
+<span id="cb140-18"><a href="bayesian-structural-time-series-models.html#cb140-18" tabindex="-1"></a>}</span>
+<span id="cb140-19"><a href="bayesian-structural-time-series-models.html#cb140-19" tabindex="-1"></a></span>
+<span id="cb140-20"><a href="bayesian-structural-time-series-models.html#cb140-20" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb140-21"><a href="bayesian-structural-time-series-models.html#cb140-21" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_obs;</span>
+<span id="cb140-22"><a href="bayesian-structural-time-series-models.html#cb140-22" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_level;</span>
+<span id="cb140-23"><a href="bayesian-structural-time-series-models.html#cb140-23" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_h;</span>
+<span id="cb140-24"><a href="bayesian-structural-time-series-models.html#cb140-24" tabindex="-1"></a></span>
+<span id="cb140-25"><a href="bayesian-structural-time-series-models.html#cb140-25" tabindex="-1"></a>  <span class="dt">vector</span>[N] level;</span>
+<span id="cb140-26"><a href="bayesian-structural-time-series-models.html#cb140-26" tabindex="-1"></a>  <span class="dt">vector</span>[N] trend;</span>
+<span id="cb140-27"><a href="bayesian-structural-time-series-models.html#cb140-27" tabindex="-1"></a>  <span class="dt">vector</span>[N] seasonal;</span>
+<span id="cb140-28"><a href="bayesian-structural-time-series-models.html#cb140-28" tabindex="-1"></a>  <span class="dt">vector</span>[N] h; <span class="co">// log variance of trend innovation</span></span>
+<span id="cb140-29"><a href="bayesian-structural-time-series-models.html#cb140-29" tabindex="-1"></a>}</span>
+<span id="cb140-30"><a href="bayesian-structural-time-series-models.html#cb140-30" tabindex="-1"></a></span>
+<span id="cb140-31"><a href="bayesian-structural-time-series-models.html#cb140-31" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb140-32"><a href="bayesian-structural-time-series-models.html#cb140-32" tabindex="-1"></a>  <span class="co">// Priors</span></span>
+<span id="cb140-33"><a href="bayesian-structural-time-series-models.html#cb140-33" tabindex="-1"></a>  sigma_obs ~ normal(<span class="dv">0</span>, <span class="dv">1</span>);</span>
+<span id="cb140-34"><a href="bayesian-structural-time-series-models.html#cb140-34" tabindex="-1"></a>  sigma_level ~ normal(<span class="dv">0</span>, <span class="fl">0.5</span>);</span>
+<span id="cb140-35"><a href="bayesian-structural-time-series-models.html#cb140-35" tabindex="-1"></a>  sigma_h ~ normal(<span class="dv">0</span>, <span class="fl">0.2</span>);</span>
+<span id="cb140-36"><a href="bayesian-structural-time-series-models.html#cb140-36" tabindex="-1"></a>  h[<span class="dv">1</span>] ~ normal(log(<span class="fl">0.05</span>^<span class="dv">2</span>), <span class="fl">0.1</span>);</span>
+<span id="cb140-37"><a href="bayesian-structural-time-series-models.html#cb140-37" tabindex="-1"></a></span>
+<span id="cb140-38"><a href="bayesian-structural-time-series-models.html#cb140-38" tabindex="-1"></a>  <span class="co">// Seasonal component evolution</span></span>
+<span id="cb140-39"><a href="bayesian-structural-time-series-models.html#cb140-39" tabindex="-1"></a>  seasonal[(m+<span class="dv">1</span>):N] ~ normal(seasonal[<span class="dv">1</span>:(N-m)], <span class="fl">0.5</span>);</span>
+<span id="cb140-40"><a href="bayesian-structural-time-series-models.html#cb140-40" tabindex="-1"></a></span>
+<span id="cb140-41"><a href="bayesian-structural-time-series-models.html#cb140-41" tabindex="-1"></a>  <span class="co">// Latent state processes</span></span>
+<span id="cb140-42"><a href="bayesian-structural-time-series-models.html#cb140-42" tabindex="-1"></a>  <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">2</span>:N) {</span>
+<span id="cb140-43"><a href="bayesian-structural-time-series-models.html#cb140-43" tabindex="-1"></a>    h[t] ~ normal(h[t<span class="dv">-1</span>], sigma_h);</span>
+<span id="cb140-44"><a href="bayesian-structural-time-series-models.html#cb140-44" tabindex="-1"></a>    trend[t] ~ normal(trend[t<span class="dv">-1</span>], exp(<span class="fl">0.5</span> * h[t]));</span>
+<span id="cb140-45"><a href="bayesian-structural-time-series-models.html#cb140-45" tabindex="-1"></a>    level[t] ~ normal(level[t<span class="dv">-1</span>] + trend[t<span class="dv">-1</span>], sigma_level);</span>
+<span id="cb140-46"><a href="bayesian-structural-time-series-models.html#cb140-46" tabindex="-1"></a>  }</span>
+<span id="cb140-47"><a href="bayesian-structural-time-series-models.html#cb140-47" tabindex="-1"></a></span>
+<span id="cb140-48"><a href="bayesian-structural-time-series-models.html#cb140-48" tabindex="-1"></a>  <span class="co">// Observation equation</span></span>
+<span id="cb140-49"><a href="bayesian-structural-time-series-models.html#cb140-49" tabindex="-1"></a>  y ~ normal(level + seasonal_component(seasonal, N, m), sigma_obs);</span>
+<span id="cb140-50"><a href="bayesian-structural-time-series-models.html#cb140-50" tabindex="-1"></a>}</span></code></pre></div>
+<p>The key innovation lies in the stochastic evolution of <code>h[t]</code>, which governs the time-varying volatility of trend innovations through the exponential transformation <code>exp(0.5 * h[t])</code>.</p>
+<ul>
+<li>Model Fitting in R with RStan</li>
+</ul>
+<p>Both models can be fitted using RStan with similar workflows, differing primarily in their complexity and computational requirements.</p>
+<ul>
+<li>Basic BSTS Model Fitting</li>
+</ul>
+<div class="sourceCode" id="cb141"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb141-1"><a href="bayesian-structural-time-series-models.html#cb141-1" tabindex="-1"></a><span class="fu">library</span>(rstan)</span>
+<span id="cb141-2"><a href="bayesian-structural-time-series-models.html#cb141-2" tabindex="-1"></a><span class="fu">options</span>(<span class="at">mc.cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>())</span>
+<span id="cb141-3"><a href="bayesian-structural-time-series-models.html#cb141-3" tabindex="-1"></a><span class="fu">rstan_options</span>(<span class="at">auto_write =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb141-4"><a href="bayesian-structural-time-series-models.html#cb141-4" tabindex="-1"></a></span>
+<span id="cb141-5"><a href="bayesian-structural-time-series-models.html#cb141-5" tabindex="-1"></a><span class="co"># Prepare data</span></span>
+<span id="cb141-6"><a href="bayesian-structural-time-series-models.html#cb141-6" tabindex="-1"></a>data_list_basic <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">N =</span> <span class="fu">length</span>(y), <span class="at">m =</span> m, <span class="at">y =</span> y)</span>
+<span id="cb141-7"><a href="bayesian-structural-time-series-models.html#cb141-7" tabindex="-1"></a></span>
+<span id="cb141-8"><a href="bayesian-structural-time-series-models.html#cb141-8" tabindex="-1"></a><span class="co"># Fit basic model</span></span>
+<span id="cb141-9"><a href="bayesian-structural-time-series-models.html#cb141-9" tabindex="-1"></a>fit_basic <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">model_code =</span> stan_model_bsts_basic, </span>
+<span id="cb141-10"><a href="bayesian-structural-time-series-models.html#cb141-10" tabindex="-1"></a>                  <span class="at">data =</span> data_list_basic,</span>
+<span id="cb141-11"><a href="bayesian-structural-time-series-models.html#cb141-11" tabindex="-1"></a>                  <span class="at">chains =</span> <span class="dv">4</span>, <span class="at">iter =</span> <span class="dv">2000</span>, <span class="at">warmup =</span> <span class="dv">1000</span>, <span class="at">seed =</span> <span class="dv">42</span>)</span>
+<span id="cb141-12"><a href="bayesian-structural-time-series-models.html#cb141-12" tabindex="-1"></a></span>
+<span id="cb141-13"><a href="bayesian-structural-time-series-models.html#cb141-13" tabindex="-1"></a><span class="fu">print</span>(fit_basic, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;sigma_obs&quot;</span>, <span class="st">&quot;sigma_level&quot;</span>, <span class="st">&quot;sigma_trend&quot;</span>, <span class="st">&quot;sigma_seasonal&quot;</span>))</span></code></pre></div>
+<ul>
+<li>Time-Varying Volatility Model Fitting</li>
+</ul>
+<div class="sourceCode" id="cb142"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb142-1"><a href="bayesian-structural-time-series-models.html#cb142-1" tabindex="-1"></a><span class="co"># Fit extended model</span></span>
+<span id="cb142-2"><a href="bayesian-structural-time-series-models.html#cb142-2" tabindex="-1"></a>fit_extended <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">model_code =</span> stan_model_bsts_extended, </span>
+<span id="cb142-3"><a href="bayesian-structural-time-series-models.html#cb142-3" tabindex="-1"></a>                     <span class="at">data =</span> data_list_basic,</span>
+<span id="cb142-4"><a href="bayesian-structural-time-series-models.html#cb142-4" tabindex="-1"></a>                     <span class="at">chains =</span> <span class="dv">4</span>, <span class="at">iter =</span> <span class="dv">2000</span>, <span class="at">warmup =</span> <span class="dv">1000</span>, <span class="at">seed =</span> <span class="dv">123</span>)</span>
+<span id="cb142-5"><a href="bayesian-structural-time-series-models.html#cb142-5" tabindex="-1"></a></span>
+<span id="cb142-6"><a href="bayesian-structural-time-series-models.html#cb142-6" tabindex="-1"></a><span class="fu">print</span>(fit_extended, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;sigma_obs&quot;</span>, <span class="st">&quot;sigma_level&quot;</span>, <span class="st">&quot;sigma_h&quot;</span>))</span></code></pre></div>
+<p>The posterior for <code>sigma_h</code> provides insights into volatility dynamics: larger values indicate more variable trend volatility, while smaller values suggest smoother volatility evolution.</p>
+<ul>
+<li>Visualization and Interpretation</li>
+</ul>
+<p>Effective visualization of BSTS results requires displaying both point estimates and uncertainty quantification for the latent components.</p>
+<ul>
+<li>Basic Model Visualization</li>
+</ul>
+<div class="sourceCode" id="cb143"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb143-1"><a href="bayesian-structural-time-series-models.html#cb143-1" tabindex="-1"></a><span class="co"># Extract posterior samples</span></span>
+<span id="cb143-2"><a href="bayesian-structural-time-series-models.html#cb143-2" tabindex="-1"></a>post_basic <span class="ot">&lt;-</span> <span class="fu">extract</span>(fit_basic)</span>
+<span id="cb143-3"><a href="bayesian-structural-time-series-models.html#cb143-3" tabindex="-1"></a></span>
+<span id="cb143-4"><a href="bayesian-structural-time-series-models.html#cb143-4" tabindex="-1"></a><span class="co"># Compute posterior summaries</span></span>
+<span id="cb143-5"><a href="bayesian-structural-time-series-models.html#cb143-5" tabindex="-1"></a>level_mean <span class="ot">&lt;-</span> <span class="fu">apply</span>(post_basic<span class="sc">$</span>level, <span class="dv">2</span>, mean)</span>
+<span id="cb143-6"><a href="bayesian-structural-time-series-models.html#cb143-6" tabindex="-1"></a>level_lower <span class="ot">&lt;-</span> <span class="fu">apply</span>(post_basic<span class="sc">$</span>level, <span class="dv">2</span>, quantile, <span class="at">probs =</span> <span class="fl">0.025</span>)</span>
+<span id="cb143-7"><a href="bayesian-structural-time-series-models.html#cb143-7" tabindex="-1"></a>level_upper <span class="ot">&lt;-</span> <span class="fu">apply</span>(post_basic<span class="sc">$</span>level, <span class="dv">2</span>, quantile, <span class="at">probs =</span> <span class="fl">0.975</span>)</span>
+<span id="cb143-8"><a href="bayesian-structural-time-series-models.html#cb143-8" tabindex="-1"></a></span>
+<span id="cb143-9"><a href="bayesian-structural-time-series-models.html#cb143-9" tabindex="-1"></a>trend_mean <span class="ot">&lt;-</span> <span class="fu">apply</span>(post_basic<span class="sc">$</span>trend, <span class="dv">2</span>, mean)</span>
+<span id="cb143-10"><a href="bayesian-structural-time-series-models.html#cb143-10" tabindex="-1"></a></span>
+<span id="cb143-11"><a href="bayesian-structural-time-series-models.html#cb143-11" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb143-12"><a href="bayesian-structural-time-series-models.html#cb143-12" tabindex="-1"></a>df_basic <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb143-13"><a href="bayesian-structural-time-series-models.html#cb143-13" tabindex="-1"></a>  <span class="at">time =</span> <span class="dv">1</span><span class="sc">:</span>n,</span>
+<span id="cb143-14"><a href="bayesian-structural-time-series-models.html#cb143-14" tabindex="-1"></a>  <span class="at">observed =</span> y,</span>
+<span id="cb143-15"><a href="bayesian-structural-time-series-models.html#cb143-15" tabindex="-1"></a>  <span class="at">level =</span> level_mean,</span>
+<span id="cb143-16"><a href="bayesian-structural-time-series-models.html#cb143-16" tabindex="-1"></a>  <span class="at">level_lower =</span> level_lower,</span>
+<span id="cb143-17"><a href="bayesian-structural-time-series-models.html#cb143-17" tabindex="-1"></a>  <span class="at">level_upper =</span> level_upper,</span>
+<span id="cb143-18"><a href="bayesian-structural-time-series-models.html#cb143-18" tabindex="-1"></a>  <span class="at">trend =</span> trend_mean</span>
+<span id="cb143-19"><a href="bayesian-structural-time-series-models.html#cb143-19" tabindex="-1"></a>)</span>
+<span id="cb143-20"><a href="bayesian-structural-time-series-models.html#cb143-20" tabindex="-1"></a></span>
+<span id="cb143-21"><a href="bayesian-structural-time-series-models.html#cb143-21" tabindex="-1"></a><span class="co"># Plot level component with uncertainty</span></span>
+<span id="cb143-22"><a href="bayesian-structural-time-series-models.html#cb143-22" tabindex="-1"></a><span class="fu">ggplot</span>(df_basic, <span class="fu">aes</span>(<span class="at">x =</span> time)) <span class="sc">+</span></span>
+<span id="cb143-23"><a href="bayesian-structural-time-series-models.html#cb143-23" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> observed), <span class="at">color =</span> <span class="st">&quot;black&quot;</span>, <span class="at">linetype =</span> <span class="st">&quot;dashed&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb143-24"><a href="bayesian-structural-time-series-models.html#cb143-24" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> level), <span class="at">color =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb143-25"><a href="bayesian-structural-time-series-models.html#cb143-25" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> level_lower, <span class="at">ymax =</span> level_upper), </span>
+<span id="cb143-26"><a href="bayesian-structural-time-series-models.html#cb143-26" tabindex="-1"></a>              <span class="at">fill =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb143-27"><a href="bayesian-structural-time-series-models.html#cb143-27" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;BSTS Level Component with 95% Credible Intervals&quot;</span>,</span>
+<span id="cb143-28"><a href="bayesian-structural-time-series-models.html#cb143-28" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Time&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Value&quot;</span>) <span class="sc">+</span></span>
+<span id="cb143-29"><a href="bayesian-structural-time-series-models.html#cb143-29" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
+<span id="cb143-30"><a href="bayesian-structural-time-series-models.html#cb143-30" tabindex="-1"></a></span>
+<span id="cb143-31"><a href="bayesian-structural-time-series-models.html#cb143-31" tabindex="-1"></a><span class="co"># Plot trend evolution</span></span>
+<span id="cb143-32"><a href="bayesian-structural-time-series-models.html#cb143-32" tabindex="-1"></a><span class="fu">ggplot</span>(df_basic, <span class="fu">aes</span>(<span class="at">x =</span> time)) <span class="sc">+</span></span>
+<span id="cb143-33"><a href="bayesian-structural-time-series-models.html#cb143-33" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> trend), <span class="at">color =</span> <span class="st">&quot;red&quot;</span>, <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb143-34"><a href="bayesian-structural-time-series-models.html#cb143-34" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Estimated Trend Component&quot;</span>,</span>
+<span id="cb143-35"><a href="bayesian-structural-time-series-models.html#cb143-35" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Time&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Trend&quot;</span>) <span class="sc">+</span></span>
+<span id="cb143-36"><a href="bayesian-structural-time-series-models.html#cb143-36" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div>
+<ul>
+<li>Time-Varying Volatility Visualization</li>
+</ul>
+<div class="sourceCode" id="cb144"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb144-1"><a href="bayesian-structural-time-series-models.html#cb144-1" tabindex="-1"></a><span class="co"># Extract posterior samples for extended model</span></span>
+<span id="cb144-2"><a href="bayesian-structural-time-series-models.html#cb144-2" tabindex="-1"></a>post_extended <span class="ot">&lt;-</span> <span class="fu">extract</span>(fit_extended)</span>
+<span id="cb144-3"><a href="bayesian-structural-time-series-models.html#cb144-3" tabindex="-1"></a></span>
+<span id="cb144-4"><a href="bayesian-structural-time-series-models.html#cb144-4" tabindex="-1"></a><span class="co"># Compute posterior summaries</span></span>
+<span id="cb144-5"><a href="bayesian-structural-time-series-models.html#cb144-5" tabindex="-1"></a>h_mean <span class="ot">&lt;-</span> <span class="fu">apply</span>(post_extended<span class="sc">$</span>h, <span class="dv">2</span>, mean)</span>
+<span id="cb144-6"><a href="bayesian-structural-time-series-models.html#cb144-6" tabindex="-1"></a>h_lower <span class="ot">&lt;-</span> <span class="fu">apply</span>(post_extended<span class="sc">$</span>h, <span class="dv">2</span>, quantile, <span class="at">probs =</span> <span class="fl">0.025</span>)</span>
+<span id="cb144-7"><a href="bayesian-structural-time-series-models.html#cb144-7" tabindex="-1"></a>h_upper <span class="ot">&lt;-</span> <span class="fu">apply</span>(post_extended<span class="sc">$</span>h, <span class="dv">2</span>, quantile, <span class="at">probs =</span> <span class="fl">0.975</span>)</span>
+<span id="cb144-8"><a href="bayesian-structural-time-series-models.html#cb144-8" tabindex="-1"></a></span>
+<span id="cb144-9"><a href="bayesian-structural-time-series-models.html#cb144-9" tabindex="-1"></a>trend_mean_ext <span class="ot">&lt;-</span> <span class="fu">apply</span>(post_extended<span class="sc">$</span>trend, <span class="dv">2</span>, mean)</span>
+<span id="cb144-10"><a href="bayesian-structural-time-series-models.html#cb144-10" tabindex="-1"></a></span>
+<span id="cb144-11"><a href="bayesian-structural-time-series-models.html#cb144-11" tabindex="-1"></a>df_extended <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb144-12"><a href="bayesian-structural-time-series-models.html#cb144-12" tabindex="-1"></a>  <span class="at">time =</span> <span class="dv">1</span><span class="sc">:</span>n,</span>
+<span id="cb144-13"><a href="bayesian-structural-time-series-models.html#cb144-13" tabindex="-1"></a>  <span class="at">log_vol =</span> h_mean,</span>
+<span id="cb144-14"><a href="bayesian-structural-time-series-models.html#cb144-14" tabindex="-1"></a>  <span class="at">log_vol_lower =</span> h_lower,</span>
+<span id="cb144-15"><a href="bayesian-structural-time-series-models.html#cb144-15" tabindex="-1"></a>  <span class="at">log_vol_upper =</span> h_upper,</span>
+<span id="cb144-16"><a href="bayesian-structural-time-series-models.html#cb144-16" tabindex="-1"></a>  <span class="at">trend =</span> trend_mean_ext</span>
+<span id="cb144-17"><a href="bayesian-structural-time-series-models.html#cb144-17" tabindex="-1"></a>)</span>
+<span id="cb144-18"><a href="bayesian-structural-time-series-models.html#cb144-18" tabindex="-1"></a></span>
+<span id="cb144-19"><a href="bayesian-structural-time-series-models.html#cb144-19" tabindex="-1"></a><span class="co"># Plot time-varying log-volatility</span></span>
+<span id="cb144-20"><a href="bayesian-structural-time-series-models.html#cb144-20" tabindex="-1"></a><span class="fu">ggplot</span>(df_extended, <span class="fu">aes</span>(<span class="at">x =</span> time)) <span class="sc">+</span></span>
+<span id="cb144-21"><a href="bayesian-structural-time-series-models.html#cb144-21" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> log_vol), <span class="at">color =</span> <span class="st">&quot;red&quot;</span>, <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb144-22"><a href="bayesian-structural-time-series-models.html#cb144-22" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> log_vol_lower, <span class="at">ymax =</span> log_vol_upper), </span>
+<span id="cb144-23"><a href="bayesian-structural-time-series-models.html#cb144-23" tabindex="-1"></a>              <span class="at">fill =</span> <span class="st">&quot;red&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb144-24"><a href="bayesian-structural-time-series-models.html#cb144-24" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Time-Varying Trend Log-Volatility with 95% Credible Intervals&quot;</span>,</span>
+<span id="cb144-25"><a href="bayesian-structural-time-series-models.html#cb144-25" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;log(σ²_τ)&quot;</span>, <span class="at">x =</span> <span class="st">&quot;Time&quot;</span>) <span class="sc">+</span></span>
+<span id="cb144-26"><a href="bayesian-structural-time-series-models.html#cb144-26" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
+<span id="cb144-27"><a href="bayesian-structural-time-series-models.html#cb144-27" tabindex="-1"></a></span>
+<span id="cb144-28"><a href="bayesian-structural-time-series-models.html#cb144-28" tabindex="-1"></a><span class="co"># Plot corresponding trend with varying smoothness</span></span>
+<span id="cb144-29"><a href="bayesian-structural-time-series-models.html#cb144-29" tabindex="-1"></a><span class="fu">ggplot</span>(df_extended, <span class="fu">aes</span>(<span class="at">x =</span> time)) <span class="sc">+</span></span>
+<span id="cb144-30"><a href="bayesian-structural-time-series-models.html#cb144-30" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> trend), <span class="at">color =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb144-31"><a href="bayesian-structural-time-series-models.html#cb144-31" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Trend Component with Time-Varying Volatility&quot;</span>,</span>
+<span id="cb144-32"><a href="bayesian-structural-time-series-models.html#cb144-32" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;Trend&quot;</span>, <span class="at">x =</span> <span class="st">&quot;Time&quot;</span>) <span class="sc">+</span></span>
+<span id="cb144-33"><a href="bayesian-structural-time-series-models.html#cb144-33" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div>
+<p>These visualizations reveal how uncertainty in trend evolution changes over time, enabling analysts to identify periods of instability or structural transitions.</p>
+<div id="applications-and-extensions" class="section level4 hasAnchor" number="14.1.2.1">
+<h4><span class="header-section-number">14.1.2.1</span> Applications and Extensions<a href="bayesian-structural-time-series-models.html#applications-and-extensions" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>BSTS models find applications across diverse domains where interpretable time series decomposition is valuable. The basic framework handles missing data naturally and provides a foundation for causal impact analysis through counterfactual prediction. The time-varying volatility extension proves particularly valuable in financial econometrics, where volatility clustering and regime changes are common phenomena. In financial time series, periods of market calm alternate with high-volatility episodes during crises or major economic announcements. The time-varying trend volatility model can capture these dynamics while maintaining the interpretable decomposition that BSTS models provide. Economic indicators often exhibit structural breaks and changing volatility regimes due to policy interventions, technological changes, or external shocks. The flexible volatility specification enables more adaptive forecasting in such environments. Climate time series frequently display non-stationary variance patterns due to changing atmospheric or oceanic conditions. The stochastic volatility framework can accommodate such dynamics while preserving seasonal and trend interpretability.</p>
+<p>Both modeling frameworks can be extended to hierarchical structures where multiple related time series share common components, or to multivariate settings where cross-series dependencies are of interest. The Stan implementations provide a flexible foundation for such extensions. BSTS models naturally accommodate regression components with spike-and-slab priors for variable selection. This capability enables automatic identification of relevant predictors while maintaining the structural decomposition that makes BSTS models interpretable. The computational complexity of BSTS models scales with the number of time points and latent states. The basic model typically converges within standard MCMC runs, while the time-varying volatility extension requires longer chains due to the additional stochastic volatility component.</p>
+<p>Stan’s efficient gradient-based sampling (HMC/NUTS) handles the high-dimensional latent state spaces more effectively than traditional Gibbs sampling approaches. However, practitioners should monitor convergence diagnostics carefully, particularly for the volatility parameters in the extended model.</p>
+<p>For very long time series, computational efficiency can be improved through state space formulations that marginalize over latent states, though this sacrifices direct access to the latent component estimates that make BSTS models interpretable.</p>
+</div>
+</div>
+</div>
+<div id="model-comparison-and-selection" class="section level2 hasAnchor" number="14.2">
+<h2><span class="header-section-number">14.2</span> Model Comparison and Selection<a href="bayesian-structural-time-series-models.html#model-comparison-and-selection" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Comparing basic and extended BSTS models requires balancing goodness-of-fit against complexity. The Widely Applicable Information Criterion (WAIC) provides a practical tool for model comparison within the Bayesian framework:</p>
+<div class="sourceCode" id="cb145"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb145-1"><a href="bayesian-structural-time-series-models.html#cb145-1" tabindex="-1"></a><span class="fu">library</span>(loo)</span>
+<span id="cb145-2"><a href="bayesian-structural-time-series-models.html#cb145-2" tabindex="-1"></a></span>
+<span id="cb145-3"><a href="bayesian-structural-time-series-models.html#cb145-3" tabindex="-1"></a><span class="co"># Compute WAIC for model comparison</span></span>
+<span id="cb145-4"><a href="bayesian-structural-time-series-models.html#cb145-4" tabindex="-1"></a>waic_basic <span class="ot">&lt;-</span> <span class="fu">waic</span>(<span class="fu">extract_log_lik</span>(fit_basic))</span>
+<span id="cb145-5"><a href="bayesian-structural-time-series-models.html#cb145-5" tabindex="-1"></a>waic_extended <span class="ot">&lt;-</span> <span class="fu">waic</span>(<span class="fu">extract_log_lik</span>(fit_extended))</span>
+<span id="cb145-6"><a href="bayesian-structural-time-series-models.html#cb145-6" tabindex="-1"></a></span>
+<span id="cb145-7"><a href="bayesian-structural-time-series-models.html#cb145-7" tabindex="-1"></a><span class="co"># Compare models</span></span>
+<span id="cb145-8"><a href="bayesian-structural-time-series-models.html#cb145-8" tabindex="-1"></a><span class="fu">loo_compare</span>(waic_basic, waic_extended)</span></code></pre></div>
+<p>Additionally, posterior predictive checks help assess whether the added complexity of time-varying volatility improves model adequacy for the specific application.</p>
+</div>
+<div id="conclusion-9" class="section level2 hasAnchor" number="14.3">
+<h2><span class="header-section-number">14.3</span> Conclusion<a href="bayesian-structural-time-series-models.html#conclusion-9" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Bayesian Structural Time Series models provide a powerful and interpretable framework for analyzing complex temporal data. The basic BSTS specification offers transparent decomposition into level, trend, and seasonal components while maintaining full uncertainty quantification through the Bayesian approach. The extension to time-varying trend volatility addresses limitations of constant volatility assumptions, enabling more adaptive modeling of time series with changing uncertainty regimes.</p>
+<p>The Stan implementations presented here provide complete, working examples that practitioners can adapt to their specific applications. The state-space framework naturally handles missing data and irregular observation patterns, while the Bayesian approach enables principled incorporation of prior information and coherent uncertainty propagation.</p>
+<p>As computational tools continue to improve and the demand for interpretable time series models grows, BSTS models are positioned to play an increasingly important role across scientific and applied domains. The flexibility demonstrated through the time-varying volatility extension illustrates how the basic framework can be adapted to address specific modeling challenges while preserving the interpretability that makes BSTS models valuable for practical time series analysis.</p>
+<p>The unified treatment presented here equips practitioners with both foundational understanding and practical tools for implementing BSTS models across a spectrum of applications, from basic seasonal decomposition to advanced volatility modeling in dynamic environments.</p>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="model-comparison-and-selection-in-bayesian-analysis.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+  "sharing": {
+    "github": false,
+    "facebook": true,
+    "twitter": true,
+    "linkedin": false,
+    "weibo": false,
+    "instapaper": false,
+    "vk": false,
+    "whatsapp": false,
+    "all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+  },
+  "fontsettings": {
+    "theme": "white",
+    "family": "sans",
+    "size": 2
+  },
+  "edit": {
+    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/edit/main/14-BSTS.Rmd",
+    "text": "Edit"
+  },
+  "history": {
+    "link": null,
+    "text": null
+  },
+  "view": {
+    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/blob/main/14-BSTS.Rmd",
+    "text": null
+  },
+  "download": null,
+  "search": {
+    "engine": "fuse",
+    "options": null
+  },
+  "toc": {
+    "collapse": "subsection"
+  }
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
