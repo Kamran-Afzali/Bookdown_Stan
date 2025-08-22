@@ -23,7 +23,7 @@
 <meta name="author" content="Kamran Afzali" />
 
 
-<meta name="date" content="2025-08-19" />
+<meta name="date" content="2025-08-22" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -143,13 +143,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Choosing the Right Bayesian Model</a></li>
 <li class="chapter" data-level="2" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html"><i class="fa fa-check"></i><b>2</b> Bayesian Modeling in R and Stan</a>
 <ul>
-<li class="chapter" data-level="2.1" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#what-is-stan"><i class="fa fa-check"></i><b>2.1</b> What is STAN?</a></li>
+<li class="chapter" data-level="2.1" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#what-is-stan"><i class="fa fa-check"></i><b>2.1</b> What is <code>stan</code>?</a></li>
 <li class="chapter" data-level="2.2" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#model-file"><i class="fa fa-check"></i><b>2.2</b> Model file</a></li>
 <li class="chapter" data-level="2.3" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#fit-the-model"><i class="fa fa-check"></i><b>2.3</b> Fit the model</a></li>
 <li class="chapter" data-level="2.4" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#mcmc-diagnostics"><i class="fa fa-check"></i><b>2.4</b> MCMC diagnostics</a></li>
-<li class="chapter" data-level="2.5" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#parting-thoughts"><i class="fa fa-check"></i><b>2.5</b> Parting thoughts</a></li>
-<li class="chapter" data-level="2.6" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#conclusions"><i class="fa fa-check"></i><b>2.6</b> Conclusions</a></li>
-<li class="chapter" data-level="2.7" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#references"><i class="fa fa-check"></i><b>2.7</b> References</a></li>
+<li class="chapter" data-level="2.5" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#conclusions"><i class="fa fa-check"></i><b>2.5</b> Conclusions</a></li>
+<li class="chapter" data-level="2.6" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#references"><i class="fa fa-check"></i><b>2.6</b> References</a></li>
 </ul></li>
 <li class="chapter" data-level="3" data-path="bayesian-regression-models-for-non-normal-data.html"><a href="bayesian-regression-models-for-non-normal-data.html"><i class="fa fa-check"></i><b>3</b> Bayesian Regression Models for Non-Normal Data</a>
 <ul>
@@ -326,10 +325,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
             <section class="normal" id="section-">
 <div id="bayesian-modeling-in-r-and-stan" class="section level1 hasAnchor" number="2">
 <h1><span class="header-section-number">Chapter 2</span> Bayesian Modeling in R and Stan<a href="bayesian-modeling-in-r-and-stan.html#bayesian-modeling-in-r-and-stan" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<p>The aim of this post is to provide a quick overview and introduction to fitting Bayesian models using STAN and R. For this, I strongly recommend installing Rstudio, an integrated development environment that allows a “user-friendly” interaction with R.</p>
+<p>The aim of this post is to provide a quick overview and introduction to fitting Bayesian models using <code>stan</code> and R. For this, I strongly recommend installing Rstudio, an integrated development environment that allows a “user-friendly” interaction with R.</p>
 <div id="what-is-stan" class="section level2 hasAnchor" number="2.1">
-<h2><span class="header-section-number">2.1</span> What is STAN?<a href="bayesian-modeling-in-r-and-stan.html#what-is-stan" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>STAN is a tool for analysing Bayesian models using Markov Chain Monte Carlo (MCMC) methods. MCMC is a sampling method for estimating a probability distribution without knowing all of the features of the distribution. STAN is a probabilistic programming language and free software for specifying statistical models utilising Hamiltonian Monte Carlo methods (HMC), a type of MCMC algorithm. Stan works with the most widely used data-analysis languages including R and Python. In this quick overview, we’ll focus on the rstan package and demonstrate how to fit STAN models with it.</p>
+<h2><span class="header-section-number">2.1</span> What is <code>stan</code>?<a href="bayesian-modeling-in-r-and-stan.html#what-is-stan" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><code>stan</code> is a tool for analysing Bayesian models using Markov Chain Monte Carlo (MCMC) methods. MCMC is a sampling method for estimating a probability distribution without knowing all of the features of the distribution. STAN is a probabilistic programming language and free software for specifying statistical models utilising Hamiltonian Monte Carlo methods (HMC), a type of MCMC algorithm. Stan works with the most widely used data-analysis languages including R and Python. In this quick overview, we’ll focus on the rstan package and demonstrate how to fit <code>stan</code> models with it.</p>
 <p>For an example dataset, here we simulate our own data in R. We firsty create a continuous outcome variable y as a function of one predictor x and a disturbance term ϵ. I simulate a dataset with 100 observations. Create the error term, the predictor and the outcome using a linear form with an intercept β0, slope β1, etc. coefficients.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="bayesian-modeling-in-r-and-stan.html#cb1-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
 <span id="cb1-2"><a href="bayesian-modeling-in-r-and-stan.html#cb1-2" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
@@ -341,149 +340,73 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb1-8"><a href="bayesian-modeling-in-r-and-stan.html#cb1-8" tabindex="-1"></a>y <span class="ot">&lt;-</span> a <span class="sc">+</span>x<span class="sc">%*%</span>b<span class="sc">+</span> eps  <span class="co">#response variable</span></span>
 <span id="cb1-9"><a href="bayesian-modeling-in-r-and-stan.html#cb1-9" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(y, x)  <span class="co">#dataset</span></span>
 <span id="cb1-10"><a href="bayesian-modeling-in-r-and-stan.html#cb1-10" tabindex="-1"></a><span class="fu">head</span>(data)<span class="sc">%&gt;%</span>kableExtra<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div>
-<table>
+<table style="width:95%;">
+<colgroup>
+<col width="13%" />
+<col width="16%" />
+<col width="16%" />
+<col width="16%" />
+<col width="16%" />
+<col width="16%" />
+</colgroup>
 <thead>
-<tr>
-<th style="text-align:right;">
-y
-</th>
-<th style="text-align:right;">
-X1
-</th>
-<th style="text-align:right;">
-X2
-</th>
-<th style="text-align:right;">
-X3
-</th>
-<th style="text-align:right;">
-X4
-</th>
-<th style="text-align:right;">
-X5
-</th>
+<tr class="header">
+<th align="right">y</th>
+<th align="right">X1</th>
+<th align="right">X2</th>
+<th align="right">X3</th>
+<th align="right">X4</th>
+<th align="right">X5</th>
 </tr>
 </thead>
 <tbody>
-<tr>
-<td style="text-align:right;">
-33.51510
-</td>
-<td style="text-align:right;">
--0.5604756
-</td>
-<td style="text-align:right;">
--0.9957987
-</td>
-<td style="text-align:right;">
--0.5116037
-</td>
-<td style="text-align:right;">
--0.1503075
-</td>
-<td style="text-align:right;">
-0.1965498
-</td>
+<tr class="odd">
+<td align="right">33.51510</td>
+<td align="right">-0.5604756</td>
+<td align="right">-0.9957987</td>
+<td align="right">-0.5116037</td>
+<td align="right">-0.1503075</td>
+<td align="right">0.1965498</td>
 </tr>
-<tr>
-<td style="text-align:right;">
-43.76098
-</td>
-<td style="text-align:right;">
--0.2301775
-</td>
-<td style="text-align:right;">
--1.0399550
-</td>
-<td style="text-align:right;">
-0.2369379
-</td>
-<td style="text-align:right;">
--0.3277571
-</td>
-<td style="text-align:right;">
-0.6501132
-</td>
+<tr class="even">
+<td align="right">43.76098</td>
+<td align="right">-0.2301775</td>
+<td align="right">-1.0399550</td>
+<td align="right">0.2369379</td>
+<td align="right">-0.3277571</td>
+<td align="right">0.6501132</td>
 </tr>
-<tr>
-<td style="text-align:right;">
-27.64712
-</td>
-<td style="text-align:right;">
-1.5587083
-</td>
-<td style="text-align:right;">
--0.0179802
-</td>
-<td style="text-align:right;">
--0.5415892
-</td>
-<td style="text-align:right;">
--1.4481653
-</td>
-<td style="text-align:right;">
-0.6710042
-</td>
+<tr class="odd">
+<td align="right">27.64712</td>
+<td align="right">1.5587083</td>
+<td align="right">-0.0179802</td>
+<td align="right">-0.5415892</td>
+<td align="right">-1.4481653</td>
+<td align="right">0.6710042</td>
 </tr>
-<tr>
-<td style="text-align:right;">
-50.72614
-</td>
-<td style="text-align:right;">
-0.0705084
-</td>
-<td style="text-align:right;">
--0.1321751
-</td>
-<td style="text-align:right;">
-1.2192276
-</td>
-<td style="text-align:right;">
--0.6972846
-</td>
-<td style="text-align:right;">
--1.2841578
-</td>
+<tr class="even">
+<td align="right">50.72614</td>
+<td align="right">0.0705084</td>
+<td align="right">-0.1321751</td>
+<td align="right">1.2192276</td>
+<td align="right">-0.6972846</td>
+<td align="right">-1.2841578</td>
 </tr>
-<tr>
-<td style="text-align:right;">
-39.46286
-</td>
-<td style="text-align:right;">
-0.1292877
-</td>
-<td style="text-align:right;">
--2.5493428
-</td>
-<td style="text-align:right;">
-0.1741359
-</td>
-<td style="text-align:right;">
-2.5984902
-</td>
-<td style="text-align:right;">
--2.0261096
-</td>
+<tr class="odd">
+<td align="right">39.46286</td>
+<td align="right">0.1292877</td>
+<td align="right">-2.5493428</td>
+<td align="right">0.1741359</td>
+<td align="right">2.5984902</td>
+<td align="right">-2.0261096</td>
 </tr>
-<tr>
-<td style="text-align:right;">
-39.42009
-</td>
-<td style="text-align:right;">
-1.7150650
-</td>
-<td style="text-align:right;">
-1.0405735
-</td>
-<td style="text-align:right;">
--0.6152683
-</td>
-<td style="text-align:right;">
--0.0374150
-</td>
-<td style="text-align:right;">
-2.2053261
-</td>
+<tr class="even">
+<td align="right">39.42009</td>
+<td align="right">1.7150650</td>
+<td align="right">1.0405735</td>
+<td align="right">-0.6152683</td>
+<td align="right">-0.0374150</td>
+<td align="right">2.2053261</td>
 </tr>
 </tbody>
 </table>
@@ -543,8 +466,7 @@ X5
 ##      // optional - derivatives (posteriors) of the samples
 ##    }
 ## </code></pre>
-<p>For this introduction, I’ll use a very simple model in the STAN model that only involves the specification of three blocks. In the data block, I declare the variables y and x as reals (or vectors) with length equal to N and declare the sample size n sim as a positive integer number using the phrase int n sim. I define the coefficients for the linear regression alpha and beta (as real values) and the standard deviation parameter sigma in the parameters block (as a positive real number).
-Finally, in the model block, I give the regression coefficients and standard deviation parameters weakly informative priors, and I use a normal distribution indexed by the conditional mean mu and standard deviation sigma parameters to model the outcome data y. I give full recognition to McElreath’s outstanding Statistical Rethinking (2020) book for this section.</p>
+<p>For this introduction, I’ll use a very simple model in the STAN model that only involves the specification of three blocks. In the data block, I declare the variables y and x as reals (or vectors) with length equal to N and declare the sample size n sim as a positive integer number using the phrase int n sim. I define the coefficients for the linear regression alpha and beta (as real values) and the standard deviation parameter sigma in the parameters block (as a positive real number). Finally, in the model block, I give the regression coefficients and standard deviation parameters weakly informative priors, and I use a normal distribution indexed by the conditional mean mu and standard deviation sigma parameters to model the outcome data y. I give full recognition to McElreath’s outstanding Statistical Rethinking (2020) book for this section.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="bayesian-modeling-in-r-and-stan.html#cb4-1" tabindex="-1"></a>stan_mod <span class="ot">=</span> <span class="st">&quot;data {</span></span>
 <span id="cb4-2"><a href="bayesian-modeling-in-r-and-stan.html#cb4-2" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; N;   // number of observations</span></span>
 <span id="cb4-3"><a href="bayesian-modeling-in-r-and-stan.html#cb4-3" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; K;   // number of predictors</span></span>
@@ -622,16 +544,12 @@ Finally, in the model block, I give the regression coefficients and standard dev
 <span id="cb9-3"><a href="bayesian-modeling-in-r-and-stan.html#cb9-3" tabindex="-1"></a>  <span class="fu">mcmc_rhat</span>() <span class="sc">+</span></span>
 <span id="cb9-4"><a href="bayesian-modeling-in-r-and-stan.html#cb9-4" tabindex="-1"></a>  <span class="fu">yaxis_text</span>()</span></code></pre></div>
 </div>
-<div id="parting-thoughts" class="section level2 hasAnchor" number="2.5">
-<h2><span class="header-section-number">2.5</span> Parting thoughts<a href="bayesian-modeling-in-r-and-stan.html#parting-thoughts" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>To finish this post, I’d like to point out that the rstanarm package makes it possible to fit STAN models without having to write them down and instead using standard R syntax, such as that found in a glm(). So, what’s the point of learning all this STAN jargon? It depends: if you’re merely fitting “classical” models to your data with no fanfare, just use rstanarm; it’ll save you time and the models in this package are unquestionably better parametrized (i.e. faster) than the one I presented here. Learning STAN, on the other hand, is a good approach to get into a very flexible and strong language that will continue to evolve if you believe you will need to fit your own models one day. rstanarm is a package that acts as a user interface for Stan on the front end, and enables R users to create Bayesian models without needing to learn how to code in Stan. Using the standard formula and data, you can fit a model in rstanarm. If you want to use rstan to fit a different model type, you’ll have to code it yourself. The prefix <em>stan_</em> precedes the model fitting functions and is followed by the model type. stan glm() and stan glmer() are two examples. A complete list of rstanarm functions can be found on Cran’s package guide.</p>
+<div id="conclusions" class="section level2 hasAnchor" number="2.5">
+<h2><span class="header-section-number">2.5</span> Conclusions<a href="bayesian-modeling-in-r-and-stan.html#conclusions" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>To finish this post, I’d like to point out that the rstanarm package makes it possible to fit STAN models without having to write them down and instead using standard R syntax, such as that found in a glm(). So, what’s the point of learning all this STAN jargon? It depends: if you’re merely fitting “classical” models to your data with no fanfare, just use rstanarm; it’ll save you time and the models in this package are unquestionably better parametrized (i.e. faster) than the one I presented here. Learning STAN, on the other hand, is a good approach to get into a very flexible and strong language that will continue to evolve if you believe you will need to fit your own models one day. rstanarm is a package that acts as a user interface for Stan on the front end, and enables R users to create Bayesian models without needing to learn how to code in Stan. Using the standard formula and data, you can fit a model in rstanarm. If you want to use rstan to fit a different model type, you’ll have to code it yourself. The prefix <em>stan_</em> precedes the model fitting functions and is followed by the model type. stan glm() and stan glmer() are two examples. A complete list of rstanarm functions can be found on Cran’s package guide. We provided only a quick overview of how to fit simple linear regression models with the Bayesian software STAN and the rstan library and how to get a collection of useful summaries from the models. This is just a taste of the many models that STAN can fit; in future postings, we’ll look at generalised linear models, as well as non-normal models with various link functions and hierarchical models. The STAN model as provided here is quite adaptable and able to accommodate datasets of various sizes. Although this may appear to be a more difficult technique than just fitting a linear model in a frequentist framework, the real benefits of Bayesian methods become apparent as the analysis becomes more sophisticated (which is often the case in real applications), the flexibility of Bayesian modelling makes it very simple to account for increasingly complicated models.</p>
 </div>
-<div id="conclusions" class="section level2 hasAnchor" number="2.6">
-<h2><span class="header-section-number">2.6</span> Conclusions<a href="bayesian-modeling-in-r-and-stan.html#conclusions" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>This tutorial provided only a quick overview of how to fit simple linear regression models with the Bayesian software STAN and the rstan library and how to get a collection of useful summaries from the models. This is just a taste of the many models that STAN can fit; in future postings, we’ll look at generalised linear models, as well as non-normal models with various link functions and hierarchical models. The STAN model as provided here is quite adaptable and able to accommodate datasets of various sizes. Although this may appear to be a more difficult technique than just fitting a linear model in a frequentist framework, the real benefits of Bayesian methods become apparent as the analysis becomes more sophisticated (which is often the case in real applications), the flexibility of Bayesian modelling makes it very simple to account for increasingly complicated models.</p>
-</div>
-<div id="references" class="section level2 hasAnchor" number="2.7">
-<h2><span class="header-section-number">2.7</span> References<a href="bayesian-modeling-in-r-and-stan.html#references" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="references" class="section level2 hasAnchor" number="2.6">
+<h2><span class="header-section-number">2.6</span> References<a href="bayesian-modeling-in-r-and-stan.html#references" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <ul>
 <li><p><a href="https://mc-stan.org/docs/2_18/functions-reference/">Stan Functions Reference</a></p></li>
 <li><p><a href="https://mc-stan.org/docs/2_29/stan-users-guide/index.html#overview">Stan Users Guide</a></p></li>

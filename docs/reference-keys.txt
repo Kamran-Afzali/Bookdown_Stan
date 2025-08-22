@@ -4,7 +4,6 @@ what-is-stan
 model-file
 fit-the-model
 mcmc-diagnostics
-parting-thoughts
 conclusions
 references
 bayesian-regression-models-for-non-normal-data
