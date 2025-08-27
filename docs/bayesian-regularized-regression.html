@@ -352,268 +352,377 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="implementation" class="section level2 hasAnchor" number="5.5">
 <h2><span class="header-section-number">5.5</span> Implementation<a href="bayesian-regularized-regression.html#implementation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<div class="sourceCode" id="cb71"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb71-1"><a href="bayesian-regularized-regression.html#cb71-1" tabindex="-1"></a><span class="fu">library</span>(tidymodels)</span>
-<span id="cb71-2"><a href="bayesian-regularized-regression.html#cb71-2" tabindex="-1"></a><span class="fu">library</span>(rstan)</span>
-<span id="cb71-3"><a href="bayesian-regularized-regression.html#cb71-3" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb71-4"><a href="bayesian-regularized-regression.html#cb71-4" tabindex="-1"></a></span>
-<span id="cb71-5"><a href="bayesian-regularized-regression.html#cb71-5" tabindex="-1"></a><span class="co"># Data simulation</span></span>
-<span id="cb71-6"><a href="bayesian-regularized-regression.html#cb71-6" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb71-7"><a href="bayesian-regularized-regression.html#cb71-7" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
-<span id="cb71-8"><a href="bayesian-regularized-regression.html#cb71-8" tabindex="-1"></a>n_train <span class="ot">&lt;-</span> <span class="dv">700</span></span>
-<span id="cb71-9"><a href="bayesian-regularized-regression.html#cb71-9" tabindex="-1"></a>n_test <span class="ot">&lt;-</span> <span class="dv">300</span></span>
-<span id="cb71-10"><a href="bayesian-regularized-regression.html#cb71-10" tabindex="-1"></a>alpha_true <span class="ot">&lt;-</span> <span class="dv">40</span>  <span class="co"># intercept</span></span>
-<span id="cb71-11"><a href="bayesian-regularized-regression.html#cb71-11" tabindex="-1"></a>beta_true <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="fl">0.25</span>)  <span class="co"># slopes</span></span>
-<span id="cb71-12"><a href="bayesian-regularized-regression.html#cb71-12" tabindex="-1"></a>sigma_true <span class="ot">&lt;-</span> <span class="dv">5</span>  <span class="co"># residual standard deviation</span></span>
-<span id="cb71-13"><a href="bayesian-regularized-regression.html#cb71-13" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">length</span>(beta_true)</span>
-<span id="cb71-14"><a href="bayesian-regularized-regression.html#cb71-14" tabindex="-1"></a></span>
-<span id="cb71-15"><a href="bayesian-regularized-regression.html#cb71-15" tabindex="-1"></a><span class="co"># Generate design matrix and response</span></span>
-<span id="cb71-16"><a href="bayesian-regularized-regression.html#cb71-16" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n <span class="sc">*</span> p), n, p)</span>
-<span id="cb71-17"><a href="bayesian-regularized-regression.html#cb71-17" tabindex="-1"></a>epsilon <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> sigma_true)</span>
-<span id="cb71-18"><a href="bayesian-regularized-regression.html#cb71-18" tabindex="-1"></a>y <span class="ot">&lt;-</span> alpha_true <span class="sc">+</span> X <span class="sc">%*%</span> beta_true <span class="sc">+</span> epsilon</span>
-<span id="cb71-19"><a href="bayesian-regularized-regression.html#cb71-19" tabindex="-1"></a></span>
-<span id="cb71-20"><a href="bayesian-regularized-regression.html#cb71-20" tabindex="-1"></a><span class="co"># Create dataset</span></span>
-<span id="cb71-21"><a href="bayesian-regularized-regression.html#cb71-21" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">y =</span> y, X)</span>
-<span id="cb71-22"><a href="bayesian-regularized-regression.html#cb71-22" tabindex="-1"></a><span class="fu">colnames</span>(data) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;y&quot;</span>, <span class="fu">paste0</span>(<span class="st">&quot;X&quot;</span>, <span class="dv">1</span><span class="sc">:</span>p))</span>
-<span id="cb71-23"><a href="bayesian-regularized-regression.html#cb71-23" tabindex="-1"></a></span>
-<span id="cb71-24"><a href="bayesian-regularized-regression.html#cb71-24" tabindex="-1"></a><span class="co"># Train-test split</span></span>
-<span id="cb71-25"><a href="bayesian-regularized-regression.html#cb71-25" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
-<span id="cb71-26"><a href="bayesian-regularized-regression.html#cb71-26" tabindex="-1"></a>data_split <span class="ot">&lt;-</span> <span class="fu">initial_split</span>(data, <span class="at">prop =</span> <span class="fl">0.7</span>)</span>
-<span id="cb71-27"><a href="bayesian-regularized-regression.html#cb71-27" tabindex="-1"></a>train_data <span class="ot">&lt;-</span> <span class="fu">training</span>(data_split)</span>
-<span id="cb71-28"><a href="bayesian-regularized-regression.html#cb71-28" tabindex="-1"></a>test_data <span class="ot">&lt;-</span> <span class="fu">testing</span>(data_split)</span>
-<span id="cb71-29"><a href="bayesian-regularized-regression.html#cb71-29" tabindex="-1"></a></span>
-<span id="cb71-30"><a href="bayesian-regularized-regression.html#cb71-30" tabindex="-1"></a><span class="co"># Prepare data for Stan</span></span>
-<span id="cb71-31"><a href="bayesian-regularized-regression.html#cb71-31" tabindex="-1"></a>X_train <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(train_data[, <span class="sc">-</span><span class="dv">1</span>])</span>
-<span id="cb71-32"><a href="bayesian-regularized-regression.html#cb71-32" tabindex="-1"></a>X_test <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(test_data[, <span class="sc">-</span><span class="dv">1</span>])</span>
-<span id="cb71-33"><a href="bayesian-regularized-regression.html#cb71-33" tabindex="-1"></a>y_train <span class="ot">&lt;-</span> train_data<span class="sc">$</span>y</span>
-<span id="cb71-34"><a href="bayesian-regularized-regression.html#cb71-34" tabindex="-1"></a>y_test <span class="ot">&lt;-</span> test_data<span class="sc">$</span>y</span></code></pre></div>
+<div class="sourceCode" id="cb71"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb71-1"><a href="bayesian-regularized-regression.html#cb71-1" tabindex="-1"></a><span class="fu">library</span>(tidymodels)</span></code></pre></div>
+<pre><code>## ── Attaching packages ───────────────────────────────────────────────────────────────────────────────────────────────────────── tidymodels 1.3.0 ──</code></pre>
+<pre><code>## ✔ broom        1.0.8     ✔ recipes      1.3.1
+## ✔ dials        1.4.0     ✔ rsample      1.3.1
+## ✔ dplyr        1.1.4     ✔ tibble       3.2.1
+## ✔ ggplot2      3.5.2     ✔ tidyr        1.3.1
+## ✔ infer        1.0.9     ✔ tune         1.3.0
+## ✔ modeldata    1.4.0     ✔ workflows    1.2.0
+## ✔ parsnip      1.3.2     ✔ workflowsets 1.1.1
+## ✔ purrr        1.0.4     ✔ yardstick    1.3.2</code></pre>
+<pre><code>## Warning: package &#39;infer&#39; was built under R version 4.5.1</code></pre>
+<pre><code>## Warning: package &#39;rsample&#39; was built under R version 4.5.1</code></pre>
+<pre><code>## ── Conflicts ──────────────────────────────────────────────────────────────────────────────────────────────────────────── tidymodels_conflicts() ──
+## ✖ purrr::discard() masks scales::discard()
+## ✖ dplyr::filter()  masks stats::filter()
+## ✖ dplyr::lag()     masks stats::lag()
+## ✖ recipes::step()  masks stats::step()
+## • Learn how to get started at https://www.tidymodels.org/start/</code></pre>
+<div class="sourceCode" id="cb77"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb77-1"><a href="bayesian-regularized-regression.html#cb77-1" tabindex="-1"></a><span class="fu">library</span>(rstan)</span></code></pre></div>
+<pre><code>## Loading required package: StanHeaders</code></pre>
+<pre><code>## 
+## rstan version 2.32.7 (Stan version 2.32.2)</code></pre>
+<pre><code>## For execution on a local, multicore CPU with excess RAM we recommend calling
+## options(mc.cores = parallel::detectCores()).
+## To avoid recompilation of unchanged Stan programs, we recommend calling
+## rstan_options(auto_write = TRUE)
+## For within-chain threading using `reduce_sum()` or `map_rect()` Stan functions,
+## change `threads_per_chain` option:
+## rstan_options(threads_per_chain = 1)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;rstan&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:tidyr&#39;:
+## 
+##     extract</code></pre>
+<div class="sourceCode" id="cb83"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb83-1"><a href="bayesian-regularized-regression.html#cb83-1" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code></pre></div>
+<pre><code>## ── Attaching core tidyverse packages ─────────────────────────────────────────────────────────────────────────────────────────── tidyverse 2.0.0 ──
+## ✔ forcats   1.0.0     ✔ readr     2.1.5
+## ✔ lubridate 1.9.4     ✔ stringr   1.5.1</code></pre>
+<pre><code>## ── Conflicts ───────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ readr::col_factor() masks scales::col_factor()
+## ✖ purrr::discard()    masks scales::discard()
+## ✖ rstan::extract()    masks tidyr::extract()
+## ✖ dplyr::filter()     masks stats::filter()
+## ✖ stringr::fixed()    masks recipes::fixed()
+## ✖ dplyr::lag()        masks stats::lag()
+## ✖ readr::spec()       masks yardstick::spec()
+## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+<div class="sourceCode" id="cb86"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb86-1"><a href="bayesian-regularized-regression.html#cb86-1" tabindex="-1"></a><span class="co"># Data simulation</span></span>
+<span id="cb86-2"><a href="bayesian-regularized-regression.html#cb86-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb86-3"><a href="bayesian-regularized-regression.html#cb86-3" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb86-4"><a href="bayesian-regularized-regression.html#cb86-4" tabindex="-1"></a>n_train <span class="ot">&lt;-</span> <span class="dv">700</span></span>
+<span id="cb86-5"><a href="bayesian-regularized-regression.html#cb86-5" tabindex="-1"></a>n_test <span class="ot">&lt;-</span> <span class="dv">300</span></span>
+<span id="cb86-6"><a href="bayesian-regularized-regression.html#cb86-6" tabindex="-1"></a>alpha_true <span class="ot">&lt;-</span> <span class="dv">40</span>  <span class="co"># intercept</span></span>
+<span id="cb86-7"><a href="bayesian-regularized-regression.html#cb86-7" tabindex="-1"></a>beta_true <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="fl">0.25</span>)  <span class="co"># slopes</span></span>
+<span id="cb86-8"><a href="bayesian-regularized-regression.html#cb86-8" tabindex="-1"></a>sigma_true <span class="ot">&lt;-</span> <span class="dv">5</span>  <span class="co"># residual standard deviation</span></span>
+<span id="cb86-9"><a href="bayesian-regularized-regression.html#cb86-9" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">length</span>(beta_true)</span>
+<span id="cb86-10"><a href="bayesian-regularized-regression.html#cb86-10" tabindex="-1"></a></span>
+<span id="cb86-11"><a href="bayesian-regularized-regression.html#cb86-11" tabindex="-1"></a><span class="co"># Generate design matrix and response</span></span>
+<span id="cb86-12"><a href="bayesian-regularized-regression.html#cb86-12" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n <span class="sc">*</span> p), n, p)</span>
+<span id="cb86-13"><a href="bayesian-regularized-regression.html#cb86-13" tabindex="-1"></a>epsilon <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> sigma_true)</span>
+<span id="cb86-14"><a href="bayesian-regularized-regression.html#cb86-14" tabindex="-1"></a>y <span class="ot">&lt;-</span> alpha_true <span class="sc">+</span> X <span class="sc">%*%</span> beta_true <span class="sc">+</span> epsilon</span>
+<span id="cb86-15"><a href="bayesian-regularized-regression.html#cb86-15" tabindex="-1"></a></span>
+<span id="cb86-16"><a href="bayesian-regularized-regression.html#cb86-16" tabindex="-1"></a><span class="co"># Create dataset</span></span>
+<span id="cb86-17"><a href="bayesian-regularized-regression.html#cb86-17" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">y =</span> y, X)</span>
+<span id="cb86-18"><a href="bayesian-regularized-regression.html#cb86-18" tabindex="-1"></a><span class="fu">colnames</span>(data) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;y&quot;</span>, <span class="fu">paste0</span>(<span class="st">&quot;X&quot;</span>, <span class="dv">1</span><span class="sc">:</span>p))</span>
+<span id="cb86-19"><a href="bayesian-regularized-regression.html#cb86-19" tabindex="-1"></a></span>
+<span id="cb86-20"><a href="bayesian-regularized-regression.html#cb86-20" tabindex="-1"></a><span class="co"># Train-test split</span></span>
+<span id="cb86-21"><a href="bayesian-regularized-regression.html#cb86-21" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb86-22"><a href="bayesian-regularized-regression.html#cb86-22" tabindex="-1"></a>data_split <span class="ot">&lt;-</span> <span class="fu">initial_split</span>(data, <span class="at">prop =</span> <span class="fl">0.7</span>)</span>
+<span id="cb86-23"><a href="bayesian-regularized-regression.html#cb86-23" tabindex="-1"></a>train_data <span class="ot">&lt;-</span> <span class="fu">training</span>(data_split)</span>
+<span id="cb86-24"><a href="bayesian-regularized-regression.html#cb86-24" tabindex="-1"></a>test_data <span class="ot">&lt;-</span> <span class="fu">testing</span>(data_split)</span>
+<span id="cb86-25"><a href="bayesian-regularized-regression.html#cb86-25" tabindex="-1"></a></span>
+<span id="cb86-26"><a href="bayesian-regularized-regression.html#cb86-26" tabindex="-1"></a><span class="co"># Prepare data for Stan</span></span>
+<span id="cb86-27"><a href="bayesian-regularized-regression.html#cb86-27" tabindex="-1"></a>X_train <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(train_data[, <span class="sc">-</span><span class="dv">1</span>])</span>
+<span id="cb86-28"><a href="bayesian-regularized-regression.html#cb86-28" tabindex="-1"></a>X_test <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(test_data[, <span class="sc">-</span><span class="dv">1</span>])</span>
+<span id="cb86-29"><a href="bayesian-regularized-regression.html#cb86-29" tabindex="-1"></a>y_train <span class="ot">&lt;-</span> train_data<span class="sc">$</span>y</span>
+<span id="cb86-30"><a href="bayesian-regularized-regression.html#cb86-30" tabindex="-1"></a>y_test <span class="ot">&lt;-</span> test_data<span class="sc">$</span>y</span></code></pre></div>
 <div id="bayesian-ridge-regression" class="section level3 hasAnchor" number="5.5.1">
 <h3><span class="header-section-number">5.5.1</span> Bayesian Ridge Regression<a href="bayesian-regularized-regression.html#bayesian-ridge-regression" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<div class="sourceCode" id="cb72"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb72-1"><a href="bayesian-regularized-regression.html#cb72-1" tabindex="-1"></a><span class="co"># Stan model for Bayesian Ridge Regression</span></span>
-<span id="cb72-2"><a href="bayesian-regularized-regression.html#cb72-2" tabindex="-1"></a>stan_ridge <span class="ot">&lt;-</span> <span class="st">&quot;</span></span>
-<span id="cb72-3"><a href="bayesian-regularized-regression.html#cb72-3" tabindex="-1"></a><span class="st">data {</span></span>
-<span id="cb72-4"><a href="bayesian-regularized-regression.html#cb72-4" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; N_train;</span></span>
-<span id="cb72-5"><a href="bayesian-regularized-regression.html#cb72-5" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; N_test;</span></span>
-<span id="cb72-6"><a href="bayesian-regularized-regression.html#cb72-6" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; p;</span></span>
-<span id="cb72-7"><a href="bayesian-regularized-regression.html#cb72-7" tabindex="-1"></a><span class="st">  matrix[N_train, p] X_train;</span></span>
-<span id="cb72-8"><a href="bayesian-regularized-regression.html#cb72-8" tabindex="-1"></a><span class="st">  matrix[N_test, p] X_test;</span></span>
-<span id="cb72-9"><a href="bayesian-regularized-regression.html#cb72-9" tabindex="-1"></a><span class="st">  vector[N_train] y_train;</span></span>
-<span id="cb72-10"><a href="bayesian-regularized-regression.html#cb72-10" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb72-11"><a href="bayesian-regularized-regression.html#cb72-11" tabindex="-1"></a><span class="st">parameters {</span></span>
-<span id="cb72-12"><a href="bayesian-regularized-regression.html#cb72-12" tabindex="-1"></a><span class="st">  real alpha;</span></span>
-<span id="cb72-13"><a href="bayesian-regularized-regression.html#cb72-13" tabindex="-1"></a><span class="st">  vector[p] beta;</span></span>
-<span id="cb72-14"><a href="bayesian-regularized-regression.html#cb72-14" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma;</span></span>
-<span id="cb72-15"><a href="bayesian-regularized-regression.html#cb72-15" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; tau;  // prior standard deviation for beta</span></span>
-<span id="cb72-16"><a href="bayesian-regularized-regression.html#cb72-16" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb72-17"><a href="bayesian-regularized-regression.html#cb72-17" tabindex="-1"></a><span class="st">model {</span></span>
-<span id="cb72-18"><a href="bayesian-regularized-regression.html#cb72-18" tabindex="-1"></a><span class="st">  // Priors</span></span>
-<span id="cb72-19"><a href="bayesian-regularized-regression.html#cb72-19" tabindex="-1"></a><span class="st">  alpha ~ normal(0, 10);</span></span>
-<span id="cb72-20"><a href="bayesian-regularized-regression.html#cb72-20" tabindex="-1"></a><span class="st">  tau ~ cauchy(0, 1);</span></span>
-<span id="cb72-21"><a href="bayesian-regularized-regression.html#cb72-21" tabindex="-1"></a><span class="st">  sigma ~ cauchy(0, 5);</span></span>
-<span id="cb72-22"><a href="bayesian-regularized-regression.html#cb72-22" tabindex="-1"></a><span class="st">  beta ~ normal(0, tau);  // Ridge prior</span></span>
-<span id="cb72-23"><a href="bayesian-regularized-regression.html#cb72-23" tabindex="-1"></a><span class="st">  </span></span>
-<span id="cb72-24"><a href="bayesian-regularized-regression.html#cb72-24" tabindex="-1"></a><span class="st">  // Likelihood</span></span>
-<span id="cb72-25"><a href="bayesian-regularized-regression.html#cb72-25" tabindex="-1"></a><span class="st">  y_train ~ normal(alpha + X_train * beta, sigma);</span></span>
-<span id="cb72-26"><a href="bayesian-regularized-regression.html#cb72-26" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb72-27"><a href="bayesian-regularized-regression.html#cb72-27" tabindex="-1"></a><span class="st">generated quantities {</span></span>
-<span id="cb72-28"><a href="bayesian-regularized-regression.html#cb72-28" tabindex="-1"></a><span class="st">  vector[N_test] y_pred;</span></span>
-<span id="cb72-29"><a href="bayesian-regularized-regression.html#cb72-29" tabindex="-1"></a><span class="st">  </span></span>
-<span id="cb72-30"><a href="bayesian-regularized-regression.html#cb72-30" tabindex="-1"></a><span class="st">  for (i in 1:N_test) {</span></span>
-<span id="cb72-31"><a href="bayesian-regularized-regression.html#cb72-31" tabindex="-1"></a><span class="st">    y_pred[i] = normal_rng(alpha + X_test[i] * beta, sigma);</span></span>
-<span id="cb72-32"><a href="bayesian-regularized-regression.html#cb72-32" tabindex="-1"></a><span class="st">  }</span></span>
-<span id="cb72-33"><a href="bayesian-regularized-regression.html#cb72-33" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb72-34"><a href="bayesian-regularized-regression.html#cb72-34" tabindex="-1"></a><span class="st">&quot;</span></span>
-<span id="cb72-35"><a href="bayesian-regularized-regression.html#cb72-35" tabindex="-1"></a></span>
-<span id="cb72-36"><a href="bayesian-regularized-regression.html#cb72-36" tabindex="-1"></a><span class="co"># Prepare data</span></span>
-<span id="cb72-37"><a href="bayesian-regularized-regression.html#cb72-37" tabindex="-1"></a>stan_data_ridge <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb72-38"><a href="bayesian-regularized-regression.html#cb72-38" tabindex="-1"></a>  <span class="at">N_train =</span> n_train,</span>
-<span id="cb72-39"><a href="bayesian-regularized-regression.html#cb72-39" tabindex="-1"></a>  <span class="at">N_test =</span> n_test,</span>
-<span id="cb72-40"><a href="bayesian-regularized-regression.html#cb72-40" tabindex="-1"></a>  <span class="at">p =</span> p,</span>
-<span id="cb72-41"><a href="bayesian-regularized-regression.html#cb72-41" tabindex="-1"></a>  <span class="at">X_train =</span> X_train,</span>
-<span id="cb72-42"><a href="bayesian-regularized-regression.html#cb72-42" tabindex="-1"></a>  <span class="at">X_test =</span> X_test,</span>
-<span id="cb72-43"><a href="bayesian-regularized-regression.html#cb72-43" tabindex="-1"></a>  <span class="at">y_train =</span> y_train</span>
-<span id="cb72-44"><a href="bayesian-regularized-regression.html#cb72-44" tabindex="-1"></a>)</span>
-<span id="cb72-45"><a href="bayesian-regularized-regression.html#cb72-45" tabindex="-1"></a></span>
-<span id="cb72-46"><a href="bayesian-regularized-regression.html#cb72-46" tabindex="-1"></a><span class="co"># Fit model</span></span>
-<span id="cb72-47"><a href="bayesian-regularized-regression.html#cb72-47" tabindex="-1"></a>fit_ridge <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">model_code =</span> stan_ridge, </span>
-<span id="cb72-48"><a href="bayesian-regularized-regression.html#cb72-48" tabindex="-1"></a>                  <span class="at">data =</span> stan_data_ridge,</span>
-<span id="cb72-49"><a href="bayesian-regularized-regression.html#cb72-49" tabindex="-1"></a>                  <span class="at">chains =</span> <span class="dv">4</span>, <span class="at">iter =</span> <span class="dv">2000</span>,</span>
-<span id="cb72-50"><a href="bayesian-regularized-regression.html#cb72-50" tabindex="-1"></a>                  <span class="at">cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>())</span>
-<span id="cb72-51"><a href="bayesian-regularized-regression.html#cb72-51" tabindex="-1"></a></span>
-<span id="cb72-52"><a href="bayesian-regularized-regression.html#cb72-52" tabindex="-1"></a><span class="fu">print</span>(fit_ridge, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;alpha&quot;</span>, <span class="st">&quot;beta&quot;</span>, <span class="st">&quot;sigma&quot;</span>, <span class="st">&quot;tau&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb87"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb87-1"><a href="bayesian-regularized-regression.html#cb87-1" tabindex="-1"></a><span class="co"># Stan model for Bayesian Ridge Regression</span></span>
+<span id="cb87-2"><a href="bayesian-regularized-regression.html#cb87-2" tabindex="-1"></a>stan_ridge <span class="ot">&lt;-</span> <span class="st">&quot;</span></span>
+<span id="cb87-3"><a href="bayesian-regularized-regression.html#cb87-3" tabindex="-1"></a><span class="st">data {</span></span>
+<span id="cb87-4"><a href="bayesian-regularized-regression.html#cb87-4" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; N_train;</span></span>
+<span id="cb87-5"><a href="bayesian-regularized-regression.html#cb87-5" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; N_test;</span></span>
+<span id="cb87-6"><a href="bayesian-regularized-regression.html#cb87-6" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; p;</span></span>
+<span id="cb87-7"><a href="bayesian-regularized-regression.html#cb87-7" tabindex="-1"></a><span class="st">  matrix[N_train, p] X_train;</span></span>
+<span id="cb87-8"><a href="bayesian-regularized-regression.html#cb87-8" tabindex="-1"></a><span class="st">  matrix[N_test, p] X_test;</span></span>
+<span id="cb87-9"><a href="bayesian-regularized-regression.html#cb87-9" tabindex="-1"></a><span class="st">  vector[N_train] y_train;</span></span>
+<span id="cb87-10"><a href="bayesian-regularized-regression.html#cb87-10" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb87-11"><a href="bayesian-regularized-regression.html#cb87-11" tabindex="-1"></a><span class="st">parameters {</span></span>
+<span id="cb87-12"><a href="bayesian-regularized-regression.html#cb87-12" tabindex="-1"></a><span class="st">  real alpha;</span></span>
+<span id="cb87-13"><a href="bayesian-regularized-regression.html#cb87-13" tabindex="-1"></a><span class="st">  vector[p] beta;</span></span>
+<span id="cb87-14"><a href="bayesian-regularized-regression.html#cb87-14" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma;</span></span>
+<span id="cb87-15"><a href="bayesian-regularized-regression.html#cb87-15" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; tau;  // prior standard deviation for beta</span></span>
+<span id="cb87-16"><a href="bayesian-regularized-regression.html#cb87-16" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb87-17"><a href="bayesian-regularized-regression.html#cb87-17" tabindex="-1"></a><span class="st">model {</span></span>
+<span id="cb87-18"><a href="bayesian-regularized-regression.html#cb87-18" tabindex="-1"></a><span class="st">  // Priors</span></span>
+<span id="cb87-19"><a href="bayesian-regularized-regression.html#cb87-19" tabindex="-1"></a><span class="st">  alpha ~ normal(0, 10);</span></span>
+<span id="cb87-20"><a href="bayesian-regularized-regression.html#cb87-20" tabindex="-1"></a><span class="st">  tau ~ cauchy(0, 1);</span></span>
+<span id="cb87-21"><a href="bayesian-regularized-regression.html#cb87-21" tabindex="-1"></a><span class="st">  sigma ~ cauchy(0, 5);</span></span>
+<span id="cb87-22"><a href="bayesian-regularized-regression.html#cb87-22" tabindex="-1"></a><span class="st">  beta ~ normal(0, tau);  // Ridge prior</span></span>
+<span id="cb87-23"><a href="bayesian-regularized-regression.html#cb87-23" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb87-24"><a href="bayesian-regularized-regression.html#cb87-24" tabindex="-1"></a><span class="st">  // Likelihood</span></span>
+<span id="cb87-25"><a href="bayesian-regularized-regression.html#cb87-25" tabindex="-1"></a><span class="st">  y_train ~ normal(alpha + X_train * beta, sigma);</span></span>
+<span id="cb87-26"><a href="bayesian-regularized-regression.html#cb87-26" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb87-27"><a href="bayesian-regularized-regression.html#cb87-27" tabindex="-1"></a><span class="st">generated quantities {</span></span>
+<span id="cb87-28"><a href="bayesian-regularized-regression.html#cb87-28" tabindex="-1"></a><span class="st">  vector[N_test] y_pred;</span></span>
+<span id="cb87-29"><a href="bayesian-regularized-regression.html#cb87-29" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb87-30"><a href="bayesian-regularized-regression.html#cb87-30" tabindex="-1"></a><span class="st">  for (i in 1:N_test) {</span></span>
+<span id="cb87-31"><a href="bayesian-regularized-regression.html#cb87-31" tabindex="-1"></a><span class="st">    y_pred[i] = normal_rng(alpha + X_test[i] * beta, sigma);</span></span>
+<span id="cb87-32"><a href="bayesian-regularized-regression.html#cb87-32" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb87-33"><a href="bayesian-regularized-regression.html#cb87-33" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb87-34"><a href="bayesian-regularized-regression.html#cb87-34" tabindex="-1"></a><span class="st">&quot;</span></span>
+<span id="cb87-35"><a href="bayesian-regularized-regression.html#cb87-35" tabindex="-1"></a></span>
+<span id="cb87-36"><a href="bayesian-regularized-regression.html#cb87-36" tabindex="-1"></a><span class="co"># Prepare data</span></span>
+<span id="cb87-37"><a href="bayesian-regularized-regression.html#cb87-37" tabindex="-1"></a>stan_data_ridge <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb87-38"><a href="bayesian-regularized-regression.html#cb87-38" tabindex="-1"></a>  <span class="at">N_train =</span> n_train,</span>
+<span id="cb87-39"><a href="bayesian-regularized-regression.html#cb87-39" tabindex="-1"></a>  <span class="at">N_test =</span> n_test,</span>
+<span id="cb87-40"><a href="bayesian-regularized-regression.html#cb87-40" tabindex="-1"></a>  <span class="at">p =</span> p,</span>
+<span id="cb87-41"><a href="bayesian-regularized-regression.html#cb87-41" tabindex="-1"></a>  <span class="at">X_train =</span> X_train,</span>
+<span id="cb87-42"><a href="bayesian-regularized-regression.html#cb87-42" tabindex="-1"></a>  <span class="at">X_test =</span> X_test,</span>
+<span id="cb87-43"><a href="bayesian-regularized-regression.html#cb87-43" tabindex="-1"></a>  <span class="at">y_train =</span> y_train</span>
+<span id="cb87-44"><a href="bayesian-regularized-regression.html#cb87-44" tabindex="-1"></a>)</span>
+<span id="cb87-45"><a href="bayesian-regularized-regression.html#cb87-45" tabindex="-1"></a></span>
+<span id="cb87-46"><a href="bayesian-regularized-regression.html#cb87-46" tabindex="-1"></a><span class="co"># Fit model</span></span>
+<span id="cb87-47"><a href="bayesian-regularized-regression.html#cb87-47" tabindex="-1"></a>fit_ridge <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">model_code =</span> stan_ridge, </span>
+<span id="cb87-48"><a href="bayesian-regularized-regression.html#cb87-48" tabindex="-1"></a>                  <span class="at">data =</span> stan_data_ridge,</span>
+<span id="cb87-49"><a href="bayesian-regularized-regression.html#cb87-49" tabindex="-1"></a>                  <span class="at">chains =</span> <span class="dv">4</span>, <span class="at">iter =</span> <span class="dv">2000</span>,</span>
+<span id="cb87-50"><a href="bayesian-regularized-regression.html#cb87-50" tabindex="-1"></a>                  <span class="at">cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>())</span>
+<span id="cb87-51"><a href="bayesian-regularized-regression.html#cb87-51" tabindex="-1"></a></span>
+<span id="cb87-52"><a href="bayesian-regularized-regression.html#cb87-52" tabindex="-1"></a><span class="fu">print</span>(fit_ridge, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;alpha&quot;</span>, <span class="st">&quot;beta&quot;</span>, <span class="st">&quot;sigma&quot;</span>, <span class="st">&quot;tau&quot;</span>))</span></code></pre></div>
+<pre><code>## Inference for Stan model: anon_model.
+## 4 chains, each with iter=2000; warmup=1000; thin=1; 
+## post-warmup draws per chain=1000, total post-warmup draws=4000.
+## 
+##          mean se_mean   sd  2.5%   25%   50%   75% 97.5% n_eff Rhat
+## alpha   40.32    0.00 0.18 39.96 40.19 40.31 40.44 40.67  7148    1
+## beta[1] -1.86    0.00 0.19 -2.24 -1.99 -1.86 -1.73 -1.48  6679    1
+## beta[2]  2.64    0.00 0.18  2.28  2.52  2.64  2.76  2.99  5238    1
+## beta[3]  3.91    0.00 0.20  3.53  3.77  3.91  4.04  4.28  6158    1
+## beta[4]  1.09    0.00 0.19  0.70  0.97  1.10  1.22  1.47  6568    1
+## beta[5]  0.32    0.00 0.19 -0.04  0.20  0.32  0.45  0.70  6110    1
+## sigma    4.97    0.00 0.13  4.72  4.88  4.97  5.06  5.24  7300    1
+## tau      2.53    0.02 0.94  1.42  1.92  2.32  2.88  4.87  2591    1
+## 
+## Samples were drawn using NUTS(diag_e) at Wed Aug 27 09:09:20 2025.
+## For each parameter, n_eff is a crude measure of effective sample size,
+## and Rhat is the potential scale reduction factor on split chains (at 
+## convergence, Rhat=1).</code></pre>
 </div>
 <div id="bayesian-lasso-regression" class="section level3 hasAnchor" number="5.5.2">
 <h3><span class="header-section-number">5.5.2</span> Bayesian LASSO Regression<a href="bayesian-regularized-regression.html#bayesian-lasso-regression" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<div class="sourceCode" id="cb73"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb73-1"><a href="bayesian-regularized-regression.html#cb73-1" tabindex="-1"></a><span class="co"># Stan model for Bayesian LASSO</span></span>
-<span id="cb73-2"><a href="bayesian-regularized-regression.html#cb73-2" tabindex="-1"></a>stan_lasso <span class="ot">&lt;-</span> <span class="st">&quot;</span></span>
-<span id="cb73-3"><a href="bayesian-regularized-regression.html#cb73-3" tabindex="-1"></a><span class="st">data {</span></span>
-<span id="cb73-4"><a href="bayesian-regularized-regression.html#cb73-4" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; N_train;</span></span>
-<span id="cb73-5"><a href="bayesian-regularized-regression.html#cb73-5" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; N_test;</span></span>
-<span id="cb73-6"><a href="bayesian-regularized-regression.html#cb73-6" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; p;</span></span>
-<span id="cb73-7"><a href="bayesian-regularized-regression.html#cb73-7" tabindex="-1"></a><span class="st">  matrix[N_train, p] X_train;</span></span>
-<span id="cb73-8"><a href="bayesian-regularized-regression.html#cb73-8" tabindex="-1"></a><span class="st">  matrix[N_test, p] X_test;</span></span>
-<span id="cb73-9"><a href="bayesian-regularized-regression.html#cb73-9" tabindex="-1"></a><span class="st">  vector[N_train] y_train;</span></span>
-<span id="cb73-10"><a href="bayesian-regularized-regression.html#cb73-10" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb73-11"><a href="bayesian-regularized-regression.html#cb73-11" tabindex="-1"></a><span class="st">parameters {</span></span>
-<span id="cb73-12"><a href="bayesian-regularized-regression.html#cb73-12" tabindex="-1"></a><span class="st">  real alpha;</span></span>
-<span id="cb73-13"><a href="bayesian-regularized-regression.html#cb73-13" tabindex="-1"></a><span class="st">  vector[p] beta;</span></span>
-<span id="cb73-14"><a href="bayesian-regularized-regression.html#cb73-14" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma;</span></span>
-<span id="cb73-15"><a href="bayesian-regularized-regression.html#cb73-15" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; b;  // Laplace scale parameter</span></span>
-<span id="cb73-16"><a href="bayesian-regularized-regression.html#cb73-16" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb73-17"><a href="bayesian-regularized-regression.html#cb73-17" tabindex="-1"></a><span class="st">model {</span></span>
-<span id="cb73-18"><a href="bayesian-regularized-regression.html#cb73-18" tabindex="-1"></a><span class="st">  // Priors</span></span>
-<span id="cb73-19"><a href="bayesian-regularized-regression.html#cb73-19" tabindex="-1"></a><span class="st">  alpha ~ normal(0, 10);</span></span>
-<span id="cb73-20"><a href="bayesian-regularized-regression.html#cb73-20" tabindex="-1"></a><span class="st">  b ~ cauchy(0, 1);</span></span>
-<span id="cb73-21"><a href="bayesian-regularized-regression.html#cb73-21" tabindex="-1"></a><span class="st">  sigma ~ cauchy(0, 5);</span></span>
-<span id="cb73-22"><a href="bayesian-regularized-regression.html#cb73-22" tabindex="-1"></a><span class="st">  beta ~ double_exponential(0, b);  // LASSO prior</span></span>
-<span id="cb73-23"><a href="bayesian-regularized-regression.html#cb73-23" tabindex="-1"></a><span class="st">  </span></span>
-<span id="cb73-24"><a href="bayesian-regularized-regression.html#cb73-24" tabindex="-1"></a><span class="st">  // Likelihood</span></span>
-<span id="cb73-25"><a href="bayesian-regularized-regression.html#cb73-25" tabindex="-1"></a><span class="st">  y_train ~ normal(alpha + X_train * beta, sigma);</span></span>
-<span id="cb73-26"><a href="bayesian-regularized-regression.html#cb73-26" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb73-27"><a href="bayesian-regularized-regression.html#cb73-27" tabindex="-1"></a><span class="st">generated quantities {</span></span>
-<span id="cb73-28"><a href="bayesian-regularized-regression.html#cb73-28" tabindex="-1"></a><span class="st">  vector[N_test] y_pred;</span></span>
-<span id="cb73-29"><a href="bayesian-regularized-regression.html#cb73-29" tabindex="-1"></a><span class="st">  </span></span>
-<span id="cb73-30"><a href="bayesian-regularized-regression.html#cb73-30" tabindex="-1"></a><span class="st">  for (i in 1:N_test) {</span></span>
-<span id="cb73-31"><a href="bayesian-regularized-regression.html#cb73-31" tabindex="-1"></a><span class="st">    y_pred[i] = normal_rng(alpha + X_test[i] * beta, sigma);</span></span>
-<span id="cb73-32"><a href="bayesian-regularized-regression.html#cb73-32" tabindex="-1"></a><span class="st">  }</span></span>
-<span id="cb73-33"><a href="bayesian-regularized-regression.html#cb73-33" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb73-34"><a href="bayesian-regularized-regression.html#cb73-34" tabindex="-1"></a><span class="st">&quot;</span></span>
-<span id="cb73-35"><a href="bayesian-regularized-regression.html#cb73-35" tabindex="-1"></a></span>
-<span id="cb73-36"><a href="bayesian-regularized-regression.html#cb73-36" tabindex="-1"></a><span class="co"># Prepare data (same as Ridge)</span></span>
-<span id="cb73-37"><a href="bayesian-regularized-regression.html#cb73-37" tabindex="-1"></a>stan_data_lasso <span class="ot">&lt;-</span> stan_data_ridge</span>
-<span id="cb73-38"><a href="bayesian-regularized-regression.html#cb73-38" tabindex="-1"></a></span>
-<span id="cb73-39"><a href="bayesian-regularized-regression.html#cb73-39" tabindex="-1"></a><span class="co"># Fit model</span></span>
-<span id="cb73-40"><a href="bayesian-regularized-regression.html#cb73-40" tabindex="-1"></a>fit_lasso <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">model_code =</span> stan_lasso,</span>
-<span id="cb73-41"><a href="bayesian-regularized-regression.html#cb73-41" tabindex="-1"></a>                  <span class="at">data =</span> stan_data_lasso,</span>
-<span id="cb73-42"><a href="bayesian-regularized-regression.html#cb73-42" tabindex="-1"></a>                  <span class="at">chains =</span> <span class="dv">4</span>, <span class="at">iter =</span> <span class="dv">2000</span>,</span>
-<span id="cb73-43"><a href="bayesian-regularized-regression.html#cb73-43" tabindex="-1"></a>                  <span class="at">cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>())</span>
-<span id="cb73-44"><a href="bayesian-regularized-regression.html#cb73-44" tabindex="-1"></a></span>
-<span id="cb73-45"><a href="bayesian-regularized-regression.html#cb73-45" tabindex="-1"></a><span class="fu">print</span>(fit_lasso, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;alpha&quot;</span>, <span class="st">&quot;beta&quot;</span>, <span class="st">&quot;sigma&quot;</span>, <span class="st">&quot;b&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb89"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb89-1"><a href="bayesian-regularized-regression.html#cb89-1" tabindex="-1"></a><span class="co"># Stan model for Bayesian LASSO</span></span>
+<span id="cb89-2"><a href="bayesian-regularized-regression.html#cb89-2" tabindex="-1"></a>stan_lasso <span class="ot">&lt;-</span> <span class="st">&quot;</span></span>
+<span id="cb89-3"><a href="bayesian-regularized-regression.html#cb89-3" tabindex="-1"></a><span class="st">data {</span></span>
+<span id="cb89-4"><a href="bayesian-regularized-regression.html#cb89-4" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; N_train;</span></span>
+<span id="cb89-5"><a href="bayesian-regularized-regression.html#cb89-5" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; N_test;</span></span>
+<span id="cb89-6"><a href="bayesian-regularized-regression.html#cb89-6" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; p;</span></span>
+<span id="cb89-7"><a href="bayesian-regularized-regression.html#cb89-7" tabindex="-1"></a><span class="st">  matrix[N_train, p] X_train;</span></span>
+<span id="cb89-8"><a href="bayesian-regularized-regression.html#cb89-8" tabindex="-1"></a><span class="st">  matrix[N_test, p] X_test;</span></span>
+<span id="cb89-9"><a href="bayesian-regularized-regression.html#cb89-9" tabindex="-1"></a><span class="st">  vector[N_train] y_train;</span></span>
+<span id="cb89-10"><a href="bayesian-regularized-regression.html#cb89-10" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb89-11"><a href="bayesian-regularized-regression.html#cb89-11" tabindex="-1"></a><span class="st">parameters {</span></span>
+<span id="cb89-12"><a href="bayesian-regularized-regression.html#cb89-12" tabindex="-1"></a><span class="st">  real alpha;</span></span>
+<span id="cb89-13"><a href="bayesian-regularized-regression.html#cb89-13" tabindex="-1"></a><span class="st">  vector[p] beta;</span></span>
+<span id="cb89-14"><a href="bayesian-regularized-regression.html#cb89-14" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma;</span></span>
+<span id="cb89-15"><a href="bayesian-regularized-regression.html#cb89-15" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; b;  // Laplace scale parameter</span></span>
+<span id="cb89-16"><a href="bayesian-regularized-regression.html#cb89-16" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb89-17"><a href="bayesian-regularized-regression.html#cb89-17" tabindex="-1"></a><span class="st">model {</span></span>
+<span id="cb89-18"><a href="bayesian-regularized-regression.html#cb89-18" tabindex="-1"></a><span class="st">  // Priors</span></span>
+<span id="cb89-19"><a href="bayesian-regularized-regression.html#cb89-19" tabindex="-1"></a><span class="st">  alpha ~ normal(0, 10);</span></span>
+<span id="cb89-20"><a href="bayesian-regularized-regression.html#cb89-20" tabindex="-1"></a><span class="st">  b ~ cauchy(0, 1);</span></span>
+<span id="cb89-21"><a href="bayesian-regularized-regression.html#cb89-21" tabindex="-1"></a><span class="st">  sigma ~ cauchy(0, 5);</span></span>
+<span id="cb89-22"><a href="bayesian-regularized-regression.html#cb89-22" tabindex="-1"></a><span class="st">  beta ~ double_exponential(0, b);  // LASSO prior</span></span>
+<span id="cb89-23"><a href="bayesian-regularized-regression.html#cb89-23" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb89-24"><a href="bayesian-regularized-regression.html#cb89-24" tabindex="-1"></a><span class="st">  // Likelihood</span></span>
+<span id="cb89-25"><a href="bayesian-regularized-regression.html#cb89-25" tabindex="-1"></a><span class="st">  y_train ~ normal(alpha + X_train * beta, sigma);</span></span>
+<span id="cb89-26"><a href="bayesian-regularized-regression.html#cb89-26" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb89-27"><a href="bayesian-regularized-regression.html#cb89-27" tabindex="-1"></a><span class="st">generated quantities {</span></span>
+<span id="cb89-28"><a href="bayesian-regularized-regression.html#cb89-28" tabindex="-1"></a><span class="st">  vector[N_test] y_pred;</span></span>
+<span id="cb89-29"><a href="bayesian-regularized-regression.html#cb89-29" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb89-30"><a href="bayesian-regularized-regression.html#cb89-30" tabindex="-1"></a><span class="st">  for (i in 1:N_test) {</span></span>
+<span id="cb89-31"><a href="bayesian-regularized-regression.html#cb89-31" tabindex="-1"></a><span class="st">    y_pred[i] = normal_rng(alpha + X_test[i] * beta, sigma);</span></span>
+<span id="cb89-32"><a href="bayesian-regularized-regression.html#cb89-32" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb89-33"><a href="bayesian-regularized-regression.html#cb89-33" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb89-34"><a href="bayesian-regularized-regression.html#cb89-34" tabindex="-1"></a><span class="st">&quot;</span></span>
+<span id="cb89-35"><a href="bayesian-regularized-regression.html#cb89-35" tabindex="-1"></a></span>
+<span id="cb89-36"><a href="bayesian-regularized-regression.html#cb89-36" tabindex="-1"></a><span class="co"># Prepare data (same as Ridge)</span></span>
+<span id="cb89-37"><a href="bayesian-regularized-regression.html#cb89-37" tabindex="-1"></a>stan_data_lasso <span class="ot">&lt;-</span> stan_data_ridge</span>
+<span id="cb89-38"><a href="bayesian-regularized-regression.html#cb89-38" tabindex="-1"></a></span>
+<span id="cb89-39"><a href="bayesian-regularized-regression.html#cb89-39" tabindex="-1"></a><span class="co"># Fit model</span></span>
+<span id="cb89-40"><a href="bayesian-regularized-regression.html#cb89-40" tabindex="-1"></a>fit_lasso <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">model_code =</span> stan_lasso,</span>
+<span id="cb89-41"><a href="bayesian-regularized-regression.html#cb89-41" tabindex="-1"></a>                  <span class="at">data =</span> stan_data_lasso,</span>
+<span id="cb89-42"><a href="bayesian-regularized-regression.html#cb89-42" tabindex="-1"></a>                  <span class="at">chains =</span> <span class="dv">4</span>, <span class="at">iter =</span> <span class="dv">2000</span>,</span>
+<span id="cb89-43"><a href="bayesian-regularized-regression.html#cb89-43" tabindex="-1"></a>                  <span class="at">cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>())</span>
+<span id="cb89-44"><a href="bayesian-regularized-regression.html#cb89-44" tabindex="-1"></a></span>
+<span id="cb89-45"><a href="bayesian-regularized-regression.html#cb89-45" tabindex="-1"></a><span class="fu">print</span>(fit_lasso, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;alpha&quot;</span>, <span class="st">&quot;beta&quot;</span>, <span class="st">&quot;sigma&quot;</span>, <span class="st">&quot;b&quot;</span>))</span></code></pre></div>
+<pre><code>## Inference for Stan model: anon_model.
+## 4 chains, each with iter=2000; warmup=1000; thin=1; 
+## post-warmup draws per chain=1000, total post-warmup draws=4000.
+## 
+##          mean se_mean   sd  2.5%   25%   50%   75% 97.5% n_eff Rhat
+## alpha   40.32    0.00 0.19 39.95 40.19 40.32 40.44 40.68  7136    1
+## beta[1] -1.85    0.00 0.19 -2.21 -1.98 -1.85 -1.72 -1.48  7288    1
+## beta[2]  2.64    0.00 0.19  2.27  2.52  2.64  2.77  3.01  7301    1
+## beta[3]  3.92    0.00 0.20  3.53  3.78  3.92  4.06  4.29  7501    1
+## beta[4]  1.08    0.00 0.19  0.71  0.95  1.08  1.22  1.46  7458    1
+## beta[5]  0.31    0.00 0.18 -0.06  0.19  0.31  0.43  0.67  6465    1
+## sigma    4.97    0.00 0.13  4.72  4.88  4.97  5.06  5.24  6770    1
+## b        2.12    0.02 1.04  0.90  1.41  1.88  2.53  4.78  4190    1
+## 
+## Samples were drawn using NUTS(diag_e) at Wed Aug 27 09:10:20 2025.
+## For each parameter, n_eff is a crude measure of effective sample size,
+## and Rhat is the potential scale reduction factor on split chains (at 
+## convergence, Rhat=1).</code></pre>
 </div>
 <div id="hierarchical-shrinkage-horseshoe-prior" class="section level3 hasAnchor" number="5.5.3">
 <h3><span class="header-section-number">5.5.3</span> Hierarchical Shrinkage (Horseshoe Prior)<a href="bayesian-regularized-regression.html#hierarchical-shrinkage-horseshoe-prior" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<div class="sourceCode" id="cb74"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb74-1"><a href="bayesian-regularized-regression.html#cb74-1" tabindex="-1"></a><span class="co"># Stan model for Horseshoe prior</span></span>
-<span id="cb74-2"><a href="bayesian-regularized-regression.html#cb74-2" tabindex="-1"></a>stan_horseshoe <span class="ot">&lt;-</span> <span class="st">&quot;</span></span>
-<span id="cb74-3"><a href="bayesian-regularized-regression.html#cb74-3" tabindex="-1"></a><span class="st">data {</span></span>
-<span id="cb74-4"><a href="bayesian-regularized-regression.html#cb74-4" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; N_train;</span></span>
-<span id="cb74-5"><a href="bayesian-regularized-regression.html#cb74-5" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; N_test;</span></span>
-<span id="cb74-6"><a href="bayesian-regularized-regression.html#cb74-6" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; p;</span></span>
-<span id="cb74-7"><a href="bayesian-regularized-regression.html#cb74-7" tabindex="-1"></a><span class="st">  matrix[N_train, p] X_train;</span></span>
-<span id="cb74-8"><a href="bayesian-regularized-regression.html#cb74-8" tabindex="-1"></a><span class="st">  matrix[N_test, p] X_test;</span></span>
-<span id="cb74-9"><a href="bayesian-regularized-regression.html#cb74-9" tabindex="-1"></a><span class="st">  vector[N_train] y_train;</span></span>
-<span id="cb74-10"><a href="bayesian-regularized-regression.html#cb74-10" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb74-11"><a href="bayesian-regularized-regression.html#cb74-11" tabindex="-1"></a><span class="st">parameters {</span></span>
-<span id="cb74-12"><a href="bayesian-regularized-regression.html#cb74-12" tabindex="-1"></a><span class="st">  real alpha;</span></span>
-<span id="cb74-13"><a href="bayesian-regularized-regression.html#cb74-13" tabindex="-1"></a><span class="st">  vector[p] beta_raw;</span></span>
-<span id="cb74-14"><a href="bayesian-regularized-regression.html#cb74-14" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma;</span></span>
-<span id="cb74-15"><a href="bayesian-regularized-regression.html#cb74-15" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; tau;  // global shrinkage</span></span>
-<span id="cb74-16"><a href="bayesian-regularized-regression.html#cb74-16" tabindex="-1"></a><span class="st">  vector&lt;lower=0&gt;[p] lambda;  // local shrinkage</span></span>
-<span id="cb74-17"><a href="bayesian-regularized-regression.html#cb74-17" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb74-18"><a href="bayesian-regularized-regression.html#cb74-18" tabindex="-1"></a><span class="st">transformed parameters {</span></span>
-<span id="cb74-19"><a href="bayesian-regularized-regression.html#cb74-19" tabindex="-1"></a><span class="st">  vector[p] beta;</span></span>
-<span id="cb74-20"><a href="bayesian-regularized-regression.html#cb74-20" tabindex="-1"></a><span class="st">  beta = beta_raw .* lambda * tau;  // hierarchical shrinkage</span></span>
-<span id="cb74-21"><a href="bayesian-regularized-regression.html#cb74-21" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb74-22"><a href="bayesian-regularized-regression.html#cb74-22" tabindex="-1"></a><span class="st">model {</span></span>
-<span id="cb74-23"><a href="bayesian-regularized-regression.html#cb74-23" tabindex="-1"></a><span class="st">  // Priors</span></span>
-<span id="cb74-24"><a href="bayesian-regularized-regression.html#cb74-24" tabindex="-1"></a><span class="st">  alpha ~ normal(0, 10);</span></span>
-<span id="cb74-25"><a href="bayesian-regularized-regression.html#cb74-25" tabindex="-1"></a><span class="st">  tau ~ cauchy(0, 1);  // global shrinkage</span></span>
-<span id="cb74-26"><a href="bayesian-regularized-regression.html#cb74-26" tabindex="-1"></a><span class="st">  lambda ~ cauchy(0, 1);  // local shrinkage</span></span>
-<span id="cb74-27"><a href="bayesian-regularized-regression.html#cb74-27" tabindex="-1"></a><span class="st">  beta_raw ~ normal(0, 1);</span></span>
-<span id="cb74-28"><a href="bayesian-regularized-regression.html#cb74-28" tabindex="-1"></a><span class="st">  sigma ~ cauchy(0, 5);</span></span>
-<span id="cb74-29"><a href="bayesian-regularized-regression.html#cb74-29" tabindex="-1"></a><span class="st">  </span></span>
-<span id="cb74-30"><a href="bayesian-regularized-regression.html#cb74-30" tabindex="-1"></a><span class="st">  // Likelihood</span></span>
-<span id="cb74-31"><a href="bayesian-regularized-regression.html#cb74-31" tabindex="-1"></a><span class="st">  y_train ~ normal(alpha + X_train * beta, sigma);</span></span>
-<span id="cb74-32"><a href="bayesian-regularized-regression.html#cb74-32" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb74-33"><a href="bayesian-regularized-regression.html#cb74-33" tabindex="-1"></a><span class="st">generated quantities {</span></span>
-<span id="cb74-34"><a href="bayesian-regularized-regression.html#cb74-34" tabindex="-1"></a><span class="st">  vector[N_test] y_pred;</span></span>
-<span id="cb74-35"><a href="bayesian-regularized-regression.html#cb74-35" tabindex="-1"></a><span class="st">  </span></span>
-<span id="cb74-36"><a href="bayesian-regularized-regression.html#cb74-36" tabindex="-1"></a><span class="st">  for (i in 1:N_test) {</span></span>
-<span id="cb74-37"><a href="bayesian-regularized-regression.html#cb74-37" tabindex="-1"></a><span class="st">    y_pred[i] = normal_rng(alpha + X_test[i] * beta, sigma);</span></span>
-<span id="cb74-38"><a href="bayesian-regularized-regression.html#cb74-38" tabindex="-1"></a><span class="st">  }</span></span>
-<span id="cb74-39"><a href="bayesian-regularized-regression.html#cb74-39" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb74-40"><a href="bayesian-regularized-regression.html#cb74-40" tabindex="-1"></a><span class="st">&quot;</span></span>
-<span id="cb74-41"><a href="bayesian-regularized-regression.html#cb74-41" tabindex="-1"></a></span>
-<span id="cb74-42"><a href="bayesian-regularized-regression.html#cb74-42" tabindex="-1"></a><span class="co"># Prepare data (same as before)</span></span>
-<span id="cb74-43"><a href="bayesian-regularized-regression.html#cb74-43" tabindex="-1"></a>stan_data_horseshoe <span class="ot">&lt;-</span> stan_data_ridge</span>
-<span id="cb74-44"><a href="bayesian-regularized-regression.html#cb74-44" tabindex="-1"></a></span>
-<span id="cb74-45"><a href="bayesian-regularized-regression.html#cb74-45" tabindex="-1"></a><span class="co"># Fit model</span></span>
-<span id="cb74-46"><a href="bayesian-regularized-regression.html#cb74-46" tabindex="-1"></a>fit_horseshoe <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">model_code =</span> stan_horseshoe,</span>
-<span id="cb74-47"><a href="bayesian-regularized-regression.html#cb74-47" tabindex="-1"></a>                      <span class="at">data =</span> stan_data_horseshoe,</span>
-<span id="cb74-48"><a href="bayesian-regularized-regression.html#cb74-48" tabindex="-1"></a>                      <span class="at">chains =</span> <span class="dv">4</span>, <span class="at">iter =</span> <span class="dv">2000</span>,</span>
-<span id="cb74-49"><a href="bayesian-regularized-regression.html#cb74-49" tabindex="-1"></a>                      <span class="at">cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>())</span>
-<span id="cb74-50"><a href="bayesian-regularized-regression.html#cb74-50" tabindex="-1"></a></span>
-<span id="cb74-51"><a href="bayesian-regularized-regression.html#cb74-51" tabindex="-1"></a><span class="fu">print</span>(fit_horseshoe, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;alpha&quot;</span>, <span class="st">&quot;beta&quot;</span>, <span class="st">&quot;sigma&quot;</span>, <span class="st">&quot;tau&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb91-1"><a href="bayesian-regularized-regression.html#cb91-1" tabindex="-1"></a><span class="co"># Stan model for Horseshoe prior</span></span>
+<span id="cb91-2"><a href="bayesian-regularized-regression.html#cb91-2" tabindex="-1"></a>stan_horseshoe <span class="ot">&lt;-</span> <span class="st">&quot;</span></span>
+<span id="cb91-3"><a href="bayesian-regularized-regression.html#cb91-3" tabindex="-1"></a><span class="st">data {</span></span>
+<span id="cb91-4"><a href="bayesian-regularized-regression.html#cb91-4" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; N_train;</span></span>
+<span id="cb91-5"><a href="bayesian-regularized-regression.html#cb91-5" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; N_test;</span></span>
+<span id="cb91-6"><a href="bayesian-regularized-regression.html#cb91-6" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; p;</span></span>
+<span id="cb91-7"><a href="bayesian-regularized-regression.html#cb91-7" tabindex="-1"></a><span class="st">  matrix[N_train, p] X_train;</span></span>
+<span id="cb91-8"><a href="bayesian-regularized-regression.html#cb91-8" tabindex="-1"></a><span class="st">  matrix[N_test, p] X_test;</span></span>
+<span id="cb91-9"><a href="bayesian-regularized-regression.html#cb91-9" tabindex="-1"></a><span class="st">  vector[N_train] y_train;</span></span>
+<span id="cb91-10"><a href="bayesian-regularized-regression.html#cb91-10" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb91-11"><a href="bayesian-regularized-regression.html#cb91-11" tabindex="-1"></a><span class="st">parameters {</span></span>
+<span id="cb91-12"><a href="bayesian-regularized-regression.html#cb91-12" tabindex="-1"></a><span class="st">  real alpha;</span></span>
+<span id="cb91-13"><a href="bayesian-regularized-regression.html#cb91-13" tabindex="-1"></a><span class="st">  vector[p] beta_raw;</span></span>
+<span id="cb91-14"><a href="bayesian-regularized-regression.html#cb91-14" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma;</span></span>
+<span id="cb91-15"><a href="bayesian-regularized-regression.html#cb91-15" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; tau;  // global shrinkage</span></span>
+<span id="cb91-16"><a href="bayesian-regularized-regression.html#cb91-16" tabindex="-1"></a><span class="st">  vector&lt;lower=0&gt;[p] lambda;  // local shrinkage</span></span>
+<span id="cb91-17"><a href="bayesian-regularized-regression.html#cb91-17" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb91-18"><a href="bayesian-regularized-regression.html#cb91-18" tabindex="-1"></a><span class="st">transformed parameters {</span></span>
+<span id="cb91-19"><a href="bayesian-regularized-regression.html#cb91-19" tabindex="-1"></a><span class="st">  vector[p] beta;</span></span>
+<span id="cb91-20"><a href="bayesian-regularized-regression.html#cb91-20" tabindex="-1"></a><span class="st">  beta = beta_raw .* lambda * tau;  // hierarchical shrinkage</span></span>
+<span id="cb91-21"><a href="bayesian-regularized-regression.html#cb91-21" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb91-22"><a href="bayesian-regularized-regression.html#cb91-22" tabindex="-1"></a><span class="st">model {</span></span>
+<span id="cb91-23"><a href="bayesian-regularized-regression.html#cb91-23" tabindex="-1"></a><span class="st">  // Priors</span></span>
+<span id="cb91-24"><a href="bayesian-regularized-regression.html#cb91-24" tabindex="-1"></a><span class="st">  alpha ~ normal(0, 10);</span></span>
+<span id="cb91-25"><a href="bayesian-regularized-regression.html#cb91-25" tabindex="-1"></a><span class="st">  tau ~ cauchy(0, 1);  // global shrinkage</span></span>
+<span id="cb91-26"><a href="bayesian-regularized-regression.html#cb91-26" tabindex="-1"></a><span class="st">  lambda ~ cauchy(0, 1);  // local shrinkage</span></span>
+<span id="cb91-27"><a href="bayesian-regularized-regression.html#cb91-27" tabindex="-1"></a><span class="st">  beta_raw ~ normal(0, 1);</span></span>
+<span id="cb91-28"><a href="bayesian-regularized-regression.html#cb91-28" tabindex="-1"></a><span class="st">  sigma ~ cauchy(0, 5);</span></span>
+<span id="cb91-29"><a href="bayesian-regularized-regression.html#cb91-29" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb91-30"><a href="bayesian-regularized-regression.html#cb91-30" tabindex="-1"></a><span class="st">  // Likelihood</span></span>
+<span id="cb91-31"><a href="bayesian-regularized-regression.html#cb91-31" tabindex="-1"></a><span class="st">  y_train ~ normal(alpha + X_train * beta, sigma);</span></span>
+<span id="cb91-32"><a href="bayesian-regularized-regression.html#cb91-32" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb91-33"><a href="bayesian-regularized-regression.html#cb91-33" tabindex="-1"></a><span class="st">generated quantities {</span></span>
+<span id="cb91-34"><a href="bayesian-regularized-regression.html#cb91-34" tabindex="-1"></a><span class="st">  vector[N_test] y_pred;</span></span>
+<span id="cb91-35"><a href="bayesian-regularized-regression.html#cb91-35" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb91-36"><a href="bayesian-regularized-regression.html#cb91-36" tabindex="-1"></a><span class="st">  for (i in 1:N_test) {</span></span>
+<span id="cb91-37"><a href="bayesian-regularized-regression.html#cb91-37" tabindex="-1"></a><span class="st">    y_pred[i] = normal_rng(alpha + X_test[i] * beta, sigma);</span></span>
+<span id="cb91-38"><a href="bayesian-regularized-regression.html#cb91-38" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb91-39"><a href="bayesian-regularized-regression.html#cb91-39" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb91-40"><a href="bayesian-regularized-regression.html#cb91-40" tabindex="-1"></a><span class="st">&quot;</span></span>
+<span id="cb91-41"><a href="bayesian-regularized-regression.html#cb91-41" tabindex="-1"></a></span>
+<span id="cb91-42"><a href="bayesian-regularized-regression.html#cb91-42" tabindex="-1"></a><span class="co"># Prepare data (same as before)</span></span>
+<span id="cb91-43"><a href="bayesian-regularized-regression.html#cb91-43" tabindex="-1"></a>stan_data_horseshoe <span class="ot">&lt;-</span> stan_data_ridge</span>
+<span id="cb91-44"><a href="bayesian-regularized-regression.html#cb91-44" tabindex="-1"></a></span>
+<span id="cb91-45"><a href="bayesian-regularized-regression.html#cb91-45" tabindex="-1"></a><span class="co"># Fit model</span></span>
+<span id="cb91-46"><a href="bayesian-regularized-regression.html#cb91-46" tabindex="-1"></a>fit_horseshoe <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">model_code =</span> stan_horseshoe,</span>
+<span id="cb91-47"><a href="bayesian-regularized-regression.html#cb91-47" tabindex="-1"></a>                      <span class="at">data =</span> stan_data_horseshoe,</span>
+<span id="cb91-48"><a href="bayesian-regularized-regression.html#cb91-48" tabindex="-1"></a>                      <span class="at">chains =</span> <span class="dv">4</span>, <span class="at">iter =</span> <span class="dv">2000</span>,</span>
+<span id="cb91-49"><a href="bayesian-regularized-regression.html#cb91-49" tabindex="-1"></a>                      <span class="at">cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>())</span></code></pre></div>
+<pre><code>## Warning: There were 106 divergent transitions after warmup. See
+## https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+## to find out why this is a problem and how to eliminate them.</code></pre>
+<pre><code>## Warning: Examine the pairs() plot to diagnose sampling problems</code></pre>
+<div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb94-1"><a href="bayesian-regularized-regression.html#cb94-1" tabindex="-1"></a><span class="fu">print</span>(fit_horseshoe, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;alpha&quot;</span>, <span class="st">&quot;beta&quot;</span>, <span class="st">&quot;sigma&quot;</span>, <span class="st">&quot;tau&quot;</span>))</span></code></pre></div>
+<pre><code>## Inference for Stan model: anon_model.
+## 4 chains, each with iter=2000; warmup=1000; thin=1; 
+## post-warmup draws per chain=1000, total post-warmup draws=4000.
+## 
+##          mean se_mean   sd  2.5%   25%   50%   75% 97.5% n_eff Rhat
+## alpha   40.32    0.00 0.19 39.95 40.19 40.32 40.45 40.70  3660    1
+## beta[1] -1.84    0.00 0.20 -2.23 -1.98 -1.84 -1.71 -1.46  3905    1
+## beta[2]  2.65    0.00 0.18  2.30  2.52  2.65  2.77  3.01  3678    1
+## beta[3]  3.93    0.00 0.20  3.54  3.80  3.93  4.06  4.31  3803    1
+## beta[4]  1.07    0.00 0.19  0.69  0.94  1.07  1.20  1.44  4014    1
+## beta[5]  0.26    0.00 0.18 -0.05  0.13  0.26  0.39  0.64  2376    1
+## sigma    4.98    0.00 0.14  4.72  4.88  4.98  5.07  5.24  3966    1
+## tau      2.21    0.04 1.50  0.56  1.21  1.83  2.75  6.06  1429    1
+## 
+## Samples were drawn using NUTS(diag_e) at Wed Aug 27 09:11:32 2025.
+## For each parameter, n_eff is a crude measure of effective sample size,
+## and Rhat is the potential scale reduction factor on split chains (at 
+## convergence, Rhat=1).</code></pre>
 </div>
 </div>
 <div id="empirical-comparison-and-model-evaluation" class="section level2 hasAnchor" number="5.6">
 <h2><span class="header-section-number">5.6</span> Empirical Comparison and Model Evaluation<a href="bayesian-regularized-regression.html#empirical-comparison-and-model-evaluation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Understanding the theoretical properties of different regularization approaches provides essential intuition, but empirical evaluation reveals how these methods perform in practice. The code below demonstrates how to compare ridge regression, LASSO, and horseshoe priors using both predictive accuracy and coefficient recovery metrics.</p>
-<div class="sourceCode" id="cb75"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb75-1"><a href="bayesian-regularized-regression.html#cb75-1" tabindex="-1"></a><span class="co"># Extract predictions and compute metrics</span></span>
-<span id="cb75-2"><a href="bayesian-regularized-regression.html#cb75-2" tabindex="-1"></a>extract_metrics <span class="ot">&lt;-</span> <span class="cf">function</span>(fit, true_values) {</span>
-<span id="cb75-3"><a href="bayesian-regularized-regression.html#cb75-3" tabindex="-1"></a>  y_pred <span class="ot">&lt;-</span> <span class="fu">extract</span>(fit)<span class="sc">$</span>y_pred</span>
-<span id="cb75-4"><a href="bayesian-regularized-regression.html#cb75-4" tabindex="-1"></a>  y_pred_mean <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(y_pred)</span>
-<span id="cb75-5"><a href="bayesian-regularized-regression.html#cb75-5" tabindex="-1"></a>  </span>
-<span id="cb75-6"><a href="bayesian-regularized-regression.html#cb75-6" tabindex="-1"></a>  <span class="co"># RMSE</span></span>
-<span id="cb75-7"><a href="bayesian-regularized-regression.html#cb75-7" tabindex="-1"></a>  rmse <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>((y_pred_mean <span class="sc">-</span> true_values)<span class="sc">^</span><span class="dv">2</span>))</span>
-<span id="cb75-8"><a href="bayesian-regularized-regression.html#cb75-8" tabindex="-1"></a>  </span>
-<span id="cb75-9"><a href="bayesian-regularized-regression.html#cb75-9" tabindex="-1"></a>  <span class="co"># Coverage (95% credible intervals)</span></span>
-<span id="cb75-10"><a href="bayesian-regularized-regression.html#cb75-10" tabindex="-1"></a>  y_pred_lower <span class="ot">&lt;-</span> <span class="fu">apply</span>(y_pred, <span class="dv">2</span>, quantile, <span class="fl">0.025</span>)</span>
-<span id="cb75-11"><a href="bayesian-regularized-regression.html#cb75-11" tabindex="-1"></a>  y_pred_upper <span class="ot">&lt;-</span> <span class="fu">apply</span>(y_pred, <span class="dv">2</span>, quantile, <span class="fl">0.975</span>)</span>
-<span id="cb75-12"><a href="bayesian-regularized-regression.html#cb75-12" tabindex="-1"></a>  coverage <span class="ot">&lt;-</span> <span class="fu">mean</span>(true_values <span class="sc">&gt;=</span> y_pred_lower <span class="sc">&amp;</span> true_values <span class="sc">&lt;=</span> y_pred_upper)</span>
-<span id="cb75-13"><a href="bayesian-regularized-regression.html#cb75-13" tabindex="-1"></a>  </span>
-<span id="cb75-14"><a href="bayesian-regularized-regression.html#cb75-14" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">rmse =</span> rmse, <span class="at">coverage =</span> coverage))</span>
-<span id="cb75-15"><a href="bayesian-regularized-regression.html#cb75-15" tabindex="-1"></a>}</span>
-<span id="cb75-16"><a href="bayesian-regularized-regression.html#cb75-16" tabindex="-1"></a></span>
-<span id="cb75-17"><a href="bayesian-regularized-regression.html#cb75-17" tabindex="-1"></a><span class="co"># True test values (computed in R, not passed to Stan)</span></span>
-<span id="cb75-18"><a href="bayesian-regularized-regression.html#cb75-18" tabindex="-1"></a>y_test_true <span class="ot">&lt;-</span> alpha_true <span class="sc">+</span> X_test <span class="sc">%*%</span> beta_true</span>
-<span id="cb75-19"><a href="bayesian-regularized-regression.html#cb75-19" tabindex="-1"></a></span>
-<span id="cb75-20"><a href="bayesian-regularized-regression.html#cb75-20" tabindex="-1"></a><span class="co"># Compare models</span></span>
-<span id="cb75-21"><a href="bayesian-regularized-regression.html#cb75-21" tabindex="-1"></a>metrics_ridge <span class="ot">&lt;-</span> <span class="fu">extract_metrics</span>(fit_ridge, y_test_true)</span>
-<span id="cb75-22"><a href="bayesian-regularized-regression.html#cb75-22" tabindex="-1"></a>metrics_lasso <span class="ot">&lt;-</span> <span class="fu">extract_metrics</span>(fit_lasso, y_test_true)</span>
-<span id="cb75-23"><a href="bayesian-regularized-regression.html#cb75-23" tabindex="-1"></a>metrics_horseshoe <span class="ot">&lt;-</span> <span class="fu">extract_metrics</span>(fit_horseshoe, y_test_true)</span>
-<span id="cb75-24"><a href="bayesian-regularized-regression.html#cb75-24" tabindex="-1"></a></span>
-<span id="cb75-25"><a href="bayesian-regularized-regression.html#cb75-25" tabindex="-1"></a></span>
-<span id="cb75-26"><a href="bayesian-regularized-regression.html#cb75-26" tabindex="-1"></a><span class="co"># Print comparison</span></span>
-<span id="cb75-27"><a href="bayesian-regularized-regression.html#cb75-27" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Model Comparison (Test Set):</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb75-28"><a href="bayesian-regularized-regression.html#cb75-28" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Ridge - RMSE:&quot;</span>, <span class="fu">round</span>(metrics_ridge<span class="sc">$</span>rmse, <span class="dv">3</span>), </span>
-<span id="cb75-29"><a href="bayesian-regularized-regression.html#cb75-29" tabindex="-1"></a>    <span class="st">&quot;Coverage:&quot;</span>, <span class="fu">round</span>(metrics_ridge<span class="sc">$</span>coverage, <span class="dv">3</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb75-30"><a href="bayesian-regularized-regression.html#cb75-30" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;LASSO - RMSE:&quot;</span>, <span class="fu">round</span>(metrics_lasso<span class="sc">$</span>rmse, <span class="dv">3</span>), </span>
-<span id="cb75-31"><a href="bayesian-regularized-regression.html#cb75-31" tabindex="-1"></a>    <span class="st">&quot;Coverage:&quot;</span>, <span class="fu">round</span>(metrics_lasso<span class="sc">$</span>coverage, <span class="dv">3</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb75-32"><a href="bayesian-regularized-regression.html#cb75-32" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Horseshoe - RMSE:&quot;</span>, <span class="fu">round</span>(metrics_horseshoe<span class="sc">$</span>rmse, <span class="dv">3</span>), </span>
-<span id="cb75-33"><a href="bayesian-regularized-regression.html#cb75-33" tabindex="-1"></a>    <span class="st">&quot;Coverage:&quot;</span>, <span class="fu">round</span>(metrics_horseshoe<span class="sc">$</span>coverage, <span class="dv">3</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb75-34"><a href="bayesian-regularized-regression.html#cb75-34" tabindex="-1"></a></span>
-<span id="cb75-35"><a href="bayesian-regularized-regression.html#cb75-35" tabindex="-1"></a><span class="co"># Plot coefficient estimates</span></span>
-<span id="cb75-36"><a href="bayesian-regularized-regression.html#cb75-36" tabindex="-1"></a><span class="fu">library</span>(bayesplot)</span>
-<span id="cb75-37"><a href="bayesian-regularized-regression.html#cb75-37" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb75-38"><a href="bayesian-regularized-regression.html#cb75-38" tabindex="-1"></a></span>
-<span id="cb75-39"><a href="bayesian-regularized-regression.html#cb75-39" tabindex="-1"></a><span class="co"># Extract posterior samples</span></span>
-<span id="cb75-40"><a href="bayesian-regularized-regression.html#cb75-40" tabindex="-1"></a>beta_ridge <span class="ot">&lt;-</span> <span class="fu">extract</span>(fit_ridge)<span class="sc">$</span>beta</span>
-<span id="cb75-41"><a href="bayesian-regularized-regression.html#cb75-41" tabindex="-1"></a>beta_lasso <span class="ot">&lt;-</span> <span class="fu">extract</span>(fit_lasso)<span class="sc">$</span>beta</span>
-<span id="cb75-42"><a href="bayesian-regularized-regression.html#cb75-42" tabindex="-1"></a>beta_horseshoe <span class="ot">&lt;-</span> <span class="fu">extract</span>(fit_horseshoe)<span class="sc">$</span>beta</span>
-<span id="cb75-43"><a href="bayesian-regularized-regression.html#cb75-43" tabindex="-1"></a></span>
-<span id="cb75-44"><a href="bayesian-regularized-regression.html#cb75-44" tabindex="-1"></a><span class="co"># Create comparison plot</span></span>
-<span id="cb75-45"><a href="bayesian-regularized-regression.html#cb75-45" tabindex="-1"></a>beta_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb75-46"><a href="bayesian-regularized-regression.html#cb75-46" tabindex="-1"></a>  <span class="at">coefficient =</span> <span class="fu">rep</span>(<span class="fu">paste0</span>(<span class="st">&quot;beta&quot;</span>, <span class="dv">1</span><span class="sc">:</span>p), <span class="dv">3</span>),</span>
-<span id="cb75-47"><a href="bayesian-regularized-regression.html#cb75-47" tabindex="-1"></a>  <span class="at">method =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">&quot;Ridge&quot;</span>, <span class="st">&quot;LASSO&quot;</span>, <span class="st">&quot;Horseshoe&quot;</span>), <span class="at">each =</span> p),</span>
-<span id="cb75-48"><a href="bayesian-regularized-regression.html#cb75-48" tabindex="-1"></a>  <span class="at">mean =</span> <span class="fu">c</span>(<span class="fu">colMeans</span>(beta_ridge), <span class="fu">colMeans</span>(beta_lasso), <span class="fu">colMeans</span>(beta_horseshoe)),</span>
-<span id="cb75-49"><a href="bayesian-regularized-regression.html#cb75-49" tabindex="-1"></a>  <span class="at">lower =</span> <span class="fu">c</span>(<span class="fu">apply</span>(beta_ridge, <span class="dv">2</span>, quantile, <span class="fl">0.025</span>),</span>
-<span id="cb75-50"><a href="bayesian-regularized-regression.html#cb75-50" tabindex="-1"></a>            <span class="fu">apply</span>(beta_lasso, <span class="dv">2</span>, quantile, <span class="fl">0.025</span>),</span>
-<span id="cb75-51"><a href="bayesian-regularized-regression.html#cb75-51" tabindex="-1"></a>            <span class="fu">apply</span>(beta_horseshoe, <span class="dv">2</span>, quantile, <span class="fl">0.025</span>)),</span>
-<span id="cb75-52"><a href="bayesian-regularized-regression.html#cb75-52" tabindex="-1"></a>  <span class="at">upper =</span> <span class="fu">c</span>(<span class="fu">apply</span>(beta_ridge, <span class="dv">2</span>, quantile, <span class="fl">0.975</span>),</span>
-<span id="cb75-53"><a href="bayesian-regularized-regression.html#cb75-53" tabindex="-1"></a>            <span class="fu">apply</span>(beta_lasso, <span class="dv">2</span>, quantile, <span class="fl">0.975</span>),</span>
-<span id="cb75-54"><a href="bayesian-regularized-regression.html#cb75-54" tabindex="-1"></a>            <span class="fu">apply</span>(beta_horseshoe, <span class="dv">2</span>, quantile, <span class="fl">0.975</span>)),</span>
-<span id="cb75-55"><a href="bayesian-regularized-regression.html#cb75-55" tabindex="-1"></a>  <span class="at">true_value =</span> <span class="fu">rep</span>(beta_true, <span class="dv">3</span>)</span>
-<span id="cb75-56"><a href="bayesian-regularized-regression.html#cb75-56" tabindex="-1"></a>)</span>
-<span id="cb75-57"><a href="bayesian-regularized-regression.html#cb75-57" tabindex="-1"></a></span>
-<span id="cb75-58"><a href="bayesian-regularized-regression.html#cb75-58" tabindex="-1"></a><span class="fu">ggplot</span>(beta_df, <span class="fu">aes</span>(<span class="at">x =</span> coefficient, <span class="at">y =</span> mean, <span class="at">color =</span> method)) <span class="sc">+</span></span>
-<span id="cb75-59"><a href="bayesian-regularized-regression.html#cb75-59" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">position =</span> <span class="fu">position_dodge</span>(<span class="fl">0.3</span>)) <span class="sc">+</span></span>
-<span id="cb75-60"><a href="bayesian-regularized-regression.html#cb75-60" tabindex="-1"></a>  <span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> lower, <span class="at">ymax =</span> upper), </span>
-<span id="cb75-61"><a href="bayesian-regularized-regression.html#cb75-61" tabindex="-1"></a>                <span class="at">position =</span> <span class="fu">position_dodge</span>(<span class="fl">0.3</span>), <span class="at">width =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
-<span id="cb75-62"><a href="bayesian-regularized-regression.html#cb75-62" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">y =</span> true_value), <span class="at">color =</span> <span class="st">&quot;black&quot;</span>, <span class="at">shape =</span> <span class="dv">4</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
-<span id="cb75-63"><a href="bayesian-regularized-regression.html#cb75-63" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Coefficient Estimates Comparison&quot;</span>,</span>
-<span id="cb75-64"><a href="bayesian-regularized-regression.html#cb75-64" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">&quot;Black crosses show true values&quot;</span>,</span>
-<span id="cb75-65"><a href="bayesian-regularized-regression.html#cb75-65" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Coefficient&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Estimate&quot;</span>) <span class="sc">+</span></span>
-<span id="cb75-66"><a href="bayesian-regularized-regression.html#cb75-66" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb75-67"><a href="bayesian-regularized-regression.html#cb75-67" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb96"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb96-1"><a href="bayesian-regularized-regression.html#cb96-1" tabindex="-1"></a><span class="co"># Extract predictions and compute metrics</span></span>
+<span id="cb96-2"><a href="bayesian-regularized-regression.html#cb96-2" tabindex="-1"></a>extract_metrics <span class="ot">&lt;-</span> <span class="cf">function</span>(fit, true_values) {</span>
+<span id="cb96-3"><a href="bayesian-regularized-regression.html#cb96-3" tabindex="-1"></a>  y_pred <span class="ot">&lt;-</span> <span class="fu">extract</span>(fit)<span class="sc">$</span>y_pred</span>
+<span id="cb96-4"><a href="bayesian-regularized-regression.html#cb96-4" tabindex="-1"></a>  y_pred_mean <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(y_pred)</span>
+<span id="cb96-5"><a href="bayesian-regularized-regression.html#cb96-5" tabindex="-1"></a>  </span>
+<span id="cb96-6"><a href="bayesian-regularized-regression.html#cb96-6" tabindex="-1"></a>  <span class="co"># RMSE</span></span>
+<span id="cb96-7"><a href="bayesian-regularized-regression.html#cb96-7" tabindex="-1"></a>  rmse <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>((y_pred_mean <span class="sc">-</span> true_values)<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb96-8"><a href="bayesian-regularized-regression.html#cb96-8" tabindex="-1"></a>  </span>
+<span id="cb96-9"><a href="bayesian-regularized-regression.html#cb96-9" tabindex="-1"></a>  <span class="co"># Coverage (95% credible intervals)</span></span>
+<span id="cb96-10"><a href="bayesian-regularized-regression.html#cb96-10" tabindex="-1"></a>  y_pred_lower <span class="ot">&lt;-</span> <span class="fu">apply</span>(y_pred, <span class="dv">2</span>, quantile, <span class="fl">0.025</span>)</span>
+<span id="cb96-11"><a href="bayesian-regularized-regression.html#cb96-11" tabindex="-1"></a>  y_pred_upper <span class="ot">&lt;-</span> <span class="fu">apply</span>(y_pred, <span class="dv">2</span>, quantile, <span class="fl">0.975</span>)</span>
+<span id="cb96-12"><a href="bayesian-regularized-regression.html#cb96-12" tabindex="-1"></a>  coverage <span class="ot">&lt;-</span> <span class="fu">mean</span>(true_values <span class="sc">&gt;=</span> y_pred_lower <span class="sc">&amp;</span> true_values <span class="sc">&lt;=</span> y_pred_upper)</span>
+<span id="cb96-13"><a href="bayesian-regularized-regression.html#cb96-13" tabindex="-1"></a>  </span>
+<span id="cb96-14"><a href="bayesian-regularized-regression.html#cb96-14" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">rmse =</span> rmse, <span class="at">coverage =</span> coverage))</span>
+<span id="cb96-15"><a href="bayesian-regularized-regression.html#cb96-15" tabindex="-1"></a>}</span>
+<span id="cb96-16"><a href="bayesian-regularized-regression.html#cb96-16" tabindex="-1"></a></span>
+<span id="cb96-17"><a href="bayesian-regularized-regression.html#cb96-17" tabindex="-1"></a><span class="co"># True test values (computed in R, not passed to Stan)</span></span>
+<span id="cb96-18"><a href="bayesian-regularized-regression.html#cb96-18" tabindex="-1"></a>y_test_true <span class="ot">&lt;-</span> alpha_true <span class="sc">+</span> X_test <span class="sc">%*%</span> beta_true</span>
+<span id="cb96-19"><a href="bayesian-regularized-regression.html#cb96-19" tabindex="-1"></a></span>
+<span id="cb96-20"><a href="bayesian-regularized-regression.html#cb96-20" tabindex="-1"></a><span class="co"># Compare models</span></span>
+<span id="cb96-21"><a href="bayesian-regularized-regression.html#cb96-21" tabindex="-1"></a>metrics_ridge <span class="ot">&lt;-</span> <span class="fu">extract_metrics</span>(fit_ridge, y_test_true)</span>
+<span id="cb96-22"><a href="bayesian-regularized-regression.html#cb96-22" tabindex="-1"></a>metrics_lasso <span class="ot">&lt;-</span> <span class="fu">extract_metrics</span>(fit_lasso, y_test_true)</span>
+<span id="cb96-23"><a href="bayesian-regularized-regression.html#cb96-23" tabindex="-1"></a>metrics_horseshoe <span class="ot">&lt;-</span> <span class="fu">extract_metrics</span>(fit_horseshoe, y_test_true)</span>
+<span id="cb96-24"><a href="bayesian-regularized-regression.html#cb96-24" tabindex="-1"></a></span>
+<span id="cb96-25"><a href="bayesian-regularized-regression.html#cb96-25" tabindex="-1"></a></span>
+<span id="cb96-26"><a href="bayesian-regularized-regression.html#cb96-26" tabindex="-1"></a><span class="co"># Print comparison</span></span>
+<span id="cb96-27"><a href="bayesian-regularized-regression.html#cb96-27" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Model Comparison (Test Set):</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## Model Comparison (Test Set):</code></pre>
+<div class="sourceCode" id="cb98"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb98-1"><a href="bayesian-regularized-regression.html#cb98-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Ridge - RMSE:&quot;</span>, <span class="fu">round</span>(metrics_ridge<span class="sc">$</span>rmse, <span class="dv">3</span>), </span>
+<span id="cb98-2"><a href="bayesian-regularized-regression.html#cb98-2" tabindex="-1"></a>    <span class="st">&quot;Coverage:&quot;</span>, <span class="fu">round</span>(metrics_ridge<span class="sc">$</span>coverage, <span class="dv">3</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## Ridge - RMSE: 0.513 Coverage: 1</code></pre>
+<div class="sourceCode" id="cb100"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb100-1"><a href="bayesian-regularized-regression.html#cb100-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;LASSO - RMSE:&quot;</span>, <span class="fu">round</span>(metrics_lasso<span class="sc">$</span>rmse, <span class="dv">3</span>), </span>
+<span id="cb100-2"><a href="bayesian-regularized-regression.html#cb100-2" tabindex="-1"></a>    <span class="st">&quot;Coverage:&quot;</span>, <span class="fu">round</span>(metrics_lasso<span class="sc">$</span>coverage, <span class="dv">3</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## LASSO - RMSE: 0.511 Coverage: 1</code></pre>
+<div class="sourceCode" id="cb102"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb102-1"><a href="bayesian-regularized-regression.html#cb102-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Horseshoe - RMSE:&quot;</span>, <span class="fu">round</span>(metrics_horseshoe<span class="sc">$</span>rmse, <span class="dv">3</span>), </span>
+<span id="cb102-2"><a href="bayesian-regularized-regression.html#cb102-2" tabindex="-1"></a>    <span class="st">&quot;Coverage:&quot;</span>, <span class="fu">round</span>(metrics_horseshoe<span class="sc">$</span>coverage, <span class="dv">3</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## Horseshoe - RMSE: 0.496 Coverage: 1</code></pre>
+<div class="sourceCode" id="cb104"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb104-1"><a href="bayesian-regularized-regression.html#cb104-1" tabindex="-1"></a><span class="co"># Plot coefficient estimates</span></span>
+<span id="cb104-2"><a href="bayesian-regularized-regression.html#cb104-2" tabindex="-1"></a><span class="fu">library</span>(bayesplot)</span></code></pre></div>
+<pre><code>## This is bayesplot version 1.12.0</code></pre>
+<pre><code>## - Online documentation and vignettes at mc-stan.org/bayesplot</code></pre>
+<pre><code>## - bayesplot theme set to bayesplot::theme_default()</code></pre>
+<pre><code>##    * Does _not_ affect other ggplot2 plots</code></pre>
+<pre><code>##    * See ?bayesplot_theme_set for details on theme setting</code></pre>
+<div class="sourceCode" id="cb110"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb110-1"><a href="bayesian-regularized-regression.html#cb110-1" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb110-2"><a href="bayesian-regularized-regression.html#cb110-2" tabindex="-1"></a></span>
+<span id="cb110-3"><a href="bayesian-regularized-regression.html#cb110-3" tabindex="-1"></a><span class="co"># Extract posterior samples</span></span>
+<span id="cb110-4"><a href="bayesian-regularized-regression.html#cb110-4" tabindex="-1"></a>beta_ridge <span class="ot">&lt;-</span> <span class="fu">extract</span>(fit_ridge)<span class="sc">$</span>beta</span>
+<span id="cb110-5"><a href="bayesian-regularized-regression.html#cb110-5" tabindex="-1"></a>beta_lasso <span class="ot">&lt;-</span> <span class="fu">extract</span>(fit_lasso)<span class="sc">$</span>beta</span>
+<span id="cb110-6"><a href="bayesian-regularized-regression.html#cb110-6" tabindex="-1"></a>beta_horseshoe <span class="ot">&lt;-</span> <span class="fu">extract</span>(fit_horseshoe)<span class="sc">$</span>beta</span>
+<span id="cb110-7"><a href="bayesian-regularized-regression.html#cb110-7" tabindex="-1"></a></span>
+<span id="cb110-8"><a href="bayesian-regularized-regression.html#cb110-8" tabindex="-1"></a><span class="co"># Create comparison plot</span></span>
+<span id="cb110-9"><a href="bayesian-regularized-regression.html#cb110-9" tabindex="-1"></a>beta_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb110-10"><a href="bayesian-regularized-regression.html#cb110-10" tabindex="-1"></a>  <span class="at">coefficient =</span> <span class="fu">rep</span>(<span class="fu">paste0</span>(<span class="st">&quot;beta&quot;</span>, <span class="dv">1</span><span class="sc">:</span>p), <span class="dv">3</span>),</span>
+<span id="cb110-11"><a href="bayesian-regularized-regression.html#cb110-11" tabindex="-1"></a>  <span class="at">method =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">&quot;Ridge&quot;</span>, <span class="st">&quot;LASSO&quot;</span>, <span class="st">&quot;Horseshoe&quot;</span>), <span class="at">each =</span> p),</span>
+<span id="cb110-12"><a href="bayesian-regularized-regression.html#cb110-12" tabindex="-1"></a>  <span class="at">mean =</span> <span class="fu">c</span>(<span class="fu">colMeans</span>(beta_ridge), <span class="fu">colMeans</span>(beta_lasso), <span class="fu">colMeans</span>(beta_horseshoe)),</span>
+<span id="cb110-13"><a href="bayesian-regularized-regression.html#cb110-13" tabindex="-1"></a>  <span class="at">lower =</span> <span class="fu">c</span>(<span class="fu">apply</span>(beta_ridge, <span class="dv">2</span>, quantile, <span class="fl">0.025</span>),</span>
+<span id="cb110-14"><a href="bayesian-regularized-regression.html#cb110-14" tabindex="-1"></a>            <span class="fu">apply</span>(beta_lasso, <span class="dv">2</span>, quantile, <span class="fl">0.025</span>),</span>
+<span id="cb110-15"><a href="bayesian-regularized-regression.html#cb110-15" tabindex="-1"></a>            <span class="fu">apply</span>(beta_horseshoe, <span class="dv">2</span>, quantile, <span class="fl">0.025</span>)),</span>
+<span id="cb110-16"><a href="bayesian-regularized-regression.html#cb110-16" tabindex="-1"></a>  <span class="at">upper =</span> <span class="fu">c</span>(<span class="fu">apply</span>(beta_ridge, <span class="dv">2</span>, quantile, <span class="fl">0.975</span>),</span>
+<span id="cb110-17"><a href="bayesian-regularized-regression.html#cb110-17" tabindex="-1"></a>            <span class="fu">apply</span>(beta_lasso, <span class="dv">2</span>, quantile, <span class="fl">0.975</span>),</span>
+<span id="cb110-18"><a href="bayesian-regularized-regression.html#cb110-18" tabindex="-1"></a>            <span class="fu">apply</span>(beta_horseshoe, <span class="dv">2</span>, quantile, <span class="fl">0.975</span>)),</span>
+<span id="cb110-19"><a href="bayesian-regularized-regression.html#cb110-19" tabindex="-1"></a>  <span class="at">true_value =</span> <span class="fu">rep</span>(beta_true, <span class="dv">3</span>)</span>
+<span id="cb110-20"><a href="bayesian-regularized-regression.html#cb110-20" tabindex="-1"></a>)</span>
+<span id="cb110-21"><a href="bayesian-regularized-regression.html#cb110-21" tabindex="-1"></a></span>
+<span id="cb110-22"><a href="bayesian-regularized-regression.html#cb110-22" tabindex="-1"></a><span class="fu">ggplot</span>(beta_df, <span class="fu">aes</span>(<span class="at">x =</span> coefficient, <span class="at">y =</span> mean, <span class="at">color =</span> method)) <span class="sc">+</span></span>
+<span id="cb110-23"><a href="bayesian-regularized-regression.html#cb110-23" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">position =</span> <span class="fu">position_dodge</span>(<span class="fl">0.3</span>)) <span class="sc">+</span></span>
+<span id="cb110-24"><a href="bayesian-regularized-regression.html#cb110-24" tabindex="-1"></a>  <span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> lower, <span class="at">ymax =</span> upper), </span>
+<span id="cb110-25"><a href="bayesian-regularized-regression.html#cb110-25" tabindex="-1"></a>                <span class="at">position =</span> <span class="fu">position_dodge</span>(<span class="fl">0.3</span>), <span class="at">width =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb110-26"><a href="bayesian-regularized-regression.html#cb110-26" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">y =</span> true_value), <span class="at">color =</span> <span class="st">&quot;black&quot;</span>, <span class="at">shape =</span> <span class="dv">4</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb110-27"><a href="bayesian-regularized-regression.html#cb110-27" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Coefficient Estimates Comparison&quot;</span>,</span>
+<span id="cb110-28"><a href="bayesian-regularized-regression.html#cb110-28" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">&quot;Black crosses show true values&quot;</span>,</span>
+<span id="cb110-29"><a href="bayesian-regularized-regression.html#cb110-29" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Coefficient&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Estimate&quot;</span>) <span class="sc">+</span></span>
+<span id="cb110-30"><a href="bayesian-regularized-regression.html#cb110-30" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb110-31"><a href="bayesian-regularized-regression.html#cb110-31" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span></code></pre></div>
+<p><img src="bookdownproj_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 <p>The empirical comparison typically reveals distinct patterns in how each method handles different types of signals. Ridge regression tends to shrink all coefficients proportionally, maintaining the relative magnitudes while reducing overall scale. This behavior works well when most predictors contribute meaningfully to the response, even if their individual effects are modest. LASSO regression exhibits more dramatic behavior, often setting smaller coefficients to exactly zero while leaving larger ones relatively unshrunk. This creates sparse solutions that can be easier to interpret but may sacrifice some predictive accuracy when the true model is dense.</p>
 <p>Hierarchical shrinkage methods like the horseshoe prior attempt to get the best of both worlds by adapting the amount of shrinkage to each coefficient individually. Large coefficients experience minimal shrinkage, allowing them to maintain their full predictive power, while small coefficients get shrunk aggressively toward zero, reducing noise in the model. This adaptivity often leads to superior predictive performance, especially in settings where the true coefficient vector contains a mixture of large, moderate, and negligible effects.</p>
 </div>
