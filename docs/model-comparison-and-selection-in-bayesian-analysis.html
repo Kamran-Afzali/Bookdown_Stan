@@ -23,7 +23,7 @@
 <meta name="author" content="Kamran Afzali" />
 
 
-<meta name="date" content="2025-08-22" />
+<meta name="date" content="2025-08-27" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -442,34 +442,34 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="practical-example-comparing-models-in-r" class="section level2 hasAnchor" number="15.6">
 <h2><span class="header-section-number">15.6</span> Practical Example: Comparing Models in R<a href="model-comparison-and-selection-in-bayesian-analysis.html#practical-example-comparing-models-in-r" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>To illustrate these concepts, consider the following example using a synthetic dataset. We compare two models: a simple linear regression and a polynomial regression.</p>
-<div class="sourceCode" id="cb166"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb166-1"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb166-1" tabindex="-1"></a><span class="fu">library</span>(rstanarm)</span>
-<span id="cb166-2"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb166-2" tabindex="-1"></a><span class="fu">library</span>(loo)</span>
-<span id="cb166-3"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb166-3" tabindex="-1"></a><span class="fu">library</span>(bayesplot)</span>
-<span id="cb166-4"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb166-4" tabindex="-1"></a></span>
-<span id="cb166-5"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb166-5" tabindex="-1"></a><span class="co"># Simulate data</span></span>
-<span id="cb166-6"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb166-6" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb166-7"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb166-7" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>)</span>
-<span id="cb166-8"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb166-8" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> x <span class="sc">+</span> x<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">100</span>)</span>
-<span id="cb166-9"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb166-9" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)</span>
-<span id="cb166-10"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb166-10" tabindex="-1"></a></span>
-<span id="cb166-11"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb166-11" tabindex="-1"></a><span class="co"># Fit linear and quadratic models</span></span>
-<span id="cb166-12"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb166-12" tabindex="-1"></a>fit_linear <span class="ot">&lt;-</span> <span class="fu">stan_glm</span>(y <span class="sc">~</span> x, <span class="at">data =</span> data, <span class="at">refresh =</span> <span class="dv">0</span>)</span>
-<span id="cb166-13"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb166-13" tabindex="-1"></a>fit_quad <span class="ot">&lt;-</span> <span class="fu">stan_glm</span>(y <span class="sc">~</span> x <span class="sc">+</span> <span class="fu">I</span>(x<span class="sc">^</span><span class="dv">2</span>), <span class="at">data =</span> data, <span class="at">refresh =</span> <span class="dv">0</span>)</span>
-<span id="cb166-14"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb166-14" tabindex="-1"></a></span>
-<span id="cb166-15"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb166-15" tabindex="-1"></a><span class="co"># Posterior predictive checks</span></span>
-<span id="cb166-16"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb166-16" tabindex="-1"></a><span class="fu">pp_check</span>(fit_linear)</span>
-<span id="cb166-17"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb166-17" tabindex="-1"></a><span class="fu">pp_check</span>(fit_quad)</span>
-<span id="cb166-18"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb166-18" tabindex="-1"></a></span>
-<span id="cb166-19"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb166-19" tabindex="-1"></a><span class="co"># WAIC comparison</span></span>
-<span id="cb166-20"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb166-20" tabindex="-1"></a>waic_linear <span class="ot">&lt;-</span> <span class="fu">waic</span>(fit_linear)</span>
-<span id="cb166-21"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb166-21" tabindex="-1"></a>waic_quad <span class="ot">&lt;-</span> <span class="fu">waic</span>(fit_quad)</span>
-<span id="cb166-22"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb166-22" tabindex="-1"></a><span class="fu">print</span>(waic_linear)</span>
-<span id="cb166-23"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb166-23" tabindex="-1"></a><span class="fu">print</span>(waic_quad)</span>
-<span id="cb166-24"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb166-24" tabindex="-1"></a></span>
-<span id="cb166-25"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb166-25" tabindex="-1"></a><span class="co"># LOO-CV comparison</span></span>
-<span id="cb166-26"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb166-26" tabindex="-1"></a>loo_linear <span class="ot">&lt;-</span> <span class="fu">loo</span>(fit_linear)</span>
-<span id="cb166-27"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb166-27" tabindex="-1"></a>loo_quad <span class="ot">&lt;-</span> <span class="fu">loo</span>(fit_quad)</span>
-<span id="cb166-28"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb166-28" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">loo_compare</span>(loo_linear, loo_quad))</span></code></pre></div>
+<div class="sourceCode" id="cb146"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb146-1"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb146-1" tabindex="-1"></a><span class="fu">library</span>(rstanarm)</span>
+<span id="cb146-2"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb146-2" tabindex="-1"></a><span class="fu">library</span>(loo)</span>
+<span id="cb146-3"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb146-3" tabindex="-1"></a><span class="fu">library</span>(bayesplot)</span>
+<span id="cb146-4"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb146-4" tabindex="-1"></a></span>
+<span id="cb146-5"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb146-5" tabindex="-1"></a><span class="co"># Simulate data</span></span>
+<span id="cb146-6"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb146-6" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb146-7"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb146-7" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>)</span>
+<span id="cb146-8"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb146-8" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> x <span class="sc">+</span> x<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">100</span>)</span>
+<span id="cb146-9"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb146-9" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)</span>
+<span id="cb146-10"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb146-10" tabindex="-1"></a></span>
+<span id="cb146-11"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb146-11" tabindex="-1"></a><span class="co"># Fit linear and quadratic models</span></span>
+<span id="cb146-12"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb146-12" tabindex="-1"></a>fit_linear <span class="ot">&lt;-</span> <span class="fu">stan_glm</span>(y <span class="sc">~</span> x, <span class="at">data =</span> data, <span class="at">refresh =</span> <span class="dv">0</span>)</span>
+<span id="cb146-13"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb146-13" tabindex="-1"></a>fit_quad <span class="ot">&lt;-</span> <span class="fu">stan_glm</span>(y <span class="sc">~</span> x <span class="sc">+</span> <span class="fu">I</span>(x<span class="sc">^</span><span class="dv">2</span>), <span class="at">data =</span> data, <span class="at">refresh =</span> <span class="dv">0</span>)</span>
+<span id="cb146-14"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb146-14" tabindex="-1"></a></span>
+<span id="cb146-15"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb146-15" tabindex="-1"></a><span class="co"># Posterior predictive checks</span></span>
+<span id="cb146-16"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb146-16" tabindex="-1"></a><span class="fu">pp_check</span>(fit_linear)</span>
+<span id="cb146-17"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb146-17" tabindex="-1"></a><span class="fu">pp_check</span>(fit_quad)</span>
+<span id="cb146-18"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb146-18" tabindex="-1"></a></span>
+<span id="cb146-19"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb146-19" tabindex="-1"></a><span class="co"># WAIC comparison</span></span>
+<span id="cb146-20"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb146-20" tabindex="-1"></a>waic_linear <span class="ot">&lt;-</span> <span class="fu">waic</span>(fit_linear)</span>
+<span id="cb146-21"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb146-21" tabindex="-1"></a>waic_quad <span class="ot">&lt;-</span> <span class="fu">waic</span>(fit_quad)</span>
+<span id="cb146-22"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb146-22" tabindex="-1"></a><span class="fu">print</span>(waic_linear)</span>
+<span id="cb146-23"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb146-23" tabindex="-1"></a><span class="fu">print</span>(waic_quad)</span>
+<span id="cb146-24"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb146-24" tabindex="-1"></a></span>
+<span id="cb146-25"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb146-25" tabindex="-1"></a><span class="co"># LOO-CV comparison</span></span>
+<span id="cb146-26"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb146-26" tabindex="-1"></a>loo_linear <span class="ot">&lt;-</span> <span class="fu">loo</span>(fit_linear)</span>
+<span id="cb146-27"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb146-27" tabindex="-1"></a>loo_quad <span class="ot">&lt;-</span> <span class="fu">loo</span>(fit_quad)</span>
+<span id="cb146-28"><a href="model-comparison-and-selection-in-bayesian-analysis.html#cb146-28" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">loo_compare</span>(loo_linear, loo_quad))</span></code></pre></div>
 <pre><code># Bayes factor using bridgesampling
 
 library(rstanarm)

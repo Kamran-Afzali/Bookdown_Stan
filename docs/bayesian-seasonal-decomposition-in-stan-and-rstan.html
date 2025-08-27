@@ -23,7 +23,7 @@
 <meta name="author" content="Kamran Afzali" />
 
 
-<meta name="date" content="2025-08-22" />
+<meta name="date" content="2025-08-27" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -330,16 +330,16 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="simulating-seasonal-time-series-data" class="section level2 hasAnchor" number="11.1">
 <h2><span class="header-section-number">11.1</span> Simulating Seasonal Time Series Data*<a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#simulating-seasonal-time-series-data" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>We first simulate a synthetic time series with additive trend, seasonality, and noise:</p>
-<div class="sourceCode" id="cb133"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb133-1"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb133-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb133-2"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb133-2" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">120</span></span>
-<span id="cb133-3"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb133-3" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span>n</span>
-<span id="cb133-4"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb133-4" tabindex="-1"></a>trend <span class="ot">&lt;-</span> <span class="fl">0.05</span> <span class="sc">*</span> t</span>
-<span id="cb133-5"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb133-5" tabindex="-1"></a>seasonal_period <span class="ot">&lt;-</span> <span class="dv">12</span></span>
-<span id="cb133-6"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb133-6" tabindex="-1"></a>seasonal <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">sin</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> (<span class="dv">1</span><span class="sc">:</span>seasonal_period) <span class="sc">/</span> seasonal_period), <span class="at">length.out =</span> n)</span>
-<span id="cb133-7"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb133-7" tabindex="-1"></a>noise <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.5</span>)</span>
-<span id="cb133-8"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb133-8" tabindex="-1"></a>y <span class="ot">&lt;-</span> trend <span class="sc">+</span> seasonal <span class="sc">+</span> noise</span>
-<span id="cb133-9"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb133-9" tabindex="-1"></a></span>
-<span id="cb133-10"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb133-10" tabindex="-1"></a><span class="fu">ts.plot</span>(y, <span class="at">main =</span> <span class="st">&quot;Simulated Time Series with Trend and Seasonality&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb113"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb113-1"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb113-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb113-2"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb113-2" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">120</span></span>
+<span id="cb113-3"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb113-3" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span>n</span>
+<span id="cb113-4"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb113-4" tabindex="-1"></a>trend <span class="ot">&lt;-</span> <span class="fl">0.05</span> <span class="sc">*</span> t</span>
+<span id="cb113-5"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb113-5" tabindex="-1"></a>seasonal_period <span class="ot">&lt;-</span> <span class="dv">12</span></span>
+<span id="cb113-6"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb113-6" tabindex="-1"></a>seasonal <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">sin</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> (<span class="dv">1</span><span class="sc">:</span>seasonal_period) <span class="sc">/</span> seasonal_period), <span class="at">length.out =</span> n)</span>
+<span id="cb113-7"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb113-7" tabindex="-1"></a>noise <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.5</span>)</span>
+<span id="cb113-8"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb113-8" tabindex="-1"></a>y <span class="ot">&lt;-</span> trend <span class="sc">+</span> seasonal <span class="sc">+</span> noise</span>
+<span id="cb113-9"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb113-9" tabindex="-1"></a></span>
+<span id="cb113-10"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb113-10" tabindex="-1"></a><span class="fu">ts.plot</span>(y, <span class="at">main =</span> <span class="st">&quot;Simulated Time Series with Trend and Seasonality&quot;</span>)</span></code></pre></div>
 </div>
 <div id="bayesian-seasonal-decomposition-model-in-stan" class="section level2 hasAnchor" number="11.2">
 <h2><span class="header-section-number">11.2</span> Bayesian Seasonal Decomposition Model in Stan<a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#bayesian-seasonal-decomposition-model-in-stan" class="anchor-section" aria-label="Anchor link to header"></a></h2>
@@ -357,67 +357,67 @@ y_t = \mu_t + \gamma_t + \epsilon_t
 \mu_t = \mu_{t-1} + \eta_t, \quad \eta_t \sim \mathcal{N}(0, \sigma_{\mu}^2)
 \]</span></p>
 <p>And we model seasonality with a constraint that its sum over one period equals zero (to ensure identifiability):</p>
-<div class="sourceCode" id="cb134"><pre class="sourceCode stan"><code class="sourceCode stan"><span id="cb134-1"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb134-1" tabindex="-1"></a>stan_model_1 &lt;-&#39;<span class="kw">data</span> {</span>
-<span id="cb134-2"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb134-2" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">2</span>&gt; N;</span>
-<span id="cb134-3"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb134-3" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">2</span>&gt; s;           <span class="co">// seasonal period</span></span>
-<span id="cb134-4"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb134-4" tabindex="-1"></a>  <span class="dt">vector</span>[N] y;</span>
-<span id="cb134-5"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb134-5" tabindex="-1"></a>}</span>
-<span id="cb134-6"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb134-6" tabindex="-1"></a><span class="kw">parameters</span> {</span>
-<span id="cb134-7"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb134-7" tabindex="-1"></a>  <span class="dt">vector</span>[N] mu;             <span class="co">// trend</span></span>
-<span id="cb134-8"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb134-8" tabindex="-1"></a>  <span class="dt">vector</span>[s] season_raw;     <span class="co">// raw seasonal effects</span></span>
-<span id="cb134-9"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb134-9" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma;</span>
-<span id="cb134-10"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb134-10" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_mu;</span>
-<span id="cb134-11"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb134-11" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_season;</span>
-<span id="cb134-12"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb134-12" tabindex="-1"></a>}</span>
-<span id="cb134-13"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb134-13" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
-<span id="cb134-14"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb134-14" tabindex="-1"></a>  <span class="dt">vector</span>[N] season;</span>
-<span id="cb134-15"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb134-15" tabindex="-1"></a>  <span class="dt">vector</span>[s] season_clean;</span>
-<span id="cb134-16"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb134-16" tabindex="-1"></a>  </span>
-<span id="cb134-17"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb134-17" tabindex="-1"></a>  <span class="co">// Center seasonal component to sum to zero</span></span>
-<span id="cb134-18"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb134-18" tabindex="-1"></a>  season_clean = season_raw - mean(season_raw);</span>
-<span id="cb134-19"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb134-19" tabindex="-1"></a>  </span>
-<span id="cb134-20"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb134-20" tabindex="-1"></a>  <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span>:N)</span>
-<span id="cb134-21"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb134-21" tabindex="-1"></a>    season[t] = season_clean[<span class="dv">1</span> + ((t - <span class="dv">1</span>) % s)];</span>
-<span id="cb134-22"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb134-22" tabindex="-1"></a>}</span>
-<span id="cb134-23"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb134-23" tabindex="-1"></a><span class="kw">model</span> {</span>
-<span id="cb134-24"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb134-24" tabindex="-1"></a>  mu[<span class="dv">2</span>:N] ~ normal(mu[<span class="dv">1</span>:(N - <span class="dv">1</span>)], sigma_mu);</span>
-<span id="cb134-25"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb134-25" tabindex="-1"></a>  season_raw ~ normal(<span class="dv">0</span>, sigma_season);</span>
-<span id="cb134-26"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb134-26" tabindex="-1"></a>  y ~ normal(mu + season, sigma);</span>
-<span id="cb134-27"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb134-27" tabindex="-1"></a>}&#39;</span></code></pre></div>
+<div class="sourceCode" id="cb114"><pre class="sourceCode stan"><code class="sourceCode stan"><span id="cb114-1"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb114-1" tabindex="-1"></a>stan_model_1 &lt;-&#39;<span class="kw">data</span> {</span>
+<span id="cb114-2"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb114-2" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">2</span>&gt; N;</span>
+<span id="cb114-3"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb114-3" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">2</span>&gt; s;           <span class="co">// seasonal period</span></span>
+<span id="cb114-4"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb114-4" tabindex="-1"></a>  <span class="dt">vector</span>[N] y;</span>
+<span id="cb114-5"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb114-5" tabindex="-1"></a>}</span>
+<span id="cb114-6"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb114-6" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb114-7"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb114-7" tabindex="-1"></a>  <span class="dt">vector</span>[N] mu;             <span class="co">// trend</span></span>
+<span id="cb114-8"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb114-8" tabindex="-1"></a>  <span class="dt">vector</span>[s] season_raw;     <span class="co">// raw seasonal effects</span></span>
+<span id="cb114-9"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb114-9" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma;</span>
+<span id="cb114-10"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb114-10" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_mu;</span>
+<span id="cb114-11"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb114-11" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_season;</span>
+<span id="cb114-12"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb114-12" tabindex="-1"></a>}</span>
+<span id="cb114-13"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb114-13" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb114-14"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb114-14" tabindex="-1"></a>  <span class="dt">vector</span>[N] season;</span>
+<span id="cb114-15"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb114-15" tabindex="-1"></a>  <span class="dt">vector</span>[s] season_clean;</span>
+<span id="cb114-16"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb114-16" tabindex="-1"></a>  </span>
+<span id="cb114-17"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb114-17" tabindex="-1"></a>  <span class="co">// Center seasonal component to sum to zero</span></span>
+<span id="cb114-18"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb114-18" tabindex="-1"></a>  season_clean = season_raw - mean(season_raw);</span>
+<span id="cb114-19"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb114-19" tabindex="-1"></a>  </span>
+<span id="cb114-20"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb114-20" tabindex="-1"></a>  <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span>:N)</span>
+<span id="cb114-21"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb114-21" tabindex="-1"></a>    season[t] = season_clean[<span class="dv">1</span> + ((t - <span class="dv">1</span>) % s)];</span>
+<span id="cb114-22"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb114-22" tabindex="-1"></a>}</span>
+<span id="cb114-23"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb114-23" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb114-24"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb114-24" tabindex="-1"></a>  mu[<span class="dv">2</span>:N] ~ normal(mu[<span class="dv">1</span>:(N - <span class="dv">1</span>)], sigma_mu);</span>
+<span id="cb114-25"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb114-25" tabindex="-1"></a>  season_raw ~ normal(<span class="dv">0</span>, sigma_season);</span>
+<span id="cb114-26"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb114-26" tabindex="-1"></a>  y ~ normal(mu + season, sigma);</span>
+<span id="cb114-27"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb114-27" tabindex="-1"></a>}&#39;</span></code></pre></div>
 </div>
 <div id="fitting-the-model-in-r" class="section level2 hasAnchor" number="11.3">
 <h2><span class="header-section-number">11.3</span> Fitting the Model in R<a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#fitting-the-model-in-r" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>We fit this model using RStan:</p>
-<div class="sourceCode" id="cb135"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb135-1"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb135-1" tabindex="-1"></a><span class="fu">library</span>(rstan)</span>
-<span id="cb135-2"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb135-2" tabindex="-1"></a></span>
-<span id="cb135-3"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb135-3" tabindex="-1"></a>data_list <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb135-4"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb135-4" tabindex="-1"></a>  <span class="at">N =</span> <span class="fu">length</span>(y),</span>
-<span id="cb135-5"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb135-5" tabindex="-1"></a>  <span class="at">s =</span> seasonal_period,</span>
-<span id="cb135-6"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb135-6" tabindex="-1"></a>  <span class="at">y =</span> y</span>
-<span id="cb135-7"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb135-7" tabindex="-1"></a>)</span>
-<span id="cb135-8"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb135-8" tabindex="-1"></a></span>
-<span id="cb135-9"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb135-9" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">stan</span>(</span>
-<span id="cb135-10"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb135-10" tabindex="-1"></a>  <span class="at">model_code =</span> stan_model_1,</span>
-<span id="cb135-11"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb135-11" tabindex="-1"></a>  <span class="at">data =</span> data_list,</span>
-<span id="cb135-12"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb135-12" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">4</span>,</span>
-<span id="cb135-13"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb135-13" tabindex="-1"></a>  <span class="at">iter =</span> <span class="dv">2000</span>,</span>
-<span id="cb135-14"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb135-14" tabindex="-1"></a>  <span class="at">warmup =</span> <span class="dv">1000</span>,</span>
-<span id="cb135-15"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb135-15" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">123</span></span>
-<span id="cb135-16"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb135-16" tabindex="-1"></a>)</span>
-<span id="cb135-17"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb135-17" tabindex="-1"></a></span>
-<span id="cb135-18"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb135-18" tabindex="-1"></a><span class="fu">print</span>(fit, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;sigma&quot;</span>, <span class="st">&quot;sigma_mu&quot;</span>, <span class="st">&quot;sigma_season&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb115"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb115-1"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb115-1" tabindex="-1"></a><span class="fu">library</span>(rstan)</span>
+<span id="cb115-2"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb115-2" tabindex="-1"></a></span>
+<span id="cb115-3"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb115-3" tabindex="-1"></a>data_list <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb115-4"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb115-4" tabindex="-1"></a>  <span class="at">N =</span> <span class="fu">length</span>(y),</span>
+<span id="cb115-5"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb115-5" tabindex="-1"></a>  <span class="at">s =</span> seasonal_period,</span>
+<span id="cb115-6"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb115-6" tabindex="-1"></a>  <span class="at">y =</span> y</span>
+<span id="cb115-7"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb115-7" tabindex="-1"></a>)</span>
+<span id="cb115-8"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb115-8" tabindex="-1"></a></span>
+<span id="cb115-9"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb115-9" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">stan</span>(</span>
+<span id="cb115-10"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb115-10" tabindex="-1"></a>  <span class="at">model_code =</span> stan_model_1,</span>
+<span id="cb115-11"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb115-11" tabindex="-1"></a>  <span class="at">data =</span> data_list,</span>
+<span id="cb115-12"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb115-12" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">4</span>,</span>
+<span id="cb115-13"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb115-13" tabindex="-1"></a>  <span class="at">iter =</span> <span class="dv">2000</span>,</span>
+<span id="cb115-14"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb115-14" tabindex="-1"></a>  <span class="at">warmup =</span> <span class="dv">1000</span>,</span>
+<span id="cb115-15"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb115-15" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">123</span></span>
+<span id="cb115-16"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb115-16" tabindex="-1"></a>)</span>
+<span id="cb115-17"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb115-17" tabindex="-1"></a></span>
+<span id="cb115-18"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb115-18" tabindex="-1"></a><span class="fu">print</span>(fit, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;sigma&quot;</span>, <span class="st">&quot;sigma_mu&quot;</span>, <span class="st">&quot;sigma_season&quot;</span>))</span></code></pre></div>
 </div>
 <div id="extracting-and-visualizing-components" class="section level2 hasAnchor" number="11.4">
 <h2><span class="header-section-number">11.4</span> Extracting and Visualizing Components<a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#extracting-and-visualizing-components" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>We now extract the posterior estimates and visualize the trend and seasonal components:</p>
-<div class="sourceCode" id="cb136"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb136-1"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb136-1" tabindex="-1"></a>posterior <span class="ot">&lt;-</span> <span class="fu">extract</span>(fit)</span>
-<span id="cb136-2"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb136-2" tabindex="-1"></a>mu_hat <span class="ot">&lt;-</span> <span class="fu">apply</span>(posterior<span class="sc">$</span>mu, <span class="dv">2</span>, mean)</span>
-<span id="cb136-3"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb136-3" tabindex="-1"></a>season_hat <span class="ot">&lt;-</span> <span class="fu">apply</span>(posterior<span class="sc">$</span>season, <span class="dv">2</span>, mean)</span>
-<span id="cb136-4"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb136-4" tabindex="-1"></a></span>
-<span id="cb136-5"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb136-5" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">1</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">1</span>))</span>
-<span id="cb136-6"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb136-6" tabindex="-1"></a><span class="fu">plot</span>(y, <span class="at">type =</span> <span class="st">&#39;l&#39;</span>, <span class="at">main =</span> <span class="st">&quot;Observed Time Series&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;y&quot;</span>)</span>
-<span id="cb136-7"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb136-7" tabindex="-1"></a><span class="fu">plot</span>(mu_hat, <span class="at">type =</span> <span class="st">&#39;l&#39;</span>, <span class="at">col =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">main =</span> <span class="st">&quot;Estimated Trend (mu)&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;mu_t&quot;</span>)</span>
-<span id="cb136-8"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb136-8" tabindex="-1"></a><span class="fu">plot</span>(season_hat, <span class="at">type =</span> <span class="st">&#39;l&#39;</span>, <span class="at">col =</span> <span class="st">&quot;darkgreen&quot;</span>, <span class="at">main =</span> <span class="st">&quot;Estimated Seasonal Component&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;season_t&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb116"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb116-1"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb116-1" tabindex="-1"></a>posterior <span class="ot">&lt;-</span> <span class="fu">extract</span>(fit)</span>
+<span id="cb116-2"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb116-2" tabindex="-1"></a>mu_hat <span class="ot">&lt;-</span> <span class="fu">apply</span>(posterior<span class="sc">$</span>mu, <span class="dv">2</span>, mean)</span>
+<span id="cb116-3"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb116-3" tabindex="-1"></a>season_hat <span class="ot">&lt;-</span> <span class="fu">apply</span>(posterior<span class="sc">$</span>season, <span class="dv">2</span>, mean)</span>
+<span id="cb116-4"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb116-4" tabindex="-1"></a></span>
+<span id="cb116-5"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb116-5" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">1</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">1</span>))</span>
+<span id="cb116-6"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb116-6" tabindex="-1"></a><span class="fu">plot</span>(y, <span class="at">type =</span> <span class="st">&#39;l&#39;</span>, <span class="at">main =</span> <span class="st">&quot;Observed Time Series&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;y&quot;</span>)</span>
+<span id="cb116-7"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb116-7" tabindex="-1"></a><span class="fu">plot</span>(mu_hat, <span class="at">type =</span> <span class="st">&#39;l&#39;</span>, <span class="at">col =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">main =</span> <span class="st">&quot;Estimated Trend (mu)&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;mu_t&quot;</span>)</span>
+<span id="cb116-8"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#cb116-8" tabindex="-1"></a><span class="fu">plot</span>(season_hat, <span class="at">type =</span> <span class="st">&#39;l&#39;</span>, <span class="at">col =</span> <span class="st">&quot;darkgreen&quot;</span>, <span class="at">main =</span> <span class="st">&quot;Estimated Seasonal Component&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;season_t&quot;</span>)</span></code></pre></div>
 <p>This visual decomposition gives insight into how much of the variation is driven by the underlying trend and how much by recurring seasonal patterns. The Bayesian framework also allows for full posterior uncertainty quantification, which can be visualized with credible intervals around each component.</p>
 </div>
 <div id="extensions-and-applications" class="section level2 hasAnchor" number="11.5">

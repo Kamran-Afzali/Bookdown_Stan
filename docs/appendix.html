@@ -23,7 +23,7 @@
 <meta name="author" content="Kamran Afzali" />
 
 
-<meta name="date" content="2025-08-22" />
+<meta name="date" content="2025-08-27" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -809,35 +809,35 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="example-hierarchical-linear-regression" class="section level2 hasAnchor" number="16.5">
 <h2><span class="header-section-number">16.5</span> Example: Hierarchical Linear Regression<a href="appendix.html#example-hierarchical-linear-regression" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Here’s a Stan model for a hierarchical linear regression, using <code>matrix_times_vector</code>, <code>to_vector</code>, and <code>mean</code> to demonstrate practical function usage:</p>
-<div class="sourceCode" id="cb168"><pre class="sourceCode stan"><code class="sourceCode stan"><span id="cb168-1"><a href="appendix.html#cb168-1" tabindex="-1"></a><span class="kw">data</span> {</span>
-<span id="cb168-2"><a href="appendix.html#cb168-2" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N; <span class="co">// Number of observations</span></span>
-<span id="cb168-3"><a href="appendix.html#cb168-3" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; J; <span class="co">// Number of groups</span></span>
-<span id="cb168-4"><a href="appendix.html#cb168-4" tabindex="-1"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>,<span class="kw">upper</span>=J&gt; group; <span class="co">// Group indicators</span></span>
-<span id="cb168-5"><a href="appendix.html#cb168-5" tabindex="-1"></a>  <span class="dt">matrix</span>[N, <span class="dv">2</span>] X; <span class="co">// Design matrix (intercept + predictor)</span></span>
-<span id="cb168-6"><a href="appendix.html#cb168-6" tabindex="-1"></a>  <span class="dt">vector</span>[N] y; <span class="co">// Outcome</span></span>
-<span id="cb168-7"><a href="appendix.html#cb168-7" tabindex="-1"></a>}</span>
-<span id="cb168-8"><a href="appendix.html#cb168-8" tabindex="-1"></a><span class="kw">parameters</span> {</span>
-<span id="cb168-9"><a href="appendix.html#cb168-9" tabindex="-1"></a>  <span class="dt">vector</span>[<span class="dv">2</span>] beta; <span class="co">// Fixed effects</span></span>
-<span id="cb168-10"><a href="appendix.html#cb168-10" tabindex="-1"></a>  <span class="dt">vector</span>[J] alpha; <span class="co">// Group-level intercepts</span></span>
-<span id="cb168-11"><a href="appendix.html#cb168-11" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma; <span class="co">// Residual standard deviation</span></span>
-<span id="cb168-12"><a href="appendix.html#cb168-12" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; tau; <span class="co">// Standard deviation of group intercepts</span></span>
-<span id="cb168-13"><a href="appendix.html#cb168-13" tabindex="-1"></a>}</span>
-<span id="cb168-14"><a href="appendix.html#cb168-14" tabindex="-1"></a><span class="kw">model</span> {</span>
-<span id="cb168-15"><a href="appendix.html#cb168-15" tabindex="-1"></a>  beta ~ normal(<span class="dv">0</span>, <span class="dv">5</span>); <span class="co">// Prior on fixed effects</span></span>
-<span id="cb168-16"><a href="appendix.html#cb168-16" tabindex="-1"></a>  tau ~ cauchy(<span class="dv">0</span>, <span class="fl">2.5</span>); <span class="co">// Prior on group SD</span></span>
-<span id="cb168-17"><a href="appendix.html#cb168-17" tabindex="-1"></a>  alpha ~ normal(<span class="dv">0</span>, tau); <span class="co">// Group-level priors</span></span>
-<span id="cb168-18"><a href="appendix.html#cb168-18" tabindex="-1"></a>  sigma ~ cauchy(<span class="dv">0</span>, <span class="fl">2.5</span>); <span class="co">// Prior on residual SD</span></span>
-<span id="cb168-19"><a href="appendix.html#cb168-19" tabindex="-1"></a>  <span class="dt">vector</span>[N] mu = matrix_times_vector(X, beta) + to_vector(alpha[group]);</span>
-<span id="cb168-20"><a href="appendix.html#cb168-20" tabindex="-1"></a>  y ~ normal(mu, sigma); <span class="co">// Likelihood</span></span>
-<span id="cb168-21"><a href="appendix.html#cb168-21" tabindex="-1"></a>}</span>
-<span id="cb168-22"><a href="appendix.html#cb168-22" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
-<span id="cb168-23"><a href="appendix.html#cb168-23" tabindex="-1"></a>  <span class="dt">vector</span>[N] y_rep; <span class="co">// Posterior predictive</span></span>
-<span id="cb168-24"><a href="appendix.html#cb168-24" tabindex="-1"></a>  <span class="dt">real</span> mean_y_rep; <span class="co">// Mean of predictions</span></span>
-<span id="cb168-25"><a href="appendix.html#cb168-25" tabindex="-1"></a>  <span class="cf">for</span> (n <span class="cf">in</span> <span class="dv">1</span>:N) {</span>
-<span id="cb168-26"><a href="appendix.html#cb168-26" tabindex="-1"></a>    y_rep[n] = normal_rng(matrix_times_vector(X[n], beta) + alpha[group[n]], sigma);</span>
-<span id="cb168-27"><a href="appendix.html#cb168-27" tabindex="-1"></a>  }</span>
-<span id="cb168-28"><a href="appendix.html#cb168-28" tabindex="-1"></a>  mean_y_rep = mean(to_vector(y_rep)); <span class="co">// Summary statistic</span></span>
-<span id="cb168-29"><a href="appendix.html#cb168-29" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb148"><pre class="sourceCode stan"><code class="sourceCode stan"><span id="cb148-1"><a href="appendix.html#cb148-1" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb148-2"><a href="appendix.html#cb148-2" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N; <span class="co">// Number of observations</span></span>
+<span id="cb148-3"><a href="appendix.html#cb148-3" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; J; <span class="co">// Number of groups</span></span>
+<span id="cb148-4"><a href="appendix.html#cb148-4" tabindex="-1"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>,<span class="kw">upper</span>=J&gt; group; <span class="co">// Group indicators</span></span>
+<span id="cb148-5"><a href="appendix.html#cb148-5" tabindex="-1"></a>  <span class="dt">matrix</span>[N, <span class="dv">2</span>] X; <span class="co">// Design matrix (intercept + predictor)</span></span>
+<span id="cb148-6"><a href="appendix.html#cb148-6" tabindex="-1"></a>  <span class="dt">vector</span>[N] y; <span class="co">// Outcome</span></span>
+<span id="cb148-7"><a href="appendix.html#cb148-7" tabindex="-1"></a>}</span>
+<span id="cb148-8"><a href="appendix.html#cb148-8" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb148-9"><a href="appendix.html#cb148-9" tabindex="-1"></a>  <span class="dt">vector</span>[<span class="dv">2</span>] beta; <span class="co">// Fixed effects</span></span>
+<span id="cb148-10"><a href="appendix.html#cb148-10" tabindex="-1"></a>  <span class="dt">vector</span>[J] alpha; <span class="co">// Group-level intercepts</span></span>
+<span id="cb148-11"><a href="appendix.html#cb148-11" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma; <span class="co">// Residual standard deviation</span></span>
+<span id="cb148-12"><a href="appendix.html#cb148-12" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; tau; <span class="co">// Standard deviation of group intercepts</span></span>
+<span id="cb148-13"><a href="appendix.html#cb148-13" tabindex="-1"></a>}</span>
+<span id="cb148-14"><a href="appendix.html#cb148-14" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb148-15"><a href="appendix.html#cb148-15" tabindex="-1"></a>  beta ~ normal(<span class="dv">0</span>, <span class="dv">5</span>); <span class="co">// Prior on fixed effects</span></span>
+<span id="cb148-16"><a href="appendix.html#cb148-16" tabindex="-1"></a>  tau ~ cauchy(<span class="dv">0</span>, <span class="fl">2.5</span>); <span class="co">// Prior on group SD</span></span>
+<span id="cb148-17"><a href="appendix.html#cb148-17" tabindex="-1"></a>  alpha ~ normal(<span class="dv">0</span>, tau); <span class="co">// Group-level priors</span></span>
+<span id="cb148-18"><a href="appendix.html#cb148-18" tabindex="-1"></a>  sigma ~ cauchy(<span class="dv">0</span>, <span class="fl">2.5</span>); <span class="co">// Prior on residual SD</span></span>
+<span id="cb148-19"><a href="appendix.html#cb148-19" tabindex="-1"></a>  <span class="dt">vector</span>[N] mu = matrix_times_vector(X, beta) + to_vector(alpha[group]);</span>
+<span id="cb148-20"><a href="appendix.html#cb148-20" tabindex="-1"></a>  y ~ normal(mu, sigma); <span class="co">// Likelihood</span></span>
+<span id="cb148-21"><a href="appendix.html#cb148-21" tabindex="-1"></a>}</span>
+<span id="cb148-22"><a href="appendix.html#cb148-22" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb148-23"><a href="appendix.html#cb148-23" tabindex="-1"></a>  <span class="dt">vector</span>[N] y_rep; <span class="co">// Posterior predictive</span></span>
+<span id="cb148-24"><a href="appendix.html#cb148-24" tabindex="-1"></a>  <span class="dt">real</span> mean_y_rep; <span class="co">// Mean of predictions</span></span>
+<span id="cb148-25"><a href="appendix.html#cb148-25" tabindex="-1"></a>  <span class="cf">for</span> (n <span class="cf">in</span> <span class="dv">1</span>:N) {</span>
+<span id="cb148-26"><a href="appendix.html#cb148-26" tabindex="-1"></a>    y_rep[n] = normal_rng(matrix_times_vector(X[n], beta) + alpha[group[n]], sigma);</span>
+<span id="cb148-27"><a href="appendix.html#cb148-27" tabindex="-1"></a>  }</span>
+<span id="cb148-28"><a href="appendix.html#cb148-28" tabindex="-1"></a>  mean_y_rep = mean(to_vector(y_rep)); <span class="co">// Summary statistic</span></span>
+<span id="cb148-29"><a href="appendix.html#cb148-29" tabindex="-1"></a>}</span></code></pre></div>
 <p>This model:
 - Uses <code>matrix_times_vector</code> to compute the linear predictor efficiently.
 - Employs <code>to_vector</code> to align group-level intercepts with observations.
