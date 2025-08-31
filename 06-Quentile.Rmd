@@ -21,7 +21,7 @@ To illustrate the use of Bayesian quantile Regression with Stan, let's consider 
 
 Simulate data from heteroskedastic regression
 
-```R
+```{r}
     set.seed(66)
     n <- 200
     X <- runif(n=n,min=0,max=10)
@@ -32,12 +32,12 @@ Simulate data from heteroskedastic regression
 Estimate series of quantile regressions with adaptive lasso
 to limit execution time of the example, ndraw is set to a very low value. Set value to 5000 for a better approximation of the posterior distirubtion.
 
-```R    
+```{r}    
     out <- bayesQR(y~X, quantile=c(.05,.25,.5,.75,.95), alasso=TRUE, ndraw=500)
 ```
 Initiate plot
 
-```R
+```{r}
     plot(X, y, main="", cex=.6, xlab="X")
     ## Add quantile regression lines to the plot (exclude first 500 burn-in draws)
     sum <- summary(out, burnin=50)
@@ -46,8 +46,10 @@ Initiate plot
     }
 ```
 
-```R
+```{r}
 outOLS = lm(y~X)
+plot(X, y, pch = 19, col = "blue")
+
     abline(outOLS,lty=1,lwd=2,col=6)
     # Add legend to plot
     legend(x=0,y=max(y),legend=c(.05,.25,.50,.75,.95,"OLS"),lty=c(1,2,3,4,5,1),
@@ -55,7 +57,7 @@ outOLS = lm(y~X)
 ```
 
 ### Using brms package
-```R
+```{r}
 n <- 200
 x <- runif(n = n, min = 0, max = 10)
 y <- 1 + 2 * x + rnorm(n = n, mean = 0, sd = 0.6*x)

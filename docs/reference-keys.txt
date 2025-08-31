@@ -12,12 +12,12 @@ negative-binomial
 conclusion
 references-1
 robust-t-regression
-motivation
+introduction
 concepts-and-code
 conclusion-1
 references-2
 bayesian-regularized-regression
-introduction
+introduction-1
 ridge-regression-and-gaussian-priors
 lasso-regression-and-laplace-priors
 hierarchical-shrinkage-and-adaptive-priors
@@ -37,7 +37,7 @@ using-brms-package
 backend-stan-model
 references-4
 bayesian-multilevel-mixed-effects-regression-in-stan
-introduction-1
+introduction-2
 multilevel-regression
 bayesian-random-intercepts-model
 bayesian-random-slopes-model
@@ -45,7 +45,7 @@ hierarchical-priors-model
 conclusion-3
 references-5
 gaussian-process-regression-gpr
-introduction-2
+introduction-3
 challenges
 gpfit-package
 bayesian-stan
@@ -56,7 +56,7 @@ example-with-multiple-variable
 conclusion-4
 references-7
 bayesian-canonical-correlation-analysis-in-stan
-introduction-3
+introduction-4
 canonical-correlation-analysis
 stan-model
 fitting-the-model
@@ -89,7 +89,7 @@ bayesian-arma11-model
 bayesian-arima111-model
 conclusion-8
 bayesian-structural-time-series-models
-introduction-4
+introduction-5
 model-specification-core-bsts-framework
 extension-to-time-varying-trend-volatility
 data-simulation-building-synthetic-time-series
@@ -99,7 +99,7 @@ applications-and-extensions
 model-comparison-and-selection
 conclusion-9
 model-comparison-and-selection-in-bayesian-analysis
-introduction-5
+introduction-6
 posterior-predictive-checks
 information-criteria-waic-and-loo-cv
 waic-watanabe-akaike-information-criterion

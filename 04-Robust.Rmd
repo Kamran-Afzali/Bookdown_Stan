@@ -1,7 +1,7 @@
 
 # Robust t-regression
 
-## Motivation
+## Introduction
 
 Simple linear regression is a widely used method for estimating the linear relation between two (or more) variables and for predicting the value of one variable (the response variable) based on the value of the other (the explanatory variable). The explanatory variable is typically represented on the x-axis and the response variable on the y-axis for visualising the results of linear regression.
 
