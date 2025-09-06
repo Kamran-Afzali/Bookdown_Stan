@@ -9,7 +9,7 @@ In contrast, **Bayesian seasonal decomposition** allows us to model uncertainty 
 
 We first simulate a synthetic time series with additive trend, seasonality, and noise:
 
-```r
+```{r}
 set.seed(123)
 n <- 120
 t <- 1:n
@@ -44,7 +44,7 @@ $$
 
 And we model seasonality with a constraint that its sum over one period equals zero (to ensure identifiability):
 
-```stan
+```{r}
 stan_model_1 <-'data {
   int<lower=2> N;
   int<lower=2> s;           // seasonal period
@@ -80,7 +80,7 @@ model {
 
 We fit this model using RStan:
 
-```r
+```{r}
 library(rstan)
 
 data_list <- list(
@@ -107,7 +107,7 @@ print(fit, pars = c("sigma", "sigma_mu", "sigma_season"))
 
 We now extract the posterior estimates and visualize the trend and seasonal components:
 
-```r
+```{r}
 posterior <- extract(fit)
 mu_hat <- apply(posterior$mu, 2, mean)
 season_hat <- apply(posterior$season, 2, mean)

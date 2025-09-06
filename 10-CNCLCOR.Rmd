@@ -79,7 +79,7 @@ for some scale $\tau > 0$.
 
 We start by generating synthetic data to demonstrate the Bayesian CCA model.
 
-```R
+```{r}
 # Improved Bayesian Canonical Correlation Analysis
 # Load required libraries
 library(tidyverse)
@@ -151,7 +151,7 @@ Y_test <- as.matrix(test_data[, (p+1):(p+q)])
 ### Stan Model
 Below is the Stan code for a Bayesian CCA model, which estimates the canonical coefficients for one pair of canonical variates.
 
-```stan
+```{r}
 stan_model <- "
 data {
   int<lower=0> N;               // number of observations
@@ -247,7 +247,7 @@ The model block establishes the probabilistic relationships through priors and l
 #### Fitting the Model
 Prepare the data and fit the model using `rstan`.
 
-```R
+```r
 X_scaled <- scale(X_train)
 Y_scaled <- scale(Y_train)
 
@@ -320,7 +320,7 @@ print(colMeans(posterior_samples$b))
 
 ### Model validation on test set
 
-```r
+```{r}
 X_test_scaled <- scale(X_test, center = attr(X_scaled, "scaled:center"), 
                        scale = attr(X_scaled, "scaled:scale"))
 Y_test_scaled <- scale(Y_test, center = attr(Y_scaled, "scaled:center"), 

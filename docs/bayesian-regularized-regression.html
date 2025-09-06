@@ -23,7 +23,7 @@
 <meta name="author" content="Kamran Afzali" />
 
 
-<meta name="date" content="2025-08-31" />
+<meta name="date" content="2025-09-06" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -454,7 +454,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## sigma    4.97    0.00 0.13  4.72  4.88  4.97  5.06  5.24  7300    1
 ## tau      2.53    0.02 0.94  1.42  1.92  2.32  2.88  4.87  2591    1
 ## 
-## Samples were drawn using NUTS(diag_e) at Sun Aug 31 10:19:28 2025.
+## Samples were drawn using NUTS(diag_e) at Sat Sep  6 17:35:13 2025.
 ## For each parameter, n_eff is a crude measure of effective sample size,
 ## and Rhat is the potential scale reduction factor on split chains (at 
 ## convergence, Rhat=1).</code></pre>
@@ -520,7 +520,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## sigma    4.97    0.00 0.13  4.72  4.88  4.97  5.06  5.24  6770    1
 ## b        2.12    0.02 1.04  0.90  1.41  1.88  2.53  4.78  4190    1
 ## 
-## Samples were drawn using NUTS(diag_e) at Sun Aug 31 10:19:42 2025.
+## Samples were drawn using NUTS(diag_e) at Sat Sep  6 17:35:27 2025.
 ## For each parameter, n_eff is a crude measure of effective sample size,
 ## and Rhat is the potential scale reduction factor on split chains (at 
 ## convergence, Rhat=1).</code></pre>
@@ -595,7 +595,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## sigma    4.98    0.00 0.14  4.72  4.88  4.98  5.07  5.24  3966    1
 ## tau      2.21    0.04 1.50  0.56  1.21  1.83  2.75  6.06  1429    1
 ## 
-## Samples were drawn using NUTS(diag_e) at Sun Aug 31 10:20:03 2025.
+## Samples were drawn using NUTS(diag_e) at Sat Sep  6 17:35:46 2025.
 ## For each parameter, n_eff is a crude measure of effective sample size,
 ## and Rhat is the potential scale reduction factor on split chains (at 
 ## convergence, Rhat=1).</code></pre>
@@ -674,7 +674,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb89-31"><a href="bayesian-regularized-regression.html#cb89-31" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Coefficient&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Estimate&quot;</span>) <span class="sc">+</span></span>
 <span id="cb89-32"><a href="bayesian-regularized-regression.html#cb89-32" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
 <span id="cb89-33"><a href="bayesian-regularized-regression.html#cb89-33" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span></code></pre></div>
-<p><img src="bookdownproj_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p><img src="bookdownproj_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 <p>The empirical comparison typically reveals distinct patterns in how each method handles different types of signals. Ridge regression tends to shrink all coefficients proportionally, maintaining the relative magnitudes while reducing overall scale. This behavior works well when most predictors contribute meaningfully to the response, even if their individual effects are modest. LASSO regression exhibits more dramatic behavior, often setting smaller coefficients to exactly zero while leaving larger ones relatively unshrunk. This creates sparse solutions that can be easier to interpret but may sacrifice some predictive accuracy when the true model is dense.</p>
 <p>Hierarchical shrinkage methods like the horseshoe prior attempt to get the best of both worlds by adapting the amount of shrinkage to each coefficient individually. Large coefficients experience minimal shrinkage, allowing them to maintain their full predictive power, while small coefficients get shrunk aggressively toward zero, reducing noise in the model. This adaptivity often leads to superior predictive performance, especially in settings where the true coefficient vector contains a mixture of large, moderate, and negligible effects.</p>
 </div>
