@@ -23,6 +23,8 @@ Simulate data from heteroskedastic regression
 
 ```{r}
     set.seed(66)
+library(brms)
+library(bayesQR)
     n <- 200
     X <- runif(n=n,min=0,max=10)
     X <- X
@@ -32,7 +34,9 @@ Simulate data from heteroskedastic regression
 Estimate series of quantile regressions with adaptive lasso
 to limit execution time of the example, ndraw is set to a very low value. Set value to 5000 for a better approximation of the posterior distirubtion.
 
-```{r}    
+```{r} 
+library(brms)
+library(bayesQR)
     out <- bayesQR(y~X, quantile=c(.05,.25,.5,.75,.95), alasso=TRUE, ndraw=500)
 ```
 Initiate plot
