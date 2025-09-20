@@ -32,7 +32,7 @@ To illustrate the practical implementation of Bayesian quantile regression with 
 
 Simulate data from heteroskedastic regression
 
-```{r}
+```r
     set.seed(66)
 library(brms)
 library(bayesQR)
@@ -45,14 +45,14 @@ library(bayesQR)
 Estimate series of quantile regressions with adaptive lasso
 to limit execution time of the example, ndraw is set to a very low value. Set value to 5000 for a better approximation of the posterior distirubtion.
 
-```{r} 
+```r 
 library(brms)
 library(bayesQR)
     out <- bayesQR(y~X, quantile=c(.05,.25,.5,.75,.95), alasso=TRUE, ndraw=500)
 ```
 Initiate plot
 
-```{r}
+```r
     plot(X, y, main="", cex=.6, xlab="X")
     ## Add quantile regression lines to the plot (exclude first 500 burn-in draws)
     sum <- summary(out, burnin=50)
@@ -61,7 +61,7 @@ Initiate plot
     }
 ```
 
-```{r}
+```r
 outOLS = lm(y~X)
 plot(X, y, pch = 19, col = "blue")
 
@@ -72,7 +72,7 @@ plot(X, y, pch = 19, col = "blue")
 ```
 
 ### Using brms package
-```{r}
+```r
 n <- 200
 x <- runif(n = n, min = 0, max = 10)
 y <- 1 + 2 * x + rnorm(n = n, mean = 0, sd = 0.6*x)

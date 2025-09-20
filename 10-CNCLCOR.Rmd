@@ -7,7 +7,7 @@ Canonical Correlation Analysis (CCA) is a multivariate statistical method that i
 
 ### Canonical Correlation Analysis
 
-CCA seeks pairs of linear combinations (canonical variates) from two sets of variables, $X \in \mathbb{R}^{n \times p}$ (with $p$ variables) and $Y \in \mathbb{R}^{n \times q}$ (with $q$ variables), such that the correlation between the variates is maximized. Mathematically, for variables $X$ and $Y$, CCA finds vectors $a_i \in \mathbb{R}^p$ and $b_i \in \mathbb{R}^q$ such that the canonical variates $U_i = X a_i$ and $V_i = Y b_i$ have maximum correlation, i.e.,
+CCA seeks pairs of linear combinations (canonical variates) from two sets of variables, $X \in \mathbbr^{n \times p}$ (with $p$ variables) and $Y \in \mathbbr^{n \times q}$ (with $q$ variables), such that the correlation between the variates is maximized. Mathematically, for variables $X$ and $Y$, CCA finds vectors $a_i \in \mathbbr^p$ and $b_i \in \mathbbr^q$ such that the canonical variates $U_i = X a_i$ and $V_i = Y b_i$ have maximum correlation, i.e.,
 
 $$
 (a_i, b_i) = \arg\max_{a, b} \; \text{corr}(X a, Y b),
@@ -33,7 +33,7 @@ $$
 U = X A, \quad V = Y B,
 $$
 
-where $A \in \mathbb{R}^{p \times k}$ and $B \in \mathbb{R}^{q \times k}$ are matrices of canonical weights, and $k \leq \min(p, q)$ is the number of canonical components.
+where $A \in \mathbbr^{p \times k}$ and $B \in \mathbbr^{q \times k}$ are matrices of canonical weights, and $k \leq \min(p, q)$ is the number of canonical components.
 
 We place normal priors on the canonical coefficients:
 
@@ -79,7 +79,7 @@ for some scale $\tau > 0$.
 
 We start by generating synthetic data to demonstrate the Bayesian CCA model.
 
-```{r}
+```r
 # Improved Bayesian Canonical Correlation Analysis
 # Load required libraries
 library(tidyverse)
@@ -151,7 +151,7 @@ Y_test <- as.matrix(test_data[, (p+1):(p+q)])
 ### Stan Model
 Below is the Stan code for a Bayesian CCA model, which estimates the canonical coefficients for one pair of canonical variates.
 
-```{r}
+```r
 stan_model <- "
 data {
   int<lower=0> N;               // number of observations
@@ -320,7 +320,7 @@ print(colMeans(posterior_samples$b))
 
 ### Model validation on test set
 
-```{r}
+```r
 X_test_scaled <- scale(X_test, center = attr(X_scaled, "scaled:center"), 
                        scale = attr(X_scaled, "scaled:scale"))
 Y_test_scaled <- scale(Y_test, center = attr(Y_scaled, "scaled:center"), 

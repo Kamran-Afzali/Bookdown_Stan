@@ -36,7 +36,7 @@ The horseshoe prior represents one particularly successful implementation of thi
 
 ## Implementation
 
-```{r}
+```r
 library(tidymodels)
 library(rstan)
 library(tidyverse)
@@ -75,7 +75,7 @@ y_test <- test_data$y
 
 ### Bayesian Ridge Regression
 
-```{r}
+```r
 # Stan model for Bayesian Ridge Regression
 stan_ridge <- "
 data {
@@ -132,7 +132,7 @@ print(fit_ridge, pars = c("alpha", "beta", "sigma", "tau"))
 
 ### Bayesian LASSO Regression
 
-```{r}
+```r
 # Stan model for Bayesian LASSO
 stan_lasso <- "
 data {
@@ -182,7 +182,7 @@ print(fit_lasso, pars = c("alpha", "beta", "sigma", "b"))
 
 ### Hierarchical Shrinkage (Horseshoe Prior)
 
-```{r}
+```r
 # Stan model for Horseshoe prior
 stan_horseshoe <- "
 data {
@@ -240,7 +240,7 @@ print(fit_horseshoe, pars = c("alpha", "beta", "sigma", "tau"))
 
 Understanding the theoretical properties of different regularization approaches provides essential intuition, but empirical evaluation reveals how these methods perform in practice. The code below demonstrates how to compare ridge regression, LASSO, and horseshoe priors using both predictive accuracy and coefficient recovery metrics.
 
-```{r}
+```r
 # Extract predictions and compute metrics
 extract_metrics <- function(fit, true_values) {
   y_pred <- extract(fit)$y_pred
