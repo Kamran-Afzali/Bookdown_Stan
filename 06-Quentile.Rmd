@@ -1,5 +1,8 @@
 # Bayesian Quantile Regression
 
+## Introduction
+
+
 Quantile regression extends traditional regression analysis beyond the conditional mean to model the entire conditional distribution of the response variable. For a response variable $Y$ and predictor variables $\mathbf{X}$, the $\tau$-th quantile function is defined as $Q_\tau(Y|\mathbf{X}) = \inf\{y : F_{Y|\mathbf{X}}(y) \geq \tau\}$, where $F_{Y|\mathbf{X}}(y)$ represents the conditional cumulative distribution function and $\tau \in (0,1)$ denotes the quantile level. This formulation allows researchers to examine how predictor variables influence different portions of the response distribution, providing insights that may be obscured when focusing solely on conditional means.
 
 The mathematical foundation of quantile regression rests on the asymmetric Laplace distribution (ALD), which serves as the working likelihood. For the $\tau$-th quantile, the ALD has the probability density function:
@@ -32,7 +35,7 @@ To illustrate the practical implementation of Bayesian quantile regression with 
 
 Simulate data from heteroskedastic regression
 
-```r
+```{r}
     set.seed(66)
 library(brms)
 library(bayesQR)
@@ -45,14 +48,14 @@ library(bayesQR)
 Estimate series of quantile regressions with adaptive lasso
 to limit execution time of the example, ndraw is set to a very low value. Set value to 5000 for a better approximation of the posterior distirubtion.
 
-```r 
+```{r} 
 library(brms)
 library(bayesQR)
     out <- bayesQR(y~X, quantile=c(.05,.25,.5,.75,.95), alasso=TRUE, ndraw=500)
 ```
 Initiate plot
 
-```r
+```{r}
     plot(X, y, main="", cex=.6, xlab="X")
     ## Add quantile regression lines to the plot (exclude first 500 burn-in draws)
     sum <- summary(out, burnin=50)
@@ -61,7 +64,7 @@ Initiate plot
     }
 ```
 
-```r
+```{r}
 outOLS = lm(y~X)
 plot(X, y, pch = 19, col = "blue")
 
@@ -72,7 +75,7 @@ plot(X, y, pch = 19, col = "blue")
 ```
 
 ### Using brms package
-```r
+```{r}
 n <- 200
 x <- runif(n = n, min = 0, max = 10)
 y <- 1 + 2 * x + rnorm(n = n, mean = 0, sd = 0.6*x)
@@ -192,6 +195,11 @@ generated quantities {
 ```
 This Stan code specifies a Bayesian model for asymmetric Laplace regression, where the main goal is to estimate the population-level effects and dispersion parameter of the model from the provided data. The asymmetric Laplace distribution is used as the likelihood function for the response variable. The `functions` block contains three helper functions: `rho_quantile`, `asym_laplace_lpdf`, and `asym_laplace_lccdf`. These functions are used to calculate the asymmetric Laplace log-PDF, log-CDF, and log-CCDF for a single response variable.  The `data` block defines the input data for the model, including the total number of observations `N`, the response variable `Y`, the number of population-level effects `K`, the population-level design matrix `X`, and a binary variable `prior_only` that indicates whether to ignore the likelihood (for prior-only sampling). The `transformed data` block preprocesses the data. It calculates the centered version of the design matrix `Xc`, removes the intercept from the design matrix `X`, and stores the column means of `X` before centering in the vector `means_X`. The `parameters` block defines the parameters to be estimated in the model. It includes the population-level effects `b`, the temporary intercept for centered predictors `Intercept`, and the dispersion parameter `sigma`. The `transformed parameters` block calculates the quantile parameter `quantile` (set to 0.2 in this case) and the prior contributions to the log posterior (`lprior`). The `lprior` term includes the priors for the `Intercept` and `sigma` parameters, which are specified as Student's t-distributions. The `model` block defines the likelihood and priors for the model. The likelihood accounts for the asymmetric Laplace distribution for the response variable `Y`, given the linear predictor `mu` (calculated using the population-level effects `b` and `Intercept`) and the dispersion parameter `sigma`. If `prior_only` is true, the likelihood is ignored, and the model only considers the priors. The `generated quantities` block computes the actual population-level intercept `b_Intercept` by removing the effect of the centered predictors from the temporary intercept `Intercept`.
 
+
+## Conclusion
+
+
+Bayesian quantile regression extends classical regression analysis by allowing researchers to model the entire conditional distribution of outcomes rather than restricting inference to the mean. By leveraging the asymmetric Laplace distribution as a working likelihood and incorporating prior information, this approach offers a principled framework for uncertainty quantification, flexible model specification, and probabilistic forecasting. The use of Hamiltonian Monte Carlo, as implemented in Stan, enables efficient exploration of complex posterior distributions, making Bayesian quantile regression both theoretically rigorous and computationally feasible. The examples with simulated heteroskedastic data highlight its capacity to reveal heterogeneous effects across the outcome distribution that would remain hidden under mean-based methods, underscoring its practical relevance for applied domains such as healthcare research, where distributional differences often carry critical substantive implications.
 
 ## References
 
