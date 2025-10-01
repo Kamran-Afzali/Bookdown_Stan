@@ -40,13 +40,13 @@ conclusion-3
 references-4
 bayesian-multilevel-regression-in-stan
 introduction-3
-implementation-1
+implementation-in-r
 data-generation-and-preparation
 random-intercepts-model-modeling-baseline-differences
 random-slopes-model-capturing-varying-effects
 model-comparison-and-visualization
-advanced-visualization-and-interpretation
-conclusion-and-practical-recommendations
+visualization-and-interpretation
+conclusion-4
 references-5
 gaussian-process-regression-gpr
 introduction-4
@@ -57,7 +57,7 @@ references-6
 bayesian-gaussian-mixture-models
 single-varaible-example
 example-with-multiple-variable
-conclusion-4
+conclusion-5
 references-7
 bayesian-canonical-correlation-analysis-in-stan
 introduction-5
@@ -65,7 +65,7 @@ canonical-correlation-analysis
 stan-model
 fitting-the-model
 model-validation-on-test-set
-conclusion-5
+conclusion-6
 references-8
 bayesian-seasonal-decomposition-in-stan-and-rstan
 simulating-seasonal-time-series-data
@@ -73,7 +73,7 @@ bayesian-seasonal-decomposition-model-in-stan
 fitting-the-model-in-r
 extracting-and-visualizing-components
 extensions-and-applications
-conclusion-6
+conclusion-7
 bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan
 bayesian-simple-exponential-smoothing-ses
 stan-model-1
@@ -86,12 +86,12 @@ visualization-1
 with-seasonality-additive-seasonal-component
 fit
 visualization-2
-conclusion-7
+conclusion-8
 bayesian-ar-arma-and-arima-models-in-stan-and-rstan
 bayesian-ar1-model
 bayesian-arma11-model
 bayesian-arima111-model
-conclusion-8
+conclusion-9
 bayesian-structural-time-series-models
 introduction-6
 model-specification-core-bsts-framework
@@ -101,7 +101,7 @@ stan-implementation-basic-bsts-model
 stan-implementation-time-varying-trend-volatility
 applications-and-extensions
 model-comparison-and-selection
-conclusion-9
+conclusion-10
 model-comparison-and-selection-in-bayesian-analysis
 introduction-7
 posterior-predictive-checks

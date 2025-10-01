@@ -25,12 +25,12 @@ $$\begin{pmatrix} u_{j}^{(\alpha)} \\ u_{j}^{(\beta)} \end{pmatrix} \sim \mathca
 
 The covariance matrix $\mathbf{\Sigma}$ captures both the variability of group-level effects and their potential correlation. This hierarchical structure enables the model to pool information across groups while accounting for group-specific variation.
 
-## Implementation 
+## Implementation in R
 #### Data Generation and Preparation
 
 To demonstrate these concepts, we'll work with simulated data that exhibits realistic hierarchical structure. Our simulation includes correlated group effects to showcase the full capability of multilevel models.
 
-```r
+```{r}
 library(tidyverse)
 library(tidymodels)
 library(rstan)
@@ -121,7 +121,7 @@ $$y_{ij} = (\alpha + u_j) + \beta x_{ij} + \epsilon_{ij}$$
 
 where $u_j \sim N(0, \sigma_\alpha^2)$ represents the group-specific deviation from the population intercept $\alpha$. In the Bayesian framework, we place priors on all parameters, including hyperpriors on the variance components.
 
-```r
+```{r}
 # Stan model for random intercepts
 stan_code_intercepts <- "
 data {
@@ -203,28 +203,6 @@ alpha_group_est <- alpha_group_post[, "mean"]
 alpha_group_lower <- alpha_group_post[, "2.5%"]
 alpha_group_upper <- alpha_group_post[, "97.5%"]
 
-shrinkage_data <- tibble(
-  group = 1:n_groups,
-  true_intercept = group_intercepts,
-  estimated_intercept = alpha_group_est,
-  lower_ci = alpha_group_lower,
-  upper_ci = alpha_group_upper,
-  sample_size = table(train_data$group_id)[1:n_groups]
-)
-
-p2 <- ggplot(shrinkage_data, aes(x = true_intercept, y = estimated_intercept)) +
-  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "red") +
-  geom_pointrange(aes(ymin = lower_ci, ymax = upper_ci, size = sample_size), 
-                  alpha = 0.7) +
-  labs(title = "Random Intercepts: Shrinkage Toward Population Mean",
-       subtitle = "Points show posterior means with 95% credible intervals",
-       x = "True Group Intercepts", 
-       y = "Estimated Group Intercepts",
-       size = "Sample Size") +
-  theme_minimal() +
-  coord_fixed()
-
-print(p2)
 ```
 
 ### Random Slopes Model: Capturing Varying Effects
@@ -237,7 +215,7 @@ $$y_{ij} = (\alpha + u_j^{(\alpha)}) + (\beta + u_j^{(\beta)}) x_{ij} + \epsilon
 
 where both $u_j^{(\alpha)}$ and $u_j^{(\beta)}$ are group-specific random effects that may be correlated.
 
-```r
+```{r}
 # Stan model for random slopes
 stan_code_slopes <- "
 data {
@@ -395,11 +373,11 @@ p5 <- ggplot(residual_comparison, aes(x = observed, y = residuals)) +
 print(p5)
 ```
 
-## Advanced Visualization and Interpretation
+## Visualization and Interpretation
 
 Understanding multilevel models requires visualizing both the population-level and group-level effects. The following visualizations illuminate the key concepts of shrinkage and partial pooling.
 
-```r
+```{r}
 # Create comprehensive visualization of group effects
 group_summary <- train_data %>%
   group_by(group_id) %>%
@@ -474,7 +452,7 @@ p8 <- ggplot() +
 print(p8)
 ```
 
-## Conclusion and Practical Recommendations
+## Conclusion
 
 Bayesian multilevel regression models provide a principled approach to analyzing hierarchical data structures, offering several key advantages over traditional regression methods. Through the implementation of random intercepts, random slopes, and hierarchical priors in Stan, we have demonstrated how these models achieve partial pooling of information across groups, resulting in more robust parameter estimates and improved predictive performance.
 
