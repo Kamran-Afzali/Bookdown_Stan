@@ -23,7 +23,7 @@
 <meta name="author" content="Kamran Afzali" />
 
 
-<meta name="date" content="2025-10-01" />
+<meta name="date" content="2025-10-16" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -212,7 +212,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="8.1" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#introduction-4"><i class="fa fa-check"></i><b>8.1</b> Introduction</a></li>
 <li class="chapter" data-level="8.2" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#challenges"><i class="fa fa-check"></i><b>8.2</b> Challenges</a></li>
 <li class="chapter" data-level="8.3" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#gpfit-package"><i class="fa fa-check"></i><b>8.3</b> GPfit package</a></li>
-<li class="chapter" data-level="8.4" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#bayesian-stan"><i class="fa fa-check"></i><b>8.4</b> Bayesian Stan</a></li>
+<li class="chapter" data-level="8.4" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#bayesian-gpr"><i class="fa fa-check"></i><b>8.4</b> Bayesian GPR</a></li>
 <li class="chapter" data-level="8.5" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#references-6"><i class="fa fa-check"></i><b>8.5</b> References</a></li>
 </ul></li>
 <li class="chapter" data-level="9" data-path="bayesian-gaussian-mixture-models.html"><a href="bayesian-gaussian-mixture-models.html"><i class="fa fa-check"></i><b>9</b> Bayesian Gaussian Mixture Models</a>
@@ -328,9 +328,34 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
             <section class="normal" id="section-">
 <div id="bayesian-gaussian-mixture-models" class="section level1 hasAnchor" number="9">
 <h1><span class="header-section-number">Chapter 9</span> Bayesian Gaussian Mixture Models<a href="bayesian-gaussian-mixture-models.html#bayesian-gaussian-mixture-models" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<p>In statistics, a mixture model is a probabilistic model used to represent the presence of subpopulations within an overall population without requiring that an individual belongs to a specific subpopulation. It is a flexible approach that can be used to model complex data containing multiple regions with high probability mass, such as multimodal distributions. A typical finite-dimensional mixture model consists of observed random variables, random latent variables specifying the identity of the mixture component of each observation, mixture weights, and parameters. Mixture models can be used to make statistical inferences about the properties of subpopulations without sub-population identity information. Mixture models are also referred to as latent class models if they assume that some of their parameters differ across unobserved subgroups or classes.</p>
-<p>Bayesian mixture models can be implemented in Stan, a probabilistic programming language. Mixture models assume that a given measurement can be drawn from one of K data generating processes, each with their own set of parameters. Stan allows for the fitting of Bayesian mixture models using its Hamiltonian Monte Carlo sampler. The models can be parameterized in several ways (see below) and used directly for modeling data with multimodal distributions or as priors for other parameters. The implementation of mixture models in Stan involves defining the model, specifying the priors, and marginalizing out the discrete parameters. Several resources provide examples and tutorials on fitting Bayesian mixture models in Stan, demonstrating the practical implementation of these models.</p>
-<p>In this post I will first introduce how mixture models are implemented in Bayesian inference. It is noteworthy to take into consideration non-identifiability inherent these models how the non-identifiability can be tempered with principled prior information. Michael Betancourt has a blogpost describing the problems often encountered with gaussian mixture models, specifically the estimation of parameters of a mixture model and identifiability i.e. the problem with labelling <a href="http://mc-stan.org/documentation/case-studies/identifying_mixture_models.html">mixtures</a>.</p>
+<p>A mixture model is a probabilistic framework used to describe populations composed of several unobserved subpopulations or latent components. Rather than assuming that each observation belongs to a single, known class, a mixture model treats membership as uncertain and infers the relative contribution of each latent process to the observed data. This approach is particularly useful when the overall distribution is multimodal or exhibits patterns that cannot be captured by a single parametric form. By representing the data as a weighted sum of simpler distributions, mixture models can approximate complex densities while retaining interpretability.</p>
+<p>In the Gaussian case, the model assumes that each observation arises from one of ( K ) multivariate normal components, each with its own mean and covariance structure. Let ( y_1, , y_N ^D ) denote the observed data points, where ( D ) is the dimensionality of the space. Each ( y_n ) is modeled as
+[
+p(y_n , {_k, _k}*{k=1}^K) = ^K _k , (y_n _k, _k),]
+where ( = (_1, , _K) ) are the mixture weights satisfying ( <em>k ) and ( </em>{k=1}^K _k = 1 ). The parameters ( _k ^D ) and ( _k ^{D D} ) denote the mean vector and covariance matrix of component ( k ). The overall likelihood of the dataset is thus
+[
+p(y_{1:N} , <em>{1:K}, </em>{1:K}) = <em>{n=1}^{N} </em>{k=1}^{K} _k , (y_n _k, _k).]</p>
+<p>The Bayesian formulation introduces priors over all unknown parameters, enabling coherent uncertainty quantification and regularization. In the Stan implementation, the mixture weights () follow a <strong>simplex</strong> constraint, ensuring they sum to one. The means (_k) are given weakly informative Gaussian priors,
+[
+_k (0, 3^2),]
+while the covariance structure is encoded through the <strong>Cholesky factor</strong> of the correlation matrix (L_k). The prior
+[
+L_k _{}(= 4)]
+induces a correlation prior with concentration parameter 4, slightly favoring correlations near zero without enforcing independence. The full covariance matrix for component (k) can then be reconstructed as (_k = L_k L_k^).</p>
+<p>Because Stan cannot sample discrete latent variables directly, the component indicators (z_n) are marginalized out analytically. For each data point, the model computes the log-density contribution across all components:
+[
+[k] = (_k) + (y_n _k, L_k L_k^),]
+and then uses the <strong>log-sum-exp</strong> transformation to combine them stably:
+[
++= _{k=1}^K ([k]).]
+This marginalization preserves the full probabilistic structure of the model while allowing the use of gradient-based samplers such as the No-U-Turn Sampler (NUTS) in Stan.</p>
+<p>The model thus represents a fully Bayesian Gaussian mixture with continuous parameter inference. Each parameter sample corresponds to a plausible mixture configuration, and posterior uncertainty reflects both component overlap and weight variability. After inference, one can compute the posterior probability that observation (y_n) belongs to component (k),
+[
+p(z_n = k y_n, , <em>{1:K}, </em>{1:K}) = ,]
+yielding soft, probabilistic cluster assignments rather than discrete labels.</p>
+<p>In practice, Bayesian Gaussian mixtures implemented in this way are both expressive and stable. They avoid the degeneracies common in maximum-likelihood estimation and automatically incorporate regularization through their priors. Moreover, they provide not only point estimates of the latent structure but also credible intervals for the mixture weights and component parameters, allowing for a principled assessment of uncertainty in clustering and density estimation alike.</p>
+<p>In contrast to the Bayesian formulation, the <strong>frequentist approach</strong> to Gaussian mixture modeling typically relies on the <strong>Expectation–Maximization (EM) algorithm</strong> for maximum-likelihood estimation. The EM procedure alternates between computing <em>responsibilities</em>—the conditional probabilities (r_{nk} = p(z_n = k y_n, , , ))—in the E-step, and updating the parameters (_k, _k, _k) to maximize the expected complete-data log-likelihood in the M-step. While efficient and deterministic, this approach produces point estimates that ignore posterior uncertainty and can overfit when data are scarce or components overlap. The Bayesian mixture model, by contrast, integrates over parameter uncertainty and regularizes through its priors, yielding a full posterior distribution rather than a single best-fit configuration. In practice, this means that Bayesian inference captures the uncertainty about both component parameters and cluster assignments—whereas EM simply converges to one mode of the likelihood surface, often sensitive to initialization and prone to singular covariance estimates when clusters are small or poorly separated.</p>
+<p>Here we first introduce how mixture models are implemented in Bayesian inference. It is noteworthy to take into consideration non-identifiability inherent these models how the non-identifiability can be tempered with principled prior information. Michael Betancourt has a blogpost describing the problems often encountered with gaussian mixture models, specifically the estimation of parameters of a mixture model and identifiability i.e. the problem with labelling <a href="http://mc-stan.org/documentation/case-studies/identifying_mixture_models.html">mixtures</a>.</p>
 <div id="single-varaible-example" class="section level2 hasAnchor" number="9.1">
 <h2><span class="header-section-number">9.1</span> Single varaible example<a href="bayesian-gaussian-mixture-models.html#single-varaible-example" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <pre><code>library(dplyr)

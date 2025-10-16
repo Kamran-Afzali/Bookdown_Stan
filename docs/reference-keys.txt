@@ -52,7 +52,9 @@ gaussian-process-regression-gpr
 introduction-4
 challenges
 gpfit-package
-bayesian-stan
+bayesian-gpr
+kernel-and-covariance
+likelihood
 references-6
 bayesian-gaussian-mixture-models
 single-varaible-example

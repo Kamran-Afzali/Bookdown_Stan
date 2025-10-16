@@ -23,7 +23,7 @@
 <meta name="author" content="Kamran Afzali" />
 
 
-<meta name="date" content="2025-10-01" />
+<meta name="date" content="2025-10-16" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -212,7 +212,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="8.1" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#introduction-4"><i class="fa fa-check"></i><b>8.1</b> Introduction</a></li>
 <li class="chapter" data-level="8.2" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#challenges"><i class="fa fa-check"></i><b>8.2</b> Challenges</a></li>
 <li class="chapter" data-level="8.3" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#gpfit-package"><i class="fa fa-check"></i><b>8.3</b> GPfit package</a></li>
-<li class="chapter" data-level="8.4" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#bayesian-stan"><i class="fa fa-check"></i><b>8.4</b> Bayesian Stan</a></li>
+<li class="chapter" data-level="8.4" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#bayesian-gpr"><i class="fa fa-check"></i><b>8.4</b> Bayesian GPR</a></li>
 <li class="chapter" data-level="8.5" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#references-6"><i class="fa fa-check"></i><b>8.5</b> References</a></li>
 </ul></li>
 <li class="chapter" data-level="9" data-path="bayesian-gaussian-mixture-models.html"><a href="bayesian-gaussian-mixture-models.html"><i class="fa fa-check"></i><b>9</b> Bayesian Gaussian Mixture Models</a>
@@ -361,171 +361,171 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <ul>
 <li>Basic BSTS Simulation</li>
 </ul>
-<div class="sourceCode" id="cb186"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb186-1"><a href="bayesian-structural-time-series-models.html#cb186-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
-<span id="cb186-2"><a href="bayesian-structural-time-series-models.html#cb186-2" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">120</span>  <span class="co"># number of time points</span></span>
-<span id="cb186-3"><a href="bayesian-structural-time-series-models.html#cb186-3" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="dv">12</span>   <span class="co"># seasonal period</span></span>
-<span id="cb186-4"><a href="bayesian-structural-time-series-models.html#cb186-4" tabindex="-1"></a></span>
-<span id="cb186-5"><a href="bayesian-structural-time-series-models.html#cb186-5" tabindex="-1"></a>level <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
-<span id="cb186-6"><a href="bayesian-structural-time-series-models.html#cb186-6" tabindex="-1"></a>trend <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
-<span id="cb186-7"><a href="bayesian-structural-time-series-models.html#cb186-7" tabindex="-1"></a>season <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
-<span id="cb186-8"><a href="bayesian-structural-time-series-models.html#cb186-8" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
-<span id="cb186-9"><a href="bayesian-structural-time-series-models.html#cb186-9" tabindex="-1"></a></span>
-<span id="cb186-10"><a href="bayesian-structural-time-series-models.html#cb186-10" tabindex="-1"></a><span class="co"># Initialize components</span></span>
-<span id="cb186-11"><a href="bayesian-structural-time-series-models.html#cb186-11" tabindex="-1"></a>level[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="dv">10</span></span>
-<span id="cb186-12"><a href="bayesian-structural-time-series-models.html#cb186-12" tabindex="-1"></a>trend[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
-<span id="cb186-13"><a href="bayesian-structural-time-series-models.html#cb186-13" tabindex="-1"></a>seasonal_pattern <span class="ot">&lt;-</span> <span class="fu">sin</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> (<span class="dv">1</span><span class="sc">:</span>m) <span class="sc">/</span> m)</span>
-<span id="cb186-14"><a href="bayesian-structural-time-series-models.html#cb186-14" tabindex="-1"></a>season[<span class="dv">1</span><span class="sc">:</span>m] <span class="ot">&lt;-</span> seasonal_pattern</span>
-<span id="cb186-15"><a href="bayesian-structural-time-series-models.html#cb186-15" tabindex="-1"></a></span>
-<span id="cb186-16"><a href="bayesian-structural-time-series-models.html#cb186-16" tabindex="-1"></a><span class="co"># Generate time series</span></span>
-<span id="cb186-17"><a href="bayesian-structural-time-series-models.html#cb186-17" tabindex="-1"></a><span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>n) {</span>
-<span id="cb186-18"><a href="bayesian-structural-time-series-models.html#cb186-18" tabindex="-1"></a>  level[t] <span class="ot">&lt;-</span> level[t<span class="dv">-1</span>] <span class="sc">+</span> trend[t<span class="dv">-1</span>] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="fl">0.3</span>)</span>
-<span id="cb186-19"><a href="bayesian-structural-time-series-models.html#cb186-19" tabindex="-1"></a>  trend[t] <span class="ot">&lt;-</span> trend[t<span class="dv">-1</span>] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="fl">0.05</span>)</span>
-<span id="cb186-20"><a href="bayesian-structural-time-series-models.html#cb186-20" tabindex="-1"></a>  season[t] <span class="ot">&lt;-</span> season[t <span class="sc">%%</span> m <span class="sc">+</span> <span class="dv">1</span>]  <span class="co"># repeat seasonal pattern</span></span>
-<span id="cb186-21"><a href="bayesian-structural-time-series-models.html#cb186-21" tabindex="-1"></a>  y[t] <span class="ot">&lt;-</span> level[t] <span class="sc">+</span> season[t] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>)</span>
-<span id="cb186-22"><a href="bayesian-structural-time-series-models.html#cb186-22" tabindex="-1"></a>}</span>
-<span id="cb186-23"><a href="bayesian-structural-time-series-models.html#cb186-23" tabindex="-1"></a></span>
-<span id="cb186-24"><a href="bayesian-structural-time-series-models.html#cb186-24" tabindex="-1"></a><span class="fu">ts.plot</span>(y, <span class="at">main =</span> <span class="st">&quot;Simulated BSTS Time Series&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb217"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb217-1"><a href="bayesian-structural-time-series-models.html#cb217-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb217-2"><a href="bayesian-structural-time-series-models.html#cb217-2" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">120</span>  <span class="co"># number of time points</span></span>
+<span id="cb217-3"><a href="bayesian-structural-time-series-models.html#cb217-3" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="dv">12</span>   <span class="co"># seasonal period</span></span>
+<span id="cb217-4"><a href="bayesian-structural-time-series-models.html#cb217-4" tabindex="-1"></a></span>
+<span id="cb217-5"><a href="bayesian-structural-time-series-models.html#cb217-5" tabindex="-1"></a>level <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb217-6"><a href="bayesian-structural-time-series-models.html#cb217-6" tabindex="-1"></a>trend <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb217-7"><a href="bayesian-structural-time-series-models.html#cb217-7" tabindex="-1"></a>season <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb217-8"><a href="bayesian-structural-time-series-models.html#cb217-8" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb217-9"><a href="bayesian-structural-time-series-models.html#cb217-9" tabindex="-1"></a></span>
+<span id="cb217-10"><a href="bayesian-structural-time-series-models.html#cb217-10" tabindex="-1"></a><span class="co"># Initialize components</span></span>
+<span id="cb217-11"><a href="bayesian-structural-time-series-models.html#cb217-11" tabindex="-1"></a>level[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb217-12"><a href="bayesian-structural-time-series-models.html#cb217-12" tabindex="-1"></a>trend[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb217-13"><a href="bayesian-structural-time-series-models.html#cb217-13" tabindex="-1"></a>seasonal_pattern <span class="ot">&lt;-</span> <span class="fu">sin</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> (<span class="dv">1</span><span class="sc">:</span>m) <span class="sc">/</span> m)</span>
+<span id="cb217-14"><a href="bayesian-structural-time-series-models.html#cb217-14" tabindex="-1"></a>season[<span class="dv">1</span><span class="sc">:</span>m] <span class="ot">&lt;-</span> seasonal_pattern</span>
+<span id="cb217-15"><a href="bayesian-structural-time-series-models.html#cb217-15" tabindex="-1"></a></span>
+<span id="cb217-16"><a href="bayesian-structural-time-series-models.html#cb217-16" tabindex="-1"></a><span class="co"># Generate time series</span></span>
+<span id="cb217-17"><a href="bayesian-structural-time-series-models.html#cb217-17" tabindex="-1"></a><span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>n) {</span>
+<span id="cb217-18"><a href="bayesian-structural-time-series-models.html#cb217-18" tabindex="-1"></a>  level[t] <span class="ot">&lt;-</span> level[t<span class="dv">-1</span>] <span class="sc">+</span> trend[t<span class="dv">-1</span>] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="fl">0.3</span>)</span>
+<span id="cb217-19"><a href="bayesian-structural-time-series-models.html#cb217-19" tabindex="-1"></a>  trend[t] <span class="ot">&lt;-</span> trend[t<span class="dv">-1</span>] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="fl">0.05</span>)</span>
+<span id="cb217-20"><a href="bayesian-structural-time-series-models.html#cb217-20" tabindex="-1"></a>  season[t] <span class="ot">&lt;-</span> season[t <span class="sc">%%</span> m <span class="sc">+</span> <span class="dv">1</span>]  <span class="co"># repeat seasonal pattern</span></span>
+<span id="cb217-21"><a href="bayesian-structural-time-series-models.html#cb217-21" tabindex="-1"></a>  y[t] <span class="ot">&lt;-</span> level[t] <span class="sc">+</span> season[t] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb217-22"><a href="bayesian-structural-time-series-models.html#cb217-22" tabindex="-1"></a>}</span>
+<span id="cb217-23"><a href="bayesian-structural-time-series-models.html#cb217-23" tabindex="-1"></a></span>
+<span id="cb217-24"><a href="bayesian-structural-time-series-models.html#cb217-24" tabindex="-1"></a><span class="fu">ts.plot</span>(y, <span class="at">main =</span> <span class="st">&quot;Simulated BSTS Time Series&quot;</span>)</span></code></pre></div>
 <ul>
 <li>Time-Varying Volatility Simulation</li>
 </ul>
 <p>For the extended model with stochastic volatility, we modify the simulation to include time-varying trend volatility:</p>
-<div class="sourceCode" id="cb187"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb187-1"><a href="bayesian-structural-time-series-models.html#cb187-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb187-2"><a href="bayesian-structural-time-series-models.html#cb187-2" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">120</span></span>
-<span id="cb187-3"><a href="bayesian-structural-time-series-models.html#cb187-3" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="dv">12</span></span>
-<span id="cb187-4"><a href="bayesian-structural-time-series-models.html#cb187-4" tabindex="-1"></a></span>
-<span id="cb187-5"><a href="bayesian-structural-time-series-models.html#cb187-5" tabindex="-1"></a>level <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
-<span id="cb187-6"><a href="bayesian-structural-time-series-models.html#cb187-6" tabindex="-1"></a>trend <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
-<span id="cb187-7"><a href="bayesian-structural-time-series-models.html#cb187-7" tabindex="-1"></a>h <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
-<span id="cb187-8"><a href="bayesian-structural-time-series-models.html#cb187-8" tabindex="-1"></a>sigma_trend_t <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
-<span id="cb187-9"><a href="bayesian-structural-time-series-models.html#cb187-9" tabindex="-1"></a>season <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
-<span id="cb187-10"><a href="bayesian-structural-time-series-models.html#cb187-10" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
-<span id="cb187-11"><a href="bayesian-structural-time-series-models.html#cb187-11" tabindex="-1"></a></span>
-<span id="cb187-12"><a href="bayesian-structural-time-series-models.html#cb187-12" tabindex="-1"></a><span class="co"># Initialize components</span></span>
-<span id="cb187-13"><a href="bayesian-structural-time-series-models.html#cb187-13" tabindex="-1"></a>level[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="dv">10</span></span>
-<span id="cb187-14"><a href="bayesian-structural-time-series-models.html#cb187-14" tabindex="-1"></a>trend[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
-<span id="cb187-15"><a href="bayesian-structural-time-series-models.html#cb187-15" tabindex="-1"></a>h[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">log</span>(<span class="fl">0.05</span><span class="sc">^</span><span class="dv">2</span>)  <span class="co"># initial log-variance</span></span>
-<span id="cb187-16"><a href="bayesian-structural-time-series-models.html#cb187-16" tabindex="-1"></a>seasonal_pattern <span class="ot">&lt;-</span> <span class="fu">sin</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> (<span class="dv">1</span><span class="sc">:</span>m) <span class="sc">/</span> m)</span>
-<span id="cb187-17"><a href="bayesian-structural-time-series-models.html#cb187-17" tabindex="-1"></a>season[<span class="dv">1</span><span class="sc">:</span>m] <span class="ot">&lt;-</span> seasonal_pattern</span>
-<span id="cb187-18"><a href="bayesian-structural-time-series-models.html#cb187-18" tabindex="-1"></a></span>
-<span id="cb187-19"><a href="bayesian-structural-time-series-models.html#cb187-19" tabindex="-1"></a><span class="co"># Generate time series with time-varying trend volatility</span></span>
-<span id="cb187-20"><a href="bayesian-structural-time-series-models.html#cb187-20" tabindex="-1"></a><span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>n) {</span>
-<span id="cb187-21"><a href="bayesian-structural-time-series-models.html#cb187-21" tabindex="-1"></a>  <span class="co"># Update log-volatility</span></span>
-<span id="cb187-22"><a href="bayesian-structural-time-series-models.html#cb187-22" tabindex="-1"></a>  h[t] <span class="ot">&lt;-</span> h[t <span class="sc">-</span> <span class="dv">1</span>] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="fl">0.1</span>)</span>
-<span id="cb187-23"><a href="bayesian-structural-time-series-models.html#cb187-23" tabindex="-1"></a>  sigma_trend_t[t] <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">exp</span>(h[t]))</span>
-<span id="cb187-24"><a href="bayesian-structural-time-series-models.html#cb187-24" tabindex="-1"></a>  </span>
-<span id="cb187-25"><a href="bayesian-structural-time-series-models.html#cb187-25" tabindex="-1"></a>  <span class="co"># Update components</span></span>
-<span id="cb187-26"><a href="bayesian-structural-time-series-models.html#cb187-26" tabindex="-1"></a>  trend[t] <span class="ot">&lt;-</span> trend[t <span class="sc">-</span> <span class="dv">1</span>] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, sigma_trend_t[t])</span>
-<span id="cb187-27"><a href="bayesian-structural-time-series-models.html#cb187-27" tabindex="-1"></a>  level[t] <span class="ot">&lt;-</span> level[t <span class="sc">-</span> <span class="dv">1</span>] <span class="sc">+</span> trend[t <span class="sc">-</span> <span class="dv">1</span>] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="fl">0.3</span>)</span>
-<span id="cb187-28"><a href="bayesian-structural-time-series-models.html#cb187-28" tabindex="-1"></a>  season[t] <span class="ot">&lt;-</span> season[t <span class="sc">%%</span> m <span class="sc">+</span> <span class="dv">1</span>]</span>
-<span id="cb187-29"><a href="bayesian-structural-time-series-models.html#cb187-29" tabindex="-1"></a>  y[t] <span class="ot">&lt;-</span> level[t] <span class="sc">+</span> season[t] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>)</span>
-<span id="cb187-30"><a href="bayesian-structural-time-series-models.html#cb187-30" tabindex="-1"></a>}</span>
-<span id="cb187-31"><a href="bayesian-structural-time-series-models.html#cb187-31" tabindex="-1"></a></span>
-<span id="cb187-32"><a href="bayesian-structural-time-series-models.html#cb187-32" tabindex="-1"></a><span class="fu">ts.plot</span>(y, <span class="at">main =</span> <span class="st">&quot;Simulated Time Series with Time-Varying Trend Volatility&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb218"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb218-1"><a href="bayesian-structural-time-series-models.html#cb218-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb218-2"><a href="bayesian-structural-time-series-models.html#cb218-2" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">120</span></span>
+<span id="cb218-3"><a href="bayesian-structural-time-series-models.html#cb218-3" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="dv">12</span></span>
+<span id="cb218-4"><a href="bayesian-structural-time-series-models.html#cb218-4" tabindex="-1"></a></span>
+<span id="cb218-5"><a href="bayesian-structural-time-series-models.html#cb218-5" tabindex="-1"></a>level <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb218-6"><a href="bayesian-structural-time-series-models.html#cb218-6" tabindex="-1"></a>trend <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb218-7"><a href="bayesian-structural-time-series-models.html#cb218-7" tabindex="-1"></a>h <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb218-8"><a href="bayesian-structural-time-series-models.html#cb218-8" tabindex="-1"></a>sigma_trend_t <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb218-9"><a href="bayesian-structural-time-series-models.html#cb218-9" tabindex="-1"></a>season <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb218-10"><a href="bayesian-structural-time-series-models.html#cb218-10" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb218-11"><a href="bayesian-structural-time-series-models.html#cb218-11" tabindex="-1"></a></span>
+<span id="cb218-12"><a href="bayesian-structural-time-series-models.html#cb218-12" tabindex="-1"></a><span class="co"># Initialize components</span></span>
+<span id="cb218-13"><a href="bayesian-structural-time-series-models.html#cb218-13" tabindex="-1"></a>level[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb218-14"><a href="bayesian-structural-time-series-models.html#cb218-14" tabindex="-1"></a>trend[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb218-15"><a href="bayesian-structural-time-series-models.html#cb218-15" tabindex="-1"></a>h[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">log</span>(<span class="fl">0.05</span><span class="sc">^</span><span class="dv">2</span>)  <span class="co"># initial log-variance</span></span>
+<span id="cb218-16"><a href="bayesian-structural-time-series-models.html#cb218-16" tabindex="-1"></a>seasonal_pattern <span class="ot">&lt;-</span> <span class="fu">sin</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> (<span class="dv">1</span><span class="sc">:</span>m) <span class="sc">/</span> m)</span>
+<span id="cb218-17"><a href="bayesian-structural-time-series-models.html#cb218-17" tabindex="-1"></a>season[<span class="dv">1</span><span class="sc">:</span>m] <span class="ot">&lt;-</span> seasonal_pattern</span>
+<span id="cb218-18"><a href="bayesian-structural-time-series-models.html#cb218-18" tabindex="-1"></a></span>
+<span id="cb218-19"><a href="bayesian-structural-time-series-models.html#cb218-19" tabindex="-1"></a><span class="co"># Generate time series with time-varying trend volatility</span></span>
+<span id="cb218-20"><a href="bayesian-structural-time-series-models.html#cb218-20" tabindex="-1"></a><span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>n) {</span>
+<span id="cb218-21"><a href="bayesian-structural-time-series-models.html#cb218-21" tabindex="-1"></a>  <span class="co"># Update log-volatility</span></span>
+<span id="cb218-22"><a href="bayesian-structural-time-series-models.html#cb218-22" tabindex="-1"></a>  h[t] <span class="ot">&lt;-</span> h[t <span class="sc">-</span> <span class="dv">1</span>] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="fl">0.1</span>)</span>
+<span id="cb218-23"><a href="bayesian-structural-time-series-models.html#cb218-23" tabindex="-1"></a>  sigma_trend_t[t] <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">exp</span>(h[t]))</span>
+<span id="cb218-24"><a href="bayesian-structural-time-series-models.html#cb218-24" tabindex="-1"></a>  </span>
+<span id="cb218-25"><a href="bayesian-structural-time-series-models.html#cb218-25" tabindex="-1"></a>  <span class="co"># Update components</span></span>
+<span id="cb218-26"><a href="bayesian-structural-time-series-models.html#cb218-26" tabindex="-1"></a>  trend[t] <span class="ot">&lt;-</span> trend[t <span class="sc">-</span> <span class="dv">1</span>] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, sigma_trend_t[t])</span>
+<span id="cb218-27"><a href="bayesian-structural-time-series-models.html#cb218-27" tabindex="-1"></a>  level[t] <span class="ot">&lt;-</span> level[t <span class="sc">-</span> <span class="dv">1</span>] <span class="sc">+</span> trend[t <span class="sc">-</span> <span class="dv">1</span>] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="fl">0.3</span>)</span>
+<span id="cb218-28"><a href="bayesian-structural-time-series-models.html#cb218-28" tabindex="-1"></a>  season[t] <span class="ot">&lt;-</span> season[t <span class="sc">%%</span> m <span class="sc">+</span> <span class="dv">1</span>]</span>
+<span id="cb218-29"><a href="bayesian-structural-time-series-models.html#cb218-29" tabindex="-1"></a>  y[t] <span class="ot">&lt;-</span> level[t] <span class="sc">+</span> season[t] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb218-30"><a href="bayesian-structural-time-series-models.html#cb218-30" tabindex="-1"></a>}</span>
+<span id="cb218-31"><a href="bayesian-structural-time-series-models.html#cb218-31" tabindex="-1"></a></span>
+<span id="cb218-32"><a href="bayesian-structural-time-series-models.html#cb218-32" tabindex="-1"></a><span class="fu">ts.plot</span>(y, <span class="at">main =</span> <span class="st">&quot;Simulated Time Series with Time-Varying Trend Volatility&quot;</span>)</span></code></pre></div>
 <p>This simulation generates periods of varying trend smoothness, providing a realistic testbed for the extended model.
 ## Stan Implementation</p>
 </div>
 <div id="stan-implementation-basic-bsts-model" class="section level3 hasAnchor" number="14.1.1">
 <h3><span class="header-section-number">14.1.1</span> Stan Implementation: Basic BSTS Model<a href="bayesian-structural-time-series-models.html#stan-implementation-basic-bsts-model" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>We implement the core BSTS model in Stan, emphasizing clarity and computational efficiency:</p>
-<div class="sourceCode" id="cb188"><pre class="sourceCode stan"><code class="sourceCode stan"><span id="cb188-1"><a href="bayesian-structural-time-series-models.html#cb188-1" tabindex="-1"></a><span class="kw">functions</span> {</span>
-<span id="cb188-2"><a href="bayesian-structural-time-series-models.html#cb188-2" tabindex="-1"></a>  <span class="dt">vector</span> seasonal_component(<span class="dt">vector</span> s, <span class="dt">int</span> N, <span class="dt">int</span> m) {</span>
-<span id="cb188-3"><a href="bayesian-structural-time-series-models.html#cb188-3" tabindex="-1"></a>    <span class="dt">vector</span>[N] seasonal;</span>
-<span id="cb188-4"><a href="bayesian-structural-time-series-models.html#cb188-4" tabindex="-1"></a>    <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span>:N) {</span>
-<span id="cb188-5"><a href="bayesian-structural-time-series-models.html#cb188-5" tabindex="-1"></a>      <span class="cf">if</span> (t &gt; m)</span>
-<span id="cb188-6"><a href="bayesian-structural-time-series-models.html#cb188-6" tabindex="-1"></a>        seasonal[t] = s[t - m];</span>
-<span id="cb188-7"><a href="bayesian-structural-time-series-models.html#cb188-7" tabindex="-1"></a>      <span class="cf">else</span></span>
-<span id="cb188-8"><a href="bayesian-structural-time-series-models.html#cb188-8" tabindex="-1"></a>        seasonal[t] = s[t];</span>
-<span id="cb188-9"><a href="bayesian-structural-time-series-models.html#cb188-9" tabindex="-1"></a>    }</span>
-<span id="cb188-10"><a href="bayesian-structural-time-series-models.html#cb188-10" tabindex="-1"></a>    <span class="cf">return</span> seasonal;</span>
-<span id="cb188-11"><a href="bayesian-structural-time-series-models.html#cb188-11" tabindex="-1"></a>  }</span>
-<span id="cb188-12"><a href="bayesian-structural-time-series-models.html#cb188-12" tabindex="-1"></a>}</span>
-<span id="cb188-13"><a href="bayesian-structural-time-series-models.html#cb188-13" tabindex="-1"></a></span>
-<span id="cb188-14"><a href="bayesian-structural-time-series-models.html#cb188-14" tabindex="-1"></a><span class="kw">data</span> {</span>
-<span id="cb188-15"><a href="bayesian-structural-time-series-models.html#cb188-15" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; N;</span>
-<span id="cb188-16"><a href="bayesian-structural-time-series-models.html#cb188-16" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; m; <span class="co">// seasonal period</span></span>
-<span id="cb188-17"><a href="bayesian-structural-time-series-models.html#cb188-17" tabindex="-1"></a>  <span class="dt">vector</span>[N] y;</span>
-<span id="cb188-18"><a href="bayesian-structural-time-series-models.html#cb188-18" tabindex="-1"></a>}</span>
-<span id="cb188-19"><a href="bayesian-structural-time-series-models.html#cb188-19" tabindex="-1"></a></span>
-<span id="cb188-20"><a href="bayesian-structural-time-series-models.html#cb188-20" tabindex="-1"></a><span class="kw">parameters</span> {</span>
-<span id="cb188-21"><a href="bayesian-structural-time-series-models.html#cb188-21" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_obs;</span>
-<span id="cb188-22"><a href="bayesian-structural-time-series-models.html#cb188-22" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_level;</span>
-<span id="cb188-23"><a href="bayesian-structural-time-series-models.html#cb188-23" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_trend;</span>
-<span id="cb188-24"><a href="bayesian-structural-time-series-models.html#cb188-24" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_seasonal;</span>
-<span id="cb188-25"><a href="bayesian-structural-time-series-models.html#cb188-25" tabindex="-1"></a>  </span>
-<span id="cb188-26"><a href="bayesian-structural-time-series-models.html#cb188-26" tabindex="-1"></a>  <span class="dt">vector</span>[N] level;</span>
-<span id="cb188-27"><a href="bayesian-structural-time-series-models.html#cb188-27" tabindex="-1"></a>  <span class="dt">vector</span>[N] trend;</span>
-<span id="cb188-28"><a href="bayesian-structural-time-series-models.html#cb188-28" tabindex="-1"></a>  <span class="dt">vector</span>[N] seasonal;</span>
-<span id="cb188-29"><a href="bayesian-structural-time-series-models.html#cb188-29" tabindex="-1"></a>}</span>
-<span id="cb188-30"><a href="bayesian-structural-time-series-models.html#cb188-30" tabindex="-1"></a></span>
-<span id="cb188-31"><a href="bayesian-structural-time-series-models.html#cb188-31" tabindex="-1"></a><span class="kw">model</span> {</span>
-<span id="cb188-32"><a href="bayesian-structural-time-series-models.html#cb188-32" tabindex="-1"></a>  <span class="co">// State evolution equations</span></span>
-<span id="cb188-33"><a href="bayesian-structural-time-series-models.html#cb188-33" tabindex="-1"></a>  level[<span class="dv">2</span>:N] ~ normal(level[<span class="dv">1</span>:(N<span class="dv">-1</span>)] + trend[<span class="dv">1</span>:(N<span class="dv">-1</span>)], sigma_level);</span>
-<span id="cb188-34"><a href="bayesian-structural-time-series-models.html#cb188-34" tabindex="-1"></a>  trend[<span class="dv">2</span>:N] ~ normal(trend[<span class="dv">1</span>:(N<span class="dv">-1</span>)], sigma_trend);</span>
-<span id="cb188-35"><a href="bayesian-structural-time-series-models.html#cb188-35" tabindex="-1"></a>  seasonal[(m+<span class="dv">1</span>):N] ~ normal(seasonal[<span class="dv">1</span>:(N-m)], sigma_seasonal);</span>
-<span id="cb188-36"><a href="bayesian-structural-time-series-models.html#cb188-36" tabindex="-1"></a>  </span>
-<span id="cb188-37"><a href="bayesian-structural-time-series-models.html#cb188-37" tabindex="-1"></a>  <span class="co">// Observation equation</span></span>
-<span id="cb188-38"><a href="bayesian-structural-time-series-models.html#cb188-38" tabindex="-1"></a>  y ~ normal(level + seasonal_component(seasonal, N, m), sigma_obs);</span>
-<span id="cb188-39"><a href="bayesian-structural-time-series-models.html#cb188-39" tabindex="-1"></a>  </span>
-<span id="cb188-40"><a href="bayesian-structural-time-series-models.html#cb188-40" tabindex="-1"></a>  <span class="co">// Priors</span></span>
-<span id="cb188-41"><a href="bayesian-structural-time-series-models.html#cb188-41" tabindex="-1"></a>  sigma_obs ~ normal(<span class="dv">0</span>, <span class="dv">1</span>);</span>
-<span id="cb188-42"><a href="bayesian-structural-time-series-models.html#cb188-42" tabindex="-1"></a>  sigma_level ~ normal(<span class="dv">0</span>, <span class="fl">0.5</span>);</span>
-<span id="cb188-43"><a href="bayesian-structural-time-series-models.html#cb188-43" tabindex="-1"></a>  sigma_trend ~ normal(<span class="dv">0</span>, <span class="fl">0.1</span>);</span>
-<span id="cb188-44"><a href="bayesian-structural-time-series-models.html#cb188-44" tabindex="-1"></a>  sigma_seasonal ~ normal(<span class="dv">0</span>, <span class="fl">0.5</span>);</span>
-<span id="cb188-45"><a href="bayesian-structural-time-series-models.html#cb188-45" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb219"><pre class="sourceCode stan"><code class="sourceCode stan"><span id="cb219-1"><a href="bayesian-structural-time-series-models.html#cb219-1" tabindex="-1"></a><span class="kw">functions</span> {</span>
+<span id="cb219-2"><a href="bayesian-structural-time-series-models.html#cb219-2" tabindex="-1"></a>  <span class="dt">vector</span> seasonal_component(<span class="dt">vector</span> s, <span class="dt">int</span> N, <span class="dt">int</span> m) {</span>
+<span id="cb219-3"><a href="bayesian-structural-time-series-models.html#cb219-3" tabindex="-1"></a>    <span class="dt">vector</span>[N] seasonal;</span>
+<span id="cb219-4"><a href="bayesian-structural-time-series-models.html#cb219-4" tabindex="-1"></a>    <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span>:N) {</span>
+<span id="cb219-5"><a href="bayesian-structural-time-series-models.html#cb219-5" tabindex="-1"></a>      <span class="cf">if</span> (t &gt; m)</span>
+<span id="cb219-6"><a href="bayesian-structural-time-series-models.html#cb219-6" tabindex="-1"></a>        seasonal[t] = s[t - m];</span>
+<span id="cb219-7"><a href="bayesian-structural-time-series-models.html#cb219-7" tabindex="-1"></a>      <span class="cf">else</span></span>
+<span id="cb219-8"><a href="bayesian-structural-time-series-models.html#cb219-8" tabindex="-1"></a>        seasonal[t] = s[t];</span>
+<span id="cb219-9"><a href="bayesian-structural-time-series-models.html#cb219-9" tabindex="-1"></a>    }</span>
+<span id="cb219-10"><a href="bayesian-structural-time-series-models.html#cb219-10" tabindex="-1"></a>    <span class="cf">return</span> seasonal;</span>
+<span id="cb219-11"><a href="bayesian-structural-time-series-models.html#cb219-11" tabindex="-1"></a>  }</span>
+<span id="cb219-12"><a href="bayesian-structural-time-series-models.html#cb219-12" tabindex="-1"></a>}</span>
+<span id="cb219-13"><a href="bayesian-structural-time-series-models.html#cb219-13" tabindex="-1"></a></span>
+<span id="cb219-14"><a href="bayesian-structural-time-series-models.html#cb219-14" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb219-15"><a href="bayesian-structural-time-series-models.html#cb219-15" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; N;</span>
+<span id="cb219-16"><a href="bayesian-structural-time-series-models.html#cb219-16" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; m; <span class="co">// seasonal period</span></span>
+<span id="cb219-17"><a href="bayesian-structural-time-series-models.html#cb219-17" tabindex="-1"></a>  <span class="dt">vector</span>[N] y;</span>
+<span id="cb219-18"><a href="bayesian-structural-time-series-models.html#cb219-18" tabindex="-1"></a>}</span>
+<span id="cb219-19"><a href="bayesian-structural-time-series-models.html#cb219-19" tabindex="-1"></a></span>
+<span id="cb219-20"><a href="bayesian-structural-time-series-models.html#cb219-20" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb219-21"><a href="bayesian-structural-time-series-models.html#cb219-21" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_obs;</span>
+<span id="cb219-22"><a href="bayesian-structural-time-series-models.html#cb219-22" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_level;</span>
+<span id="cb219-23"><a href="bayesian-structural-time-series-models.html#cb219-23" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_trend;</span>
+<span id="cb219-24"><a href="bayesian-structural-time-series-models.html#cb219-24" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_seasonal;</span>
+<span id="cb219-25"><a href="bayesian-structural-time-series-models.html#cb219-25" tabindex="-1"></a>  </span>
+<span id="cb219-26"><a href="bayesian-structural-time-series-models.html#cb219-26" tabindex="-1"></a>  <span class="dt">vector</span>[N] level;</span>
+<span id="cb219-27"><a href="bayesian-structural-time-series-models.html#cb219-27" tabindex="-1"></a>  <span class="dt">vector</span>[N] trend;</span>
+<span id="cb219-28"><a href="bayesian-structural-time-series-models.html#cb219-28" tabindex="-1"></a>  <span class="dt">vector</span>[N] seasonal;</span>
+<span id="cb219-29"><a href="bayesian-structural-time-series-models.html#cb219-29" tabindex="-1"></a>}</span>
+<span id="cb219-30"><a href="bayesian-structural-time-series-models.html#cb219-30" tabindex="-1"></a></span>
+<span id="cb219-31"><a href="bayesian-structural-time-series-models.html#cb219-31" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb219-32"><a href="bayesian-structural-time-series-models.html#cb219-32" tabindex="-1"></a>  <span class="co">// State evolution equations</span></span>
+<span id="cb219-33"><a href="bayesian-structural-time-series-models.html#cb219-33" tabindex="-1"></a>  level[<span class="dv">2</span>:N] ~ normal(level[<span class="dv">1</span>:(N<span class="dv">-1</span>)] + trend[<span class="dv">1</span>:(N<span class="dv">-1</span>)], sigma_level);</span>
+<span id="cb219-34"><a href="bayesian-structural-time-series-models.html#cb219-34" tabindex="-1"></a>  trend[<span class="dv">2</span>:N] ~ normal(trend[<span class="dv">1</span>:(N<span class="dv">-1</span>)], sigma_trend);</span>
+<span id="cb219-35"><a href="bayesian-structural-time-series-models.html#cb219-35" tabindex="-1"></a>  seasonal[(m+<span class="dv">1</span>):N] ~ normal(seasonal[<span class="dv">1</span>:(N-m)], sigma_seasonal);</span>
+<span id="cb219-36"><a href="bayesian-structural-time-series-models.html#cb219-36" tabindex="-1"></a>  </span>
+<span id="cb219-37"><a href="bayesian-structural-time-series-models.html#cb219-37" tabindex="-1"></a>  <span class="co">// Observation equation</span></span>
+<span id="cb219-38"><a href="bayesian-structural-time-series-models.html#cb219-38" tabindex="-1"></a>  y ~ normal(level + seasonal_component(seasonal, N, m), sigma_obs);</span>
+<span id="cb219-39"><a href="bayesian-structural-time-series-models.html#cb219-39" tabindex="-1"></a>  </span>
+<span id="cb219-40"><a href="bayesian-structural-time-series-models.html#cb219-40" tabindex="-1"></a>  <span class="co">// Priors</span></span>
+<span id="cb219-41"><a href="bayesian-structural-time-series-models.html#cb219-41" tabindex="-1"></a>  sigma_obs ~ normal(<span class="dv">0</span>, <span class="dv">1</span>);</span>
+<span id="cb219-42"><a href="bayesian-structural-time-series-models.html#cb219-42" tabindex="-1"></a>  sigma_level ~ normal(<span class="dv">0</span>, <span class="fl">0.5</span>);</span>
+<span id="cb219-43"><a href="bayesian-structural-time-series-models.html#cb219-43" tabindex="-1"></a>  sigma_trend ~ normal(<span class="dv">0</span>, <span class="fl">0.1</span>);</span>
+<span id="cb219-44"><a href="bayesian-structural-time-series-models.html#cb219-44" tabindex="-1"></a>  sigma_seasonal ~ normal(<span class="dv">0</span>, <span class="fl">0.5</span>);</span>
+<span id="cb219-45"><a href="bayesian-structural-time-series-models.html#cb219-45" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 <div id="stan-implementation-time-varying-trend-volatility" class="section level3 hasAnchor" number="14.1.2">
 <h3><span class="header-section-number">14.1.2</span> Stan Implementation: Time-Varying Trend Volatility<a href="bayesian-structural-time-series-models.html#stan-implementation-time-varying-trend-volatility" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>The extended model incorporates stochastic volatility into the trend component:</p>
-<div class="sourceCode" id="cb189"><pre class="sourceCode stan"><code class="sourceCode stan"><span id="cb189-1"><a href="bayesian-structural-time-series-models.html#cb189-1" tabindex="-1"></a><span class="kw">functions</span> {</span>
-<span id="cb189-2"><a href="bayesian-structural-time-series-models.html#cb189-2" tabindex="-1"></a>  <span class="dt">vector</span> seasonal_component(<span class="dt">vector</span> s, <span class="dt">int</span> N, <span class="dt">int</span> m) {</span>
-<span id="cb189-3"><a href="bayesian-structural-time-series-models.html#cb189-3" tabindex="-1"></a>    <span class="dt">vector</span>[N] seasonal;</span>
-<span id="cb189-4"><a href="bayesian-structural-time-series-models.html#cb189-4" tabindex="-1"></a>    <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span>:N) {</span>
-<span id="cb189-5"><a href="bayesian-structural-time-series-models.html#cb189-5" tabindex="-1"></a>      <span class="cf">if</span> (t &gt; m)</span>
-<span id="cb189-6"><a href="bayesian-structural-time-series-models.html#cb189-6" tabindex="-1"></a>        seasonal[t] = s[t - m];</span>
-<span id="cb189-7"><a href="bayesian-structural-time-series-models.html#cb189-7" tabindex="-1"></a>      <span class="cf">else</span></span>
-<span id="cb189-8"><a href="bayesian-structural-time-series-models.html#cb189-8" tabindex="-1"></a>        seasonal[t] = s[t];</span>
-<span id="cb189-9"><a href="bayesian-structural-time-series-models.html#cb189-9" tabindex="-1"></a>    }</span>
-<span id="cb189-10"><a href="bayesian-structural-time-series-models.html#cb189-10" tabindex="-1"></a>    <span class="cf">return</span> seasonal;</span>
-<span id="cb189-11"><a href="bayesian-structural-time-series-models.html#cb189-11" tabindex="-1"></a>  }</span>
-<span id="cb189-12"><a href="bayesian-structural-time-series-models.html#cb189-12" tabindex="-1"></a>}</span>
-<span id="cb189-13"><a href="bayesian-structural-time-series-models.html#cb189-13" tabindex="-1"></a></span>
-<span id="cb189-14"><a href="bayesian-structural-time-series-models.html#cb189-14" tabindex="-1"></a><span class="kw">data</span> {</span>
-<span id="cb189-15"><a href="bayesian-structural-time-series-models.html#cb189-15" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; N;</span>
-<span id="cb189-16"><a href="bayesian-structural-time-series-models.html#cb189-16" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; m;</span>
-<span id="cb189-17"><a href="bayesian-structural-time-series-models.html#cb189-17" tabindex="-1"></a>  <span class="dt">vector</span>[N] y;</span>
-<span id="cb189-18"><a href="bayesian-structural-time-series-models.html#cb189-18" tabindex="-1"></a>}</span>
-<span id="cb189-19"><a href="bayesian-structural-time-series-models.html#cb189-19" tabindex="-1"></a></span>
-<span id="cb189-20"><a href="bayesian-structural-time-series-models.html#cb189-20" tabindex="-1"></a><span class="kw">parameters</span> {</span>
-<span id="cb189-21"><a href="bayesian-structural-time-series-models.html#cb189-21" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_obs;</span>
-<span id="cb189-22"><a href="bayesian-structural-time-series-models.html#cb189-22" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_level;</span>
-<span id="cb189-23"><a href="bayesian-structural-time-series-models.html#cb189-23" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_h;</span>
-<span id="cb189-24"><a href="bayesian-structural-time-series-models.html#cb189-24" tabindex="-1"></a></span>
-<span id="cb189-25"><a href="bayesian-structural-time-series-models.html#cb189-25" tabindex="-1"></a>  <span class="dt">vector</span>[N] level;</span>
-<span id="cb189-26"><a href="bayesian-structural-time-series-models.html#cb189-26" tabindex="-1"></a>  <span class="dt">vector</span>[N] trend;</span>
-<span id="cb189-27"><a href="bayesian-structural-time-series-models.html#cb189-27" tabindex="-1"></a>  <span class="dt">vector</span>[N] seasonal;</span>
-<span id="cb189-28"><a href="bayesian-structural-time-series-models.html#cb189-28" tabindex="-1"></a>  <span class="dt">vector</span>[N] h; <span class="co">// log variance of trend innovation</span></span>
-<span id="cb189-29"><a href="bayesian-structural-time-series-models.html#cb189-29" tabindex="-1"></a>}</span>
-<span id="cb189-30"><a href="bayesian-structural-time-series-models.html#cb189-30" tabindex="-1"></a></span>
-<span id="cb189-31"><a href="bayesian-structural-time-series-models.html#cb189-31" tabindex="-1"></a><span class="kw">model</span> {</span>
-<span id="cb189-32"><a href="bayesian-structural-time-series-models.html#cb189-32" tabindex="-1"></a>  <span class="co">// Priors</span></span>
-<span id="cb189-33"><a href="bayesian-structural-time-series-models.html#cb189-33" tabindex="-1"></a>  sigma_obs ~ normal(<span class="dv">0</span>, <span class="dv">1</span>);</span>
-<span id="cb189-34"><a href="bayesian-structural-time-series-models.html#cb189-34" tabindex="-1"></a>  sigma_level ~ normal(<span class="dv">0</span>, <span class="fl">0.5</span>);</span>
-<span id="cb189-35"><a href="bayesian-structural-time-series-models.html#cb189-35" tabindex="-1"></a>  sigma_h ~ normal(<span class="dv">0</span>, <span class="fl">0.2</span>);</span>
-<span id="cb189-36"><a href="bayesian-structural-time-series-models.html#cb189-36" tabindex="-1"></a>  h[<span class="dv">1</span>] ~ normal(log(<span class="fl">0.05</span>^<span class="dv">2</span>), <span class="fl">0.1</span>);</span>
-<span id="cb189-37"><a href="bayesian-structural-time-series-models.html#cb189-37" tabindex="-1"></a></span>
-<span id="cb189-38"><a href="bayesian-structural-time-series-models.html#cb189-38" tabindex="-1"></a>  <span class="co">// Seasonal component evolution</span></span>
-<span id="cb189-39"><a href="bayesian-structural-time-series-models.html#cb189-39" tabindex="-1"></a>  seasonal[(m+<span class="dv">1</span>):N] ~ normal(seasonal[<span class="dv">1</span>:(N-m)], <span class="fl">0.5</span>);</span>
-<span id="cb189-40"><a href="bayesian-structural-time-series-models.html#cb189-40" tabindex="-1"></a></span>
-<span id="cb189-41"><a href="bayesian-structural-time-series-models.html#cb189-41" tabindex="-1"></a>  <span class="co">// Latent state processes</span></span>
-<span id="cb189-42"><a href="bayesian-structural-time-series-models.html#cb189-42" tabindex="-1"></a>  <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">2</span>:N) {</span>
-<span id="cb189-43"><a href="bayesian-structural-time-series-models.html#cb189-43" tabindex="-1"></a>    h[t] ~ normal(h[t<span class="dv">-1</span>], sigma_h);</span>
-<span id="cb189-44"><a href="bayesian-structural-time-series-models.html#cb189-44" tabindex="-1"></a>    trend[t] ~ normal(trend[t<span class="dv">-1</span>], exp(<span class="fl">0.5</span> * h[t]));</span>
-<span id="cb189-45"><a href="bayesian-structural-time-series-models.html#cb189-45" tabindex="-1"></a>    level[t] ~ normal(level[t<span class="dv">-1</span>] + trend[t<span class="dv">-1</span>], sigma_level);</span>
-<span id="cb189-46"><a href="bayesian-structural-time-series-models.html#cb189-46" tabindex="-1"></a>  }</span>
-<span id="cb189-47"><a href="bayesian-structural-time-series-models.html#cb189-47" tabindex="-1"></a></span>
-<span id="cb189-48"><a href="bayesian-structural-time-series-models.html#cb189-48" tabindex="-1"></a>  <span class="co">// Observation equation</span></span>
-<span id="cb189-49"><a href="bayesian-structural-time-series-models.html#cb189-49" tabindex="-1"></a>  y ~ normal(level + seasonal_component(seasonal, N, m), sigma_obs);</span>
-<span id="cb189-50"><a href="bayesian-structural-time-series-models.html#cb189-50" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb220"><pre class="sourceCode stan"><code class="sourceCode stan"><span id="cb220-1"><a href="bayesian-structural-time-series-models.html#cb220-1" tabindex="-1"></a><span class="kw">functions</span> {</span>
+<span id="cb220-2"><a href="bayesian-structural-time-series-models.html#cb220-2" tabindex="-1"></a>  <span class="dt">vector</span> seasonal_component(<span class="dt">vector</span> s, <span class="dt">int</span> N, <span class="dt">int</span> m) {</span>
+<span id="cb220-3"><a href="bayesian-structural-time-series-models.html#cb220-3" tabindex="-1"></a>    <span class="dt">vector</span>[N] seasonal;</span>
+<span id="cb220-4"><a href="bayesian-structural-time-series-models.html#cb220-4" tabindex="-1"></a>    <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span>:N) {</span>
+<span id="cb220-5"><a href="bayesian-structural-time-series-models.html#cb220-5" tabindex="-1"></a>      <span class="cf">if</span> (t &gt; m)</span>
+<span id="cb220-6"><a href="bayesian-structural-time-series-models.html#cb220-6" tabindex="-1"></a>        seasonal[t] = s[t - m];</span>
+<span id="cb220-7"><a href="bayesian-structural-time-series-models.html#cb220-7" tabindex="-1"></a>      <span class="cf">else</span></span>
+<span id="cb220-8"><a href="bayesian-structural-time-series-models.html#cb220-8" tabindex="-1"></a>        seasonal[t] = s[t];</span>
+<span id="cb220-9"><a href="bayesian-structural-time-series-models.html#cb220-9" tabindex="-1"></a>    }</span>
+<span id="cb220-10"><a href="bayesian-structural-time-series-models.html#cb220-10" tabindex="-1"></a>    <span class="cf">return</span> seasonal;</span>
+<span id="cb220-11"><a href="bayesian-structural-time-series-models.html#cb220-11" tabindex="-1"></a>  }</span>
+<span id="cb220-12"><a href="bayesian-structural-time-series-models.html#cb220-12" tabindex="-1"></a>}</span>
+<span id="cb220-13"><a href="bayesian-structural-time-series-models.html#cb220-13" tabindex="-1"></a></span>
+<span id="cb220-14"><a href="bayesian-structural-time-series-models.html#cb220-14" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb220-15"><a href="bayesian-structural-time-series-models.html#cb220-15" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; N;</span>
+<span id="cb220-16"><a href="bayesian-structural-time-series-models.html#cb220-16" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; m;</span>
+<span id="cb220-17"><a href="bayesian-structural-time-series-models.html#cb220-17" tabindex="-1"></a>  <span class="dt">vector</span>[N] y;</span>
+<span id="cb220-18"><a href="bayesian-structural-time-series-models.html#cb220-18" tabindex="-1"></a>}</span>
+<span id="cb220-19"><a href="bayesian-structural-time-series-models.html#cb220-19" tabindex="-1"></a></span>
+<span id="cb220-20"><a href="bayesian-structural-time-series-models.html#cb220-20" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb220-21"><a href="bayesian-structural-time-series-models.html#cb220-21" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_obs;</span>
+<span id="cb220-22"><a href="bayesian-structural-time-series-models.html#cb220-22" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_level;</span>
+<span id="cb220-23"><a href="bayesian-structural-time-series-models.html#cb220-23" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_h;</span>
+<span id="cb220-24"><a href="bayesian-structural-time-series-models.html#cb220-24" tabindex="-1"></a></span>
+<span id="cb220-25"><a href="bayesian-structural-time-series-models.html#cb220-25" tabindex="-1"></a>  <span class="dt">vector</span>[N] level;</span>
+<span id="cb220-26"><a href="bayesian-structural-time-series-models.html#cb220-26" tabindex="-1"></a>  <span class="dt">vector</span>[N] trend;</span>
+<span id="cb220-27"><a href="bayesian-structural-time-series-models.html#cb220-27" tabindex="-1"></a>  <span class="dt">vector</span>[N] seasonal;</span>
+<span id="cb220-28"><a href="bayesian-structural-time-series-models.html#cb220-28" tabindex="-1"></a>  <span class="dt">vector</span>[N] h; <span class="co">// log variance of trend innovation</span></span>
+<span id="cb220-29"><a href="bayesian-structural-time-series-models.html#cb220-29" tabindex="-1"></a>}</span>
+<span id="cb220-30"><a href="bayesian-structural-time-series-models.html#cb220-30" tabindex="-1"></a></span>
+<span id="cb220-31"><a href="bayesian-structural-time-series-models.html#cb220-31" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb220-32"><a href="bayesian-structural-time-series-models.html#cb220-32" tabindex="-1"></a>  <span class="co">// Priors</span></span>
+<span id="cb220-33"><a href="bayesian-structural-time-series-models.html#cb220-33" tabindex="-1"></a>  sigma_obs ~ normal(<span class="dv">0</span>, <span class="dv">1</span>);</span>
+<span id="cb220-34"><a href="bayesian-structural-time-series-models.html#cb220-34" tabindex="-1"></a>  sigma_level ~ normal(<span class="dv">0</span>, <span class="fl">0.5</span>);</span>
+<span id="cb220-35"><a href="bayesian-structural-time-series-models.html#cb220-35" tabindex="-1"></a>  sigma_h ~ normal(<span class="dv">0</span>, <span class="fl">0.2</span>);</span>
+<span id="cb220-36"><a href="bayesian-structural-time-series-models.html#cb220-36" tabindex="-1"></a>  h[<span class="dv">1</span>] ~ normal(log(<span class="fl">0.05</span>^<span class="dv">2</span>), <span class="fl">0.1</span>);</span>
+<span id="cb220-37"><a href="bayesian-structural-time-series-models.html#cb220-37" tabindex="-1"></a></span>
+<span id="cb220-38"><a href="bayesian-structural-time-series-models.html#cb220-38" tabindex="-1"></a>  <span class="co">// Seasonal component evolution</span></span>
+<span id="cb220-39"><a href="bayesian-structural-time-series-models.html#cb220-39" tabindex="-1"></a>  seasonal[(m+<span class="dv">1</span>):N] ~ normal(seasonal[<span class="dv">1</span>:(N-m)], <span class="fl">0.5</span>);</span>
+<span id="cb220-40"><a href="bayesian-structural-time-series-models.html#cb220-40" tabindex="-1"></a></span>
+<span id="cb220-41"><a href="bayesian-structural-time-series-models.html#cb220-41" tabindex="-1"></a>  <span class="co">// Latent state processes</span></span>
+<span id="cb220-42"><a href="bayesian-structural-time-series-models.html#cb220-42" tabindex="-1"></a>  <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">2</span>:N) {</span>
+<span id="cb220-43"><a href="bayesian-structural-time-series-models.html#cb220-43" tabindex="-1"></a>    h[t] ~ normal(h[t<span class="dv">-1</span>], sigma_h);</span>
+<span id="cb220-44"><a href="bayesian-structural-time-series-models.html#cb220-44" tabindex="-1"></a>    trend[t] ~ normal(trend[t<span class="dv">-1</span>], exp(<span class="fl">0.5</span> * h[t]));</span>
+<span id="cb220-45"><a href="bayesian-structural-time-series-models.html#cb220-45" tabindex="-1"></a>    level[t] ~ normal(level[t<span class="dv">-1</span>] + trend[t<span class="dv">-1</span>], sigma_level);</span>
+<span id="cb220-46"><a href="bayesian-structural-time-series-models.html#cb220-46" tabindex="-1"></a>  }</span>
+<span id="cb220-47"><a href="bayesian-structural-time-series-models.html#cb220-47" tabindex="-1"></a></span>
+<span id="cb220-48"><a href="bayesian-structural-time-series-models.html#cb220-48" tabindex="-1"></a>  <span class="co">// Observation equation</span></span>
+<span id="cb220-49"><a href="bayesian-structural-time-series-models.html#cb220-49" tabindex="-1"></a>  y ~ normal(level + seasonal_component(seasonal, N, m), sigma_obs);</span>
+<span id="cb220-50"><a href="bayesian-structural-time-series-models.html#cb220-50" tabindex="-1"></a>}</span></code></pre></div>
 <p>The key innovation lies in the stochastic evolution of <code>h[t]</code>, which governs the time-varying volatility of trend innovations through the exponential transformation <code>exp(0.5 * h[t])</code>.</p>
 <ul>
 <li>Model Fitting in R with RStan</li>
@@ -534,28 +534,28 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <ul>
 <li>Basic BSTS Model Fitting</li>
 </ul>
-<div class="sourceCode" id="cb190"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb190-1"><a href="bayesian-structural-time-series-models.html#cb190-1" tabindex="-1"></a><span class="fu">library</span>(rstan)</span>
-<span id="cb190-2"><a href="bayesian-structural-time-series-models.html#cb190-2" tabindex="-1"></a><span class="fu">options</span>(<span class="at">mc.cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>())</span>
-<span id="cb190-3"><a href="bayesian-structural-time-series-models.html#cb190-3" tabindex="-1"></a><span class="fu">rstan_options</span>(<span class="at">auto_write =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb190-4"><a href="bayesian-structural-time-series-models.html#cb190-4" tabindex="-1"></a></span>
-<span id="cb190-5"><a href="bayesian-structural-time-series-models.html#cb190-5" tabindex="-1"></a><span class="co"># Prepare data</span></span>
-<span id="cb190-6"><a href="bayesian-structural-time-series-models.html#cb190-6" tabindex="-1"></a>data_list_basic <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">N =</span> <span class="fu">length</span>(y), <span class="at">m =</span> m, <span class="at">y =</span> y)</span>
-<span id="cb190-7"><a href="bayesian-structural-time-series-models.html#cb190-7" tabindex="-1"></a></span>
-<span id="cb190-8"><a href="bayesian-structural-time-series-models.html#cb190-8" tabindex="-1"></a><span class="co"># Fit basic model</span></span>
-<span id="cb190-9"><a href="bayesian-structural-time-series-models.html#cb190-9" tabindex="-1"></a>fit_basic <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">model_code =</span> stan_model_bsts_basic, </span>
-<span id="cb190-10"><a href="bayesian-structural-time-series-models.html#cb190-10" tabindex="-1"></a>                  <span class="at">data =</span> data_list_basic,</span>
-<span id="cb190-11"><a href="bayesian-structural-time-series-models.html#cb190-11" tabindex="-1"></a>                  <span class="at">chains =</span> <span class="dv">4</span>, <span class="at">iter =</span> <span class="dv">2000</span>, <span class="at">warmup =</span> <span class="dv">1000</span>, <span class="at">seed =</span> <span class="dv">42</span>)</span>
-<span id="cb190-12"><a href="bayesian-structural-time-series-models.html#cb190-12" tabindex="-1"></a></span>
-<span id="cb190-13"><a href="bayesian-structural-time-series-models.html#cb190-13" tabindex="-1"></a><span class="fu">print</span>(fit_basic, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;sigma_obs&quot;</span>, <span class="st">&quot;sigma_level&quot;</span>, <span class="st">&quot;sigma_trend&quot;</span>, <span class="st">&quot;sigma_seasonal&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb221"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb221-1"><a href="bayesian-structural-time-series-models.html#cb221-1" tabindex="-1"></a><span class="fu">library</span>(rstan)</span>
+<span id="cb221-2"><a href="bayesian-structural-time-series-models.html#cb221-2" tabindex="-1"></a><span class="fu">options</span>(<span class="at">mc.cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>())</span>
+<span id="cb221-3"><a href="bayesian-structural-time-series-models.html#cb221-3" tabindex="-1"></a><span class="fu">rstan_options</span>(<span class="at">auto_write =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb221-4"><a href="bayesian-structural-time-series-models.html#cb221-4" tabindex="-1"></a></span>
+<span id="cb221-5"><a href="bayesian-structural-time-series-models.html#cb221-5" tabindex="-1"></a><span class="co"># Prepare data</span></span>
+<span id="cb221-6"><a href="bayesian-structural-time-series-models.html#cb221-6" tabindex="-1"></a>data_list_basic <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">N =</span> <span class="fu">length</span>(y), <span class="at">m =</span> m, <span class="at">y =</span> y)</span>
+<span id="cb221-7"><a href="bayesian-structural-time-series-models.html#cb221-7" tabindex="-1"></a></span>
+<span id="cb221-8"><a href="bayesian-structural-time-series-models.html#cb221-8" tabindex="-1"></a><span class="co"># Fit basic model</span></span>
+<span id="cb221-9"><a href="bayesian-structural-time-series-models.html#cb221-9" tabindex="-1"></a>fit_basic <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">model_code =</span> stan_model_bsts_basic, </span>
+<span id="cb221-10"><a href="bayesian-structural-time-series-models.html#cb221-10" tabindex="-1"></a>                  <span class="at">data =</span> data_list_basic,</span>
+<span id="cb221-11"><a href="bayesian-structural-time-series-models.html#cb221-11" tabindex="-1"></a>                  <span class="at">chains =</span> <span class="dv">4</span>, <span class="at">iter =</span> <span class="dv">2000</span>, <span class="at">warmup =</span> <span class="dv">1000</span>, <span class="at">seed =</span> <span class="dv">42</span>)</span>
+<span id="cb221-12"><a href="bayesian-structural-time-series-models.html#cb221-12" tabindex="-1"></a></span>
+<span id="cb221-13"><a href="bayesian-structural-time-series-models.html#cb221-13" tabindex="-1"></a><span class="fu">print</span>(fit_basic, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;sigma_obs&quot;</span>, <span class="st">&quot;sigma_level&quot;</span>, <span class="st">&quot;sigma_trend&quot;</span>, <span class="st">&quot;sigma_seasonal&quot;</span>))</span></code></pre></div>
 <ul>
 <li>Time-Varying Volatility Model Fitting</li>
 </ul>
-<div class="sourceCode" id="cb191"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb191-1"><a href="bayesian-structural-time-series-models.html#cb191-1" tabindex="-1"></a><span class="co"># Fit extended model</span></span>
-<span id="cb191-2"><a href="bayesian-structural-time-series-models.html#cb191-2" tabindex="-1"></a>fit_extended <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">model_code =</span> stan_model_bsts_extended, </span>
-<span id="cb191-3"><a href="bayesian-structural-time-series-models.html#cb191-3" tabindex="-1"></a>                     <span class="at">data =</span> data_list_basic,</span>
-<span id="cb191-4"><a href="bayesian-structural-time-series-models.html#cb191-4" tabindex="-1"></a>                     <span class="at">chains =</span> <span class="dv">4</span>, <span class="at">iter =</span> <span class="dv">2000</span>, <span class="at">warmup =</span> <span class="dv">1000</span>, <span class="at">seed =</span> <span class="dv">123</span>)</span>
-<span id="cb191-5"><a href="bayesian-structural-time-series-models.html#cb191-5" tabindex="-1"></a></span>
-<span id="cb191-6"><a href="bayesian-structural-time-series-models.html#cb191-6" tabindex="-1"></a><span class="fu">print</span>(fit_extended, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;sigma_obs&quot;</span>, <span class="st">&quot;sigma_level&quot;</span>, <span class="st">&quot;sigma_h&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb222"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb222-1"><a href="bayesian-structural-time-series-models.html#cb222-1" tabindex="-1"></a><span class="co"># Fit extended model</span></span>
+<span id="cb222-2"><a href="bayesian-structural-time-series-models.html#cb222-2" tabindex="-1"></a>fit_extended <span class="ot">&lt;-</span> <span class="fu">stan</span>(<span class="at">model_code =</span> stan_model_bsts_extended, </span>
+<span id="cb222-3"><a href="bayesian-structural-time-series-models.html#cb222-3" tabindex="-1"></a>                     <span class="at">data =</span> data_list_basic,</span>
+<span id="cb222-4"><a href="bayesian-structural-time-series-models.html#cb222-4" tabindex="-1"></a>                     <span class="at">chains =</span> <span class="dv">4</span>, <span class="at">iter =</span> <span class="dv">2000</span>, <span class="at">warmup =</span> <span class="dv">1000</span>, <span class="at">seed =</span> <span class="dv">123</span>)</span>
+<span id="cb222-5"><a href="bayesian-structural-time-series-models.html#cb222-5" tabindex="-1"></a></span>
+<span id="cb222-6"><a href="bayesian-structural-time-series-models.html#cb222-6" tabindex="-1"></a><span class="fu">print</span>(fit_extended, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;sigma_obs&quot;</span>, <span class="st">&quot;sigma_level&quot;</span>, <span class="st">&quot;sigma_h&quot;</span>))</span></code></pre></div>
 <p>The posterior for <code>sigma_h</code> provides insights into volatility dynamics: larger values indicate more variable trend volatility, while smaller values suggest smoother volatility evolution.</p>
 <ul>
 <li>Visualization and Interpretation</li>
@@ -564,78 +564,78 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <ul>
 <li>Basic Model Visualization</li>
 </ul>
-<div class="sourceCode" id="cb192"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb192-1"><a href="bayesian-structural-time-series-models.html#cb192-1" tabindex="-1"></a><span class="co"># Extract posterior samples</span></span>
-<span id="cb192-2"><a href="bayesian-structural-time-series-models.html#cb192-2" tabindex="-1"></a>post_basic <span class="ot">&lt;-</span> <span class="fu">extract</span>(fit_basic)</span>
-<span id="cb192-3"><a href="bayesian-structural-time-series-models.html#cb192-3" tabindex="-1"></a></span>
-<span id="cb192-4"><a href="bayesian-structural-time-series-models.html#cb192-4" tabindex="-1"></a><span class="co"># Compute posterior summaries</span></span>
-<span id="cb192-5"><a href="bayesian-structural-time-series-models.html#cb192-5" tabindex="-1"></a>level_mean <span class="ot">&lt;-</span> <span class="fu">apply</span>(post_basic<span class="sc">$</span>level, <span class="dv">2</span>, mean)</span>
-<span id="cb192-6"><a href="bayesian-structural-time-series-models.html#cb192-6" tabindex="-1"></a>level_lower <span class="ot">&lt;-</span> <span class="fu">apply</span>(post_basic<span class="sc">$</span>level, <span class="dv">2</span>, quantile, <span class="at">probs =</span> <span class="fl">0.025</span>)</span>
-<span id="cb192-7"><a href="bayesian-structural-time-series-models.html#cb192-7" tabindex="-1"></a>level_upper <span class="ot">&lt;-</span> <span class="fu">apply</span>(post_basic<span class="sc">$</span>level, <span class="dv">2</span>, quantile, <span class="at">probs =</span> <span class="fl">0.975</span>)</span>
-<span id="cb192-8"><a href="bayesian-structural-time-series-models.html#cb192-8" tabindex="-1"></a></span>
-<span id="cb192-9"><a href="bayesian-structural-time-series-models.html#cb192-9" tabindex="-1"></a>trend_mean <span class="ot">&lt;-</span> <span class="fu">apply</span>(post_basic<span class="sc">$</span>trend, <span class="dv">2</span>, mean)</span>
-<span id="cb192-10"><a href="bayesian-structural-time-series-models.html#cb192-10" tabindex="-1"></a></span>
-<span id="cb192-11"><a href="bayesian-structural-time-series-models.html#cb192-11" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb192-12"><a href="bayesian-structural-time-series-models.html#cb192-12" tabindex="-1"></a>df_basic <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb192-13"><a href="bayesian-structural-time-series-models.html#cb192-13" tabindex="-1"></a>  <span class="at">time =</span> <span class="dv">1</span><span class="sc">:</span>n,</span>
-<span id="cb192-14"><a href="bayesian-structural-time-series-models.html#cb192-14" tabindex="-1"></a>  <span class="at">observed =</span> y,</span>
-<span id="cb192-15"><a href="bayesian-structural-time-series-models.html#cb192-15" tabindex="-1"></a>  <span class="at">level =</span> level_mean,</span>
-<span id="cb192-16"><a href="bayesian-structural-time-series-models.html#cb192-16" tabindex="-1"></a>  <span class="at">level_lower =</span> level_lower,</span>
-<span id="cb192-17"><a href="bayesian-structural-time-series-models.html#cb192-17" tabindex="-1"></a>  <span class="at">level_upper =</span> level_upper,</span>
-<span id="cb192-18"><a href="bayesian-structural-time-series-models.html#cb192-18" tabindex="-1"></a>  <span class="at">trend =</span> trend_mean</span>
-<span id="cb192-19"><a href="bayesian-structural-time-series-models.html#cb192-19" tabindex="-1"></a>)</span>
-<span id="cb192-20"><a href="bayesian-structural-time-series-models.html#cb192-20" tabindex="-1"></a></span>
-<span id="cb192-21"><a href="bayesian-structural-time-series-models.html#cb192-21" tabindex="-1"></a><span class="co"># Plot level component with uncertainty</span></span>
-<span id="cb192-22"><a href="bayesian-structural-time-series-models.html#cb192-22" tabindex="-1"></a><span class="fu">ggplot</span>(df_basic, <span class="fu">aes</span>(<span class="at">x =</span> time)) <span class="sc">+</span></span>
-<span id="cb192-23"><a href="bayesian-structural-time-series-models.html#cb192-23" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> observed), <span class="at">color =</span> <span class="st">&quot;black&quot;</span>, <span class="at">linetype =</span> <span class="st">&quot;dashed&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
-<span id="cb192-24"><a href="bayesian-structural-time-series-models.html#cb192-24" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> level), <span class="at">color =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb192-25"><a href="bayesian-structural-time-series-models.html#cb192-25" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> level_lower, <span class="at">ymax =</span> level_upper), </span>
-<span id="cb192-26"><a href="bayesian-structural-time-series-models.html#cb192-26" tabindex="-1"></a>              <span class="at">fill =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
-<span id="cb192-27"><a href="bayesian-structural-time-series-models.html#cb192-27" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;BSTS Level Component with 95% Credible Intervals&quot;</span>,</span>
-<span id="cb192-28"><a href="bayesian-structural-time-series-models.html#cb192-28" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Time&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Value&quot;</span>) <span class="sc">+</span></span>
-<span id="cb192-29"><a href="bayesian-structural-time-series-models.html#cb192-29" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
-<span id="cb192-30"><a href="bayesian-structural-time-series-models.html#cb192-30" tabindex="-1"></a></span>
-<span id="cb192-31"><a href="bayesian-structural-time-series-models.html#cb192-31" tabindex="-1"></a><span class="co"># Plot trend evolution</span></span>
-<span id="cb192-32"><a href="bayesian-structural-time-series-models.html#cb192-32" tabindex="-1"></a><span class="fu">ggplot</span>(df_basic, <span class="fu">aes</span>(<span class="at">x =</span> time)) <span class="sc">+</span></span>
-<span id="cb192-33"><a href="bayesian-structural-time-series-models.html#cb192-33" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> trend), <span class="at">color =</span> <span class="st">&quot;red&quot;</span>, <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb192-34"><a href="bayesian-structural-time-series-models.html#cb192-34" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Estimated Trend Component&quot;</span>,</span>
-<span id="cb192-35"><a href="bayesian-structural-time-series-models.html#cb192-35" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Time&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Trend&quot;</span>) <span class="sc">+</span></span>
-<span id="cb192-36"><a href="bayesian-structural-time-series-models.html#cb192-36" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb223"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb223-1"><a href="bayesian-structural-time-series-models.html#cb223-1" tabindex="-1"></a><span class="co"># Extract posterior samples</span></span>
+<span id="cb223-2"><a href="bayesian-structural-time-series-models.html#cb223-2" tabindex="-1"></a>post_basic <span class="ot">&lt;-</span> <span class="fu">extract</span>(fit_basic)</span>
+<span id="cb223-3"><a href="bayesian-structural-time-series-models.html#cb223-3" tabindex="-1"></a></span>
+<span id="cb223-4"><a href="bayesian-structural-time-series-models.html#cb223-4" tabindex="-1"></a><span class="co"># Compute posterior summaries</span></span>
+<span id="cb223-5"><a href="bayesian-structural-time-series-models.html#cb223-5" tabindex="-1"></a>level_mean <span class="ot">&lt;-</span> <span class="fu">apply</span>(post_basic<span class="sc">$</span>level, <span class="dv">2</span>, mean)</span>
+<span id="cb223-6"><a href="bayesian-structural-time-series-models.html#cb223-6" tabindex="-1"></a>level_lower <span class="ot">&lt;-</span> <span class="fu">apply</span>(post_basic<span class="sc">$</span>level, <span class="dv">2</span>, quantile, <span class="at">probs =</span> <span class="fl">0.025</span>)</span>
+<span id="cb223-7"><a href="bayesian-structural-time-series-models.html#cb223-7" tabindex="-1"></a>level_upper <span class="ot">&lt;-</span> <span class="fu">apply</span>(post_basic<span class="sc">$</span>level, <span class="dv">2</span>, quantile, <span class="at">probs =</span> <span class="fl">0.975</span>)</span>
+<span id="cb223-8"><a href="bayesian-structural-time-series-models.html#cb223-8" tabindex="-1"></a></span>
+<span id="cb223-9"><a href="bayesian-structural-time-series-models.html#cb223-9" tabindex="-1"></a>trend_mean <span class="ot">&lt;-</span> <span class="fu">apply</span>(post_basic<span class="sc">$</span>trend, <span class="dv">2</span>, mean)</span>
+<span id="cb223-10"><a href="bayesian-structural-time-series-models.html#cb223-10" tabindex="-1"></a></span>
+<span id="cb223-11"><a href="bayesian-structural-time-series-models.html#cb223-11" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb223-12"><a href="bayesian-structural-time-series-models.html#cb223-12" tabindex="-1"></a>df_basic <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb223-13"><a href="bayesian-structural-time-series-models.html#cb223-13" tabindex="-1"></a>  <span class="at">time =</span> <span class="dv">1</span><span class="sc">:</span>n,</span>
+<span id="cb223-14"><a href="bayesian-structural-time-series-models.html#cb223-14" tabindex="-1"></a>  <span class="at">observed =</span> y,</span>
+<span id="cb223-15"><a href="bayesian-structural-time-series-models.html#cb223-15" tabindex="-1"></a>  <span class="at">level =</span> level_mean,</span>
+<span id="cb223-16"><a href="bayesian-structural-time-series-models.html#cb223-16" tabindex="-1"></a>  <span class="at">level_lower =</span> level_lower,</span>
+<span id="cb223-17"><a href="bayesian-structural-time-series-models.html#cb223-17" tabindex="-1"></a>  <span class="at">level_upper =</span> level_upper,</span>
+<span id="cb223-18"><a href="bayesian-structural-time-series-models.html#cb223-18" tabindex="-1"></a>  <span class="at">trend =</span> trend_mean</span>
+<span id="cb223-19"><a href="bayesian-structural-time-series-models.html#cb223-19" tabindex="-1"></a>)</span>
+<span id="cb223-20"><a href="bayesian-structural-time-series-models.html#cb223-20" tabindex="-1"></a></span>
+<span id="cb223-21"><a href="bayesian-structural-time-series-models.html#cb223-21" tabindex="-1"></a><span class="co"># Plot level component with uncertainty</span></span>
+<span id="cb223-22"><a href="bayesian-structural-time-series-models.html#cb223-22" tabindex="-1"></a><span class="fu">ggplot</span>(df_basic, <span class="fu">aes</span>(<span class="at">x =</span> time)) <span class="sc">+</span></span>
+<span id="cb223-23"><a href="bayesian-structural-time-series-models.html#cb223-23" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> observed), <span class="at">color =</span> <span class="st">&quot;black&quot;</span>, <span class="at">linetype =</span> <span class="st">&quot;dashed&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb223-24"><a href="bayesian-structural-time-series-models.html#cb223-24" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> level), <span class="at">color =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb223-25"><a href="bayesian-structural-time-series-models.html#cb223-25" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> level_lower, <span class="at">ymax =</span> level_upper), </span>
+<span id="cb223-26"><a href="bayesian-structural-time-series-models.html#cb223-26" tabindex="-1"></a>              <span class="at">fill =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb223-27"><a href="bayesian-structural-time-series-models.html#cb223-27" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;BSTS Level Component with 95% Credible Intervals&quot;</span>,</span>
+<span id="cb223-28"><a href="bayesian-structural-time-series-models.html#cb223-28" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Time&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Value&quot;</span>) <span class="sc">+</span></span>
+<span id="cb223-29"><a href="bayesian-structural-time-series-models.html#cb223-29" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
+<span id="cb223-30"><a href="bayesian-structural-time-series-models.html#cb223-30" tabindex="-1"></a></span>
+<span id="cb223-31"><a href="bayesian-structural-time-series-models.html#cb223-31" tabindex="-1"></a><span class="co"># Plot trend evolution</span></span>
+<span id="cb223-32"><a href="bayesian-structural-time-series-models.html#cb223-32" tabindex="-1"></a><span class="fu">ggplot</span>(df_basic, <span class="fu">aes</span>(<span class="at">x =</span> time)) <span class="sc">+</span></span>
+<span id="cb223-33"><a href="bayesian-structural-time-series-models.html#cb223-33" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> trend), <span class="at">color =</span> <span class="st">&quot;red&quot;</span>, <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb223-34"><a href="bayesian-structural-time-series-models.html#cb223-34" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Estimated Trend Component&quot;</span>,</span>
+<span id="cb223-35"><a href="bayesian-structural-time-series-models.html#cb223-35" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Time&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Trend&quot;</span>) <span class="sc">+</span></span>
+<span id="cb223-36"><a href="bayesian-structural-time-series-models.html#cb223-36" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div>
 <ul>
 <li>Time-Varying Volatility Visualization</li>
 </ul>
-<div class="sourceCode" id="cb193"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb193-1"><a href="bayesian-structural-time-series-models.html#cb193-1" tabindex="-1"></a><span class="co"># Extract posterior samples for extended model</span></span>
-<span id="cb193-2"><a href="bayesian-structural-time-series-models.html#cb193-2" tabindex="-1"></a>post_extended <span class="ot">&lt;-</span> <span class="fu">extract</span>(fit_extended)</span>
-<span id="cb193-3"><a href="bayesian-structural-time-series-models.html#cb193-3" tabindex="-1"></a></span>
-<span id="cb193-4"><a href="bayesian-structural-time-series-models.html#cb193-4" tabindex="-1"></a><span class="co"># Compute posterior summaries</span></span>
-<span id="cb193-5"><a href="bayesian-structural-time-series-models.html#cb193-5" tabindex="-1"></a>h_mean <span class="ot">&lt;-</span> <span class="fu">apply</span>(post_extended<span class="sc">$</span>h, <span class="dv">2</span>, mean)</span>
-<span id="cb193-6"><a href="bayesian-structural-time-series-models.html#cb193-6" tabindex="-1"></a>h_lower <span class="ot">&lt;-</span> <span class="fu">apply</span>(post_extended<span class="sc">$</span>h, <span class="dv">2</span>, quantile, <span class="at">probs =</span> <span class="fl">0.025</span>)</span>
-<span id="cb193-7"><a href="bayesian-structural-time-series-models.html#cb193-7" tabindex="-1"></a>h_upper <span class="ot">&lt;-</span> <span class="fu">apply</span>(post_extended<span class="sc">$</span>h, <span class="dv">2</span>, quantile, <span class="at">probs =</span> <span class="fl">0.975</span>)</span>
-<span id="cb193-8"><a href="bayesian-structural-time-series-models.html#cb193-8" tabindex="-1"></a></span>
-<span id="cb193-9"><a href="bayesian-structural-time-series-models.html#cb193-9" tabindex="-1"></a>trend_mean_ext <span class="ot">&lt;-</span> <span class="fu">apply</span>(post_extended<span class="sc">$</span>trend, <span class="dv">2</span>, mean)</span>
-<span id="cb193-10"><a href="bayesian-structural-time-series-models.html#cb193-10" tabindex="-1"></a></span>
-<span id="cb193-11"><a href="bayesian-structural-time-series-models.html#cb193-11" tabindex="-1"></a>df_extended <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb193-12"><a href="bayesian-structural-time-series-models.html#cb193-12" tabindex="-1"></a>  <span class="at">time =</span> <span class="dv">1</span><span class="sc">:</span>n,</span>
-<span id="cb193-13"><a href="bayesian-structural-time-series-models.html#cb193-13" tabindex="-1"></a>  <span class="at">log_vol =</span> h_mean,</span>
-<span id="cb193-14"><a href="bayesian-structural-time-series-models.html#cb193-14" tabindex="-1"></a>  <span class="at">log_vol_lower =</span> h_lower,</span>
-<span id="cb193-15"><a href="bayesian-structural-time-series-models.html#cb193-15" tabindex="-1"></a>  <span class="at">log_vol_upper =</span> h_upper,</span>
-<span id="cb193-16"><a href="bayesian-structural-time-series-models.html#cb193-16" tabindex="-1"></a>  <span class="at">trend =</span> trend_mean_ext</span>
-<span id="cb193-17"><a href="bayesian-structural-time-series-models.html#cb193-17" tabindex="-1"></a>)</span>
-<span id="cb193-18"><a href="bayesian-structural-time-series-models.html#cb193-18" tabindex="-1"></a></span>
-<span id="cb193-19"><a href="bayesian-structural-time-series-models.html#cb193-19" tabindex="-1"></a><span class="co"># Plot time-varying log-volatility</span></span>
-<span id="cb193-20"><a href="bayesian-structural-time-series-models.html#cb193-20" tabindex="-1"></a><span class="fu">ggplot</span>(df_extended, <span class="fu">aes</span>(<span class="at">x =</span> time)) <span class="sc">+</span></span>
-<span id="cb193-21"><a href="bayesian-structural-time-series-models.html#cb193-21" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> log_vol), <span class="at">color =</span> <span class="st">&quot;red&quot;</span>, <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb193-22"><a href="bayesian-structural-time-series-models.html#cb193-22" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> log_vol_lower, <span class="at">ymax =</span> log_vol_upper), </span>
-<span id="cb193-23"><a href="bayesian-structural-time-series-models.html#cb193-23" tabindex="-1"></a>              <span class="at">fill =</span> <span class="st">&quot;red&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
-<span id="cb193-24"><a href="bayesian-structural-time-series-models.html#cb193-24" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Time-Varying Trend Log-Volatility with 95% Credible Intervals&quot;</span>,</span>
-<span id="cb193-25"><a href="bayesian-structural-time-series-models.html#cb193-25" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;log(σ²_τ)&quot;</span>, <span class="at">x =</span> <span class="st">&quot;Time&quot;</span>) <span class="sc">+</span></span>
-<span id="cb193-26"><a href="bayesian-structural-time-series-models.html#cb193-26" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
-<span id="cb193-27"><a href="bayesian-structural-time-series-models.html#cb193-27" tabindex="-1"></a></span>
-<span id="cb193-28"><a href="bayesian-structural-time-series-models.html#cb193-28" tabindex="-1"></a><span class="co"># Plot corresponding trend with varying smoothness</span></span>
-<span id="cb193-29"><a href="bayesian-structural-time-series-models.html#cb193-29" tabindex="-1"></a><span class="fu">ggplot</span>(df_extended, <span class="fu">aes</span>(<span class="at">x =</span> time)) <span class="sc">+</span></span>
-<span id="cb193-30"><a href="bayesian-structural-time-series-models.html#cb193-30" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> trend), <span class="at">color =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb193-31"><a href="bayesian-structural-time-series-models.html#cb193-31" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Trend Component with Time-Varying Volatility&quot;</span>,</span>
-<span id="cb193-32"><a href="bayesian-structural-time-series-models.html#cb193-32" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;Trend&quot;</span>, <span class="at">x =</span> <span class="st">&quot;Time&quot;</span>) <span class="sc">+</span></span>
-<span id="cb193-33"><a href="bayesian-structural-time-series-models.html#cb193-33" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb224"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb224-1"><a href="bayesian-structural-time-series-models.html#cb224-1" tabindex="-1"></a><span class="co"># Extract posterior samples for extended model</span></span>
+<span id="cb224-2"><a href="bayesian-structural-time-series-models.html#cb224-2" tabindex="-1"></a>post_extended <span class="ot">&lt;-</span> <span class="fu">extract</span>(fit_extended)</span>
+<span id="cb224-3"><a href="bayesian-structural-time-series-models.html#cb224-3" tabindex="-1"></a></span>
+<span id="cb224-4"><a href="bayesian-structural-time-series-models.html#cb224-4" tabindex="-1"></a><span class="co"># Compute posterior summaries</span></span>
+<span id="cb224-5"><a href="bayesian-structural-time-series-models.html#cb224-5" tabindex="-1"></a>h_mean <span class="ot">&lt;-</span> <span class="fu">apply</span>(post_extended<span class="sc">$</span>h, <span class="dv">2</span>, mean)</span>
+<span id="cb224-6"><a href="bayesian-structural-time-series-models.html#cb224-6" tabindex="-1"></a>h_lower <span class="ot">&lt;-</span> <span class="fu">apply</span>(post_extended<span class="sc">$</span>h, <span class="dv">2</span>, quantile, <span class="at">probs =</span> <span class="fl">0.025</span>)</span>
+<span id="cb224-7"><a href="bayesian-structural-time-series-models.html#cb224-7" tabindex="-1"></a>h_upper <span class="ot">&lt;-</span> <span class="fu">apply</span>(post_extended<span class="sc">$</span>h, <span class="dv">2</span>, quantile, <span class="at">probs =</span> <span class="fl">0.975</span>)</span>
+<span id="cb224-8"><a href="bayesian-structural-time-series-models.html#cb224-8" tabindex="-1"></a></span>
+<span id="cb224-9"><a href="bayesian-structural-time-series-models.html#cb224-9" tabindex="-1"></a>trend_mean_ext <span class="ot">&lt;-</span> <span class="fu">apply</span>(post_extended<span class="sc">$</span>trend, <span class="dv">2</span>, mean)</span>
+<span id="cb224-10"><a href="bayesian-structural-time-series-models.html#cb224-10" tabindex="-1"></a></span>
+<span id="cb224-11"><a href="bayesian-structural-time-series-models.html#cb224-11" tabindex="-1"></a>df_extended <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb224-12"><a href="bayesian-structural-time-series-models.html#cb224-12" tabindex="-1"></a>  <span class="at">time =</span> <span class="dv">1</span><span class="sc">:</span>n,</span>
+<span id="cb224-13"><a href="bayesian-structural-time-series-models.html#cb224-13" tabindex="-1"></a>  <span class="at">log_vol =</span> h_mean,</span>
+<span id="cb224-14"><a href="bayesian-structural-time-series-models.html#cb224-14" tabindex="-1"></a>  <span class="at">log_vol_lower =</span> h_lower,</span>
+<span id="cb224-15"><a href="bayesian-structural-time-series-models.html#cb224-15" tabindex="-1"></a>  <span class="at">log_vol_upper =</span> h_upper,</span>
+<span id="cb224-16"><a href="bayesian-structural-time-series-models.html#cb224-16" tabindex="-1"></a>  <span class="at">trend =</span> trend_mean_ext</span>
+<span id="cb224-17"><a href="bayesian-structural-time-series-models.html#cb224-17" tabindex="-1"></a>)</span>
+<span id="cb224-18"><a href="bayesian-structural-time-series-models.html#cb224-18" tabindex="-1"></a></span>
+<span id="cb224-19"><a href="bayesian-structural-time-series-models.html#cb224-19" tabindex="-1"></a><span class="co"># Plot time-varying log-volatility</span></span>
+<span id="cb224-20"><a href="bayesian-structural-time-series-models.html#cb224-20" tabindex="-1"></a><span class="fu">ggplot</span>(df_extended, <span class="fu">aes</span>(<span class="at">x =</span> time)) <span class="sc">+</span></span>
+<span id="cb224-21"><a href="bayesian-structural-time-series-models.html#cb224-21" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> log_vol), <span class="at">color =</span> <span class="st">&quot;red&quot;</span>, <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb224-22"><a href="bayesian-structural-time-series-models.html#cb224-22" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> log_vol_lower, <span class="at">ymax =</span> log_vol_upper), </span>
+<span id="cb224-23"><a href="bayesian-structural-time-series-models.html#cb224-23" tabindex="-1"></a>              <span class="at">fill =</span> <span class="st">&quot;red&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb224-24"><a href="bayesian-structural-time-series-models.html#cb224-24" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Time-Varying Trend Log-Volatility with 95% Credible Intervals&quot;</span>,</span>
+<span id="cb224-25"><a href="bayesian-structural-time-series-models.html#cb224-25" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;log(σ²_τ)&quot;</span>, <span class="at">x =</span> <span class="st">&quot;Time&quot;</span>) <span class="sc">+</span></span>
+<span id="cb224-26"><a href="bayesian-structural-time-series-models.html#cb224-26" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
+<span id="cb224-27"><a href="bayesian-structural-time-series-models.html#cb224-27" tabindex="-1"></a></span>
+<span id="cb224-28"><a href="bayesian-structural-time-series-models.html#cb224-28" tabindex="-1"></a><span class="co"># Plot corresponding trend with varying smoothness</span></span>
+<span id="cb224-29"><a href="bayesian-structural-time-series-models.html#cb224-29" tabindex="-1"></a><span class="fu">ggplot</span>(df_extended, <span class="fu">aes</span>(<span class="at">x =</span> time)) <span class="sc">+</span></span>
+<span id="cb224-30"><a href="bayesian-structural-time-series-models.html#cb224-30" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> trend), <span class="at">color =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb224-31"><a href="bayesian-structural-time-series-models.html#cb224-31" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Trend Component with Time-Varying Volatility&quot;</span>,</span>
+<span id="cb224-32"><a href="bayesian-structural-time-series-models.html#cb224-32" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;Trend&quot;</span>, <span class="at">x =</span> <span class="st">&quot;Time&quot;</span>) <span class="sc">+</span></span>
+<span id="cb224-33"><a href="bayesian-structural-time-series-models.html#cb224-33" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div>
 <p>These visualizations reveal how uncertainty in trend evolution changes over time, enabling analysts to identify periods of instability or structural transitions.</p>
 <div id="applications-and-extensions" class="section level4 hasAnchor" number="14.1.2.1">
 <h4><span class="header-section-number">14.1.2.1</span> Applications and Extensions<a href="bayesian-structural-time-series-models.html#applications-and-extensions" class="anchor-section" aria-label="Anchor link to header"></a></h4>
@@ -649,14 +649,14 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="model-comparison-and-selection" class="section level2 hasAnchor" number="14.2">
 <h2><span class="header-section-number">14.2</span> Model Comparison and Selection<a href="bayesian-structural-time-series-models.html#model-comparison-and-selection" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Comparing basic and extended BSTS models requires balancing goodness-of-fit against complexity. The Widely Applicable Information Criterion (WAIC) provides a practical tool for model comparison within the Bayesian framework:</p>
-<div class="sourceCode" id="cb194"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb194-1"><a href="bayesian-structural-time-series-models.html#cb194-1" tabindex="-1"></a><span class="fu">library</span>(loo)</span>
-<span id="cb194-2"><a href="bayesian-structural-time-series-models.html#cb194-2" tabindex="-1"></a></span>
-<span id="cb194-3"><a href="bayesian-structural-time-series-models.html#cb194-3" tabindex="-1"></a><span class="co"># Compute WAIC for model comparison</span></span>
-<span id="cb194-4"><a href="bayesian-structural-time-series-models.html#cb194-4" tabindex="-1"></a>waic_basic <span class="ot">&lt;-</span> <span class="fu">waic</span>(<span class="fu">extract_log_lik</span>(fit_basic))</span>
-<span id="cb194-5"><a href="bayesian-structural-time-series-models.html#cb194-5" tabindex="-1"></a>waic_extended <span class="ot">&lt;-</span> <span class="fu">waic</span>(<span class="fu">extract_log_lik</span>(fit_extended))</span>
-<span id="cb194-6"><a href="bayesian-structural-time-series-models.html#cb194-6" tabindex="-1"></a></span>
-<span id="cb194-7"><a href="bayesian-structural-time-series-models.html#cb194-7" tabindex="-1"></a><span class="co"># Compare models</span></span>
-<span id="cb194-8"><a href="bayesian-structural-time-series-models.html#cb194-8" tabindex="-1"></a><span class="fu">loo_compare</span>(waic_basic, waic_extended)</span></code></pre></div>
+<div class="sourceCode" id="cb225"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb225-1"><a href="bayesian-structural-time-series-models.html#cb225-1" tabindex="-1"></a><span class="fu">library</span>(loo)</span>
+<span id="cb225-2"><a href="bayesian-structural-time-series-models.html#cb225-2" tabindex="-1"></a></span>
+<span id="cb225-3"><a href="bayesian-structural-time-series-models.html#cb225-3" tabindex="-1"></a><span class="co"># Compute WAIC for model comparison</span></span>
+<span id="cb225-4"><a href="bayesian-structural-time-series-models.html#cb225-4" tabindex="-1"></a>waic_basic <span class="ot">&lt;-</span> <span class="fu">waic</span>(<span class="fu">extract_log_lik</span>(fit_basic))</span>
+<span id="cb225-5"><a href="bayesian-structural-time-series-models.html#cb225-5" tabindex="-1"></a>waic_extended <span class="ot">&lt;-</span> <span class="fu">waic</span>(<span class="fu">extract_log_lik</span>(fit_extended))</span>
+<span id="cb225-6"><a href="bayesian-structural-time-series-models.html#cb225-6" tabindex="-1"></a></span>
+<span id="cb225-7"><a href="bayesian-structural-time-series-models.html#cb225-7" tabindex="-1"></a><span class="co"># Compare models</span></span>
+<span id="cb225-8"><a href="bayesian-structural-time-series-models.html#cb225-8" tabindex="-1"></a><span class="fu">loo_compare</span>(waic_basic, waic_extended)</span></code></pre></div>
 <p>Additionally, posterior predictive checks help assess whether the added complexity of time-varying volatility improves model adequacy for the specific application.</p>
 </div>
 <div id="conclusion-10" class="section level2 hasAnchor" number="14.3">

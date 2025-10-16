@@ -23,7 +23,7 @@
 <meta name="author" content="Kamran Afzali" />
 
 
-<meta name="date" content="2025-10-01" />
+<meta name="date" content="2025-10-16" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -212,7 +212,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="8.1" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#introduction-4"><i class="fa fa-check"></i><b>8.1</b> Introduction</a></li>
 <li class="chapter" data-level="8.2" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#challenges"><i class="fa fa-check"></i><b>8.2</b> Challenges</a></li>
 <li class="chapter" data-level="8.3" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#gpfit-package"><i class="fa fa-check"></i><b>8.3</b> GPfit package</a></li>
-<li class="chapter" data-level="8.4" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#bayesian-stan"><i class="fa fa-check"></i><b>8.4</b> Bayesian Stan</a></li>
+<li class="chapter" data-level="8.4" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#bayesian-gpr"><i class="fa fa-check"></i><b>8.4</b> Bayesian GPR</a></li>
 <li class="chapter" data-level="8.5" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#references-6"><i class="fa fa-check"></i><b>8.5</b> References</a></li>
 </ul></li>
 <li class="chapter" data-level="9" data-path="bayesian-gaussian-mixture-models.html"><a href="bayesian-gaussian-mixture-models.html"><i class="fa fa-check"></i><b>9</b> Bayesian Gaussian Mixture Models</a>
@@ -384,253 +384,253 @@ Y
 \]</span></p>
 <p>for some scale <span class="math inline">\(\tau &gt; 0\)</span>.</p>
 <p>We start by generating synthetic data to demonstrate the Bayesian CCA model.</p>
-<div class="sourceCode" id="cb155"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb155-1"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-1" tabindex="-1"></a><span class="co"># Improved Bayesian Canonical Correlation Analysis</span></span>
-<span id="cb155-2"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-2" tabindex="-1"></a><span class="co"># Load required libraries</span></span>
-<span id="cb155-3"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-3" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb155-4"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-4" tabindex="-1"></a><span class="fu">library</span>(rstan)</span>
-<span id="cb155-5"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-5" tabindex="-1"></a><span class="fu">library</span>(rsample)</span>
-<span id="cb155-6"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-6" tabindex="-1"></a><span class="fu">library</span>(bayesplot)</span>
-<span id="cb155-7"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-7" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb155-8"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-8" tabindex="-1"></a></span>
-<span id="cb155-9"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-9" tabindex="-1"></a><span class="co"># Set Stan options for better performance</span></span>
-<span id="cb155-10"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-10" tabindex="-1"></a><span class="fu">options</span>(<span class="at">mc.cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>())</span>
-<span id="cb155-11"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-11" tabindex="-1"></a><span class="fu">rstan_options</span>(<span class="at">auto_write =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb155-12"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-12" tabindex="-1"></a></span>
-<span id="cb155-13"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-13" tabindex="-1"></a><span class="co"># Data Generation with more realistic structure</span></span>
-<span id="cb155-14"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-14" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb155-15"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-15" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">1000</span>  <span class="co"># number of observations</span></span>
-<span id="cb155-16"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-16" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="dv">4</span>     <span class="co"># number of X variables (increased for more complexity)</span></span>
-<span id="cb155-17"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-17" tabindex="-1"></a>q <span class="ot">&lt;-</span> <span class="dv">3</span>     <span class="co"># number of Y variables (increased for more complexity)</span></span>
-<span id="cb155-18"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-18" tabindex="-1"></a></span>
-<span id="cb155-19"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-19" tabindex="-1"></a><span class="co"># Generate multiple latent canonical variates for richer structure</span></span>
-<span id="cb155-20"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-20" tabindex="-1"></a>u1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="dv">1</span>)</span>
-<span id="cb155-21"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-21" tabindex="-1"></a>u2 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.5</span>)  <span class="co"># Secondary canonical variate</span></span>
-<span id="cb155-22"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-22" tabindex="-1"></a></span>
-<span id="cb155-23"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-23" tabindex="-1"></a><span class="co"># Create correlated canonical variates for Y</span></span>
-<span id="cb155-24"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-24" tabindex="-1"></a>v1 <span class="ot">&lt;-</span> <span class="fl">0.8</span> <span class="sc">*</span> u1 <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fu">sqrt</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fl">0.8</span><span class="sc">^</span><span class="dv">2</span>))  <span class="co"># Strong correlation</span></span>
-<span id="cb155-25"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-25" tabindex="-1"></a>v2 <span class="ot">&lt;-</span> <span class="fl">0.5</span> <span class="sc">*</span> u2 <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fu">sqrt</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fl">0.5</span><span class="sc">^</span><span class="dv">2</span>))  <span class="co"># Moderate correlation</span></span>
-<span id="cb155-26"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-26" tabindex="-1"></a></span>
-<span id="cb155-27"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-27" tabindex="-1"></a><span class="co"># Generate X variables with varying loadings on canonical variates</span></span>
-<span id="cb155-28"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-28" tabindex="-1"></a>X1 <span class="ot">&lt;-</span> <span class="fl">0.9</span> <span class="sc">*</span> u1 <span class="sc">+</span> <span class="fl">0.3</span> <span class="sc">*</span> u2 <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.5</span>)</span>
-<span id="cb155-29"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-29" tabindex="-1"></a>X2 <span class="ot">&lt;-</span> <span class="fl">0.7</span> <span class="sc">*</span> u1 <span class="sc">+</span> <span class="fl">0.5</span> <span class="sc">*</span> u2 <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.6</span>)</span>
-<span id="cb155-30"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-30" tabindex="-1"></a>X3 <span class="ot">&lt;-</span> <span class="fl">0.5</span> <span class="sc">*</span> u1 <span class="sc">+</span> <span class="fl">0.8</span> <span class="sc">*</span> u2 <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.4</span>)</span>
-<span id="cb155-31"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-31" tabindex="-1"></a>X4 <span class="ot">&lt;-</span> <span class="fl">0.3</span> <span class="sc">*</span> u1 <span class="sc">+</span> <span class="fl">0.2</span> <span class="sc">*</span> u2 <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.8</span>)</span>
-<span id="cb155-32"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-32" tabindex="-1"></a></span>
-<span id="cb155-33"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-33" tabindex="-1"></a><span class="co"># Generate Y variables with varying loadings</span></span>
-<span id="cb155-34"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-34" tabindex="-1"></a>Y1 <span class="ot">&lt;-</span> <span class="fl">0.8</span> <span class="sc">*</span> v1 <span class="sc">+</span> <span class="fl">0.2</span> <span class="sc">*</span> v2 <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.4</span>)</span>
-<span id="cb155-35"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-35" tabindex="-1"></a>Y2 <span class="ot">&lt;-</span> <span class="fl">0.6</span> <span class="sc">*</span> v1 <span class="sc">+</span> <span class="fl">0.7</span> <span class="sc">*</span> v2 <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.5</span>)</span>
-<span id="cb155-36"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-36" tabindex="-1"></a>Y3 <span class="ot">&lt;-</span> <span class="fl">0.4</span> <span class="sc">*</span> v1 <span class="sc">+</span> <span class="fl">0.9</span> <span class="sc">*</span> v2 <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.3</span>)</span>
-<span id="cb155-37"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-37" tabindex="-1"></a></span>
-<span id="cb155-38"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-38" tabindex="-1"></a><span class="co"># Create properly structured data frame</span></span>
-<span id="cb155-39"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-39" tabindex="-1"></a>X_matrix <span class="ot">&lt;-</span> <span class="fu">cbind</span>(X1, X2, X3, X4)</span>
-<span id="cb155-40"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-40" tabindex="-1"></a>Y_matrix <span class="ot">&lt;-</span> <span class="fu">cbind</span>(Y1, Y2, Y3)</span>
-<span id="cb155-41"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-41" tabindex="-1"></a></span>
-<span id="cb155-42"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-42" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb155-43"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-43" tabindex="-1"></a>  X_matrix,</span>
-<span id="cb155-44"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-44" tabindex="-1"></a>  Y_matrix</span>
-<span id="cb155-45"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-45" tabindex="-1"></a>)</span>
-<span id="cb155-46"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-46" tabindex="-1"></a></span>
-<span id="cb155-47"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-47" tabindex="-1"></a><span class="co"># Rename columns for clarity</span></span>
-<span id="cb155-48"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-48" tabindex="-1"></a><span class="fu">colnames</span>(data) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">paste0</span>(<span class="st">&quot;X&quot;</span>, <span class="dv">1</span><span class="sc">:</span>p), <span class="fu">paste0</span>(<span class="st">&quot;Y&quot;</span>, <span class="dv">1</span><span class="sc">:</span>q))</span>
-<span id="cb155-49"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-49" tabindex="-1"></a></span>
-<span id="cb155-50"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-50" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Data structure:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb155-51"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-51" tabindex="-1"></a><span class="fu">str</span>(data)</span>
-<span id="cb155-52"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-52" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">First few rows:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb155-53"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-53" tabindex="-1"></a><span class="fu">head</span>(data)</span>
-<span id="cb155-54"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-54" tabindex="-1"></a></span>
-<span id="cb155-55"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-55" tabindex="-1"></a><span class="co"># Data splitting</span></span>
-<span id="cb155-56"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-56" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
-<span id="cb155-57"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-57" tabindex="-1"></a>data_split <span class="ot">&lt;-</span> <span class="fu">initial_split</span>(data, <span class="at">prop =</span> <span class="fl">0.7</span>)</span>
-<span id="cb155-58"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-58" tabindex="-1"></a>train_data <span class="ot">&lt;-</span> <span class="fu">training</span>(data_split)</span>
-<span id="cb155-59"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-59" tabindex="-1"></a>test_data <span class="ot">&lt;-</span> <span class="fu">testing</span>(data_split)</span>
-<span id="cb155-60"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-60" tabindex="-1"></a></span>
-<span id="cb155-61"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-61" tabindex="-1"></a><span class="co"># Extract X and Y matrices correctly</span></span>
-<span id="cb155-62"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-62" tabindex="-1"></a>X_train <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(train_data[, <span class="dv">1</span><span class="sc">:</span>p])</span>
-<span id="cb155-63"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-63" tabindex="-1"></a>Y_train <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(train_data[, (p<span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>(p<span class="sc">+</span>q)])</span>
-<span id="cb155-64"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-64" tabindex="-1"></a></span>
-<span id="cb155-65"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-65" tabindex="-1"></a>X_test <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(test_data[, <span class="dv">1</span><span class="sc">:</span>p])</span>
-<span id="cb155-66"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb155-66" tabindex="-1"></a>Y_test <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(test_data[, (p<span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>(p<span class="sc">+</span>q)])</span></code></pre></div>
+<div class="sourceCode" id="cb186"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb186-1"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-1" tabindex="-1"></a><span class="co"># Improved Bayesian Canonical Correlation Analysis</span></span>
+<span id="cb186-2"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-2" tabindex="-1"></a><span class="co"># Load required libraries</span></span>
+<span id="cb186-3"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-3" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb186-4"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-4" tabindex="-1"></a><span class="fu">library</span>(rstan)</span>
+<span id="cb186-5"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-5" tabindex="-1"></a><span class="fu">library</span>(rsample)</span>
+<span id="cb186-6"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-6" tabindex="-1"></a><span class="fu">library</span>(bayesplot)</span>
+<span id="cb186-7"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-7" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb186-8"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-8" tabindex="-1"></a></span>
+<span id="cb186-9"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-9" tabindex="-1"></a><span class="co"># Set Stan options for better performance</span></span>
+<span id="cb186-10"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-10" tabindex="-1"></a><span class="fu">options</span>(<span class="at">mc.cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>())</span>
+<span id="cb186-11"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-11" tabindex="-1"></a><span class="fu">rstan_options</span>(<span class="at">auto_write =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb186-12"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-12" tabindex="-1"></a></span>
+<span id="cb186-13"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-13" tabindex="-1"></a><span class="co"># Data Generation with more realistic structure</span></span>
+<span id="cb186-14"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-14" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb186-15"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-15" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">1000</span>  <span class="co"># number of observations</span></span>
+<span id="cb186-16"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-16" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="dv">4</span>     <span class="co"># number of X variables (increased for more complexity)</span></span>
+<span id="cb186-17"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-17" tabindex="-1"></a>q <span class="ot">&lt;-</span> <span class="dv">3</span>     <span class="co"># number of Y variables (increased for more complexity)</span></span>
+<span id="cb186-18"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-18" tabindex="-1"></a></span>
+<span id="cb186-19"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-19" tabindex="-1"></a><span class="co"># Generate multiple latent canonical variates for richer structure</span></span>
+<span id="cb186-20"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-20" tabindex="-1"></a>u1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb186-21"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-21" tabindex="-1"></a>u2 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.5</span>)  <span class="co"># Secondary canonical variate</span></span>
+<span id="cb186-22"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-22" tabindex="-1"></a></span>
+<span id="cb186-23"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-23" tabindex="-1"></a><span class="co"># Create correlated canonical variates for Y</span></span>
+<span id="cb186-24"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-24" tabindex="-1"></a>v1 <span class="ot">&lt;-</span> <span class="fl">0.8</span> <span class="sc">*</span> u1 <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fu">sqrt</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fl">0.8</span><span class="sc">^</span><span class="dv">2</span>))  <span class="co"># Strong correlation</span></span>
+<span id="cb186-25"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-25" tabindex="-1"></a>v2 <span class="ot">&lt;-</span> <span class="fl">0.5</span> <span class="sc">*</span> u2 <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fu">sqrt</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fl">0.5</span><span class="sc">^</span><span class="dv">2</span>))  <span class="co"># Moderate correlation</span></span>
+<span id="cb186-26"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-26" tabindex="-1"></a></span>
+<span id="cb186-27"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-27" tabindex="-1"></a><span class="co"># Generate X variables with varying loadings on canonical variates</span></span>
+<span id="cb186-28"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-28" tabindex="-1"></a>X1 <span class="ot">&lt;-</span> <span class="fl">0.9</span> <span class="sc">*</span> u1 <span class="sc">+</span> <span class="fl">0.3</span> <span class="sc">*</span> u2 <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.5</span>)</span>
+<span id="cb186-29"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-29" tabindex="-1"></a>X2 <span class="ot">&lt;-</span> <span class="fl">0.7</span> <span class="sc">*</span> u1 <span class="sc">+</span> <span class="fl">0.5</span> <span class="sc">*</span> u2 <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.6</span>)</span>
+<span id="cb186-30"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-30" tabindex="-1"></a>X3 <span class="ot">&lt;-</span> <span class="fl">0.5</span> <span class="sc">*</span> u1 <span class="sc">+</span> <span class="fl">0.8</span> <span class="sc">*</span> u2 <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.4</span>)</span>
+<span id="cb186-31"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-31" tabindex="-1"></a>X4 <span class="ot">&lt;-</span> <span class="fl">0.3</span> <span class="sc">*</span> u1 <span class="sc">+</span> <span class="fl">0.2</span> <span class="sc">*</span> u2 <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.8</span>)</span>
+<span id="cb186-32"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-32" tabindex="-1"></a></span>
+<span id="cb186-33"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-33" tabindex="-1"></a><span class="co"># Generate Y variables with varying loadings</span></span>
+<span id="cb186-34"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-34" tabindex="-1"></a>Y1 <span class="ot">&lt;-</span> <span class="fl">0.8</span> <span class="sc">*</span> v1 <span class="sc">+</span> <span class="fl">0.2</span> <span class="sc">*</span> v2 <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.4</span>)</span>
+<span id="cb186-35"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-35" tabindex="-1"></a>Y2 <span class="ot">&lt;-</span> <span class="fl">0.6</span> <span class="sc">*</span> v1 <span class="sc">+</span> <span class="fl">0.7</span> <span class="sc">*</span> v2 <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.5</span>)</span>
+<span id="cb186-36"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-36" tabindex="-1"></a>Y3 <span class="ot">&lt;-</span> <span class="fl">0.4</span> <span class="sc">*</span> v1 <span class="sc">+</span> <span class="fl">0.9</span> <span class="sc">*</span> v2 <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.3</span>)</span>
+<span id="cb186-37"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-37" tabindex="-1"></a></span>
+<span id="cb186-38"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-38" tabindex="-1"></a><span class="co"># Create properly structured data frame</span></span>
+<span id="cb186-39"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-39" tabindex="-1"></a>X_matrix <span class="ot">&lt;-</span> <span class="fu">cbind</span>(X1, X2, X3, X4)</span>
+<span id="cb186-40"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-40" tabindex="-1"></a>Y_matrix <span class="ot">&lt;-</span> <span class="fu">cbind</span>(Y1, Y2, Y3)</span>
+<span id="cb186-41"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-41" tabindex="-1"></a></span>
+<span id="cb186-42"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-42" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb186-43"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-43" tabindex="-1"></a>  X_matrix,</span>
+<span id="cb186-44"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-44" tabindex="-1"></a>  Y_matrix</span>
+<span id="cb186-45"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-45" tabindex="-1"></a>)</span>
+<span id="cb186-46"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-46" tabindex="-1"></a></span>
+<span id="cb186-47"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-47" tabindex="-1"></a><span class="co"># Rename columns for clarity</span></span>
+<span id="cb186-48"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-48" tabindex="-1"></a><span class="fu">colnames</span>(data) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">paste0</span>(<span class="st">&quot;X&quot;</span>, <span class="dv">1</span><span class="sc">:</span>p), <span class="fu">paste0</span>(<span class="st">&quot;Y&quot;</span>, <span class="dv">1</span><span class="sc">:</span>q))</span>
+<span id="cb186-49"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-49" tabindex="-1"></a></span>
+<span id="cb186-50"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-50" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Data structure:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb186-51"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-51" tabindex="-1"></a><span class="fu">str</span>(data)</span>
+<span id="cb186-52"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-52" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">First few rows:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb186-53"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-53" tabindex="-1"></a><span class="fu">head</span>(data)</span>
+<span id="cb186-54"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-54" tabindex="-1"></a></span>
+<span id="cb186-55"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-55" tabindex="-1"></a><span class="co"># Data splitting</span></span>
+<span id="cb186-56"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-56" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb186-57"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-57" tabindex="-1"></a>data_split <span class="ot">&lt;-</span> <span class="fu">initial_split</span>(data, <span class="at">prop =</span> <span class="fl">0.7</span>)</span>
+<span id="cb186-58"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-58" tabindex="-1"></a>train_data <span class="ot">&lt;-</span> <span class="fu">training</span>(data_split)</span>
+<span id="cb186-59"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-59" tabindex="-1"></a>test_data <span class="ot">&lt;-</span> <span class="fu">testing</span>(data_split)</span>
+<span id="cb186-60"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-60" tabindex="-1"></a></span>
+<span id="cb186-61"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-61" tabindex="-1"></a><span class="co"># Extract X and Y matrices correctly</span></span>
+<span id="cb186-62"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-62" tabindex="-1"></a>X_train <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(train_data[, <span class="dv">1</span><span class="sc">:</span>p])</span>
+<span id="cb186-63"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-63" tabindex="-1"></a>Y_train <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(train_data[, (p<span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>(p<span class="sc">+</span>q)])</span>
+<span id="cb186-64"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-64" tabindex="-1"></a></span>
+<span id="cb186-65"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-65" tabindex="-1"></a>X_test <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(test_data[, <span class="dv">1</span><span class="sc">:</span>p])</span>
+<span id="cb186-66"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb186-66" tabindex="-1"></a>Y_test <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(test_data[, (p<span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>(p<span class="sc">+</span>q)])</span></code></pre></div>
 </div>
 <div id="stan-model" class="section level3 hasAnchor" number="10.1.2">
 <h3><span class="header-section-number">10.1.2</span> Stan Model<a href="bayesian-canonical-correlation-analysis-in-stan.html#stan-model" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>Below is the Stan code for a Bayesian CCA model, which estimates the canonical coefficients for one pair of canonical variates.</p>
-<div class="sourceCode" id="cb156"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb156-1"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-1" tabindex="-1"></a>stan_model <span class="ot">&lt;-</span> <span class="st">&quot;</span></span>
-<span id="cb156-2"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-2" tabindex="-1"></a><span class="st">data {</span></span>
-<span id="cb156-3"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-3" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; N;               // number of observations</span></span>
-<span id="cb156-4"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-4" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; p;               // number of X variables</span></span>
-<span id="cb156-5"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-5" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; q;               // number of Y variables</span></span>
-<span id="cb156-6"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-6" tabindex="-1"></a><span class="st">  matrix[N, p] X;               // X variables (standardized)</span></span>
-<span id="cb156-7"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-7" tabindex="-1"></a><span class="st">  matrix[N, q] Y;               // Y variables (standardized)</span></span>
-<span id="cb156-8"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-8" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb156-9"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-9" tabindex="-1"></a></span>
-<span id="cb156-10"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-10" tabindex="-1"></a><span class="st">parameters {</span></span>
-<span id="cb156-11"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-11" tabindex="-1"></a><span class="st">  vector[p] a;                  // canonical coefficients for X</span></span>
-<span id="cb156-12"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-12" tabindex="-1"></a><span class="st">  vector[q] b;                  // canonical coefficients for Y</span></span>
-<span id="cb156-13"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-13" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma_u;        // SD for canonical variate u</span></span>
-<span id="cb156-14"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-14" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma_v;        // SD for canonical variate v</span></span>
-<span id="cb156-15"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-15" tabindex="-1"></a><span class="st">  real&lt;lower=-1, upper=1&gt; rho;  // canonical correlation</span></span>
-<span id="cb156-16"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-16" tabindex="-1"></a><span class="st">  </span></span>
-<span id="cb156-17"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-17" tabindex="-1"></a><span class="st">  // Hierarchical priors for better regularization</span></span>
-<span id="cb156-18"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-18" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; tau_a;          // hierarchical scale for a</span></span>
-<span id="cb156-19"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-19" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; tau_b;          // hierarchical scale for b</span></span>
-<span id="cb156-20"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-20" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb156-21"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-21" tabindex="-1"></a></span>
-<span id="cb156-22"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-22" tabindex="-1"></a><span class="st">transformed parameters {</span></span>
-<span id="cb156-23"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-23" tabindex="-1"></a><span class="st">  vector[N] u;                  // canonical variate for X</span></span>
-<span id="cb156-24"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-24" tabindex="-1"></a><span class="st">  vector[N] v;                  // canonical variate for Y</span></span>
-<span id="cb156-25"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-25" tabindex="-1"></a><span class="st">  </span></span>
-<span id="cb156-26"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-26" tabindex="-1"></a><span class="st">  // Compute canonical variates</span></span>
-<span id="cb156-27"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-27" tabindex="-1"></a><span class="st">  u = X * a;</span></span>
-<span id="cb156-28"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-28" tabindex="-1"></a><span class="st">  v = Y * b;</span></span>
-<span id="cb156-29"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-29" tabindex="-1"></a><span class="st">  </span></span>
-<span id="cb156-30"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-30" tabindex="-1"></a><span class="st">  // Standardize canonical variates for identifiability</span></span>
-<span id="cb156-31"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-31" tabindex="-1"></a><span class="st">  real u_mean = mean(u);</span></span>
-<span id="cb156-32"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-32" tabindex="-1"></a><span class="st">  real v_mean = mean(v);</span></span>
-<span id="cb156-33"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-33" tabindex="-1"></a><span class="st">  real u_sd = sd(u);</span></span>
-<span id="cb156-34"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-34" tabindex="-1"></a><span class="st">  real v_sd = sd(v);</span></span>
-<span id="cb156-35"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-35" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb156-36"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-36" tabindex="-1"></a></span>
-<span id="cb156-37"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-37" tabindex="-1"></a><span class="st">model {</span></span>
-<span id="cb156-38"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-38" tabindex="-1"></a><span class="st">  // Hierarchical priors</span></span>
-<span id="cb156-39"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-39" tabindex="-1"></a><span class="st">  tau_a ~ cauchy(0, 1);</span></span>
-<span id="cb156-40"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-40" tabindex="-1"></a><span class="st">  tau_b ~ cauchy(0, 1);</span></span>
-<span id="cb156-41"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-41" tabindex="-1"></a><span class="st">  </span></span>
-<span id="cb156-42"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-42" tabindex="-1"></a><span class="st">  // Priors for canonical coefficients with hierarchical regularization</span></span>
-<span id="cb156-43"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-43" tabindex="-1"></a><span class="st">  a ~ normal(0, tau_a);</span></span>
-<span id="cb156-44"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-44" tabindex="-1"></a><span class="st">  b ~ normal(0, tau_b);</span></span>
-<span id="cb156-45"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-45" tabindex="-1"></a><span class="st">  </span></span>
-<span id="cb156-46"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-46" tabindex="-1"></a><span class="st">  // Priors for variance parameters</span></span>
-<span id="cb156-47"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-47" tabindex="-1"></a><span class="st">  sigma_u ~ cauchy(0, 1);</span></span>
-<span id="cb156-48"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-48" tabindex="-1"></a><span class="st">  sigma_v ~ cauchy(0, 1);</span></span>
-<span id="cb156-49"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-49" tabindex="-1"></a><span class="st">  </span></span>
-<span id="cb156-50"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-50" tabindex="-1"></a><span class="st">  // Prior for canonical correlation</span></span>
-<span id="cb156-51"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-51" tabindex="-1"></a><span class="st">  rho ~ beta(2, 2);  // Slightly informative prior favoring moderate correlations</span></span>
-<span id="cb156-52"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-52" tabindex="-1"></a><span class="st">  </span></span>
-<span id="cb156-53"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-53" tabindex="-1"></a><span class="st">  // Likelihood for canonical variates</span></span>
-<span id="cb156-54"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-54" tabindex="-1"></a><span class="st">  u ~ normal(0, sigma_u);</span></span>
-<span id="cb156-55"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-55" tabindex="-1"></a><span class="st">  v ~ normal(rho * u, sigma_v * sqrt(1 - rho^2));</span></span>
-<span id="cb156-56"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-56" tabindex="-1"></a><span class="st">  </span></span>
-<span id="cb156-57"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-57" tabindex="-1"></a><span class="st">  // Constraint for identifiability (optional - can help with convergence)</span></span>
-<span id="cb156-58"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-58" tabindex="-1"></a><span class="st">  target += -0.5 * dot_self(a) - 0.5 * dot_self(b);</span></span>
-<span id="cb156-59"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-59" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb156-60"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-60" tabindex="-1"></a></span>
-<span id="cb156-61"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-61" tabindex="-1"></a><span class="st">generated quantities {</span></span>
-<span id="cb156-62"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-62" tabindex="-1"></a><span class="st">  // Posterior predictions</span></span>
-<span id="cb156-63"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-63" tabindex="-1"></a><span class="st">  vector[N] u_pred;</span></span>
-<span id="cb156-64"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-64" tabindex="-1"></a><span class="st">  vector[N] v_pred;</span></span>
-<span id="cb156-65"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-65" tabindex="-1"></a><span class="st">  matrix[N, p] X_pred;</span></span>
-<span id="cb156-66"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-66" tabindex="-1"></a><span class="st">  matrix[N, q] Y_pred;</span></span>
-<span id="cb156-67"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-67" tabindex="-1"></a><span class="st">  </span></span>
-<span id="cb156-68"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-68" tabindex="-1"></a><span class="st">  // Log likelihood for model comparison</span></span>
-<span id="cb156-69"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-69" tabindex="-1"></a><span class="st">  real log_lik = 0;</span></span>
-<span id="cb156-70"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-70" tabindex="-1"></a><span class="st">  </span></span>
-<span id="cb156-71"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-71" tabindex="-1"></a><span class="st">  // Generate predictions</span></span>
-<span id="cb156-72"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-72" tabindex="-1"></a><span class="st">  for (n in 1:N) {</span></span>
-<span id="cb156-73"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-73" tabindex="-1"></a><span class="st">    u_pred[n] = normal_rng(0, sigma_u);</span></span>
-<span id="cb156-74"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-74" tabindex="-1"></a><span class="st">    v_pred[n] = normal_rng(rho * u_pred[n], sigma_v * sqrt(1 - rho^2));</span></span>
-<span id="cb156-75"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-75" tabindex="-1"></a><span class="st">  }</span></span>
-<span id="cb156-76"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-76" tabindex="-1"></a><span class="st">  </span></span>
-<span id="cb156-77"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-77" tabindex="-1"></a><span class="st">  // Predicted X and Y based on canonical variates</span></span>
-<span id="cb156-78"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-78" tabindex="-1"></a><span class="st">  X_pred = rep_matrix(u_pred, p);</span></span>
-<span id="cb156-79"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-79" tabindex="-1"></a><span class="st">  Y_pred = rep_matrix(v_pred, q);</span></span>
-<span id="cb156-80"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-80" tabindex="-1"></a><span class="st">  </span></span>
-<span id="cb156-81"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-81" tabindex="-1"></a><span class="st">  // Calculate log likelihood</span></span>
-<span id="cb156-82"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-82" tabindex="-1"></a><span class="st">  for (n in 1:N) {</span></span>
-<span id="cb156-83"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-83" tabindex="-1"></a><span class="st">    log_lik += normal_lpdf(u[n] | 0, sigma_u);</span></span>
-<span id="cb156-84"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-84" tabindex="-1"></a><span class="st">    log_lik += normal_lpdf(v[n] | rho * u[n], sigma_v * sqrt(1 - rho^2));</span></span>
-<span id="cb156-85"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-85" tabindex="-1"></a><span class="st">  }</span></span>
-<span id="cb156-86"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-86" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb156-87"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb156-87" tabindex="-1"></a><span class="st">&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb187"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb187-1"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-1" tabindex="-1"></a>stan_model <span class="ot">&lt;-</span> <span class="st">&quot;</span></span>
+<span id="cb187-2"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-2" tabindex="-1"></a><span class="st">data {</span></span>
+<span id="cb187-3"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-3" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; N;               // number of observations</span></span>
+<span id="cb187-4"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-4" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; p;               // number of X variables</span></span>
+<span id="cb187-5"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-5" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; q;               // number of Y variables</span></span>
+<span id="cb187-6"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-6" tabindex="-1"></a><span class="st">  matrix[N, p] X;               // X variables (standardized)</span></span>
+<span id="cb187-7"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-7" tabindex="-1"></a><span class="st">  matrix[N, q] Y;               // Y variables (standardized)</span></span>
+<span id="cb187-8"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-8" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb187-9"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-9" tabindex="-1"></a></span>
+<span id="cb187-10"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-10" tabindex="-1"></a><span class="st">parameters {</span></span>
+<span id="cb187-11"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-11" tabindex="-1"></a><span class="st">  vector[p] a;                  // canonical coefficients for X</span></span>
+<span id="cb187-12"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-12" tabindex="-1"></a><span class="st">  vector[q] b;                  // canonical coefficients for Y</span></span>
+<span id="cb187-13"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-13" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma_u;        // SD for canonical variate u</span></span>
+<span id="cb187-14"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-14" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma_v;        // SD for canonical variate v</span></span>
+<span id="cb187-15"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-15" tabindex="-1"></a><span class="st">  real&lt;lower=-1, upper=1&gt; rho;  // canonical correlation</span></span>
+<span id="cb187-16"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-16" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb187-17"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-17" tabindex="-1"></a><span class="st">  // Hierarchical priors for better regularization</span></span>
+<span id="cb187-18"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-18" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; tau_a;          // hierarchical scale for a</span></span>
+<span id="cb187-19"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-19" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; tau_b;          // hierarchical scale for b</span></span>
+<span id="cb187-20"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-20" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb187-21"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-21" tabindex="-1"></a></span>
+<span id="cb187-22"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-22" tabindex="-1"></a><span class="st">transformed parameters {</span></span>
+<span id="cb187-23"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-23" tabindex="-1"></a><span class="st">  vector[N] u;                  // canonical variate for X</span></span>
+<span id="cb187-24"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-24" tabindex="-1"></a><span class="st">  vector[N] v;                  // canonical variate for Y</span></span>
+<span id="cb187-25"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-25" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb187-26"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-26" tabindex="-1"></a><span class="st">  // Compute canonical variates</span></span>
+<span id="cb187-27"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-27" tabindex="-1"></a><span class="st">  u = X * a;</span></span>
+<span id="cb187-28"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-28" tabindex="-1"></a><span class="st">  v = Y * b;</span></span>
+<span id="cb187-29"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-29" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb187-30"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-30" tabindex="-1"></a><span class="st">  // Standardize canonical variates for identifiability</span></span>
+<span id="cb187-31"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-31" tabindex="-1"></a><span class="st">  real u_mean = mean(u);</span></span>
+<span id="cb187-32"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-32" tabindex="-1"></a><span class="st">  real v_mean = mean(v);</span></span>
+<span id="cb187-33"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-33" tabindex="-1"></a><span class="st">  real u_sd = sd(u);</span></span>
+<span id="cb187-34"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-34" tabindex="-1"></a><span class="st">  real v_sd = sd(v);</span></span>
+<span id="cb187-35"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-35" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb187-36"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-36" tabindex="-1"></a></span>
+<span id="cb187-37"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-37" tabindex="-1"></a><span class="st">model {</span></span>
+<span id="cb187-38"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-38" tabindex="-1"></a><span class="st">  // Hierarchical priors</span></span>
+<span id="cb187-39"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-39" tabindex="-1"></a><span class="st">  tau_a ~ cauchy(0, 1);</span></span>
+<span id="cb187-40"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-40" tabindex="-1"></a><span class="st">  tau_b ~ cauchy(0, 1);</span></span>
+<span id="cb187-41"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-41" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb187-42"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-42" tabindex="-1"></a><span class="st">  // Priors for canonical coefficients with hierarchical regularization</span></span>
+<span id="cb187-43"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-43" tabindex="-1"></a><span class="st">  a ~ normal(0, tau_a);</span></span>
+<span id="cb187-44"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-44" tabindex="-1"></a><span class="st">  b ~ normal(0, tau_b);</span></span>
+<span id="cb187-45"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-45" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb187-46"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-46" tabindex="-1"></a><span class="st">  // Priors for variance parameters</span></span>
+<span id="cb187-47"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-47" tabindex="-1"></a><span class="st">  sigma_u ~ cauchy(0, 1);</span></span>
+<span id="cb187-48"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-48" tabindex="-1"></a><span class="st">  sigma_v ~ cauchy(0, 1);</span></span>
+<span id="cb187-49"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-49" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb187-50"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-50" tabindex="-1"></a><span class="st">  // Prior for canonical correlation</span></span>
+<span id="cb187-51"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-51" tabindex="-1"></a><span class="st">  rho ~ beta(2, 2);  // Slightly informative prior favoring moderate correlations</span></span>
+<span id="cb187-52"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-52" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb187-53"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-53" tabindex="-1"></a><span class="st">  // Likelihood for canonical variates</span></span>
+<span id="cb187-54"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-54" tabindex="-1"></a><span class="st">  u ~ normal(0, sigma_u);</span></span>
+<span id="cb187-55"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-55" tabindex="-1"></a><span class="st">  v ~ normal(rho * u, sigma_v * sqrt(1 - rho^2));</span></span>
+<span id="cb187-56"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-56" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb187-57"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-57" tabindex="-1"></a><span class="st">  // Constraint for identifiability (optional - can help with convergence)</span></span>
+<span id="cb187-58"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-58" tabindex="-1"></a><span class="st">  target += -0.5 * dot_self(a) - 0.5 * dot_self(b);</span></span>
+<span id="cb187-59"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-59" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb187-60"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-60" tabindex="-1"></a></span>
+<span id="cb187-61"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-61" tabindex="-1"></a><span class="st">generated quantities {</span></span>
+<span id="cb187-62"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-62" tabindex="-1"></a><span class="st">  // Posterior predictions</span></span>
+<span id="cb187-63"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-63" tabindex="-1"></a><span class="st">  vector[N] u_pred;</span></span>
+<span id="cb187-64"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-64" tabindex="-1"></a><span class="st">  vector[N] v_pred;</span></span>
+<span id="cb187-65"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-65" tabindex="-1"></a><span class="st">  matrix[N, p] X_pred;</span></span>
+<span id="cb187-66"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-66" tabindex="-1"></a><span class="st">  matrix[N, q] Y_pred;</span></span>
+<span id="cb187-67"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-67" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb187-68"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-68" tabindex="-1"></a><span class="st">  // Log likelihood for model comparison</span></span>
+<span id="cb187-69"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-69" tabindex="-1"></a><span class="st">  real log_lik = 0;</span></span>
+<span id="cb187-70"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-70" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb187-71"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-71" tabindex="-1"></a><span class="st">  // Generate predictions</span></span>
+<span id="cb187-72"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-72" tabindex="-1"></a><span class="st">  for (n in 1:N) {</span></span>
+<span id="cb187-73"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-73" tabindex="-1"></a><span class="st">    u_pred[n] = normal_rng(0, sigma_u);</span></span>
+<span id="cb187-74"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-74" tabindex="-1"></a><span class="st">    v_pred[n] = normal_rng(rho * u_pred[n], sigma_v * sqrt(1 - rho^2));</span></span>
+<span id="cb187-75"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-75" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb187-76"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-76" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb187-77"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-77" tabindex="-1"></a><span class="st">  // Predicted X and Y based on canonical variates</span></span>
+<span id="cb187-78"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-78" tabindex="-1"></a><span class="st">  X_pred = rep_matrix(u_pred, p);</span></span>
+<span id="cb187-79"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-79" tabindex="-1"></a><span class="st">  Y_pred = rep_matrix(v_pred, q);</span></span>
+<span id="cb187-80"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-80" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb187-81"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-81" tabindex="-1"></a><span class="st">  // Calculate log likelihood</span></span>
+<span id="cb187-82"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-82" tabindex="-1"></a><span class="st">  for (n in 1:N) {</span></span>
+<span id="cb187-83"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-83" tabindex="-1"></a><span class="st">    log_lik += normal_lpdf(u[n] | 0, sigma_u);</span></span>
+<span id="cb187-84"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-84" tabindex="-1"></a><span class="st">    log_lik += normal_lpdf(v[n] | rho * u[n], sigma_v * sqrt(1 - rho^2));</span></span>
+<span id="cb187-85"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-85" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb187-86"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-86" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb187-87"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb187-87" tabindex="-1"></a><span class="st">&quot;</span></span></code></pre></div>
 <p>This Stan model implements Bayesian Canonical Correlation Analysis by first defining the data structure with <code>N</code> observations, <code>p</code> X variables, and <code>q</code> Y variables stored in matrices <code>X</code> and <code>Y</code>. The parameters section declares the key unknowns: canonical coefficient vectors <code>a</code> and <code>b</code> that will create linear combinations of the original variables, standard deviations <code>sigma_u</code> and <code>sigma_v</code> for the canonical variates, the canonical correlation <code>rho</code> (constrained between -1 and 1), and hierarchical regularization parameters <code>tau_a</code> and <code>tau_b</code>. In the transformed parameters block, the model computes the canonical variates <code>u = X * a</code> and <code>v = Y * b</code>, which are the linear combinations that maximize correlation between the two sets of variables, along with their means and standard deviations for standardization purposes.</p>
 <p>The model block establishes the probabilistic relationships through priors and likelihood functions. Hierarchical priors are set with <code>tau_a ~ cauchy(0, 1)</code> and <code>tau_b ~ cauchy(0, 1)</code>, which then inform the canonical coefficients <code>a ~ normal(0, tau_a)</code> and <code>b ~ normal(0, tau_b)</code>, providing adaptive regularization. The variance parameters <code>sigma_u</code> and <code>sigma_v</code> receive Cauchy priors, while <code>rho</code> gets a Beta(2,2) prior favoring moderate correlations. The core likelihood assumes <code>u ~ normal(0, sigma_u)</code> and <code>v ~ normal(rho * u, sigma_v * sqrt(1 - rho^2))</code>, establishing that the canonical variates follow a bivariate normal distribution with correlation <code>rho</code>. The model adds an identifiability constraint <code>target += -0.5 * dot_self(a) - 0.5 * dot_self(b)</code> to prevent scaling issues. Finally, the generated quantities block creates posterior predictions by sampling new canonical variates <code>u_pred</code> and <code>v_pred</code> from their respective distributions, generates predicted data matrices <code>X_pred</code> and <code>Y_pred</code>, and computes the log-likelihood <code>log_lik</code> for model comparison purposes.</p>
 <div id="fitting-the-model" class="section level4 hasAnchor" number="10.1.2.1">
 <h4><span class="header-section-number">10.1.2.1</span> Fitting the Model<a href="bayesian-canonical-correlation-analysis-in-stan.html#fitting-the-model" class="anchor-section" aria-label="Anchor link to header"></a></h4>
 <p>Prepare the data and fit the model using <code>rstan</code>.</p>
-<div class="sourceCode" id="cb157"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb157-1"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-1" tabindex="-1"></a>X_scaled <span class="ot">&lt;-</span> <span class="fu">scale</span>(X_train)</span>
-<span id="cb157-2"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-2" tabindex="-1"></a>Y_scaled <span class="ot">&lt;-</span> <span class="fu">scale</span>(Y_train)</span>
-<span id="cb157-3"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-3" tabindex="-1"></a></span>
-<span id="cb157-4"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-4" tabindex="-1"></a>stan_data <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb157-5"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-5" tabindex="-1"></a>  <span class="at">N =</span> <span class="fu">nrow</span>(X_scaled),</span>
-<span id="cb157-6"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-6" tabindex="-1"></a>  <span class="at">p =</span> <span class="fu">ncol</span>(X_scaled),</span>
-<span id="cb157-7"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-7" tabindex="-1"></a>  <span class="at">q =</span> <span class="fu">ncol</span>(Y_scaled),</span>
-<span id="cb157-8"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-8" tabindex="-1"></a>  <span class="at">X =</span> X_scaled,</span>
-<span id="cb157-9"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-9" tabindex="-1"></a>  <span class="at">Y =</span> Y_scaled</span>
-<span id="cb157-10"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-10" tabindex="-1"></a>)</span>
-<span id="cb157-11"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-11" tabindex="-1"></a></span>
-<span id="cb157-12"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-12" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Stan data structure:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb157-13"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-13" tabindex="-1"></a><span class="fu">str</span>(stan_data)</span>
-<span id="cb157-14"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-14" tabindex="-1"></a></span>
-<span id="cb157-15"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-15" tabindex="-1"></a><span class="co"># Compile and fit the model</span></span>
-<span id="cb157-16"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-16" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Compiling and fitting Stan model...</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb157-17"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-17" tabindex="-1"></a>fit_cca <span class="ot">&lt;-</span> <span class="fu">stan</span>(</span>
-<span id="cb157-18"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-18" tabindex="-1"></a>  <span class="at">model_code =</span> stan_model,</span>
-<span id="cb157-19"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-19" tabindex="-1"></a>  <span class="at">data =</span> stan_data,</span>
-<span id="cb157-20"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-20" tabindex="-1"></a>  <span class="at">iter =</span> <span class="dv">2000</span>,</span>
-<span id="cb157-21"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-21" tabindex="-1"></a>  <span class="at">warmup =</span> <span class="dv">1000</span>,</span>
-<span id="cb157-22"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-22" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">4</span>,</span>
-<span id="cb157-23"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-23" tabindex="-1"></a>  <span class="at">cores =</span> <span class="dv">4</span>,</span>
-<span id="cb157-24"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-24" tabindex="-1"></a>  <span class="at">control =</span> <span class="fu">list</span>(<span class="at">adapt_delta =</span> <span class="fl">0.95</span>, <span class="at">max_treedepth =</span> <span class="dv">12</span>),</span>
-<span id="cb157-25"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-25" tabindex="-1"></a>  <span class="at">verbose =</span> <span class="cn">TRUE</span></span>
-<span id="cb157-26"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-26" tabindex="-1"></a>)</span>
-<span id="cb157-27"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-27" tabindex="-1"></a></span>
-<span id="cb157-28"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-28" tabindex="-1"></a><span class="co"># Model diagnostics</span></span>
-<span id="cb157-29"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-29" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Model Summary:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb157-30"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-30" tabindex="-1"></a><span class="fu">print</span>(fit_cca, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;rho&quot;</span>, <span class="st">&quot;sigma_u&quot;</span>, <span class="st">&quot;sigma_v&quot;</span>, <span class="st">&quot;tau_a&quot;</span>, <span class="st">&quot;tau_b&quot;</span>))</span>
-<span id="cb157-31"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-31" tabindex="-1"></a></span>
-<span id="cb157-32"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-32" tabindex="-1"></a><span class="co"># Check convergence diagnostics</span></span>
-<span id="cb157-33"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-33" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Convergence Diagnostics:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb157-34"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-34" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;R-hat values:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb157-35"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-35" tabindex="-1"></a>rhat_values <span class="ot">&lt;-</span> <span class="fu">rhat</span>(fit_cca)</span>
-<span id="cb157-36"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-36" tabindex="-1"></a><span class="fu">print</span>(rhat_values[rhat_values <span class="sc">&gt;</span> <span class="fl">1.1</span>])</span>
-<span id="cb157-37"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-37" tabindex="-1"></a></span>
-<span id="cb157-38"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-38" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Effective sample sizes:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb157-39"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-39" tabindex="-1"></a>eff_samples <span class="ot">&lt;-</span> <span class="fu">neff_ratio</span>(fit_cca)</span>
-<span id="cb157-40"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-40" tabindex="-1"></a><span class="fu">print</span>(eff_samples[eff_samples <span class="sc">&lt;</span> <span class="fl">0.1</span>])</span>
-<span id="cb157-41"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-41" tabindex="-1"></a></span>
-<span id="cb157-42"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-42" tabindex="-1"></a><span class="co"># Extract posterior samples</span></span>
-<span id="cb157-43"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-43" tabindex="-1"></a>posterior_samples <span class="ot">&lt;-</span> <span class="fu">extract</span>(fit_cca)</span>
-<span id="cb157-44"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-44" tabindex="-1"></a></span>
-<span id="cb157-45"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-45" tabindex="-1"></a><span class="co"># Visualization of results</span></span>
-<span id="cb157-46"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-46" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">require</span>(bayesplot)) {</span>
-<span id="cb157-47"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-47" tabindex="-1"></a>  <span class="co"># Trace plots for key parameters</span></span>
-<span id="cb157-48"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-48" tabindex="-1"></a>  <span class="fu">mcmc_trace</span>(fit_cca, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;rho&quot;</span>, <span class="st">&quot;sigma_u&quot;</span>, <span class="st">&quot;sigma_v&quot;</span>))</span>
-<span id="cb157-49"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-49" tabindex="-1"></a>  </span>
-<span id="cb157-50"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-50" tabindex="-1"></a>  <span class="co"># Posterior density plots</span></span>
-<span id="cb157-51"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-51" tabindex="-1"></a>  <span class="fu">mcmc_dens</span>(fit_cca, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;rho&quot;</span>, <span class="st">&quot;sigma_u&quot;</span>, <span class="st">&quot;sigma_v&quot;</span>))</span>
-<span id="cb157-52"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-52" tabindex="-1"></a>  </span>
-<span id="cb157-53"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-53" tabindex="-1"></a>  <span class="co"># Posterior intervals for canonical coefficients</span></span>
-<span id="cb157-54"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-54" tabindex="-1"></a>  <span class="fu">mcmc_intervals</span>(fit_cca, <span class="at">pars =</span> <span class="fu">paste0</span>(<span class="st">&quot;a[&quot;</span>, <span class="dv">1</span><span class="sc">:</span>p, <span class="st">&quot;]&quot;</span>))</span>
-<span id="cb157-55"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-55" tabindex="-1"></a>  <span class="fu">mcmc_intervals</span>(fit_cca, <span class="at">pars =</span> <span class="fu">paste0</span>(<span class="st">&quot;b[&quot;</span>, <span class="dv">1</span><span class="sc">:</span>q, <span class="st">&quot;]&quot;</span>))</span>
-<span id="cb157-56"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-56" tabindex="-1"></a>}</span>
-<span id="cb157-57"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-57" tabindex="-1"></a></span>
-<span id="cb157-58"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-58" tabindex="-1"></a><span class="co"># Summary statistics</span></span>
-<span id="cb157-59"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-59" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Posterior Summary for Key Parameters:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb157-60"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-60" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Canonical Correlation (rho):</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb157-61"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-61" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Mean:&quot;</span>, <span class="fu">mean</span>(posterior_samples<span class="sc">$</span>rho), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb157-62"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-62" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;95% CI:&quot;</span>, <span class="fu">quantile</span>(posterior_samples<span class="sc">$</span>rho, <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.975</span>)), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb157-63"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-63" tabindex="-1"></a></span>
-<span id="cb157-64"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-64" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Canonical Coefficients for X (a):</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb157-65"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-65" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">colMeans</span>(posterior_samples<span class="sc">$</span>a))</span>
-<span id="cb157-66"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-66" tabindex="-1"></a></span>
-<span id="cb157-67"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-67" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Canonical Coefficients for Y (b):</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb157-68"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb157-68" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">colMeans</span>(posterior_samples<span class="sc">$</span>b))</span></code></pre></div>
+<div class="sourceCode" id="cb188"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb188-1"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-1" tabindex="-1"></a>X_scaled <span class="ot">&lt;-</span> <span class="fu">scale</span>(X_train)</span>
+<span id="cb188-2"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-2" tabindex="-1"></a>Y_scaled <span class="ot">&lt;-</span> <span class="fu">scale</span>(Y_train)</span>
+<span id="cb188-3"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-3" tabindex="-1"></a></span>
+<span id="cb188-4"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-4" tabindex="-1"></a>stan_data <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb188-5"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-5" tabindex="-1"></a>  <span class="at">N =</span> <span class="fu">nrow</span>(X_scaled),</span>
+<span id="cb188-6"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-6" tabindex="-1"></a>  <span class="at">p =</span> <span class="fu">ncol</span>(X_scaled),</span>
+<span id="cb188-7"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-7" tabindex="-1"></a>  <span class="at">q =</span> <span class="fu">ncol</span>(Y_scaled),</span>
+<span id="cb188-8"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-8" tabindex="-1"></a>  <span class="at">X =</span> X_scaled,</span>
+<span id="cb188-9"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-9" tabindex="-1"></a>  <span class="at">Y =</span> Y_scaled</span>
+<span id="cb188-10"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-10" tabindex="-1"></a>)</span>
+<span id="cb188-11"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-11" tabindex="-1"></a></span>
+<span id="cb188-12"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-12" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Stan data structure:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb188-13"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-13" tabindex="-1"></a><span class="fu">str</span>(stan_data)</span>
+<span id="cb188-14"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-14" tabindex="-1"></a></span>
+<span id="cb188-15"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-15" tabindex="-1"></a><span class="co"># Compile and fit the model</span></span>
+<span id="cb188-16"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-16" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Compiling and fitting Stan model...</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb188-17"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-17" tabindex="-1"></a>fit_cca <span class="ot">&lt;-</span> <span class="fu">stan</span>(</span>
+<span id="cb188-18"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-18" tabindex="-1"></a>  <span class="at">model_code =</span> stan_model,</span>
+<span id="cb188-19"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-19" tabindex="-1"></a>  <span class="at">data =</span> stan_data,</span>
+<span id="cb188-20"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-20" tabindex="-1"></a>  <span class="at">iter =</span> <span class="dv">2000</span>,</span>
+<span id="cb188-21"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-21" tabindex="-1"></a>  <span class="at">warmup =</span> <span class="dv">1000</span>,</span>
+<span id="cb188-22"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-22" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">4</span>,</span>
+<span id="cb188-23"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-23" tabindex="-1"></a>  <span class="at">cores =</span> <span class="dv">4</span>,</span>
+<span id="cb188-24"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-24" tabindex="-1"></a>  <span class="at">control =</span> <span class="fu">list</span>(<span class="at">adapt_delta =</span> <span class="fl">0.95</span>, <span class="at">max_treedepth =</span> <span class="dv">12</span>),</span>
+<span id="cb188-25"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-25" tabindex="-1"></a>  <span class="at">verbose =</span> <span class="cn">TRUE</span></span>
+<span id="cb188-26"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-26" tabindex="-1"></a>)</span>
+<span id="cb188-27"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-27" tabindex="-1"></a></span>
+<span id="cb188-28"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-28" tabindex="-1"></a><span class="co"># Model diagnostics</span></span>
+<span id="cb188-29"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-29" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Model Summary:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb188-30"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-30" tabindex="-1"></a><span class="fu">print</span>(fit_cca, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;rho&quot;</span>, <span class="st">&quot;sigma_u&quot;</span>, <span class="st">&quot;sigma_v&quot;</span>, <span class="st">&quot;tau_a&quot;</span>, <span class="st">&quot;tau_b&quot;</span>))</span>
+<span id="cb188-31"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-31" tabindex="-1"></a></span>
+<span id="cb188-32"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-32" tabindex="-1"></a><span class="co"># Check convergence diagnostics</span></span>
+<span id="cb188-33"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-33" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Convergence Diagnostics:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb188-34"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-34" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;R-hat values:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb188-35"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-35" tabindex="-1"></a>rhat_values <span class="ot">&lt;-</span> <span class="fu">rhat</span>(fit_cca)</span>
+<span id="cb188-36"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-36" tabindex="-1"></a><span class="fu">print</span>(rhat_values[rhat_values <span class="sc">&gt;</span> <span class="fl">1.1</span>])</span>
+<span id="cb188-37"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-37" tabindex="-1"></a></span>
+<span id="cb188-38"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-38" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Effective sample sizes:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb188-39"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-39" tabindex="-1"></a>eff_samples <span class="ot">&lt;-</span> <span class="fu">neff_ratio</span>(fit_cca)</span>
+<span id="cb188-40"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-40" tabindex="-1"></a><span class="fu">print</span>(eff_samples[eff_samples <span class="sc">&lt;</span> <span class="fl">0.1</span>])</span>
+<span id="cb188-41"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-41" tabindex="-1"></a></span>
+<span id="cb188-42"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-42" tabindex="-1"></a><span class="co"># Extract posterior samples</span></span>
+<span id="cb188-43"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-43" tabindex="-1"></a>posterior_samples <span class="ot">&lt;-</span> <span class="fu">extract</span>(fit_cca)</span>
+<span id="cb188-44"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-44" tabindex="-1"></a></span>
+<span id="cb188-45"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-45" tabindex="-1"></a><span class="co"># Visualization of results</span></span>
+<span id="cb188-46"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-46" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">require</span>(bayesplot)) {</span>
+<span id="cb188-47"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-47" tabindex="-1"></a>  <span class="co"># Trace plots for key parameters</span></span>
+<span id="cb188-48"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-48" tabindex="-1"></a>  <span class="fu">mcmc_trace</span>(fit_cca, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;rho&quot;</span>, <span class="st">&quot;sigma_u&quot;</span>, <span class="st">&quot;sigma_v&quot;</span>))</span>
+<span id="cb188-49"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-49" tabindex="-1"></a>  </span>
+<span id="cb188-50"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-50" tabindex="-1"></a>  <span class="co"># Posterior density plots</span></span>
+<span id="cb188-51"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-51" tabindex="-1"></a>  <span class="fu">mcmc_dens</span>(fit_cca, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;rho&quot;</span>, <span class="st">&quot;sigma_u&quot;</span>, <span class="st">&quot;sigma_v&quot;</span>))</span>
+<span id="cb188-52"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-52" tabindex="-1"></a>  </span>
+<span id="cb188-53"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-53" tabindex="-1"></a>  <span class="co"># Posterior intervals for canonical coefficients</span></span>
+<span id="cb188-54"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-54" tabindex="-1"></a>  <span class="fu">mcmc_intervals</span>(fit_cca, <span class="at">pars =</span> <span class="fu">paste0</span>(<span class="st">&quot;a[&quot;</span>, <span class="dv">1</span><span class="sc">:</span>p, <span class="st">&quot;]&quot;</span>))</span>
+<span id="cb188-55"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-55" tabindex="-1"></a>  <span class="fu">mcmc_intervals</span>(fit_cca, <span class="at">pars =</span> <span class="fu">paste0</span>(<span class="st">&quot;b[&quot;</span>, <span class="dv">1</span><span class="sc">:</span>q, <span class="st">&quot;]&quot;</span>))</span>
+<span id="cb188-56"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-56" tabindex="-1"></a>}</span>
+<span id="cb188-57"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-57" tabindex="-1"></a></span>
+<span id="cb188-58"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-58" tabindex="-1"></a><span class="co"># Summary statistics</span></span>
+<span id="cb188-59"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-59" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Posterior Summary for Key Parameters:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb188-60"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-60" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Canonical Correlation (rho):</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb188-61"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-61" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Mean:&quot;</span>, <span class="fu">mean</span>(posterior_samples<span class="sc">$</span>rho), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb188-62"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-62" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;95% CI:&quot;</span>, <span class="fu">quantile</span>(posterior_samples<span class="sc">$</span>rho, <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.975</span>)), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb188-63"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-63" tabindex="-1"></a></span>
+<span id="cb188-64"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-64" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Canonical Coefficients for X (a):</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb188-65"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-65" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">colMeans</span>(posterior_samples<span class="sc">$</span>a))</span>
+<span id="cb188-66"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-66" tabindex="-1"></a></span>
+<span id="cb188-67"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-67" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Canonical Coefficients for Y (b):</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb188-68"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb188-68" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">colMeans</span>(posterior_samples<span class="sc">$</span>b))</span></code></pre></div>
 </div>
 </div>
 <div id="model-validation-on-test-set" class="section level3 hasAnchor" number="10.1.3">
 <h3><span class="header-section-number">10.1.3</span> Model validation on test set<a href="bayesian-canonical-correlation-analysis-in-stan.html#model-validation-on-test-set" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<div class="sourceCode" id="cb158"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb158-1"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb158-1" tabindex="-1"></a>X_test_scaled <span class="ot">&lt;-</span> <span class="fu">scale</span>(X_test, <span class="at">center =</span> <span class="fu">attr</span>(X_scaled, <span class="st">&quot;scaled:center&quot;</span>), </span>
-<span id="cb158-2"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb158-2" tabindex="-1"></a>                       <span class="at">scale =</span> <span class="fu">attr</span>(X_scaled, <span class="st">&quot;scaled:scale&quot;</span>))</span>
-<span id="cb158-3"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb158-3" tabindex="-1"></a>Y_test_scaled <span class="ot">&lt;-</span> <span class="fu">scale</span>(Y_test, <span class="at">center =</span> <span class="fu">attr</span>(Y_scaled, <span class="st">&quot;scaled:center&quot;</span>), </span>
-<span id="cb158-4"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb158-4" tabindex="-1"></a>                       <span class="at">scale =</span> <span class="fu">attr</span>(Y_scaled, <span class="st">&quot;scaled:scale&quot;</span>))</span>
-<span id="cb158-5"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb158-5" tabindex="-1"></a></span>
-<span id="cb158-6"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb158-6" tabindex="-1"></a><span class="co"># Calculate canonical variates for test set</span></span>
-<span id="cb158-7"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb158-7" tabindex="-1"></a>a_mean <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(posterior_samples<span class="sc">$</span>a)</span>
-<span id="cb158-8"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb158-8" tabindex="-1"></a>b_mean <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(posterior_samples<span class="sc">$</span>b)</span>
-<span id="cb158-9"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb158-9" tabindex="-1"></a></span>
-<span id="cb158-10"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb158-10" tabindex="-1"></a>u_test <span class="ot">&lt;-</span> X_test_scaled <span class="sc">%*%</span> a_mean</span>
-<span id="cb158-11"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb158-11" tabindex="-1"></a>v_test <span class="ot">&lt;-</span> Y_test_scaled <span class="sc">%*%</span> b_mean</span>
-<span id="cb158-12"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb158-12" tabindex="-1"></a></span>
-<span id="cb158-13"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb158-13" tabindex="-1"></a>test_correlation <span class="ot">&lt;-</span> <span class="fu">cor</span>(u_test, v_test)</span></code></pre></div>
+<div class="sourceCode" id="cb189"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb189-1"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb189-1" tabindex="-1"></a>X_test_scaled <span class="ot">&lt;-</span> <span class="fu">scale</span>(X_test, <span class="at">center =</span> <span class="fu">attr</span>(X_scaled, <span class="st">&quot;scaled:center&quot;</span>), </span>
+<span id="cb189-2"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb189-2" tabindex="-1"></a>                       <span class="at">scale =</span> <span class="fu">attr</span>(X_scaled, <span class="st">&quot;scaled:scale&quot;</span>))</span>
+<span id="cb189-3"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb189-3" tabindex="-1"></a>Y_test_scaled <span class="ot">&lt;-</span> <span class="fu">scale</span>(Y_test, <span class="at">center =</span> <span class="fu">attr</span>(Y_scaled, <span class="st">&quot;scaled:center&quot;</span>), </span>
+<span id="cb189-4"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb189-4" tabindex="-1"></a>                       <span class="at">scale =</span> <span class="fu">attr</span>(Y_scaled, <span class="st">&quot;scaled:scale&quot;</span>))</span>
+<span id="cb189-5"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb189-5" tabindex="-1"></a></span>
+<span id="cb189-6"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb189-6" tabindex="-1"></a><span class="co"># Calculate canonical variates for test set</span></span>
+<span id="cb189-7"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb189-7" tabindex="-1"></a>a_mean <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(posterior_samples<span class="sc">$</span>a)</span>
+<span id="cb189-8"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb189-8" tabindex="-1"></a>b_mean <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(posterior_samples<span class="sc">$</span>b)</span>
+<span id="cb189-9"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb189-9" tabindex="-1"></a></span>
+<span id="cb189-10"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb189-10" tabindex="-1"></a>u_test <span class="ot">&lt;-</span> X_test_scaled <span class="sc">%*%</span> a_mean</span>
+<span id="cb189-11"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb189-11" tabindex="-1"></a>v_test <span class="ot">&lt;-</span> Y_test_scaled <span class="sc">%*%</span> b_mean</span>
+<span id="cb189-12"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb189-12" tabindex="-1"></a></span>
+<span id="cb189-13"><a href="bayesian-canonical-correlation-analysis-in-stan.html#cb189-13" tabindex="-1"></a>test_correlation <span class="ot">&lt;-</span> <span class="fu">cor</span>(u_test, v_test)</span></code></pre></div>
 </div>
 </div>
 <div id="conclusion-6" class="section level2 hasAnchor" number="10.2">
