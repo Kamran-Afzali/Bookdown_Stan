@@ -1,10 +1,48 @@
 # Bayesian Gaussian Mixture Models
 
-In statistics, a mixture model is a probabilistic model used to represent the presence of subpopulations within an overall population without requiring that an individual belongs to a specific subpopulation. It is a flexible approach that can be used to model complex data containing multiple regions with high probability mass, such as multimodal distributions. A typical finite-dimensional mixture model consists of observed random variables, random latent variables specifying the identity of the mixture component of each observation, mixture weights, and parameters. Mixture models can be used to make statistical inferences about the properties of subpopulations without sub-population identity information. Mixture models are also referred to as latent class models if they assume that some of their parameters differ across unobserved subgroups or classes. 
+A mixture model is a probabilistic framework used to describe populations composed of several unobserved subpopulations or latent components. Rather than assuming that each observation belongs to a single, known class, a mixture model treats membership as uncertain and infers the relative contribution of each latent process to the observed data. This approach is particularly useful when the overall distribution is multimodal or exhibits patterns that cannot be captured by a single parametric form. By representing the data as a weighted sum of simpler distributions, mixture models can approximate complex densities while retaining interpretability.
 
-Bayesian mixture models can be implemented in Stan, a probabilistic programming language. Mixture models assume that a given measurement can be drawn from one of K data generating processes, each with their own set of parameters. Stan allows for the fitting of Bayesian mixture models using its Hamiltonian Monte Carlo sampler. The models can be parameterized in several ways (see below) and used directly for modeling data with multimodal distributions or as priors for other parameters. The implementation of mixture models in Stan involves defining the model, specifying the priors, and marginalizing out the discrete parameters. Several resources provide examples and tutorials on fitting Bayesian mixture models in Stan, demonstrating the practical implementation of these models.
+In the Gaussian case, the model assumes that each observation arises from one of ( K ) multivariate normal components, each with its own mean and covariance structure. Let ( y_1, \ldots, y_N \in \mathbb{R}^D ) denote the observed data points, where ( D ) is the dimensionality of the space. Each ( y_n ) is modeled as
+[
+p(y_n \mid \theta, {\mu_k, \Sigma_k}*{k=1}^K) = \sum*{k=1}^K \theta_k , \mathcal{N}(y_n \mid \mu_k, \Sigma_k),
+]
+where ( \theta = (\theta_1, \ldots, \theta_K) ) are the mixture weights satisfying ( \theta_k \ge 0 ) and ( \sum_{k=1}^K \theta_k = 1 ). The parameters ( \mu_k \in \mathbb{R}^D ) and ( \Sigma_k \in \mathbb{R}^{D \times D} ) denote the mean vector and covariance matrix of component ( k ). The overall likelihood of the dataset is thus
+[
+p(y_{1:N} \mid \theta, \mu_{1:K}, \Sigma_{1:K}) = \prod_{n=1}^{N} \sum_{k=1}^{K} \theta_k , \mathcal{N}(y_n \mid \mu_k, \Sigma_k).
+]
 
-In this post I will first introduce how mixture models are implemented in Bayesian inference. It is noteworthy to take into consideration non-identifiability inherent these models how the non-identifiability can be tempered with principled prior information. Michael Betancourt has a blogpost describing the problems often encountered with gaussian mixture models, specifically the estimation of parameters of a mixture model and identifiability i.e. the problem with labelling [mixtures](http://mc-stan.org/documentation/case-studies/identifying_mixture_models.html). 
+The Bayesian formulation introduces priors over all unknown parameters, enabling coherent uncertainty quantification and regularization. In the Stan implementation, the mixture weights (\theta) follow a **simplex** constraint, ensuring they sum to one. The means (\mu_k) are given weakly informative Gaussian priors,
+[
+\mu_k \sim \mathcal{N}(0, 3^2),
+]
+while the covariance structure is encoded through the **Cholesky factor** of the correlation matrix (L_k). The prior
+[
+L_k \sim \text{LKJ}_{\text{Cholesky}}(\eta = 4)
+]
+induces a correlation prior with concentration parameter 4, slightly favoring correlations near zero without enforcing independence. The full covariance matrix for component (k) can then be reconstructed as (\Sigma_k = L_k L_k^\top).
+
+Because Stan cannot sample discrete latent variables directly, the component indicators (z_n) are marginalized out analytically. For each data point, the model computes the log-density contribution across all components:
+[
+\text{ps}[k] = \log(\theta_k) + \log \mathcal{N}(y_n \mid \mu_k, L_k L_k^\top),
+]
+and then uses the **log-sum-exp** transformation to combine them stably:
+[
+\text{target} += \log \sum_{k=1}^K \exp(\text{ps}[k]).
+]
+This marginalization preserves the full probabilistic structure of the model while allowing the use of gradient-based samplers such as the No-U-Turn Sampler (NUTS) in Stan.
+
+The model thus represents a fully Bayesian Gaussian mixture with continuous parameter inference. Each parameter sample corresponds to a plausible mixture configuration, and posterior uncertainty reflects both component overlap and weight variability. After inference, one can compute the posterior probability that observation (y_n) belongs to component (k),
+[
+p(z_n = k \mid y_n, \theta, \mu_{1:K}, \Sigma_{1:K}) = \frac{\theta_k , \mathcal{N}(y_n \mid \mu_k, \Sigma_k)}{\sum_{j=1}^K \theta_j , \mathcal{N}(y_n \mid \mu_j, \Sigma_j)},
+]
+yielding soft, probabilistic cluster assignments rather than discrete labels.
+
+In practice, Bayesian Gaussian mixtures implemented in this way are both expressive and stable. They avoid the degeneracies common in maximum-likelihood estimation and automatically incorporate regularization through their priors. Moreover, they provide not only point estimates of the latent structure but also credible intervals for the mixture weights and component parameters, allowing for a principled assessment of uncertainty in clustering and density estimation alike.
+
+In contrast to the Bayesian formulation, the **frequentist approach** to Gaussian mixture modeling typically relies on the **Expectation–Maximization (EM) algorithm** for maximum-likelihood estimation. The EM procedure alternates between computing *responsibilities*—the conditional probabilities (r_{nk} = p(z_n = k \mid y_n, \theta, \mu, \Sigma))—in the E-step, and updating the parameters (\theta_k, \mu_k, \Sigma_k) to maximize the expected complete-data log-likelihood in the M-step. While efficient and deterministic, this approach produces point estimates that ignore posterior uncertainty and can overfit when data are scarce or components overlap. The Bayesian mixture model, by contrast, integrates over parameter uncertainty and regularizes through its priors, yielding a full posterior distribution rather than a single best-fit configuration. In practice, this means that Bayesian inference captures the uncertainty about both component parameters and cluster assignments—whereas EM simply converges to one mode of the likelihood surface, often sensitive to initialization and prone to singular covariance estimates when clusters are small or poorly separated.
+
+
+Here we first introduce how mixture models are implemented in Bayesian inference. It is noteworthy to take into consideration non-identifiability inherent these models how the non-identifiability can be tempered with principled prior information. Michael Betancourt has a blogpost describing the problems often encountered with gaussian mixture models, specifically the estimation of parameters of a mixture model and identifiability i.e. the problem with labelling [mixtures](http://mc-stan.org/documentation/case-studies/identifying_mixture_models.html). 
 
 ## Single varaible example
 

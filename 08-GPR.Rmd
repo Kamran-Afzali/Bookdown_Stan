@@ -86,9 +86,9 @@ The results are then visualized using `ggplot2`. A scatter plot of the original 
 
 
 
-## Bayesian Stan
+## Bayesian GPR
 
-Gaussian process regression (GPR) can also be implemented in a Bayesian context using Stan. In Bayesian GPR, we assume a prior distribution for the unknown function and then update our beliefs about the function based on the observed data. The prior distribution is typically specified as a Gaussian process with a mean function and covariance function that depend on hyperparameters. The likelihood function for the observed data is also assumed to be Gaussian with a mean function equal to the prior mean function and a covariance function equal to the sum of the prior covariance function and a noise term. The hyperparameters of the prior and likelihood functions are estimated from the data using Markov chain Monte Carlo (MCMC) methods.
+Gaussian process regression can also be implemented in a Bayesian context using Stan. In Bayesian GPR, we assume a prior distribution for the unknown function and then update our beliefs about the function based on the observed data. The prior distribution is typically specified as a Gaussian process with a mean function and covariance function that depend on hyperparameters. The likelihood function for the observed data is also assumed to be Gaussian with a mean function equal to the prior mean function and a covariance function equal to the sum of the prior covariance function and a noise term. The hyperparameters of the prior and likelihood functions are estimated from the data using Markov chain Monte Carlo (MCMC) methods.
 
 Here is an example of R code for fitting a Bayesian GPR model using Stan. Let's break down each part of the code step-by-step:
 
@@ -227,9 +227,125 @@ Simulated data is generated for the predictor variable `x` and the response vari
 
 2. Specify Stan Model Code:
 
-```R
-stan_model_code <- " ... "
+
+**1. data block**
+
+```stan
+data {
+  int<lower=1> N;      // number of observations
+  vector[N] x;         // univariate covariate
+  vector[N] y;         // target variable
+  int<lower=1> N2;     // number of test points
+  vector[N2] x2;       // univariate test points
+}
 ```
+
+* `x`, `y` — training inputs and targets.
+* `x2` — test inputs where predictions will be made.
+* `N`, `N2` — number of training and test points.
+
+
+
+**2. transformed data block**
+
+```stan
+transformed data {
+  // Normalize data
+  real xmean = mean(x);
+  real ymean = mean(y);
+  real xsd = sd(x);
+  real ysd = sd(y);
+  array[N] real xn = to_array_1d((x - xmean)/xsd);
+  array[N2] real x2n = to_array_1d((x2 - xmean)/xsd);
+  vector[N] yn = (y - ymean)/ysd;
+  real sigma_intercept = 1;
+  vector[N] zeros = rep_vector(0, N);
+}
+```
+
+* This normalizes both inputs and outputs for numerical stability:
+
+  * $x_n = \frac{x - \bar{x}}{sd(x)}$
+  * $y_n = \frac{y - \bar{y}}{sd(y)}$
+* The test inputs (`x2`) are normalized using the **training mean and sd**.
+* `sigma_intercept = 1` acts like a constant term in the kernel (bias).
+* `zeros` is a zero vector used as the GP mean function (mean-zero prior).
+
+**3. parameters block**
+
+```stan
+parameters {
+  real<lower=0> lengthscale_f; // lengthscale of f
+  real<lower=0> sigma_f;       // scale of f
+  real<lower=0> sigman;        // noise sigma
+}
+```
+
+* `lengthscale_f`: controls how quickly the function varies with `x`.
+* `sigma_f`: output scale (amplitude) of the GP prior.
+* `sigman`: standard deviation of observation noise.
+
+
+**4. model block**
+
+```stan
+model {
+  // covariances and Cholesky decompositions
+  matrix[N, N] K_f = gp_exp_quad_cov(xn, sigma_f, lengthscale_f) +
+                     sigma_intercept^2;
+  matrix[N, N] L_f = cholesky_decompose(add_diag(K_f, sigman^2));
+  // priors
+  lengthscale_f ~ normal(0, 1);
+  sigma_f ~ normal(0, 1);
+  sigman ~ normal(0, 1);
+  // model
+  yn ~ multi_normal_cholesky(zeros, L_f);
+}
+```
+
+#### Kernel and covariance
+
+* `gp_exp_quad_cov` computes the **squared exponential (RBF)** covariance:
+
+  $$
+  K_{ij} = \sigma_f^2 \exp\!\left(-\frac{(x_i - x_j)^2}{2\,l^2}\right)
+  $$
+* Adds a constant term `sigma_intercept^2` (bias kernel).
+* Adds observation noise `sigman^2` to the diagonal:
+  $K = K_f + \sigma_n^2 I$.
+
+#### Likelihood
+
+* `yn ~ multi_normal_cholesky(zeros, L_f);`
+  means $y_n \sim \mathcal{N}(0, K)$.
+
+**5. generated quantities block**
+
+```stan
+generated quantities {
+  // function scaled back to the original scale
+  vector[N2] f = gp_pred_rng(x2n, yn, xn, sigma_f, lengthscale_f, sigman, 1e-9)*ysd + ymean;
+  real sigma = sigman*ysd;
+}
+```
+
+* `gp_pred_rng` draws samples from the **posterior predictive distribution** of the GP at the normalized test inputs `x2n`.
+* Predictions are **re-scaled back** to the original `y` scale using:
+
+  $$
+  f = \text{(predicted normalized value)} \times sd(y) + \bar{y}
+  $$
+* The posterior noise standard deviation `sigma` is also rescaled to match the original data scale.
+
+**Summary of the model’s function**
+
+This code:
+
+1. Normalizes the training data for stable GP computation.
+2. Defines a zero-mean GP prior with RBF covariance.
+3. Learns the hyperparameters `lengthscale_f`, `sigma_f`, and `sigman` from the data.
+4. Generates posterior predictive draws at new points `x2`, rescaled to the original units.
+
 
 The Stan model code is specified as a character string. The model defines the data, parameters, and the statistical model for Bayesian GPR. It uses a Gaussian process kernel to model the relationship between the predictor variable `x` and the response variable `y`. The parameters `mu`, `sigma_f`, `sigma_n`, and `eta` represent the mean function, the covariance function for the underlying Gaussian process, the noise standard deviation, and the latent function values, respectively.
 
