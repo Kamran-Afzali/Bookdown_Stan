@@ -150,7 +150,6 @@ Y_test <- as.matrix(test_data[, (p+1):(p+q)])
 
 ### Stan Model
 Below is the Stan code for a Bayesian CCA model, which estimates the canonical coefficients for one pair of canonical variates.
-
 ```r
 stan_model <- "
 data {

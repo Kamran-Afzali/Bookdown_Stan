@@ -322,7 +322,7 @@ print(p3 + p4)
 
 To understand the practical differences between these approaches, we'll compare their predictive performance and examine how they handle the bias-variance tradeoff inherent in multilevel modeling.
 
-```r
+```{r}
 # Extract log-likelihood for model comparison
 log_lik_intercepts <- extract_log_lik(fit_intercepts)
 log_lik_slopes <- extract_log_lik(fit_slopes)
