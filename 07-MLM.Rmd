@@ -30,7 +30,7 @@ The covariance matrix $\mathbf{\Sigma}$ captures both the variability of group-l
 
 To demonstrate these concepts, we'll work with simulated data that exhibits realistic hierarchical structure. Our simulation includes correlated group effects to showcase the full capability of multilevel models.
 
-```{r}
+```r
 library(tidyverse)
 library(tidymodels)
 library(rstan)
@@ -121,7 +121,7 @@ $$y_{ij} = (\alpha + u_j) + \beta x_{ij} + \epsilon_{ij}$$
 
 where $u_j \sim N(0, \sigma_\alpha^2)$ represents the group-specific deviation from the population intercept $\alpha$. In the Bayesian framework, we place priors on all parameters, including hyperpriors on the variance components.
 
-```{r}
+```r
 # Stan model for random intercepts
 stan_code_intercepts <- "
 data {
@@ -215,7 +215,7 @@ $$y_{ij} = (\alpha + u_j^{(\alpha)}) + (\beta + u_j^{(\beta)}) x_{ij} + \epsilon
 
 where both $u_j^{(\alpha)}$ and $u_j^{(\beta)}$ are group-specific random effects that may be correlated.
 
-```{r}
+```r
 # Stan model for random slopes
 stan_code_slopes <- "
 data {
@@ -322,7 +322,7 @@ print(p3 + p4)
 
 To understand the practical differences between these approaches, we'll compare their predictive performance and examine how they handle the bias-variance tradeoff inherent in multilevel modeling.
 
-```{r}
+```r
 # Extract log-likelihood for model comparison
 log_lik_intercepts <- extract_log_lik(fit_intercepts)
 log_lik_slopes <- extract_log_lik(fit_slopes)
@@ -377,7 +377,7 @@ print(p5)
 
 Understanding multilevel models requires visualizing both the population-level and group-level effects. The following visualizations illuminate the key concepts of shrinkage and partial pooling.
 
-```{r}
+```r
 # Create comprehensive visualization of group effects
 group_summary <- train_data %>%
   group_by(group_id) %>%
