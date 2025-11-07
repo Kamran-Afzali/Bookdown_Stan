@@ -25,7 +25,8 @@ $$
 
 To simulate a series under this model:
 
-```r
+```{r}
+library(ggplot2)
 set.seed(1)
 n <- 100
 alpha <- 0.3
@@ -192,7 +193,7 @@ y_t &\sim \mathcal{N}(\ell_t + b_t + s_{t-m}, \sigma^2)
 \end{aligned}
 $$
 
-```r
+```{r}
 set.seed(3)
 n <- 120
 m <- 12
@@ -212,7 +213,7 @@ for (t in 2:n) {
 }
 ts.plot(y, main = "Simulated Seasonal Holt-Winters Time Series")
 ```
-```r
+```{r}
 ### Stan Model (Additive Seasonal)
 
 stan_model_3='data {
@@ -261,7 +262,7 @@ model {
 
 ### Fit
 
-```r
+```{r}
 library(rstan)
 
 data_list <- list(N = length(y), y = y, m = m)
@@ -288,7 +289,7 @@ df <- data.frame(
 
 ### Visualization
 
-```r
+```{r}
 post <- extract(fit)
 l_hat <- apply(post$l, 2, mean)
 l_ci_lower <- apply(post$l, 2, quantile, 0.025)

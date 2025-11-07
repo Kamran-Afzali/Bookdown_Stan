@@ -23,7 +23,7 @@
 <meta name="author" content="Kamran Afzali" />
 
 
-<meta name="date" content="2025-10-26" />
+<meta name="date" content="2025-11-07" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -348,84 +348,84 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="data-generation-and-preparation" class="section level4 hasAnchor" number="7.2.0.1">
 <h4><span class="header-section-number">7.2.0.1</span> Data Generation and Preparation<a href="bayesian-multilevel-regression-in-stan.html#data-generation-and-preparation" class="anchor-section" aria-label="Anchor link to header"></a></h4>
 <p>To demonstrate these concepts, we’ll work with simulated data that exhibits realistic hierarchical structure. Our simulation includes correlated group effects to showcase the full capability of multilevel models.</p>
-<div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb94-1"><a href="bayesian-multilevel-regression-in-stan.html#cb94-1" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb94-2"><a href="bayesian-multilevel-regression-in-stan.html#cb94-2" tabindex="-1"></a><span class="fu">library</span>(tidymodels)</span>
-<span id="cb94-3"><a href="bayesian-multilevel-regression-in-stan.html#cb94-3" tabindex="-1"></a><span class="fu">library</span>(rstan)</span>
-<span id="cb94-4"><a href="bayesian-multilevel-regression-in-stan.html#cb94-4" tabindex="-1"></a><span class="fu">library</span>(bayesplot)</span>
-<span id="cb94-5"><a href="bayesian-multilevel-regression-in-stan.html#cb94-5" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb94-6"><a href="bayesian-multilevel-regression-in-stan.html#cb94-6" tabindex="-1"></a><span class="fu">library</span>(corrplot)</span>
-<span id="cb94-7"><a href="bayesian-multilevel-regression-in-stan.html#cb94-7" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
-<span id="cb94-8"><a href="bayesian-multilevel-regression-in-stan.html#cb94-8" tabindex="-1"></a></span>
-<span id="cb94-9"><a href="bayesian-multilevel-regression-in-stan.html#cb94-9" tabindex="-1"></a><span class="co"># Set random seed for reproducibility</span></span>
-<span id="cb94-10"><a href="bayesian-multilevel-regression-in-stan.html#cb94-10" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb94-11"><a href="bayesian-multilevel-regression-in-stan.html#cb94-11" tabindex="-1"></a></span>
-<span id="cb94-12"><a href="bayesian-multilevel-regression-in-stan.html#cb94-12" tabindex="-1"></a><span class="co"># Data generation parameters</span></span>
-<span id="cb94-13"><a href="bayesian-multilevel-regression-in-stan.html#cb94-13" tabindex="-1"></a>n_total <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
-<span id="cb94-14"><a href="bayesian-multilevel-regression-in-stan.html#cb94-14" tabindex="-1"></a>n_groups <span class="ot">&lt;-</span> <span class="dv">20</span></span>
-<span id="cb94-15"><a href="bayesian-multilevel-regression-in-stan.html#cb94-15" tabindex="-1"></a>n_per_group <span class="ot">&lt;-</span> n_total <span class="sc">/</span> n_groups</span>
-<span id="cb94-16"><a href="bayesian-multilevel-regression-in-stan.html#cb94-16" tabindex="-1"></a></span>
-<span id="cb94-17"><a href="bayesian-multilevel-regression-in-stan.html#cb94-17" tabindex="-1"></a><span class="co"># Population-level parameters</span></span>
-<span id="cb94-18"><a href="bayesian-multilevel-regression-in-stan.html#cb94-18" tabindex="-1"></a>alpha_pop <span class="ot">&lt;-</span> <span class="dv">40</span>    <span class="co"># population intercept</span></span>
-<span id="cb94-19"><a href="bayesian-multilevel-regression-in-stan.html#cb94-19" tabindex="-1"></a>beta_pop <span class="ot">&lt;-</span> <span class="dv">3</span>      <span class="co"># population slope</span></span>
-<span id="cb94-20"><a href="bayesian-multilevel-regression-in-stan.html#cb94-20" tabindex="-1"></a>sigma_y <span class="ot">&lt;-</span> <span class="dv">4</span>       <span class="co"># residual standard deviation</span></span>
-<span id="cb94-21"><a href="bayesian-multilevel-regression-in-stan.html#cb94-21" tabindex="-1"></a></span>
-<span id="cb94-22"><a href="bayesian-multilevel-regression-in-stan.html#cb94-22" tabindex="-1"></a><span class="co"># Group-level variation parameters</span></span>
-<span id="cb94-23"><a href="bayesian-multilevel-regression-in-stan.html#cb94-23" tabindex="-1"></a>sigma_alpha <span class="ot">&lt;-</span> <span class="dv">8</span>   <span class="co"># SD of group intercepts</span></span>
-<span id="cb94-24"><a href="bayesian-multilevel-regression-in-stan.html#cb94-24" tabindex="-1"></a>sigma_beta <span class="ot">&lt;-</span> <span class="dv">2</span>    <span class="co"># SD of group slopes  </span></span>
-<span id="cb94-25"><a href="bayesian-multilevel-regression-in-stan.html#cb94-25" tabindex="-1"></a>rho <span class="ot">&lt;-</span> <span class="fl">0.3</span>         <span class="co"># correlation between random intercepts and slopes</span></span>
-<span id="cb94-26"><a href="bayesian-multilevel-regression-in-stan.html#cb94-26" tabindex="-1"></a></span>
-<span id="cb94-27"><a href="bayesian-multilevel-regression-in-stan.html#cb94-27" tabindex="-1"></a><span class="co"># Create covariance matrix for group effects</span></span>
-<span id="cb94-28"><a href="bayesian-multilevel-regression-in-stan.html#cb94-28" tabindex="-1"></a>Sigma_group <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(sigma_alpha<span class="sc">^</span><span class="dv">2</span>, rho <span class="sc">*</span> sigma_alpha <span class="sc">*</span> sigma_beta,</span>
-<span id="cb94-29"><a href="bayesian-multilevel-regression-in-stan.html#cb94-29" tabindex="-1"></a>                       rho <span class="sc">*</span> sigma_alpha <span class="sc">*</span> sigma_beta, sigma_beta<span class="sc">^</span><span class="dv">2</span>), </span>
-<span id="cb94-30"><a href="bayesian-multilevel-regression-in-stan.html#cb94-30" tabindex="-1"></a>                     <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
-<span id="cb94-31"><a href="bayesian-multilevel-regression-in-stan.html#cb94-31" tabindex="-1"></a></span>
-<span id="cb94-32"><a href="bayesian-multilevel-regression-in-stan.html#cb94-32" tabindex="-1"></a><span class="co"># Generate group effects</span></span>
-<span id="cb94-33"><a href="bayesian-multilevel-regression-in-stan.html#cb94-33" tabindex="-1"></a>group_effects <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">mvrnorm</span>(n_groups, <span class="at">mu =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>), <span class="at">Sigma =</span> Sigma_group)</span>
-<span id="cb94-34"><a href="bayesian-multilevel-regression-in-stan.html#cb94-34" tabindex="-1"></a>group_intercepts <span class="ot">&lt;-</span> group_effects[, <span class="dv">1</span>]</span>
-<span id="cb94-35"><a href="bayesian-multilevel-regression-in-stan.html#cb94-35" tabindex="-1"></a>group_slopes <span class="ot">&lt;-</span> group_effects[, <span class="dv">2</span>]</span>
-<span id="cb94-36"><a href="bayesian-multilevel-regression-in-stan.html#cb94-36" tabindex="-1"></a></span>
-<span id="cb94-37"><a href="bayesian-multilevel-regression-in-stan.html#cb94-37" tabindex="-1"></a><span class="co"># Generate individual-level data</span></span>
-<span id="cb94-38"><a href="bayesian-multilevel-regression-in-stan.html#cb94-38" tabindex="-1"></a>group_id <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span>n_groups, <span class="at">each =</span> n_per_group)</span>
-<span id="cb94-39"><a href="bayesian-multilevel-regression-in-stan.html#cb94-39" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n_total, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="fl">1.5</span>)</span>
-<span id="cb94-40"><a href="bayesian-multilevel-regression-in-stan.html#cb94-40" tabindex="-1"></a>y <span class="ot">&lt;-</span> (alpha_pop <span class="sc">+</span> group_intercepts[group_id]) <span class="sc">+</span> </span>
-<span id="cb94-41"><a href="bayesian-multilevel-regression-in-stan.html#cb94-41" tabindex="-1"></a>     (beta_pop <span class="sc">+</span> group_slopes[group_id]) <span class="sc">*</span> x <span class="sc">+</span> </span>
-<span id="cb94-42"><a href="bayesian-multilevel-regression-in-stan.html#cb94-42" tabindex="-1"></a>     <span class="fu">rnorm</span>(n_total, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> sigma_y)</span>
-<span id="cb94-43"><a href="bayesian-multilevel-regression-in-stan.html#cb94-43" tabindex="-1"></a></span>
-<span id="cb94-44"><a href="bayesian-multilevel-regression-in-stan.html#cb94-44" tabindex="-1"></a><span class="co"># Create dataset</span></span>
-<span id="cb94-45"><a href="bayesian-multilevel-regression-in-stan.html#cb94-45" tabindex="-1"></a>data_full <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
-<span id="cb94-46"><a href="bayesian-multilevel-regression-in-stan.html#cb94-46" tabindex="-1"></a>  <span class="at">y =</span> y,</span>
-<span id="cb94-47"><a href="bayesian-multilevel-regression-in-stan.html#cb94-47" tabindex="-1"></a>  <span class="at">x =</span> x,</span>
-<span id="cb94-48"><a href="bayesian-multilevel-regression-in-stan.html#cb94-48" tabindex="-1"></a>  <span class="at">group_id =</span> <span class="fu">factor</span>(group_id),</span>
-<span id="cb94-49"><a href="bayesian-multilevel-regression-in-stan.html#cb94-49" tabindex="-1"></a>  <span class="at">group_intercept_true =</span> group_intercepts[group_id],</span>
-<span id="cb94-50"><a href="bayesian-multilevel-regression-in-stan.html#cb94-50" tabindex="-1"></a>  <span class="at">group_slope_true =</span> group_slopes[group_id]</span>
-<span id="cb94-51"><a href="bayesian-multilevel-regression-in-stan.html#cb94-51" tabindex="-1"></a>)</span>
-<span id="cb94-52"><a href="bayesian-multilevel-regression-in-stan.html#cb94-52" tabindex="-1"></a></span>
-<span id="cb94-53"><a href="bayesian-multilevel-regression-in-stan.html#cb94-53" tabindex="-1"></a><span class="co"># Train-test split</span></span>
-<span id="cb94-54"><a href="bayesian-multilevel-regression-in-stan.html#cb94-54" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
-<span id="cb94-55"><a href="bayesian-multilevel-regression-in-stan.html#cb94-55" tabindex="-1"></a>data_split <span class="ot">&lt;-</span> <span class="fu">initial_split</span>(data_full, <span class="at">prop =</span> <span class="fl">0.75</span>, <span class="at">strata =</span> group_id)</span>
-<span id="cb94-56"><a href="bayesian-multilevel-regression-in-stan.html#cb94-56" tabindex="-1"></a>train_data <span class="ot">&lt;-</span> <span class="fu">training</span>(data_split)</span>
-<span id="cb94-57"><a href="bayesian-multilevel-regression-in-stan.html#cb94-57" tabindex="-1"></a>test_data <span class="ot">&lt;-</span> <span class="fu">testing</span>(data_split)</span>
-<span id="cb94-58"><a href="bayesian-multilevel-regression-in-stan.html#cb94-58" tabindex="-1"></a></span>
-<span id="cb94-59"><a href="bayesian-multilevel-regression-in-stan.html#cb94-59" tabindex="-1"></a><span class="co"># Display data structure</span></span>
-<span id="cb94-60"><a href="bayesian-multilevel-regression-in-stan.html#cb94-60" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Dataset structure:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb94-61"><a href="bayesian-multilevel-regression-in-stan.html#cb94-61" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Total observations:&quot;</span>, <span class="fu">nrow</span>(data_full), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb94-62"><a href="bayesian-multilevel-regression-in-stan.html#cb94-62" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Number of groups:&quot;</span>, n_groups, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb94-63"><a href="bayesian-multilevel-regression-in-stan.html#cb94-63" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Average observations per group:&quot;</span>, n_per_group, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb94-64"><a href="bayesian-multilevel-regression-in-stan.html#cb94-64" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Training set size:&quot;</span>, <span class="fu">nrow</span>(train_data), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb94-65"><a href="bayesian-multilevel-regression-in-stan.html#cb94-65" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Test set size:&quot;</span>, <span class="fu">nrow</span>(test_data), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb94-66"><a href="bayesian-multilevel-regression-in-stan.html#cb94-66" tabindex="-1"></a></span>
-<span id="cb94-67"><a href="bayesian-multilevel-regression-in-stan.html#cb94-67" tabindex="-1"></a><span class="co"># Visualize the hierarchical structure</span></span>
-<span id="cb94-68"><a href="bayesian-multilevel-regression-in-stan.html#cb94-68" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(train_data, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">color =</span> group_id)) <span class="sc">+</span></span>
-<span id="cb94-69"><a href="bayesian-multilevel-regression-in-stan.html#cb94-69" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.6</span>, <span class="at">size =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
-<span id="cb94-70"><a href="bayesian-multilevel-regression-in-stan.html#cb94-70" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">size =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
-<span id="cb94-71"><a href="bayesian-multilevel-regression-in-stan.html#cb94-71" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Data Structure: Group-Specific Regression Lines&quot;</span>,</span>
-<span id="cb94-72"><a href="bayesian-multilevel-regression-in-stan.html#cb94-72" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">&quot;Each color represents a different group&quot;</span>,</span>
-<span id="cb94-73"><a href="bayesian-multilevel-regression-in-stan.html#cb94-73" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Predictor (x)&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Outcome (y)&quot;</span>) <span class="sc">+</span></span>
-<span id="cb94-74"><a href="bayesian-multilevel-regression-in-stan.html#cb94-74" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb94-75"><a href="bayesian-multilevel-regression-in-stan.html#cb94-75" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>) <span class="sc">+</span></span>
-<span id="cb94-76"><a href="bayesian-multilevel-regression-in-stan.html#cb94-76" tabindex="-1"></a>  <span class="fu">scale_color_viridis_d</span>()</span>
-<span id="cb94-77"><a href="bayesian-multilevel-regression-in-stan.html#cb94-77" tabindex="-1"></a></span>
-<span id="cb94-78"><a href="bayesian-multilevel-regression-in-stan.html#cb94-78" tabindex="-1"></a><span class="fu">print</span>(p1)</span></code></pre></div>
+<div class="sourceCode" id="cb121"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb121-1"><a href="bayesian-multilevel-regression-in-stan.html#cb121-1" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb121-2"><a href="bayesian-multilevel-regression-in-stan.html#cb121-2" tabindex="-1"></a><span class="fu">library</span>(tidymodels)</span>
+<span id="cb121-3"><a href="bayesian-multilevel-regression-in-stan.html#cb121-3" tabindex="-1"></a><span class="fu">library</span>(rstan)</span>
+<span id="cb121-4"><a href="bayesian-multilevel-regression-in-stan.html#cb121-4" tabindex="-1"></a><span class="fu">library</span>(bayesplot)</span>
+<span id="cb121-5"><a href="bayesian-multilevel-regression-in-stan.html#cb121-5" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb121-6"><a href="bayesian-multilevel-regression-in-stan.html#cb121-6" tabindex="-1"></a><span class="fu">library</span>(corrplot)</span>
+<span id="cb121-7"><a href="bayesian-multilevel-regression-in-stan.html#cb121-7" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb121-8"><a href="bayesian-multilevel-regression-in-stan.html#cb121-8" tabindex="-1"></a></span>
+<span id="cb121-9"><a href="bayesian-multilevel-regression-in-stan.html#cb121-9" tabindex="-1"></a><span class="co"># Set random seed for reproducibility</span></span>
+<span id="cb121-10"><a href="bayesian-multilevel-regression-in-stan.html#cb121-10" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb121-11"><a href="bayesian-multilevel-regression-in-stan.html#cb121-11" tabindex="-1"></a></span>
+<span id="cb121-12"><a href="bayesian-multilevel-regression-in-stan.html#cb121-12" tabindex="-1"></a><span class="co"># Data generation parameters</span></span>
+<span id="cb121-13"><a href="bayesian-multilevel-regression-in-stan.html#cb121-13" tabindex="-1"></a>n_total <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb121-14"><a href="bayesian-multilevel-regression-in-stan.html#cb121-14" tabindex="-1"></a>n_groups <span class="ot">&lt;-</span> <span class="dv">20</span></span>
+<span id="cb121-15"><a href="bayesian-multilevel-regression-in-stan.html#cb121-15" tabindex="-1"></a>n_per_group <span class="ot">&lt;-</span> n_total <span class="sc">/</span> n_groups</span>
+<span id="cb121-16"><a href="bayesian-multilevel-regression-in-stan.html#cb121-16" tabindex="-1"></a></span>
+<span id="cb121-17"><a href="bayesian-multilevel-regression-in-stan.html#cb121-17" tabindex="-1"></a><span class="co"># Population-level parameters</span></span>
+<span id="cb121-18"><a href="bayesian-multilevel-regression-in-stan.html#cb121-18" tabindex="-1"></a>alpha_pop <span class="ot">&lt;-</span> <span class="dv">40</span>    <span class="co"># population intercept</span></span>
+<span id="cb121-19"><a href="bayesian-multilevel-regression-in-stan.html#cb121-19" tabindex="-1"></a>beta_pop <span class="ot">&lt;-</span> <span class="dv">3</span>      <span class="co"># population slope</span></span>
+<span id="cb121-20"><a href="bayesian-multilevel-regression-in-stan.html#cb121-20" tabindex="-1"></a>sigma_y <span class="ot">&lt;-</span> <span class="dv">4</span>       <span class="co"># residual standard deviation</span></span>
+<span id="cb121-21"><a href="bayesian-multilevel-regression-in-stan.html#cb121-21" tabindex="-1"></a></span>
+<span id="cb121-22"><a href="bayesian-multilevel-regression-in-stan.html#cb121-22" tabindex="-1"></a><span class="co"># Group-level variation parameters</span></span>
+<span id="cb121-23"><a href="bayesian-multilevel-regression-in-stan.html#cb121-23" tabindex="-1"></a>sigma_alpha <span class="ot">&lt;-</span> <span class="dv">8</span>   <span class="co"># SD of group intercepts</span></span>
+<span id="cb121-24"><a href="bayesian-multilevel-regression-in-stan.html#cb121-24" tabindex="-1"></a>sigma_beta <span class="ot">&lt;-</span> <span class="dv">2</span>    <span class="co"># SD of group slopes  </span></span>
+<span id="cb121-25"><a href="bayesian-multilevel-regression-in-stan.html#cb121-25" tabindex="-1"></a>rho <span class="ot">&lt;-</span> <span class="fl">0.3</span>         <span class="co"># correlation between random intercepts and slopes</span></span>
+<span id="cb121-26"><a href="bayesian-multilevel-regression-in-stan.html#cb121-26" tabindex="-1"></a></span>
+<span id="cb121-27"><a href="bayesian-multilevel-regression-in-stan.html#cb121-27" tabindex="-1"></a><span class="co"># Create covariance matrix for group effects</span></span>
+<span id="cb121-28"><a href="bayesian-multilevel-regression-in-stan.html#cb121-28" tabindex="-1"></a>Sigma_group <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(sigma_alpha<span class="sc">^</span><span class="dv">2</span>, rho <span class="sc">*</span> sigma_alpha <span class="sc">*</span> sigma_beta,</span>
+<span id="cb121-29"><a href="bayesian-multilevel-regression-in-stan.html#cb121-29" tabindex="-1"></a>                       rho <span class="sc">*</span> sigma_alpha <span class="sc">*</span> sigma_beta, sigma_beta<span class="sc">^</span><span class="dv">2</span>), </span>
+<span id="cb121-30"><a href="bayesian-multilevel-regression-in-stan.html#cb121-30" tabindex="-1"></a>                     <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
+<span id="cb121-31"><a href="bayesian-multilevel-regression-in-stan.html#cb121-31" tabindex="-1"></a></span>
+<span id="cb121-32"><a href="bayesian-multilevel-regression-in-stan.html#cb121-32" tabindex="-1"></a><span class="co"># Generate group effects</span></span>
+<span id="cb121-33"><a href="bayesian-multilevel-regression-in-stan.html#cb121-33" tabindex="-1"></a>group_effects <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">mvrnorm</span>(n_groups, <span class="at">mu =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>), <span class="at">Sigma =</span> Sigma_group)</span>
+<span id="cb121-34"><a href="bayesian-multilevel-regression-in-stan.html#cb121-34" tabindex="-1"></a>group_intercepts <span class="ot">&lt;-</span> group_effects[, <span class="dv">1</span>]</span>
+<span id="cb121-35"><a href="bayesian-multilevel-regression-in-stan.html#cb121-35" tabindex="-1"></a>group_slopes <span class="ot">&lt;-</span> group_effects[, <span class="dv">2</span>]</span>
+<span id="cb121-36"><a href="bayesian-multilevel-regression-in-stan.html#cb121-36" tabindex="-1"></a></span>
+<span id="cb121-37"><a href="bayesian-multilevel-regression-in-stan.html#cb121-37" tabindex="-1"></a><span class="co"># Generate individual-level data</span></span>
+<span id="cb121-38"><a href="bayesian-multilevel-regression-in-stan.html#cb121-38" tabindex="-1"></a>group_id <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span>n_groups, <span class="at">each =</span> n_per_group)</span>
+<span id="cb121-39"><a href="bayesian-multilevel-regression-in-stan.html#cb121-39" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n_total, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="fl">1.5</span>)</span>
+<span id="cb121-40"><a href="bayesian-multilevel-regression-in-stan.html#cb121-40" tabindex="-1"></a>y <span class="ot">&lt;-</span> (alpha_pop <span class="sc">+</span> group_intercepts[group_id]) <span class="sc">+</span> </span>
+<span id="cb121-41"><a href="bayesian-multilevel-regression-in-stan.html#cb121-41" tabindex="-1"></a>     (beta_pop <span class="sc">+</span> group_slopes[group_id]) <span class="sc">*</span> x <span class="sc">+</span> </span>
+<span id="cb121-42"><a href="bayesian-multilevel-regression-in-stan.html#cb121-42" tabindex="-1"></a>     <span class="fu">rnorm</span>(n_total, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> sigma_y)</span>
+<span id="cb121-43"><a href="bayesian-multilevel-regression-in-stan.html#cb121-43" tabindex="-1"></a></span>
+<span id="cb121-44"><a href="bayesian-multilevel-regression-in-stan.html#cb121-44" tabindex="-1"></a><span class="co"># Create dataset</span></span>
+<span id="cb121-45"><a href="bayesian-multilevel-regression-in-stan.html#cb121-45" tabindex="-1"></a>data_full <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb121-46"><a href="bayesian-multilevel-regression-in-stan.html#cb121-46" tabindex="-1"></a>  <span class="at">y =</span> y,</span>
+<span id="cb121-47"><a href="bayesian-multilevel-regression-in-stan.html#cb121-47" tabindex="-1"></a>  <span class="at">x =</span> x,</span>
+<span id="cb121-48"><a href="bayesian-multilevel-regression-in-stan.html#cb121-48" tabindex="-1"></a>  <span class="at">group_id =</span> <span class="fu">factor</span>(group_id),</span>
+<span id="cb121-49"><a href="bayesian-multilevel-regression-in-stan.html#cb121-49" tabindex="-1"></a>  <span class="at">group_intercept_true =</span> group_intercepts[group_id],</span>
+<span id="cb121-50"><a href="bayesian-multilevel-regression-in-stan.html#cb121-50" tabindex="-1"></a>  <span class="at">group_slope_true =</span> group_slopes[group_id]</span>
+<span id="cb121-51"><a href="bayesian-multilevel-regression-in-stan.html#cb121-51" tabindex="-1"></a>)</span>
+<span id="cb121-52"><a href="bayesian-multilevel-regression-in-stan.html#cb121-52" tabindex="-1"></a></span>
+<span id="cb121-53"><a href="bayesian-multilevel-regression-in-stan.html#cb121-53" tabindex="-1"></a><span class="co"># Train-test split</span></span>
+<span id="cb121-54"><a href="bayesian-multilevel-regression-in-stan.html#cb121-54" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb121-55"><a href="bayesian-multilevel-regression-in-stan.html#cb121-55" tabindex="-1"></a>data_split <span class="ot">&lt;-</span> <span class="fu">initial_split</span>(data_full, <span class="at">prop =</span> <span class="fl">0.75</span>, <span class="at">strata =</span> group_id)</span>
+<span id="cb121-56"><a href="bayesian-multilevel-regression-in-stan.html#cb121-56" tabindex="-1"></a>train_data <span class="ot">&lt;-</span> <span class="fu">training</span>(data_split)</span>
+<span id="cb121-57"><a href="bayesian-multilevel-regression-in-stan.html#cb121-57" tabindex="-1"></a>test_data <span class="ot">&lt;-</span> <span class="fu">testing</span>(data_split)</span>
+<span id="cb121-58"><a href="bayesian-multilevel-regression-in-stan.html#cb121-58" tabindex="-1"></a></span>
+<span id="cb121-59"><a href="bayesian-multilevel-regression-in-stan.html#cb121-59" tabindex="-1"></a><span class="co"># Display data structure</span></span>
+<span id="cb121-60"><a href="bayesian-multilevel-regression-in-stan.html#cb121-60" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Dataset structure:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb121-61"><a href="bayesian-multilevel-regression-in-stan.html#cb121-61" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Total observations:&quot;</span>, <span class="fu">nrow</span>(data_full), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb121-62"><a href="bayesian-multilevel-regression-in-stan.html#cb121-62" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Number of groups:&quot;</span>, n_groups, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb121-63"><a href="bayesian-multilevel-regression-in-stan.html#cb121-63" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Average observations per group:&quot;</span>, n_per_group, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb121-64"><a href="bayesian-multilevel-regression-in-stan.html#cb121-64" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Training set size:&quot;</span>, <span class="fu">nrow</span>(train_data), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb121-65"><a href="bayesian-multilevel-regression-in-stan.html#cb121-65" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Test set size:&quot;</span>, <span class="fu">nrow</span>(test_data), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb121-66"><a href="bayesian-multilevel-regression-in-stan.html#cb121-66" tabindex="-1"></a></span>
+<span id="cb121-67"><a href="bayesian-multilevel-regression-in-stan.html#cb121-67" tabindex="-1"></a><span class="co"># Visualize the hierarchical structure</span></span>
+<span id="cb121-68"><a href="bayesian-multilevel-regression-in-stan.html#cb121-68" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(train_data, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">color =</span> group_id)) <span class="sc">+</span></span>
+<span id="cb121-69"><a href="bayesian-multilevel-regression-in-stan.html#cb121-69" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.6</span>, <span class="at">size =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
+<span id="cb121-70"><a href="bayesian-multilevel-regression-in-stan.html#cb121-70" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">size =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb121-71"><a href="bayesian-multilevel-regression-in-stan.html#cb121-71" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Data Structure: Group-Specific Regression Lines&quot;</span>,</span>
+<span id="cb121-72"><a href="bayesian-multilevel-regression-in-stan.html#cb121-72" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">&quot;Each color represents a different group&quot;</span>,</span>
+<span id="cb121-73"><a href="bayesian-multilevel-regression-in-stan.html#cb121-73" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Predictor (x)&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Outcome (y)&quot;</span>) <span class="sc">+</span></span>
+<span id="cb121-74"><a href="bayesian-multilevel-regression-in-stan.html#cb121-74" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb121-75"><a href="bayesian-multilevel-regression-in-stan.html#cb121-75" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>) <span class="sc">+</span></span>
+<span id="cb121-76"><a href="bayesian-multilevel-regression-in-stan.html#cb121-76" tabindex="-1"></a>  <span class="fu">scale_color_viridis_d</span>()</span>
+<span id="cb121-77"><a href="bayesian-multilevel-regression-in-stan.html#cb121-77" tabindex="-1"></a></span>
+<span id="cb121-78"><a href="bayesian-multilevel-regression-in-stan.html#cb121-78" tabindex="-1"></a><span class="fu">print</span>(p1)</span></code></pre></div>
 </div>
 <div id="random-intercepts-model-modeling-baseline-differences" class="section level3 hasAnchor" number="7.2.1">
 <h3><span class="header-section-number">7.2.1</span> Random Intercepts Model: Modeling Baseline Differences<a href="bayesian-multilevel-regression-in-stan.html#random-intercepts-model-modeling-baseline-differences" class="anchor-section" aria-label="Anchor link to header"></a></h3>
@@ -433,86 +433,86 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>Mathematically, the random intercepts model is specified as:</p>
 <p><span class="math display">\[y_{ij} = (\alpha + u_j) + \beta x_{ij} + \epsilon_{ij}\]</span></p>
 <p>where <span class="math inline">\(u_j \sim N(0, \sigma_\alpha^2)\)</span> represents the group-specific deviation from the population intercept <span class="math inline">\(\alpha\)</span>. In the Bayesian framework, we place priors on all parameters, including hyperpriors on the variance components.</p>
-<div class="sourceCode" id="cb95"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb95-1"><a href="bayesian-multilevel-regression-in-stan.html#cb95-1" tabindex="-1"></a><span class="co"># Stan model for random intercepts</span></span>
-<span id="cb95-2"><a href="bayesian-multilevel-regression-in-stan.html#cb95-2" tabindex="-1"></a>stan_code_intercepts <span class="ot">&lt;-</span> <span class="st">&quot;</span></span>
-<span id="cb95-3"><a href="bayesian-multilevel-regression-in-stan.html#cb95-3" tabindex="-1"></a><span class="st">data {</span></span>
-<span id="cb95-4"><a href="bayesian-multilevel-regression-in-stan.html#cb95-4" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; N;                    // number of observations</span></span>
-<span id="cb95-5"><a href="bayesian-multilevel-regression-in-stan.html#cb95-5" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; J;                    // number of groups</span></span>
-<span id="cb95-6"><a href="bayesian-multilevel-regression-in-stan.html#cb95-6" tabindex="-1"></a><span class="st">  vector[N] y;                       // outcome variable</span></span>
-<span id="cb95-7"><a href="bayesian-multilevel-regression-in-stan.html#cb95-7" tabindex="-1"></a><span class="st">  vector[N] x;                       // predictor variable</span></span>
-<span id="cb95-8"><a href="bayesian-multilevel-regression-in-stan.html#cb95-8" tabindex="-1"></a><span class="st">  array[N] int&lt;lower=1, upper=J&gt; group_id;  // group indicators</span></span>
-<span id="cb95-9"><a href="bayesian-multilevel-regression-in-stan.html#cb95-9" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb95-10"><a href="bayesian-multilevel-regression-in-stan.html#cb95-10" tabindex="-1"></a></span>
-<span id="cb95-11"><a href="bayesian-multilevel-regression-in-stan.html#cb95-11" tabindex="-1"></a><span class="st">parameters {</span></span>
-<span id="cb95-12"><a href="bayesian-multilevel-regression-in-stan.html#cb95-12" tabindex="-1"></a><span class="st">  real alpha;                        // population intercept</span></span>
-<span id="cb95-13"><a href="bayesian-multilevel-regression-in-stan.html#cb95-13" tabindex="-1"></a><span class="st">  real beta;                         // population slope</span></span>
-<span id="cb95-14"><a href="bayesian-multilevel-regression-in-stan.html#cb95-14" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma_y;             // residual standard deviation</span></span>
-<span id="cb95-15"><a href="bayesian-multilevel-regression-in-stan.html#cb95-15" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma_alpha;         // standard deviation of group intercepts</span></span>
-<span id="cb95-16"><a href="bayesian-multilevel-regression-in-stan.html#cb95-16" tabindex="-1"></a><span class="st">  vector[J] alpha_raw;               // non-centered group intercepts</span></span>
-<span id="cb95-17"><a href="bayesian-multilevel-regression-in-stan.html#cb95-17" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb95-18"><a href="bayesian-multilevel-regression-in-stan.html#cb95-18" tabindex="-1"></a></span>
-<span id="cb95-19"><a href="bayesian-multilevel-regression-in-stan.html#cb95-19" tabindex="-1"></a><span class="st">transformed parameters {</span></span>
-<span id="cb95-20"><a href="bayesian-multilevel-regression-in-stan.html#cb95-20" tabindex="-1"></a><span class="st">  vector[J] alpha_group = alpha + sigma_alpha * alpha_raw;  // centered parameterization</span></span>
-<span id="cb95-21"><a href="bayesian-multilevel-regression-in-stan.html#cb95-21" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb95-22"><a href="bayesian-multilevel-regression-in-stan.html#cb95-22" tabindex="-1"></a></span>
-<span id="cb95-23"><a href="bayesian-multilevel-regression-in-stan.html#cb95-23" tabindex="-1"></a><span class="st">model {</span></span>
-<span id="cb95-24"><a href="bayesian-multilevel-regression-in-stan.html#cb95-24" tabindex="-1"></a><span class="st">  // Priors</span></span>
-<span id="cb95-25"><a href="bayesian-multilevel-regression-in-stan.html#cb95-25" tabindex="-1"></a><span class="st">  alpha ~ normal(40, 10);</span></span>
-<span id="cb95-26"><a href="bayesian-multilevel-regression-in-stan.html#cb95-26" tabindex="-1"></a><span class="st">  beta ~ normal(3, 5);</span></span>
-<span id="cb95-27"><a href="bayesian-multilevel-regression-in-stan.html#cb95-27" tabindex="-1"></a><span class="st">  sigma_y ~ exponential(0.2);</span></span>
-<span id="cb95-28"><a href="bayesian-multilevel-regression-in-stan.html#cb95-28" tabindex="-1"></a><span class="st">  sigma_alpha ~ exponential(0.1);</span></span>
-<span id="cb95-29"><a href="bayesian-multilevel-regression-in-stan.html#cb95-29" tabindex="-1"></a><span class="st">  alpha_raw ~ std_normal();          // non-centered parameterization</span></span>
-<span id="cb95-30"><a href="bayesian-multilevel-regression-in-stan.html#cb95-30" tabindex="-1"></a><span class="st">  </span></span>
-<span id="cb95-31"><a href="bayesian-multilevel-regression-in-stan.html#cb95-31" tabindex="-1"></a><span class="st">  // Likelihood</span></span>
-<span id="cb95-32"><a href="bayesian-multilevel-regression-in-stan.html#cb95-32" tabindex="-1"></a><span class="st">  for (n in 1:N) {</span></span>
-<span id="cb95-33"><a href="bayesian-multilevel-regression-in-stan.html#cb95-33" tabindex="-1"></a><span class="st">    y[n] ~ normal(alpha_group[group_id[n]] + beta * x[n], sigma_y);</span></span>
-<span id="cb95-34"><a href="bayesian-multilevel-regression-in-stan.html#cb95-34" tabindex="-1"></a><span class="st">  }</span></span>
-<span id="cb95-35"><a href="bayesian-multilevel-regression-in-stan.html#cb95-35" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb95-36"><a href="bayesian-multilevel-regression-in-stan.html#cb95-36" tabindex="-1"></a></span>
-<span id="cb95-37"><a href="bayesian-multilevel-regression-in-stan.html#cb95-37" tabindex="-1"></a><span class="st">generated quantities {</span></span>
-<span id="cb95-38"><a href="bayesian-multilevel-regression-in-stan.html#cb95-38" tabindex="-1"></a><span class="st">  vector[N] y_pred;                  // posterior predictive samples</span></span>
-<span id="cb95-39"><a href="bayesian-multilevel-regression-in-stan.html#cb95-39" tabindex="-1"></a><span class="st">  vector[N] log_lik;                 // log-likelihood for model comparison</span></span>
-<span id="cb95-40"><a href="bayesian-multilevel-regression-in-stan.html#cb95-40" tabindex="-1"></a><span class="st">  </span></span>
-<span id="cb95-41"><a href="bayesian-multilevel-regression-in-stan.html#cb95-41" tabindex="-1"></a><span class="st">  for (n in 1:N) {</span></span>
-<span id="cb95-42"><a href="bayesian-multilevel-regression-in-stan.html#cb95-42" tabindex="-1"></a><span class="st">    y_pred[n] = normal_rng(alpha_group[group_id[n]] + beta * x[n], sigma_y);</span></span>
-<span id="cb95-43"><a href="bayesian-multilevel-regression-in-stan.html#cb95-43" tabindex="-1"></a><span class="st">    log_lik[n] = normal_lpdf(y[n] | alpha_group[group_id[n]] + beta * x[n], sigma_y);</span></span>
-<span id="cb95-44"><a href="bayesian-multilevel-regression-in-stan.html#cb95-44" tabindex="-1"></a><span class="st">  }</span></span>
-<span id="cb95-45"><a href="bayesian-multilevel-regression-in-stan.html#cb95-45" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb95-46"><a href="bayesian-multilevel-regression-in-stan.html#cb95-46" tabindex="-1"></a><span class="st">&quot;</span></span>
-<span id="cb95-47"><a href="bayesian-multilevel-regression-in-stan.html#cb95-47" tabindex="-1"></a></span>
-<span id="cb95-48"><a href="bayesian-multilevel-regression-in-stan.html#cb95-48" tabindex="-1"></a><span class="co"># Prepare data for Stan</span></span>
-<span id="cb95-49"><a href="bayesian-multilevel-regression-in-stan.html#cb95-49" tabindex="-1"></a>stan_data_intercepts <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb95-50"><a href="bayesian-multilevel-regression-in-stan.html#cb95-50" tabindex="-1"></a>  <span class="at">N =</span> <span class="fu">nrow</span>(train_data),</span>
-<span id="cb95-51"><a href="bayesian-multilevel-regression-in-stan.html#cb95-51" tabindex="-1"></a>  <span class="at">J =</span> <span class="fu">length</span>(<span class="fu">unique</span>(train_data<span class="sc">$</span>group_id)),</span>
-<span id="cb95-52"><a href="bayesian-multilevel-regression-in-stan.html#cb95-52" tabindex="-1"></a>  <span class="at">y =</span> train_data<span class="sc">$</span>y,</span>
-<span id="cb95-53"><a href="bayesian-multilevel-regression-in-stan.html#cb95-53" tabindex="-1"></a>  <span class="at">x =</span> train_data<span class="sc">$</span>x,</span>
-<span id="cb95-54"><a href="bayesian-multilevel-regression-in-stan.html#cb95-54" tabindex="-1"></a>  <span class="at">group_id =</span> <span class="fu">as.numeric</span>(train_data<span class="sc">$</span>group_id)</span>
-<span id="cb95-55"><a href="bayesian-multilevel-regression-in-stan.html#cb95-55" tabindex="-1"></a>)</span>
-<span id="cb95-56"><a href="bayesian-multilevel-regression-in-stan.html#cb95-56" tabindex="-1"></a></span>
-<span id="cb95-57"><a href="bayesian-multilevel-regression-in-stan.html#cb95-57" tabindex="-1"></a><span class="co"># Compile and fit the model</span></span>
-<span id="cb95-58"><a href="bayesian-multilevel-regression-in-stan.html#cb95-58" tabindex="-1"></a><span class="fu">rstan_options</span>(<span class="at">auto_write =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb95-59"><a href="bayesian-multilevel-regression-in-stan.html#cb95-59" tabindex="-1"></a><span class="fu">options</span>(<span class="at">mc.cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>())</span>
-<span id="cb95-60"><a href="bayesian-multilevel-regression-in-stan.html#cb95-60" tabindex="-1"></a></span>
-<span id="cb95-61"><a href="bayesian-multilevel-regression-in-stan.html#cb95-61" tabindex="-1"></a>fit_intercepts <span class="ot">&lt;-</span> <span class="fu">stan</span>(</span>
-<span id="cb95-62"><a href="bayesian-multilevel-regression-in-stan.html#cb95-62" tabindex="-1"></a>  <span class="at">model_code =</span> stan_code_intercepts,</span>
-<span id="cb95-63"><a href="bayesian-multilevel-regression-in-stan.html#cb95-63" tabindex="-1"></a>  <span class="at">data =</span> stan_data_intercepts,</span>
-<span id="cb95-64"><a href="bayesian-multilevel-regression-in-stan.html#cb95-64" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">4</span>,</span>
-<span id="cb95-65"><a href="bayesian-multilevel-regression-in-stan.html#cb95-65" tabindex="-1"></a>  <span class="at">iter =</span> <span class="dv">2000</span>,</span>
-<span id="cb95-66"><a href="bayesian-multilevel-regression-in-stan.html#cb95-66" tabindex="-1"></a>  <span class="at">warmup =</span> <span class="dv">1000</span>,</span>
-<span id="cb95-67"><a href="bayesian-multilevel-regression-in-stan.html#cb95-67" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">42</span></span>
-<span id="cb95-68"><a href="bayesian-multilevel-regression-in-stan.html#cb95-68" tabindex="-1"></a>)</span>
-<span id="cb95-69"><a href="bayesian-multilevel-regression-in-stan.html#cb95-69" tabindex="-1"></a></span>
-<span id="cb95-70"><a href="bayesian-multilevel-regression-in-stan.html#cb95-70" tabindex="-1"></a><span class="co"># Model diagnostics</span></span>
-<span id="cb95-71"><a href="bayesian-multilevel-regression-in-stan.html#cb95-71" tabindex="-1"></a><span class="fu">print</span>(fit_intercepts, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;alpha&quot;</span>, <span class="st">&quot;beta&quot;</span>, <span class="st">&quot;sigma_y&quot;</span>, <span class="st">&quot;sigma_alpha&quot;</span>))</span>
-<span id="cb95-72"><a href="bayesian-multilevel-regression-in-stan.html#cb95-72" tabindex="-1"></a></span>
-<span id="cb95-73"><a href="bayesian-multilevel-regression-in-stan.html#cb95-73" tabindex="-1"></a><span class="co"># Extract posterior samples</span></span>
-<span id="cb95-74"><a href="bayesian-multilevel-regression-in-stan.html#cb95-74" tabindex="-1"></a>posterior_intercepts <span class="ot">&lt;-</span> rstan<span class="sc">::</span><span class="fu">extract</span>(fit_intercepts)</span>
-<span id="cb95-75"><a href="bayesian-multilevel-regression-in-stan.html#cb95-75" tabindex="-1"></a></span>
-<span id="cb95-76"><a href="bayesian-multilevel-regression-in-stan.html#cb95-76" tabindex="-1"></a><span class="co"># Visualization of results</span></span>
-<span id="cb95-77"><a href="bayesian-multilevel-regression-in-stan.html#cb95-77" tabindex="-1"></a>alpha_group_post <span class="ot">&lt;-</span> <span class="fu">summary</span>(fit_intercepts, <span class="at">pars =</span> <span class="st">&quot;alpha_group&quot;</span>)<span class="sc">$</span>summary</span>
-<span id="cb95-78"><a href="bayesian-multilevel-regression-in-stan.html#cb95-78" tabindex="-1"></a>alpha_group_est <span class="ot">&lt;-</span> alpha_group_post[, <span class="st">&quot;mean&quot;</span>]</span>
-<span id="cb95-79"><a href="bayesian-multilevel-regression-in-stan.html#cb95-79" tabindex="-1"></a>alpha_group_lower <span class="ot">&lt;-</span> alpha_group_post[, <span class="st">&quot;2.5%&quot;</span>]</span>
-<span id="cb95-80"><a href="bayesian-multilevel-regression-in-stan.html#cb95-80" tabindex="-1"></a>alpha_group_upper <span class="ot">&lt;-</span> alpha_group_post[, <span class="st">&quot;97.5%&quot;</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb122"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb122-1"><a href="bayesian-multilevel-regression-in-stan.html#cb122-1" tabindex="-1"></a><span class="co"># Stan model for random intercepts</span></span>
+<span id="cb122-2"><a href="bayesian-multilevel-regression-in-stan.html#cb122-2" tabindex="-1"></a>stan_code_intercepts <span class="ot">&lt;-</span> <span class="st">&quot;</span></span>
+<span id="cb122-3"><a href="bayesian-multilevel-regression-in-stan.html#cb122-3" tabindex="-1"></a><span class="st">data {</span></span>
+<span id="cb122-4"><a href="bayesian-multilevel-regression-in-stan.html#cb122-4" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; N;                    // number of observations</span></span>
+<span id="cb122-5"><a href="bayesian-multilevel-regression-in-stan.html#cb122-5" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; J;                    // number of groups</span></span>
+<span id="cb122-6"><a href="bayesian-multilevel-regression-in-stan.html#cb122-6" tabindex="-1"></a><span class="st">  vector[N] y;                       // outcome variable</span></span>
+<span id="cb122-7"><a href="bayesian-multilevel-regression-in-stan.html#cb122-7" tabindex="-1"></a><span class="st">  vector[N] x;                       // predictor variable</span></span>
+<span id="cb122-8"><a href="bayesian-multilevel-regression-in-stan.html#cb122-8" tabindex="-1"></a><span class="st">  array[N] int&lt;lower=1, upper=J&gt; group_id;  // group indicators</span></span>
+<span id="cb122-9"><a href="bayesian-multilevel-regression-in-stan.html#cb122-9" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb122-10"><a href="bayesian-multilevel-regression-in-stan.html#cb122-10" tabindex="-1"></a></span>
+<span id="cb122-11"><a href="bayesian-multilevel-regression-in-stan.html#cb122-11" tabindex="-1"></a><span class="st">parameters {</span></span>
+<span id="cb122-12"><a href="bayesian-multilevel-regression-in-stan.html#cb122-12" tabindex="-1"></a><span class="st">  real alpha;                        // population intercept</span></span>
+<span id="cb122-13"><a href="bayesian-multilevel-regression-in-stan.html#cb122-13" tabindex="-1"></a><span class="st">  real beta;                         // population slope</span></span>
+<span id="cb122-14"><a href="bayesian-multilevel-regression-in-stan.html#cb122-14" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma_y;             // residual standard deviation</span></span>
+<span id="cb122-15"><a href="bayesian-multilevel-regression-in-stan.html#cb122-15" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma_alpha;         // standard deviation of group intercepts</span></span>
+<span id="cb122-16"><a href="bayesian-multilevel-regression-in-stan.html#cb122-16" tabindex="-1"></a><span class="st">  vector[J] alpha_raw;               // non-centered group intercepts</span></span>
+<span id="cb122-17"><a href="bayesian-multilevel-regression-in-stan.html#cb122-17" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb122-18"><a href="bayesian-multilevel-regression-in-stan.html#cb122-18" tabindex="-1"></a></span>
+<span id="cb122-19"><a href="bayesian-multilevel-regression-in-stan.html#cb122-19" tabindex="-1"></a><span class="st">transformed parameters {</span></span>
+<span id="cb122-20"><a href="bayesian-multilevel-regression-in-stan.html#cb122-20" tabindex="-1"></a><span class="st">  vector[J] alpha_group = alpha + sigma_alpha * alpha_raw;  // centered parameterization</span></span>
+<span id="cb122-21"><a href="bayesian-multilevel-regression-in-stan.html#cb122-21" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb122-22"><a href="bayesian-multilevel-regression-in-stan.html#cb122-22" tabindex="-1"></a></span>
+<span id="cb122-23"><a href="bayesian-multilevel-regression-in-stan.html#cb122-23" tabindex="-1"></a><span class="st">model {</span></span>
+<span id="cb122-24"><a href="bayesian-multilevel-regression-in-stan.html#cb122-24" tabindex="-1"></a><span class="st">  // Priors</span></span>
+<span id="cb122-25"><a href="bayesian-multilevel-regression-in-stan.html#cb122-25" tabindex="-1"></a><span class="st">  alpha ~ normal(40, 10);</span></span>
+<span id="cb122-26"><a href="bayesian-multilevel-regression-in-stan.html#cb122-26" tabindex="-1"></a><span class="st">  beta ~ normal(3, 5);</span></span>
+<span id="cb122-27"><a href="bayesian-multilevel-regression-in-stan.html#cb122-27" tabindex="-1"></a><span class="st">  sigma_y ~ exponential(0.2);</span></span>
+<span id="cb122-28"><a href="bayesian-multilevel-regression-in-stan.html#cb122-28" tabindex="-1"></a><span class="st">  sigma_alpha ~ exponential(0.1);</span></span>
+<span id="cb122-29"><a href="bayesian-multilevel-regression-in-stan.html#cb122-29" tabindex="-1"></a><span class="st">  alpha_raw ~ std_normal();          // non-centered parameterization</span></span>
+<span id="cb122-30"><a href="bayesian-multilevel-regression-in-stan.html#cb122-30" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb122-31"><a href="bayesian-multilevel-regression-in-stan.html#cb122-31" tabindex="-1"></a><span class="st">  // Likelihood</span></span>
+<span id="cb122-32"><a href="bayesian-multilevel-regression-in-stan.html#cb122-32" tabindex="-1"></a><span class="st">  for (n in 1:N) {</span></span>
+<span id="cb122-33"><a href="bayesian-multilevel-regression-in-stan.html#cb122-33" tabindex="-1"></a><span class="st">    y[n] ~ normal(alpha_group[group_id[n]] + beta * x[n], sigma_y);</span></span>
+<span id="cb122-34"><a href="bayesian-multilevel-regression-in-stan.html#cb122-34" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb122-35"><a href="bayesian-multilevel-regression-in-stan.html#cb122-35" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb122-36"><a href="bayesian-multilevel-regression-in-stan.html#cb122-36" tabindex="-1"></a></span>
+<span id="cb122-37"><a href="bayesian-multilevel-regression-in-stan.html#cb122-37" tabindex="-1"></a><span class="st">generated quantities {</span></span>
+<span id="cb122-38"><a href="bayesian-multilevel-regression-in-stan.html#cb122-38" tabindex="-1"></a><span class="st">  vector[N] y_pred;                  // posterior predictive samples</span></span>
+<span id="cb122-39"><a href="bayesian-multilevel-regression-in-stan.html#cb122-39" tabindex="-1"></a><span class="st">  vector[N] log_lik;                 // log-likelihood for model comparison</span></span>
+<span id="cb122-40"><a href="bayesian-multilevel-regression-in-stan.html#cb122-40" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb122-41"><a href="bayesian-multilevel-regression-in-stan.html#cb122-41" tabindex="-1"></a><span class="st">  for (n in 1:N) {</span></span>
+<span id="cb122-42"><a href="bayesian-multilevel-regression-in-stan.html#cb122-42" tabindex="-1"></a><span class="st">    y_pred[n] = normal_rng(alpha_group[group_id[n]] + beta * x[n], sigma_y);</span></span>
+<span id="cb122-43"><a href="bayesian-multilevel-regression-in-stan.html#cb122-43" tabindex="-1"></a><span class="st">    log_lik[n] = normal_lpdf(y[n] | alpha_group[group_id[n]] + beta * x[n], sigma_y);</span></span>
+<span id="cb122-44"><a href="bayesian-multilevel-regression-in-stan.html#cb122-44" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb122-45"><a href="bayesian-multilevel-regression-in-stan.html#cb122-45" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb122-46"><a href="bayesian-multilevel-regression-in-stan.html#cb122-46" tabindex="-1"></a><span class="st">&quot;</span></span>
+<span id="cb122-47"><a href="bayesian-multilevel-regression-in-stan.html#cb122-47" tabindex="-1"></a></span>
+<span id="cb122-48"><a href="bayesian-multilevel-regression-in-stan.html#cb122-48" tabindex="-1"></a><span class="co"># Prepare data for Stan</span></span>
+<span id="cb122-49"><a href="bayesian-multilevel-regression-in-stan.html#cb122-49" tabindex="-1"></a>stan_data_intercepts <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb122-50"><a href="bayesian-multilevel-regression-in-stan.html#cb122-50" tabindex="-1"></a>  <span class="at">N =</span> <span class="fu">nrow</span>(train_data),</span>
+<span id="cb122-51"><a href="bayesian-multilevel-regression-in-stan.html#cb122-51" tabindex="-1"></a>  <span class="at">J =</span> <span class="fu">length</span>(<span class="fu">unique</span>(train_data<span class="sc">$</span>group_id)),</span>
+<span id="cb122-52"><a href="bayesian-multilevel-regression-in-stan.html#cb122-52" tabindex="-1"></a>  <span class="at">y =</span> train_data<span class="sc">$</span>y,</span>
+<span id="cb122-53"><a href="bayesian-multilevel-regression-in-stan.html#cb122-53" tabindex="-1"></a>  <span class="at">x =</span> train_data<span class="sc">$</span>x,</span>
+<span id="cb122-54"><a href="bayesian-multilevel-regression-in-stan.html#cb122-54" tabindex="-1"></a>  <span class="at">group_id =</span> <span class="fu">as.numeric</span>(train_data<span class="sc">$</span>group_id)</span>
+<span id="cb122-55"><a href="bayesian-multilevel-regression-in-stan.html#cb122-55" tabindex="-1"></a>)</span>
+<span id="cb122-56"><a href="bayesian-multilevel-regression-in-stan.html#cb122-56" tabindex="-1"></a></span>
+<span id="cb122-57"><a href="bayesian-multilevel-regression-in-stan.html#cb122-57" tabindex="-1"></a><span class="co"># Compile and fit the model</span></span>
+<span id="cb122-58"><a href="bayesian-multilevel-regression-in-stan.html#cb122-58" tabindex="-1"></a><span class="fu">rstan_options</span>(<span class="at">auto_write =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb122-59"><a href="bayesian-multilevel-regression-in-stan.html#cb122-59" tabindex="-1"></a><span class="fu">options</span>(<span class="at">mc.cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>())</span>
+<span id="cb122-60"><a href="bayesian-multilevel-regression-in-stan.html#cb122-60" tabindex="-1"></a></span>
+<span id="cb122-61"><a href="bayesian-multilevel-regression-in-stan.html#cb122-61" tabindex="-1"></a>fit_intercepts <span class="ot">&lt;-</span> <span class="fu">stan</span>(</span>
+<span id="cb122-62"><a href="bayesian-multilevel-regression-in-stan.html#cb122-62" tabindex="-1"></a>  <span class="at">model_code =</span> stan_code_intercepts,</span>
+<span id="cb122-63"><a href="bayesian-multilevel-regression-in-stan.html#cb122-63" tabindex="-1"></a>  <span class="at">data =</span> stan_data_intercepts,</span>
+<span id="cb122-64"><a href="bayesian-multilevel-regression-in-stan.html#cb122-64" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">4</span>,</span>
+<span id="cb122-65"><a href="bayesian-multilevel-regression-in-stan.html#cb122-65" tabindex="-1"></a>  <span class="at">iter =</span> <span class="dv">2000</span>,</span>
+<span id="cb122-66"><a href="bayesian-multilevel-regression-in-stan.html#cb122-66" tabindex="-1"></a>  <span class="at">warmup =</span> <span class="dv">1000</span>,</span>
+<span id="cb122-67"><a href="bayesian-multilevel-regression-in-stan.html#cb122-67" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">42</span></span>
+<span id="cb122-68"><a href="bayesian-multilevel-regression-in-stan.html#cb122-68" tabindex="-1"></a>)</span>
+<span id="cb122-69"><a href="bayesian-multilevel-regression-in-stan.html#cb122-69" tabindex="-1"></a></span>
+<span id="cb122-70"><a href="bayesian-multilevel-regression-in-stan.html#cb122-70" tabindex="-1"></a><span class="co"># Model diagnostics</span></span>
+<span id="cb122-71"><a href="bayesian-multilevel-regression-in-stan.html#cb122-71" tabindex="-1"></a><span class="fu">print</span>(fit_intercepts, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;alpha&quot;</span>, <span class="st">&quot;beta&quot;</span>, <span class="st">&quot;sigma_y&quot;</span>, <span class="st">&quot;sigma_alpha&quot;</span>))</span>
+<span id="cb122-72"><a href="bayesian-multilevel-regression-in-stan.html#cb122-72" tabindex="-1"></a></span>
+<span id="cb122-73"><a href="bayesian-multilevel-regression-in-stan.html#cb122-73" tabindex="-1"></a><span class="co"># Extract posterior samples</span></span>
+<span id="cb122-74"><a href="bayesian-multilevel-regression-in-stan.html#cb122-74" tabindex="-1"></a>posterior_intercepts <span class="ot">&lt;-</span> rstan<span class="sc">::</span><span class="fu">extract</span>(fit_intercepts)</span>
+<span id="cb122-75"><a href="bayesian-multilevel-regression-in-stan.html#cb122-75" tabindex="-1"></a></span>
+<span id="cb122-76"><a href="bayesian-multilevel-regression-in-stan.html#cb122-76" tabindex="-1"></a><span class="co"># Visualization of results</span></span>
+<span id="cb122-77"><a href="bayesian-multilevel-regression-in-stan.html#cb122-77" tabindex="-1"></a>alpha_group_post <span class="ot">&lt;-</span> <span class="fu">summary</span>(fit_intercepts, <span class="at">pars =</span> <span class="st">&quot;alpha_group&quot;</span>)<span class="sc">$</span>summary</span>
+<span id="cb122-78"><a href="bayesian-multilevel-regression-in-stan.html#cb122-78" tabindex="-1"></a>alpha_group_est <span class="ot">&lt;-</span> alpha_group_post[, <span class="st">&quot;mean&quot;</span>]</span>
+<span id="cb122-79"><a href="bayesian-multilevel-regression-in-stan.html#cb122-79" tabindex="-1"></a>alpha_group_lower <span class="ot">&lt;-</span> alpha_group_post[, <span class="st">&quot;2.5%&quot;</span>]</span>
+<span id="cb122-80"><a href="bayesian-multilevel-regression-in-stan.html#cb122-80" tabindex="-1"></a>alpha_group_upper <span class="ot">&lt;-</span> alpha_group_post[, <span class="st">&quot;97.5%&quot;</span>]</span></code></pre></div>
 </div>
 <div id="random-slopes-model-capturing-varying-effects" class="section level3 hasAnchor" number="7.2.2">
 <h3><span class="header-section-number">7.2.2</span> Random Slopes Model: Capturing Varying Effects<a href="bayesian-multilevel-regression-in-stan.html#random-slopes-model-capturing-varying-effects" class="anchor-section" aria-label="Anchor link to header"></a></h3>
@@ -520,235 +520,235 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>The mathematical specification becomes:</p>
 <p><span class="math display">\[y_{ij} = (\alpha + u_j^{(\alpha)}) + (\beta + u_j^{(\beta)}) x_{ij} + \epsilon_{ij}\]</span></p>
 <p>where both <span class="math inline">\(u_j^{(\alpha)}\)</span> and <span class="math inline">\(u_j^{(\beta)}\)</span> are group-specific random effects that may be correlated.</p>
-<div class="sourceCode" id="cb96"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb96-1"><a href="bayesian-multilevel-regression-in-stan.html#cb96-1" tabindex="-1"></a><span class="co"># Stan model for random slopes</span></span>
-<span id="cb96-2"><a href="bayesian-multilevel-regression-in-stan.html#cb96-2" tabindex="-1"></a>stan_code_slopes <span class="ot">&lt;-</span> <span class="st">&quot;</span></span>
-<span id="cb96-3"><a href="bayesian-multilevel-regression-in-stan.html#cb96-3" tabindex="-1"></a><span class="st">data {</span></span>
-<span id="cb96-4"><a href="bayesian-multilevel-regression-in-stan.html#cb96-4" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; N;</span></span>
-<span id="cb96-5"><a href="bayesian-multilevel-regression-in-stan.html#cb96-5" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; J;</span></span>
-<span id="cb96-6"><a href="bayesian-multilevel-regression-in-stan.html#cb96-6" tabindex="-1"></a><span class="st">  vector[N] y;</span></span>
-<span id="cb96-7"><a href="bayesian-multilevel-regression-in-stan.html#cb96-7" tabindex="-1"></a><span class="st">  vector[N] x;</span></span>
-<span id="cb96-8"><a href="bayesian-multilevel-regression-in-stan.html#cb96-8" tabindex="-1"></a><span class="st">  array[N] int&lt;lower=1, upper=J&gt; group_id;</span></span>
-<span id="cb96-9"><a href="bayesian-multilevel-regression-in-stan.html#cb96-9" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb96-10"><a href="bayesian-multilevel-regression-in-stan.html#cb96-10" tabindex="-1"></a></span>
-<span id="cb96-11"><a href="bayesian-multilevel-regression-in-stan.html#cb96-11" tabindex="-1"></a><span class="st">parameters {</span></span>
-<span id="cb96-12"><a href="bayesian-multilevel-regression-in-stan.html#cb96-12" tabindex="-1"></a><span class="st">  real alpha;                        // population intercept</span></span>
-<span id="cb96-13"><a href="bayesian-multilevel-regression-in-stan.html#cb96-13" tabindex="-1"></a><span class="st">  real beta;                         // population slope</span></span>
-<span id="cb96-14"><a href="bayesian-multilevel-regression-in-stan.html#cb96-14" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma_y;             // residual standard deviation</span></span>
-<span id="cb96-15"><a href="bayesian-multilevel-regression-in-stan.html#cb96-15" tabindex="-1"></a><span class="st">  vector&lt;lower=0&gt;[2] sigma_group;    // standard deviations of group effects</span></span>
-<span id="cb96-16"><a href="bayesian-multilevel-regression-in-stan.html#cb96-16" tabindex="-1"></a><span class="st">  cholesky_factor_corr[2] L_Rho;     // Cholesky factor of correlation matrix</span></span>
-<span id="cb96-17"><a href="bayesian-multilevel-regression-in-stan.html#cb96-17" tabindex="-1"></a><span class="st">  matrix[2, J] z_group;              // non-centered group effects</span></span>
-<span id="cb96-18"><a href="bayesian-multilevel-regression-in-stan.html#cb96-18" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb96-19"><a href="bayesian-multilevel-regression-in-stan.html#cb96-19" tabindex="-1"></a></span>
-<span id="cb96-20"><a href="bayesian-multilevel-regression-in-stan.html#cb96-20" tabindex="-1"></a><span class="st">transformed parameters {</span></span>
-<span id="cb96-21"><a href="bayesian-multilevel-regression-in-stan.html#cb96-21" tabindex="-1"></a><span class="st">  matrix[J, 2] group_effects;</span></span>
-<span id="cb96-22"><a href="bayesian-multilevel-regression-in-stan.html#cb96-22" tabindex="-1"></a><span class="st">  group_effects = (diag_pre_multiply(sigma_group, L_Rho) * z_group)&#39;;</span></span>
-<span id="cb96-23"><a href="bayesian-multilevel-regression-in-stan.html#cb96-23" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb96-24"><a href="bayesian-multilevel-regression-in-stan.html#cb96-24" tabindex="-1"></a></span>
-<span id="cb96-25"><a href="bayesian-multilevel-regression-in-stan.html#cb96-25" tabindex="-1"></a><span class="st">model {</span></span>
-<span id="cb96-26"><a href="bayesian-multilevel-regression-in-stan.html#cb96-26" tabindex="-1"></a><span class="st">  // Priors</span></span>
-<span id="cb96-27"><a href="bayesian-multilevel-regression-in-stan.html#cb96-27" tabindex="-1"></a><span class="st">  alpha ~ normal(40, 10);</span></span>
-<span id="cb96-28"><a href="bayesian-multilevel-regression-in-stan.html#cb96-28" tabindex="-1"></a><span class="st">  beta ~ normal(3, 5);</span></span>
-<span id="cb96-29"><a href="bayesian-multilevel-regression-in-stan.html#cb96-29" tabindex="-1"></a><span class="st">  sigma_y ~ exponential(0.2);</span></span>
-<span id="cb96-30"><a href="bayesian-multilevel-regression-in-stan.html#cb96-30" tabindex="-1"></a><span class="st">  sigma_group ~ exponential(0.1);</span></span>
-<span id="cb96-31"><a href="bayesian-multilevel-regression-in-stan.html#cb96-31" tabindex="-1"></a><span class="st">  L_Rho ~ lkj_corr_cholesky(2);</span></span>
-<span id="cb96-32"><a href="bayesian-multilevel-regression-in-stan.html#cb96-32" tabindex="-1"></a><span class="st">  to_vector(z_group) ~ std_normal();</span></span>
-<span id="cb96-33"><a href="bayesian-multilevel-regression-in-stan.html#cb96-33" tabindex="-1"></a><span class="st">  </span></span>
-<span id="cb96-34"><a href="bayesian-multilevel-regression-in-stan.html#cb96-34" tabindex="-1"></a><span class="st">  // Likelihood</span></span>
-<span id="cb96-35"><a href="bayesian-multilevel-regression-in-stan.html#cb96-35" tabindex="-1"></a><span class="st">  for (n in 1:N) {</span></span>
-<span id="cb96-36"><a href="bayesian-multilevel-regression-in-stan.html#cb96-36" tabindex="-1"></a><span class="st">    y[n] ~ normal(alpha + group_effects[group_id[n], 1] + </span></span>
-<span id="cb96-37"><a href="bayesian-multilevel-regression-in-stan.html#cb96-37" tabindex="-1"></a><span class="st">                  (beta + group_effects[group_id[n], 2]) * x[n], sigma_y);</span></span>
-<span id="cb96-38"><a href="bayesian-multilevel-regression-in-stan.html#cb96-38" tabindex="-1"></a><span class="st">  }</span></span>
-<span id="cb96-39"><a href="bayesian-multilevel-regression-in-stan.html#cb96-39" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb96-40"><a href="bayesian-multilevel-regression-in-stan.html#cb96-40" tabindex="-1"></a></span>
-<span id="cb96-41"><a href="bayesian-multilevel-regression-in-stan.html#cb96-41" tabindex="-1"></a><span class="st">generated quantities {</span></span>
-<span id="cb96-42"><a href="bayesian-multilevel-regression-in-stan.html#cb96-42" tabindex="-1"></a><span class="st">  matrix[2, 2] Rho = L_Rho * L_Rho&#39;;  // correlation matrix</span></span>
-<span id="cb96-43"><a href="bayesian-multilevel-regression-in-stan.html#cb96-43" tabindex="-1"></a><span class="st">  vector[N] y_pred;</span></span>
-<span id="cb96-44"><a href="bayesian-multilevel-regression-in-stan.html#cb96-44" tabindex="-1"></a><span class="st">  vector[N] log_lik;</span></span>
-<span id="cb96-45"><a href="bayesian-multilevel-regression-in-stan.html#cb96-45" tabindex="-1"></a><span class="st">  </span></span>
-<span id="cb96-46"><a href="bayesian-multilevel-regression-in-stan.html#cb96-46" tabindex="-1"></a><span class="st">  for (n in 1:N) {</span></span>
-<span id="cb96-47"><a href="bayesian-multilevel-regression-in-stan.html#cb96-47" tabindex="-1"></a><span class="st">    y_pred[n] = normal_rng(alpha + group_effects[group_id[n], 1] + </span></span>
-<span id="cb96-48"><a href="bayesian-multilevel-regression-in-stan.html#cb96-48" tabindex="-1"></a><span class="st">                           (beta + group_effects[group_id[n], 2]) * x[n], sigma_y);</span></span>
-<span id="cb96-49"><a href="bayesian-multilevel-regression-in-stan.html#cb96-49" tabindex="-1"></a><span class="st">    log_lik[n] = normal_lpdf(y[n] | alpha + group_effects[group_id[n], 1] + </span></span>
-<span id="cb96-50"><a href="bayesian-multilevel-regression-in-stan.html#cb96-50" tabindex="-1"></a><span class="st">                             (beta + group_effects[group_id[n], 2]) * x[n], sigma_y);</span></span>
-<span id="cb96-51"><a href="bayesian-multilevel-regression-in-stan.html#cb96-51" tabindex="-1"></a><span class="st">  }</span></span>
-<span id="cb96-52"><a href="bayesian-multilevel-regression-in-stan.html#cb96-52" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb96-53"><a href="bayesian-multilevel-regression-in-stan.html#cb96-53" tabindex="-1"></a><span class="st">&quot;</span></span>
-<span id="cb96-54"><a href="bayesian-multilevel-regression-in-stan.html#cb96-54" tabindex="-1"></a></span>
-<span id="cb96-55"><a href="bayesian-multilevel-regression-in-stan.html#cb96-55" tabindex="-1"></a><span class="co"># Fit random slopes model</span></span>
-<span id="cb96-56"><a href="bayesian-multilevel-regression-in-stan.html#cb96-56" tabindex="-1"></a>fit_slopes <span class="ot">&lt;-</span> <span class="fu">stan</span>(</span>
-<span id="cb96-57"><a href="bayesian-multilevel-regression-in-stan.html#cb96-57" tabindex="-1"></a>  <span class="at">model_code =</span> stan_code_slopes,</span>
-<span id="cb96-58"><a href="bayesian-multilevel-regression-in-stan.html#cb96-58" tabindex="-1"></a>  <span class="at">data =</span> stan_data_intercepts,</span>
-<span id="cb96-59"><a href="bayesian-multilevel-regression-in-stan.html#cb96-59" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">4</span>,</span>
-<span id="cb96-60"><a href="bayesian-multilevel-regression-in-stan.html#cb96-60" tabindex="-1"></a>  <span class="at">iter =</span> <span class="dv">2000</span>,</span>
-<span id="cb96-61"><a href="bayesian-multilevel-regression-in-stan.html#cb96-61" tabindex="-1"></a>  <span class="at">warmup =</span> <span class="dv">1000</span>,</span>
-<span id="cb96-62"><a href="bayesian-multilevel-regression-in-stan.html#cb96-62" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">42</span></span>
-<span id="cb96-63"><a href="bayesian-multilevel-regression-in-stan.html#cb96-63" tabindex="-1"></a>)</span>
-<span id="cb96-64"><a href="bayesian-multilevel-regression-in-stan.html#cb96-64" tabindex="-1"></a></span>
-<span id="cb96-65"><a href="bayesian-multilevel-regression-in-stan.html#cb96-65" tabindex="-1"></a><span class="fu">print</span>(fit_slopes, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;alpha&quot;</span>, <span class="st">&quot;beta&quot;</span>, <span class="st">&quot;sigma_y&quot;</span>, <span class="st">&quot;sigma_group&quot;</span>, <span class="st">&quot;Rho&quot;</span>))</span>
-<span id="cb96-66"><a href="bayesian-multilevel-regression-in-stan.html#cb96-66" tabindex="-1"></a></span>
-<span id="cb96-67"><a href="bayesian-multilevel-regression-in-stan.html#cb96-67" tabindex="-1"></a><span class="co"># Extract and visualize group effects</span></span>
-<span id="cb96-68"><a href="bayesian-multilevel-regression-in-stan.html#cb96-68" tabindex="-1"></a>group_effects_post <span class="ot">&lt;-</span> <span class="fu">summary</span>(fit_slopes, <span class="at">pars =</span> <span class="st">&quot;group_effects&quot;</span>)<span class="sc">$</span>summary</span>
-<span id="cb96-69"><a href="bayesian-multilevel-regression-in-stan.html#cb96-69" tabindex="-1"></a>group_effects_matrix <span class="ot">&lt;-</span> <span class="fu">matrix</span>(group_effects_post[, <span class="st">&quot;mean&quot;</span>], <span class="at">nrow =</span> n_groups, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
-<span id="cb96-70"><a href="bayesian-multilevel-regression-in-stan.html#cb96-70" tabindex="-1"></a></span>
-<span id="cb96-71"><a href="bayesian-multilevel-regression-in-stan.html#cb96-71" tabindex="-1"></a>slopes_comparison <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
-<span id="cb96-72"><a href="bayesian-multilevel-regression-in-stan.html#cb96-72" tabindex="-1"></a>  <span class="at">group =</span> <span class="dv">1</span><span class="sc">:</span>n_groups,</span>
-<span id="cb96-73"><a href="bayesian-multilevel-regression-in-stan.html#cb96-73" tabindex="-1"></a>  <span class="at">true_intercept =</span> group_intercepts,</span>
-<span id="cb96-74"><a href="bayesian-multilevel-regression-in-stan.html#cb96-74" tabindex="-1"></a>  <span class="at">true_slope =</span> group_slopes,</span>
-<span id="cb96-75"><a href="bayesian-multilevel-regression-in-stan.html#cb96-75" tabindex="-1"></a>  <span class="at">est_intercept =</span> group_effects_matrix[, <span class="dv">1</span>],</span>
-<span id="cb96-76"><a href="bayesian-multilevel-regression-in-stan.html#cb96-76" tabindex="-1"></a>  <span class="at">est_slope =</span> group_effects_matrix[, <span class="dv">2</span>]</span>
-<span id="cb96-77"><a href="bayesian-multilevel-regression-in-stan.html#cb96-77" tabindex="-1"></a>)</span>
-<span id="cb96-78"><a href="bayesian-multilevel-regression-in-stan.html#cb96-78" tabindex="-1"></a></span>
-<span id="cb96-79"><a href="bayesian-multilevel-regression-in-stan.html#cb96-79" tabindex="-1"></a>p3 <span class="ot">&lt;-</span> slopes_comparison <span class="sc">%&gt;%</span></span>
-<span id="cb96-80"><a href="bayesian-multilevel-regression-in-stan.html#cb96-80" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> true_slope, <span class="at">y =</span> est_slope)) <span class="sc">+</span></span>
-<span id="cb96-81"><a href="bayesian-multilevel-regression-in-stan.html#cb96-81" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">slope =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">&quot;dashed&quot;</span>, <span class="at">color =</span> <span class="st">&quot;red&quot;</span>) <span class="sc">+</span></span>
-<span id="cb96-82"><a href="bayesian-multilevel-regression-in-stan.html#cb96-82" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>, <span class="at">color =</span> <span class="st">&quot;steelblue&quot;</span>) <span class="sc">+</span></span>
-<span id="cb96-83"><a href="bayesian-multilevel-regression-in-stan.html#cb96-83" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Random Slopes: Estimated vs. True Group Slopes&quot;</span>,</span>
-<span id="cb96-84"><a href="bayesian-multilevel-regression-in-stan.html#cb96-84" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;True Group Slopes&quot;</span>, </span>
-<span id="cb96-85"><a href="bayesian-multilevel-regression-in-stan.html#cb96-85" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;Estimated Group Slopes&quot;</span>) <span class="sc">+</span></span>
-<span id="cb96-86"><a href="bayesian-multilevel-regression-in-stan.html#cb96-86" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb96-87"><a href="bayesian-multilevel-regression-in-stan.html#cb96-87" tabindex="-1"></a>  <span class="fu">coord_fixed</span>()</span>
-<span id="cb96-88"><a href="bayesian-multilevel-regression-in-stan.html#cb96-88" tabindex="-1"></a></span>
-<span id="cb96-89"><a href="bayesian-multilevel-regression-in-stan.html#cb96-89" tabindex="-1"></a>p4 <span class="ot">&lt;-</span> slopes_comparison <span class="sc">%&gt;%</span></span>
-<span id="cb96-90"><a href="bayesian-multilevel-regression-in-stan.html#cb96-90" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> est_intercept, <span class="at">y =</span> est_slope)) <span class="sc">+</span></span>
-<span id="cb96-91"><a href="bayesian-multilevel-regression-in-stan.html#cb96-91" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>, <span class="at">color =</span> <span class="st">&quot;darkgreen&quot;</span>) <span class="sc">+</span></span>
-<span id="cb96-92"><a href="bayesian-multilevel-regression-in-stan.html#cb96-92" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="at">se =</span> <span class="cn">TRUE</span>, <span class="at">color =</span> <span class="st">&quot;red&quot;</span>) <span class="sc">+</span></span>
-<span id="cb96-93"><a href="bayesian-multilevel-regression-in-stan.html#cb96-93" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Correlation Between Group Intercepts and Slopes&quot;</span>,</span>
-<span id="cb96-94"><a href="bayesian-multilevel-regression-in-stan.html#cb96-94" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="fu">paste</span>(<span class="st">&quot;Estimated correlation:&quot;</span>, </span>
-<span id="cb96-95"><a href="bayesian-multilevel-regression-in-stan.html#cb96-95" tabindex="-1"></a>                       <span class="fu">round</span>(<span class="fu">summary</span>(fit_slopes, <span class="at">pars =</span> <span class="st">&quot;Rho&quot;</span>)<span class="sc">$</span>summary[<span class="dv">2</span>, <span class="st">&quot;mean&quot;</span>], <span class="dv">3</span>)),</span>
-<span id="cb96-96"><a href="bayesian-multilevel-regression-in-stan.html#cb96-96" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Group Intercepts&quot;</span>, </span>
-<span id="cb96-97"><a href="bayesian-multilevel-regression-in-stan.html#cb96-97" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;Group Slopes&quot;</span>) <span class="sc">+</span></span>
-<span id="cb96-98"><a href="bayesian-multilevel-regression-in-stan.html#cb96-98" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
-<span id="cb96-99"><a href="bayesian-multilevel-regression-in-stan.html#cb96-99" tabindex="-1"></a></span>
-<span id="cb96-100"><a href="bayesian-multilevel-regression-in-stan.html#cb96-100" tabindex="-1"></a><span class="fu">print</span>(p3 <span class="sc">+</span> p4)</span></code></pre></div>
+<div class="sourceCode" id="cb123"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb123-1"><a href="bayesian-multilevel-regression-in-stan.html#cb123-1" tabindex="-1"></a><span class="co"># Stan model for random slopes</span></span>
+<span id="cb123-2"><a href="bayesian-multilevel-regression-in-stan.html#cb123-2" tabindex="-1"></a>stan_code_slopes <span class="ot">&lt;-</span> <span class="st">&quot;</span></span>
+<span id="cb123-3"><a href="bayesian-multilevel-regression-in-stan.html#cb123-3" tabindex="-1"></a><span class="st">data {</span></span>
+<span id="cb123-4"><a href="bayesian-multilevel-regression-in-stan.html#cb123-4" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; N;</span></span>
+<span id="cb123-5"><a href="bayesian-multilevel-regression-in-stan.html#cb123-5" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; J;</span></span>
+<span id="cb123-6"><a href="bayesian-multilevel-regression-in-stan.html#cb123-6" tabindex="-1"></a><span class="st">  vector[N] y;</span></span>
+<span id="cb123-7"><a href="bayesian-multilevel-regression-in-stan.html#cb123-7" tabindex="-1"></a><span class="st">  vector[N] x;</span></span>
+<span id="cb123-8"><a href="bayesian-multilevel-regression-in-stan.html#cb123-8" tabindex="-1"></a><span class="st">  array[N] int&lt;lower=1, upper=J&gt; group_id;</span></span>
+<span id="cb123-9"><a href="bayesian-multilevel-regression-in-stan.html#cb123-9" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb123-10"><a href="bayesian-multilevel-regression-in-stan.html#cb123-10" tabindex="-1"></a></span>
+<span id="cb123-11"><a href="bayesian-multilevel-regression-in-stan.html#cb123-11" tabindex="-1"></a><span class="st">parameters {</span></span>
+<span id="cb123-12"><a href="bayesian-multilevel-regression-in-stan.html#cb123-12" tabindex="-1"></a><span class="st">  real alpha;                        // population intercept</span></span>
+<span id="cb123-13"><a href="bayesian-multilevel-regression-in-stan.html#cb123-13" tabindex="-1"></a><span class="st">  real beta;                         // population slope</span></span>
+<span id="cb123-14"><a href="bayesian-multilevel-regression-in-stan.html#cb123-14" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma_y;             // residual standard deviation</span></span>
+<span id="cb123-15"><a href="bayesian-multilevel-regression-in-stan.html#cb123-15" tabindex="-1"></a><span class="st">  vector&lt;lower=0&gt;[2] sigma_group;    // standard deviations of group effects</span></span>
+<span id="cb123-16"><a href="bayesian-multilevel-regression-in-stan.html#cb123-16" tabindex="-1"></a><span class="st">  cholesky_factor_corr[2] L_Rho;     // Cholesky factor of correlation matrix</span></span>
+<span id="cb123-17"><a href="bayesian-multilevel-regression-in-stan.html#cb123-17" tabindex="-1"></a><span class="st">  matrix[2, J] z_group;              // non-centered group effects</span></span>
+<span id="cb123-18"><a href="bayesian-multilevel-regression-in-stan.html#cb123-18" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb123-19"><a href="bayesian-multilevel-regression-in-stan.html#cb123-19" tabindex="-1"></a></span>
+<span id="cb123-20"><a href="bayesian-multilevel-regression-in-stan.html#cb123-20" tabindex="-1"></a><span class="st">transformed parameters {</span></span>
+<span id="cb123-21"><a href="bayesian-multilevel-regression-in-stan.html#cb123-21" tabindex="-1"></a><span class="st">  matrix[J, 2] group_effects;</span></span>
+<span id="cb123-22"><a href="bayesian-multilevel-regression-in-stan.html#cb123-22" tabindex="-1"></a><span class="st">  group_effects = (diag_pre_multiply(sigma_group, L_Rho) * z_group)&#39;;</span></span>
+<span id="cb123-23"><a href="bayesian-multilevel-regression-in-stan.html#cb123-23" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb123-24"><a href="bayesian-multilevel-regression-in-stan.html#cb123-24" tabindex="-1"></a></span>
+<span id="cb123-25"><a href="bayesian-multilevel-regression-in-stan.html#cb123-25" tabindex="-1"></a><span class="st">model {</span></span>
+<span id="cb123-26"><a href="bayesian-multilevel-regression-in-stan.html#cb123-26" tabindex="-1"></a><span class="st">  // Priors</span></span>
+<span id="cb123-27"><a href="bayesian-multilevel-regression-in-stan.html#cb123-27" tabindex="-1"></a><span class="st">  alpha ~ normal(40, 10);</span></span>
+<span id="cb123-28"><a href="bayesian-multilevel-regression-in-stan.html#cb123-28" tabindex="-1"></a><span class="st">  beta ~ normal(3, 5);</span></span>
+<span id="cb123-29"><a href="bayesian-multilevel-regression-in-stan.html#cb123-29" tabindex="-1"></a><span class="st">  sigma_y ~ exponential(0.2);</span></span>
+<span id="cb123-30"><a href="bayesian-multilevel-regression-in-stan.html#cb123-30" tabindex="-1"></a><span class="st">  sigma_group ~ exponential(0.1);</span></span>
+<span id="cb123-31"><a href="bayesian-multilevel-regression-in-stan.html#cb123-31" tabindex="-1"></a><span class="st">  L_Rho ~ lkj_corr_cholesky(2);</span></span>
+<span id="cb123-32"><a href="bayesian-multilevel-regression-in-stan.html#cb123-32" tabindex="-1"></a><span class="st">  to_vector(z_group) ~ std_normal();</span></span>
+<span id="cb123-33"><a href="bayesian-multilevel-regression-in-stan.html#cb123-33" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb123-34"><a href="bayesian-multilevel-regression-in-stan.html#cb123-34" tabindex="-1"></a><span class="st">  // Likelihood</span></span>
+<span id="cb123-35"><a href="bayesian-multilevel-regression-in-stan.html#cb123-35" tabindex="-1"></a><span class="st">  for (n in 1:N) {</span></span>
+<span id="cb123-36"><a href="bayesian-multilevel-regression-in-stan.html#cb123-36" tabindex="-1"></a><span class="st">    y[n] ~ normal(alpha + group_effects[group_id[n], 1] + </span></span>
+<span id="cb123-37"><a href="bayesian-multilevel-regression-in-stan.html#cb123-37" tabindex="-1"></a><span class="st">                  (beta + group_effects[group_id[n], 2]) * x[n], sigma_y);</span></span>
+<span id="cb123-38"><a href="bayesian-multilevel-regression-in-stan.html#cb123-38" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb123-39"><a href="bayesian-multilevel-regression-in-stan.html#cb123-39" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb123-40"><a href="bayesian-multilevel-regression-in-stan.html#cb123-40" tabindex="-1"></a></span>
+<span id="cb123-41"><a href="bayesian-multilevel-regression-in-stan.html#cb123-41" tabindex="-1"></a><span class="st">generated quantities {</span></span>
+<span id="cb123-42"><a href="bayesian-multilevel-regression-in-stan.html#cb123-42" tabindex="-1"></a><span class="st">  matrix[2, 2] Rho = L_Rho * L_Rho&#39;;  // correlation matrix</span></span>
+<span id="cb123-43"><a href="bayesian-multilevel-regression-in-stan.html#cb123-43" tabindex="-1"></a><span class="st">  vector[N] y_pred;</span></span>
+<span id="cb123-44"><a href="bayesian-multilevel-regression-in-stan.html#cb123-44" tabindex="-1"></a><span class="st">  vector[N] log_lik;</span></span>
+<span id="cb123-45"><a href="bayesian-multilevel-regression-in-stan.html#cb123-45" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb123-46"><a href="bayesian-multilevel-regression-in-stan.html#cb123-46" tabindex="-1"></a><span class="st">  for (n in 1:N) {</span></span>
+<span id="cb123-47"><a href="bayesian-multilevel-regression-in-stan.html#cb123-47" tabindex="-1"></a><span class="st">    y_pred[n] = normal_rng(alpha + group_effects[group_id[n], 1] + </span></span>
+<span id="cb123-48"><a href="bayesian-multilevel-regression-in-stan.html#cb123-48" tabindex="-1"></a><span class="st">                           (beta + group_effects[group_id[n], 2]) * x[n], sigma_y);</span></span>
+<span id="cb123-49"><a href="bayesian-multilevel-regression-in-stan.html#cb123-49" tabindex="-1"></a><span class="st">    log_lik[n] = normal_lpdf(y[n] | alpha + group_effects[group_id[n], 1] + </span></span>
+<span id="cb123-50"><a href="bayesian-multilevel-regression-in-stan.html#cb123-50" tabindex="-1"></a><span class="st">                             (beta + group_effects[group_id[n], 2]) * x[n], sigma_y);</span></span>
+<span id="cb123-51"><a href="bayesian-multilevel-regression-in-stan.html#cb123-51" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb123-52"><a href="bayesian-multilevel-regression-in-stan.html#cb123-52" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb123-53"><a href="bayesian-multilevel-regression-in-stan.html#cb123-53" tabindex="-1"></a><span class="st">&quot;</span></span>
+<span id="cb123-54"><a href="bayesian-multilevel-regression-in-stan.html#cb123-54" tabindex="-1"></a></span>
+<span id="cb123-55"><a href="bayesian-multilevel-regression-in-stan.html#cb123-55" tabindex="-1"></a><span class="co"># Fit random slopes model</span></span>
+<span id="cb123-56"><a href="bayesian-multilevel-regression-in-stan.html#cb123-56" tabindex="-1"></a>fit_slopes <span class="ot">&lt;-</span> <span class="fu">stan</span>(</span>
+<span id="cb123-57"><a href="bayesian-multilevel-regression-in-stan.html#cb123-57" tabindex="-1"></a>  <span class="at">model_code =</span> stan_code_slopes,</span>
+<span id="cb123-58"><a href="bayesian-multilevel-regression-in-stan.html#cb123-58" tabindex="-1"></a>  <span class="at">data =</span> stan_data_intercepts,</span>
+<span id="cb123-59"><a href="bayesian-multilevel-regression-in-stan.html#cb123-59" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">4</span>,</span>
+<span id="cb123-60"><a href="bayesian-multilevel-regression-in-stan.html#cb123-60" tabindex="-1"></a>  <span class="at">iter =</span> <span class="dv">2000</span>,</span>
+<span id="cb123-61"><a href="bayesian-multilevel-regression-in-stan.html#cb123-61" tabindex="-1"></a>  <span class="at">warmup =</span> <span class="dv">1000</span>,</span>
+<span id="cb123-62"><a href="bayesian-multilevel-regression-in-stan.html#cb123-62" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">42</span></span>
+<span id="cb123-63"><a href="bayesian-multilevel-regression-in-stan.html#cb123-63" tabindex="-1"></a>)</span>
+<span id="cb123-64"><a href="bayesian-multilevel-regression-in-stan.html#cb123-64" tabindex="-1"></a></span>
+<span id="cb123-65"><a href="bayesian-multilevel-regression-in-stan.html#cb123-65" tabindex="-1"></a><span class="fu">print</span>(fit_slopes, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;alpha&quot;</span>, <span class="st">&quot;beta&quot;</span>, <span class="st">&quot;sigma_y&quot;</span>, <span class="st">&quot;sigma_group&quot;</span>, <span class="st">&quot;Rho&quot;</span>))</span>
+<span id="cb123-66"><a href="bayesian-multilevel-regression-in-stan.html#cb123-66" tabindex="-1"></a></span>
+<span id="cb123-67"><a href="bayesian-multilevel-regression-in-stan.html#cb123-67" tabindex="-1"></a><span class="co"># Extract and visualize group effects</span></span>
+<span id="cb123-68"><a href="bayesian-multilevel-regression-in-stan.html#cb123-68" tabindex="-1"></a>group_effects_post <span class="ot">&lt;-</span> <span class="fu">summary</span>(fit_slopes, <span class="at">pars =</span> <span class="st">&quot;group_effects&quot;</span>)<span class="sc">$</span>summary</span>
+<span id="cb123-69"><a href="bayesian-multilevel-regression-in-stan.html#cb123-69" tabindex="-1"></a>group_effects_matrix <span class="ot">&lt;-</span> <span class="fu">matrix</span>(group_effects_post[, <span class="st">&quot;mean&quot;</span>], <span class="at">nrow =</span> n_groups, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
+<span id="cb123-70"><a href="bayesian-multilevel-regression-in-stan.html#cb123-70" tabindex="-1"></a></span>
+<span id="cb123-71"><a href="bayesian-multilevel-regression-in-stan.html#cb123-71" tabindex="-1"></a>slopes_comparison <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb123-72"><a href="bayesian-multilevel-regression-in-stan.html#cb123-72" tabindex="-1"></a>  <span class="at">group =</span> <span class="dv">1</span><span class="sc">:</span>n_groups,</span>
+<span id="cb123-73"><a href="bayesian-multilevel-regression-in-stan.html#cb123-73" tabindex="-1"></a>  <span class="at">true_intercept =</span> group_intercepts,</span>
+<span id="cb123-74"><a href="bayesian-multilevel-regression-in-stan.html#cb123-74" tabindex="-1"></a>  <span class="at">true_slope =</span> group_slopes,</span>
+<span id="cb123-75"><a href="bayesian-multilevel-regression-in-stan.html#cb123-75" tabindex="-1"></a>  <span class="at">est_intercept =</span> group_effects_matrix[, <span class="dv">1</span>],</span>
+<span id="cb123-76"><a href="bayesian-multilevel-regression-in-stan.html#cb123-76" tabindex="-1"></a>  <span class="at">est_slope =</span> group_effects_matrix[, <span class="dv">2</span>]</span>
+<span id="cb123-77"><a href="bayesian-multilevel-regression-in-stan.html#cb123-77" tabindex="-1"></a>)</span>
+<span id="cb123-78"><a href="bayesian-multilevel-regression-in-stan.html#cb123-78" tabindex="-1"></a></span>
+<span id="cb123-79"><a href="bayesian-multilevel-regression-in-stan.html#cb123-79" tabindex="-1"></a>p3 <span class="ot">&lt;-</span> slopes_comparison <span class="sc">%&gt;%</span></span>
+<span id="cb123-80"><a href="bayesian-multilevel-regression-in-stan.html#cb123-80" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> true_slope, <span class="at">y =</span> est_slope)) <span class="sc">+</span></span>
+<span id="cb123-81"><a href="bayesian-multilevel-regression-in-stan.html#cb123-81" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">slope =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">&quot;dashed&quot;</span>, <span class="at">color =</span> <span class="st">&quot;red&quot;</span>) <span class="sc">+</span></span>
+<span id="cb123-82"><a href="bayesian-multilevel-regression-in-stan.html#cb123-82" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>, <span class="at">color =</span> <span class="st">&quot;steelblue&quot;</span>) <span class="sc">+</span></span>
+<span id="cb123-83"><a href="bayesian-multilevel-regression-in-stan.html#cb123-83" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Random Slopes: Estimated vs. True Group Slopes&quot;</span>,</span>
+<span id="cb123-84"><a href="bayesian-multilevel-regression-in-stan.html#cb123-84" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;True Group Slopes&quot;</span>, </span>
+<span id="cb123-85"><a href="bayesian-multilevel-regression-in-stan.html#cb123-85" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;Estimated Group Slopes&quot;</span>) <span class="sc">+</span></span>
+<span id="cb123-86"><a href="bayesian-multilevel-regression-in-stan.html#cb123-86" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb123-87"><a href="bayesian-multilevel-regression-in-stan.html#cb123-87" tabindex="-1"></a>  <span class="fu">coord_fixed</span>()</span>
+<span id="cb123-88"><a href="bayesian-multilevel-regression-in-stan.html#cb123-88" tabindex="-1"></a></span>
+<span id="cb123-89"><a href="bayesian-multilevel-regression-in-stan.html#cb123-89" tabindex="-1"></a>p4 <span class="ot">&lt;-</span> slopes_comparison <span class="sc">%&gt;%</span></span>
+<span id="cb123-90"><a href="bayesian-multilevel-regression-in-stan.html#cb123-90" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> est_intercept, <span class="at">y =</span> est_slope)) <span class="sc">+</span></span>
+<span id="cb123-91"><a href="bayesian-multilevel-regression-in-stan.html#cb123-91" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>, <span class="at">color =</span> <span class="st">&quot;darkgreen&quot;</span>) <span class="sc">+</span></span>
+<span id="cb123-92"><a href="bayesian-multilevel-regression-in-stan.html#cb123-92" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="at">se =</span> <span class="cn">TRUE</span>, <span class="at">color =</span> <span class="st">&quot;red&quot;</span>) <span class="sc">+</span></span>
+<span id="cb123-93"><a href="bayesian-multilevel-regression-in-stan.html#cb123-93" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Correlation Between Group Intercepts and Slopes&quot;</span>,</span>
+<span id="cb123-94"><a href="bayesian-multilevel-regression-in-stan.html#cb123-94" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="fu">paste</span>(<span class="st">&quot;Estimated correlation:&quot;</span>, </span>
+<span id="cb123-95"><a href="bayesian-multilevel-regression-in-stan.html#cb123-95" tabindex="-1"></a>                       <span class="fu">round</span>(<span class="fu">summary</span>(fit_slopes, <span class="at">pars =</span> <span class="st">&quot;Rho&quot;</span>)<span class="sc">$</span>summary[<span class="dv">2</span>, <span class="st">&quot;mean&quot;</span>], <span class="dv">3</span>)),</span>
+<span id="cb123-96"><a href="bayesian-multilevel-regression-in-stan.html#cb123-96" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Group Intercepts&quot;</span>, </span>
+<span id="cb123-97"><a href="bayesian-multilevel-regression-in-stan.html#cb123-97" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;Group Slopes&quot;</span>) <span class="sc">+</span></span>
+<span id="cb123-98"><a href="bayesian-multilevel-regression-in-stan.html#cb123-98" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
+<span id="cb123-99"><a href="bayesian-multilevel-regression-in-stan.html#cb123-99" tabindex="-1"></a></span>
+<span id="cb123-100"><a href="bayesian-multilevel-regression-in-stan.html#cb123-100" tabindex="-1"></a><span class="fu">print</span>(p3 <span class="sc">+</span> p4)</span></code></pre></div>
 </div>
 <div id="model-comparison-and-visualization" class="section level3 hasAnchor" number="7.2.3">
 <h3><span class="header-section-number">7.2.3</span> Model Comparison and Visualization<a href="bayesian-multilevel-regression-in-stan.html#model-comparison-and-visualization" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>To understand the practical differences between these approaches, we’ll compare their predictive performance and examine how they handle the bias-variance tradeoff inherent in multilevel modeling.</p>
-<div class="sourceCode" id="cb97"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb97-1"><a href="bayesian-multilevel-regression-in-stan.html#cb97-1" tabindex="-1"></a><span class="co"># Extract log-likelihood for model comparison</span></span>
-<span id="cb97-2"><a href="bayesian-multilevel-regression-in-stan.html#cb97-2" tabindex="-1"></a>log_lik_intercepts <span class="ot">&lt;-</span> <span class="fu">extract_log_lik</span>(fit_intercepts)</span>
-<span id="cb97-3"><a href="bayesian-multilevel-regression-in-stan.html#cb97-3" tabindex="-1"></a>log_lik_slopes <span class="ot">&lt;-</span> <span class="fu">extract_log_lik</span>(fit_slopes)</span>
-<span id="cb97-4"><a href="bayesian-multilevel-regression-in-stan.html#cb97-4" tabindex="-1"></a></span>
-<span id="cb97-5"><a href="bayesian-multilevel-regression-in-stan.html#cb97-5" tabindex="-1"></a><span class="co"># Calculate WAIC for model comparison</span></span>
-<span id="cb97-6"><a href="bayesian-multilevel-regression-in-stan.html#cb97-6" tabindex="-1"></a>waic_intercepts <span class="ot">&lt;-</span> <span class="fu">waic</span>(log_lik_intercepts)</span>
-<span id="cb97-7"><a href="bayesian-multilevel-regression-in-stan.html#cb97-7" tabindex="-1"></a>waic_slopes <span class="ot">&lt;-</span> <span class="fu">waic</span>(log_lik_slopes)</span>
-<span id="cb97-8"><a href="bayesian-multilevel-regression-in-stan.html#cb97-8" tabindex="-1"></a></span>
-<span id="cb97-9"><a href="bayesian-multilevel-regression-in-stan.html#cb97-9" tabindex="-1"></a><span class="co"># Display model comparison</span></span>
-<span id="cb97-10"><a href="bayesian-multilevel-regression-in-stan.html#cb97-10" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Model Comparison (WAIC):</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb97-11"><a href="bayesian-multilevel-regression-in-stan.html#cb97-11" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Random Intercepts WAIC:&quot;</span>, <span class="fu">round</span>(waic_intercepts<span class="sc">$</span>estimates[<span class="st">&quot;waic&quot;</span>, <span class="st">&quot;Estimate&quot;</span>], <span class="dv">2</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb97-12"><a href="bayesian-multilevel-regression-in-stan.html#cb97-12" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Random Slopes WAIC:&quot;</span>, <span class="fu">round</span>(waic_slopes<span class="sc">$</span>estimates[<span class="st">&quot;waic&quot;</span>, <span class="st">&quot;Estimate&quot;</span>], <span class="dv">2</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb97-13"><a href="bayesian-multilevel-regression-in-stan.html#cb97-13" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Difference:&quot;</span>, <span class="fu">round</span>(waic_intercepts<span class="sc">$</span>estimates[<span class="st">&quot;waic&quot;</span>, <span class="st">&quot;Estimate&quot;</span>] <span class="sc">-</span> </span>
-<span id="cb97-14"><a href="bayesian-multilevel-regression-in-stan.html#cb97-14" tabindex="-1"></a>                        waic_slopes<span class="sc">$</span>estimates[<span class="st">&quot;waic&quot;</span>, <span class="st">&quot;Estimate&quot;</span>], <span class="dv">2</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb97-15"><a href="bayesian-multilevel-regression-in-stan.html#cb97-15" tabindex="-1"></a></span>
-<span id="cb97-16"><a href="bayesian-multilevel-regression-in-stan.html#cb97-16" tabindex="-1"></a><span class="co"># Posterior predictive checks</span></span>
-<span id="cb97-17"><a href="bayesian-multilevel-regression-in-stan.html#cb97-17" tabindex="-1"></a>y_pred_intercepts <span class="ot">&lt;-</span> posterior_intercepts<span class="sc">$</span>y_pred</span>
-<span id="cb97-18"><a href="bayesian-multilevel-regression-in-stan.html#cb97-18" tabindex="-1"></a>y_pred_slopes <span class="ot">&lt;-</span> rstan<span class="sc">::</span><span class="fu">extract</span>(fit_slopes)<span class="sc">$</span>y_pred</span>
-<span id="cb97-19"><a href="bayesian-multilevel-regression-in-stan.html#cb97-19" tabindex="-1"></a></span>
-<span id="cb97-20"><a href="bayesian-multilevel-regression-in-stan.html#cb97-20" tabindex="-1"></a>ppc_intercepts <span class="ot">&lt;-</span> <span class="fu">ppc_dens_overlay</span>(train_data<span class="sc">$</span>y, y_pred_intercepts[<span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>, ]) <span class="sc">+</span></span>
-<span id="cb97-21"><a href="bayesian-multilevel-regression-in-stan.html#cb97-21" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">&quot;Posterior Predictive Check: Random Intercepts&quot;</span>)</span>
-<span id="cb97-22"><a href="bayesian-multilevel-regression-in-stan.html#cb97-22" tabindex="-1"></a></span>
-<span id="cb97-23"><a href="bayesian-multilevel-regression-in-stan.html#cb97-23" tabindex="-1"></a>ppc_slopes <span class="ot">&lt;-</span> <span class="fu">ppc_dens_overlay</span>(train_data<span class="sc">$</span>y, y_pred_slopes[<span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>, ]) <span class="sc">+</span></span>
-<span id="cb97-24"><a href="bayesian-multilevel-regression-in-stan.html#cb97-24" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">&quot;Posterior Predictive Check: Random Slopes&quot;</span>)</span>
-<span id="cb97-25"><a href="bayesian-multilevel-regression-in-stan.html#cb97-25" tabindex="-1"></a></span>
-<span id="cb97-26"><a href="bayesian-multilevel-regression-in-stan.html#cb97-26" tabindex="-1"></a><span class="fu">print</span>(ppc_intercepts <span class="sc">+</span> ppc_slopes)</span>
-<span id="cb97-27"><a href="bayesian-multilevel-regression-in-stan.html#cb97-27" tabindex="-1"></a></span>
-<span id="cb97-28"><a href="bayesian-multilevel-regression-in-stan.html#cb97-28" tabindex="-1"></a><span class="co"># Residual analysis</span></span>
-<span id="cb97-29"><a href="bayesian-multilevel-regression-in-stan.html#cb97-29" tabindex="-1"></a>residuals_intercepts <span class="ot">&lt;-</span> train_data<span class="sc">$</span>y <span class="sc">-</span> <span class="fu">colMeans</span>(y_pred_intercepts)</span>
-<span id="cb97-30"><a href="bayesian-multilevel-regression-in-stan.html#cb97-30" tabindex="-1"></a>residuals_slopes <span class="ot">&lt;-</span> train_data<span class="sc">$</span>y <span class="sc">-</span> <span class="fu">colMeans</span>(y_pred_slopes)</span>
-<span id="cb97-31"><a href="bayesian-multilevel-regression-in-stan.html#cb97-31" tabindex="-1"></a></span>
-<span id="cb97-32"><a href="bayesian-multilevel-regression-in-stan.html#cb97-32" tabindex="-1"></a>residual_comparison <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
-<span id="cb97-33"><a href="bayesian-multilevel-regression-in-stan.html#cb97-33" tabindex="-1"></a>  <span class="at">observed =</span> <span class="fu">rep</span>(train_data<span class="sc">$</span>y, <span class="dv">2</span>),</span>
-<span id="cb97-34"><a href="bayesian-multilevel-regression-in-stan.html#cb97-34" tabindex="-1"></a>  <span class="at">residuals =</span> <span class="fu">c</span>(residuals_intercepts, residuals_slopes),</span>
-<span id="cb97-35"><a href="bayesian-multilevel-regression-in-stan.html#cb97-35" tabindex="-1"></a>  <span class="at">model =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">&quot;Random Intercepts&quot;</span>, <span class="st">&quot;Random Slopes&quot;</span>), <span class="at">each =</span> <span class="fu">length</span>(residuals_intercepts)),</span>
-<span id="cb97-36"><a href="bayesian-multilevel-regression-in-stan.html#cb97-36" tabindex="-1"></a>  <span class="at">group_id =</span> <span class="fu">rep</span>(train_data<span class="sc">$</span>group_id, <span class="dv">2</span>)</span>
-<span id="cb97-37"><a href="bayesian-multilevel-regression-in-stan.html#cb97-37" tabindex="-1"></a>)</span>
-<span id="cb97-38"><a href="bayesian-multilevel-regression-in-stan.html#cb97-38" tabindex="-1"></a></span>
-<span id="cb97-39"><a href="bayesian-multilevel-regression-in-stan.html#cb97-39" tabindex="-1"></a>p5 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(residual_comparison, <span class="fu">aes</span>(<span class="at">x =</span> observed, <span class="at">y =</span> residuals)) <span class="sc">+</span></span>
-<span id="cb97-40"><a href="bayesian-multilevel-regression-in-stan.html#cb97-40" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
-<span id="cb97-41"><a href="bayesian-multilevel-regression-in-stan.html#cb97-41" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">&quot;dashed&quot;</span>, <span class="at">color =</span> <span class="st">&quot;red&quot;</span>) <span class="sc">+</span></span>
-<span id="cb97-42"><a href="bayesian-multilevel-regression-in-stan.html#cb97-42" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;loess&quot;</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
-<span id="cb97-43"><a href="bayesian-multilevel-regression-in-stan.html#cb97-43" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>model) <span class="sc">+</span></span>
-<span id="cb97-44"><a href="bayesian-multilevel-regression-in-stan.html#cb97-44" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Residual Analysis: Model Comparison&quot;</span>,</span>
-<span id="cb97-45"><a href="bayesian-multilevel-regression-in-stan.html#cb97-45" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Observed Values&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Residuals&quot;</span>) <span class="sc">+</span></span>
-<span id="cb97-46"><a href="bayesian-multilevel-regression-in-stan.html#cb97-46" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
-<span id="cb97-47"><a href="bayesian-multilevel-regression-in-stan.html#cb97-47" tabindex="-1"></a></span>
-<span id="cb97-48"><a href="bayesian-multilevel-regression-in-stan.html#cb97-48" tabindex="-1"></a><span class="fu">print</span>(p5)</span></code></pre></div>
+<div class="sourceCode" id="cb124"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb124-1"><a href="bayesian-multilevel-regression-in-stan.html#cb124-1" tabindex="-1"></a><span class="co"># Extract log-likelihood for model comparison</span></span>
+<span id="cb124-2"><a href="bayesian-multilevel-regression-in-stan.html#cb124-2" tabindex="-1"></a>log_lik_intercepts <span class="ot">&lt;-</span> <span class="fu">extract_log_lik</span>(fit_intercepts)</span>
+<span id="cb124-3"><a href="bayesian-multilevel-regression-in-stan.html#cb124-3" tabindex="-1"></a>log_lik_slopes <span class="ot">&lt;-</span> <span class="fu">extract_log_lik</span>(fit_slopes)</span>
+<span id="cb124-4"><a href="bayesian-multilevel-regression-in-stan.html#cb124-4" tabindex="-1"></a></span>
+<span id="cb124-5"><a href="bayesian-multilevel-regression-in-stan.html#cb124-5" tabindex="-1"></a><span class="co"># Calculate WAIC for model comparison</span></span>
+<span id="cb124-6"><a href="bayesian-multilevel-regression-in-stan.html#cb124-6" tabindex="-1"></a>waic_intercepts <span class="ot">&lt;-</span> <span class="fu">waic</span>(log_lik_intercepts)</span>
+<span id="cb124-7"><a href="bayesian-multilevel-regression-in-stan.html#cb124-7" tabindex="-1"></a>waic_slopes <span class="ot">&lt;-</span> <span class="fu">waic</span>(log_lik_slopes)</span>
+<span id="cb124-8"><a href="bayesian-multilevel-regression-in-stan.html#cb124-8" tabindex="-1"></a></span>
+<span id="cb124-9"><a href="bayesian-multilevel-regression-in-stan.html#cb124-9" tabindex="-1"></a><span class="co"># Display model comparison</span></span>
+<span id="cb124-10"><a href="bayesian-multilevel-regression-in-stan.html#cb124-10" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Model Comparison (WAIC):</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb124-11"><a href="bayesian-multilevel-regression-in-stan.html#cb124-11" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Random Intercepts WAIC:&quot;</span>, <span class="fu">round</span>(waic_intercepts<span class="sc">$</span>estimates[<span class="st">&quot;waic&quot;</span>, <span class="st">&quot;Estimate&quot;</span>], <span class="dv">2</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb124-12"><a href="bayesian-multilevel-regression-in-stan.html#cb124-12" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Random Slopes WAIC:&quot;</span>, <span class="fu">round</span>(waic_slopes<span class="sc">$</span>estimates[<span class="st">&quot;waic&quot;</span>, <span class="st">&quot;Estimate&quot;</span>], <span class="dv">2</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb124-13"><a href="bayesian-multilevel-regression-in-stan.html#cb124-13" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Difference:&quot;</span>, <span class="fu">round</span>(waic_intercepts<span class="sc">$</span>estimates[<span class="st">&quot;waic&quot;</span>, <span class="st">&quot;Estimate&quot;</span>] <span class="sc">-</span> </span>
+<span id="cb124-14"><a href="bayesian-multilevel-regression-in-stan.html#cb124-14" tabindex="-1"></a>                        waic_slopes<span class="sc">$</span>estimates[<span class="st">&quot;waic&quot;</span>, <span class="st">&quot;Estimate&quot;</span>], <span class="dv">2</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb124-15"><a href="bayesian-multilevel-regression-in-stan.html#cb124-15" tabindex="-1"></a></span>
+<span id="cb124-16"><a href="bayesian-multilevel-regression-in-stan.html#cb124-16" tabindex="-1"></a><span class="co"># Posterior predictive checks</span></span>
+<span id="cb124-17"><a href="bayesian-multilevel-regression-in-stan.html#cb124-17" tabindex="-1"></a>y_pred_intercepts <span class="ot">&lt;-</span> posterior_intercepts<span class="sc">$</span>y_pred</span>
+<span id="cb124-18"><a href="bayesian-multilevel-regression-in-stan.html#cb124-18" tabindex="-1"></a>y_pred_slopes <span class="ot">&lt;-</span> rstan<span class="sc">::</span><span class="fu">extract</span>(fit_slopes)<span class="sc">$</span>y_pred</span>
+<span id="cb124-19"><a href="bayesian-multilevel-regression-in-stan.html#cb124-19" tabindex="-1"></a></span>
+<span id="cb124-20"><a href="bayesian-multilevel-regression-in-stan.html#cb124-20" tabindex="-1"></a>ppc_intercepts <span class="ot">&lt;-</span> <span class="fu">ppc_dens_overlay</span>(train_data<span class="sc">$</span>y, y_pred_intercepts[<span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>, ]) <span class="sc">+</span></span>
+<span id="cb124-21"><a href="bayesian-multilevel-regression-in-stan.html#cb124-21" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">&quot;Posterior Predictive Check: Random Intercepts&quot;</span>)</span>
+<span id="cb124-22"><a href="bayesian-multilevel-regression-in-stan.html#cb124-22" tabindex="-1"></a></span>
+<span id="cb124-23"><a href="bayesian-multilevel-regression-in-stan.html#cb124-23" tabindex="-1"></a>ppc_slopes <span class="ot">&lt;-</span> <span class="fu">ppc_dens_overlay</span>(train_data<span class="sc">$</span>y, y_pred_slopes[<span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>, ]) <span class="sc">+</span></span>
+<span id="cb124-24"><a href="bayesian-multilevel-regression-in-stan.html#cb124-24" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">&quot;Posterior Predictive Check: Random Slopes&quot;</span>)</span>
+<span id="cb124-25"><a href="bayesian-multilevel-regression-in-stan.html#cb124-25" tabindex="-1"></a></span>
+<span id="cb124-26"><a href="bayesian-multilevel-regression-in-stan.html#cb124-26" tabindex="-1"></a><span class="fu">print</span>(ppc_intercepts <span class="sc">+</span> ppc_slopes)</span>
+<span id="cb124-27"><a href="bayesian-multilevel-regression-in-stan.html#cb124-27" tabindex="-1"></a></span>
+<span id="cb124-28"><a href="bayesian-multilevel-regression-in-stan.html#cb124-28" tabindex="-1"></a><span class="co"># Residual analysis</span></span>
+<span id="cb124-29"><a href="bayesian-multilevel-regression-in-stan.html#cb124-29" tabindex="-1"></a>residuals_intercepts <span class="ot">&lt;-</span> train_data<span class="sc">$</span>y <span class="sc">-</span> <span class="fu">colMeans</span>(y_pred_intercepts)</span>
+<span id="cb124-30"><a href="bayesian-multilevel-regression-in-stan.html#cb124-30" tabindex="-1"></a>residuals_slopes <span class="ot">&lt;-</span> train_data<span class="sc">$</span>y <span class="sc">-</span> <span class="fu">colMeans</span>(y_pred_slopes)</span>
+<span id="cb124-31"><a href="bayesian-multilevel-regression-in-stan.html#cb124-31" tabindex="-1"></a></span>
+<span id="cb124-32"><a href="bayesian-multilevel-regression-in-stan.html#cb124-32" tabindex="-1"></a>residual_comparison <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb124-33"><a href="bayesian-multilevel-regression-in-stan.html#cb124-33" tabindex="-1"></a>  <span class="at">observed =</span> <span class="fu">rep</span>(train_data<span class="sc">$</span>y, <span class="dv">2</span>),</span>
+<span id="cb124-34"><a href="bayesian-multilevel-regression-in-stan.html#cb124-34" tabindex="-1"></a>  <span class="at">residuals =</span> <span class="fu">c</span>(residuals_intercepts, residuals_slopes),</span>
+<span id="cb124-35"><a href="bayesian-multilevel-regression-in-stan.html#cb124-35" tabindex="-1"></a>  <span class="at">model =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">&quot;Random Intercepts&quot;</span>, <span class="st">&quot;Random Slopes&quot;</span>), <span class="at">each =</span> <span class="fu">length</span>(residuals_intercepts)),</span>
+<span id="cb124-36"><a href="bayesian-multilevel-regression-in-stan.html#cb124-36" tabindex="-1"></a>  <span class="at">group_id =</span> <span class="fu">rep</span>(train_data<span class="sc">$</span>group_id, <span class="dv">2</span>)</span>
+<span id="cb124-37"><a href="bayesian-multilevel-regression-in-stan.html#cb124-37" tabindex="-1"></a>)</span>
+<span id="cb124-38"><a href="bayesian-multilevel-regression-in-stan.html#cb124-38" tabindex="-1"></a></span>
+<span id="cb124-39"><a href="bayesian-multilevel-regression-in-stan.html#cb124-39" tabindex="-1"></a>p5 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(residual_comparison, <span class="fu">aes</span>(<span class="at">x =</span> observed, <span class="at">y =</span> residuals)) <span class="sc">+</span></span>
+<span id="cb124-40"><a href="bayesian-multilevel-regression-in-stan.html#cb124-40" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
+<span id="cb124-41"><a href="bayesian-multilevel-regression-in-stan.html#cb124-41" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">&quot;dashed&quot;</span>, <span class="at">color =</span> <span class="st">&quot;red&quot;</span>) <span class="sc">+</span></span>
+<span id="cb124-42"><a href="bayesian-multilevel-regression-in-stan.html#cb124-42" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;loess&quot;</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb124-43"><a href="bayesian-multilevel-regression-in-stan.html#cb124-43" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>model) <span class="sc">+</span></span>
+<span id="cb124-44"><a href="bayesian-multilevel-regression-in-stan.html#cb124-44" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Residual Analysis: Model Comparison&quot;</span>,</span>
+<span id="cb124-45"><a href="bayesian-multilevel-regression-in-stan.html#cb124-45" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Observed Values&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Residuals&quot;</span>) <span class="sc">+</span></span>
+<span id="cb124-46"><a href="bayesian-multilevel-regression-in-stan.html#cb124-46" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
+<span id="cb124-47"><a href="bayesian-multilevel-regression-in-stan.html#cb124-47" tabindex="-1"></a></span>
+<span id="cb124-48"><a href="bayesian-multilevel-regression-in-stan.html#cb124-48" tabindex="-1"></a><span class="fu">print</span>(p5)</span></code></pre></div>
 </div>
 </div>
 <div id="visualization-and-interpretation" class="section level2 hasAnchor" number="7.3">
 <h2><span class="header-section-number">7.3</span> Visualization and Interpretation<a href="bayesian-multilevel-regression-in-stan.html#visualization-and-interpretation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Understanding multilevel models requires visualizing both the population-level and group-level effects. The following visualizations illuminate the key concepts of shrinkage and partial pooling.</p>
-<div class="sourceCode" id="cb98"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb98-1"><a href="bayesian-multilevel-regression-in-stan.html#cb98-1" tabindex="-1"></a><span class="co"># Create comprehensive visualization of group effects</span></span>
-<span id="cb98-2"><a href="bayesian-multilevel-regression-in-stan.html#cb98-2" tabindex="-1"></a>group_summary <span class="ot">&lt;-</span> train_data <span class="sc">%&gt;%</span></span>
-<span id="cb98-3"><a href="bayesian-multilevel-regression-in-stan.html#cb98-3" tabindex="-1"></a>  <span class="fu">group_by</span>(group_id) <span class="sc">%&gt;%</span></span>
-<span id="cb98-4"><a href="bayesian-multilevel-regression-in-stan.html#cb98-4" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
-<span id="cb98-5"><a href="bayesian-multilevel-regression-in-stan.html#cb98-5" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">n</span>(),</span>
-<span id="cb98-6"><a href="bayesian-multilevel-regression-in-stan.html#cb98-6" tabindex="-1"></a>    <span class="at">mean_y =</span> <span class="fu">mean</span>(y),</span>
-<span id="cb98-7"><a href="bayesian-multilevel-regression-in-stan.html#cb98-7" tabindex="-1"></a>    <span class="at">mean_x =</span> <span class="fu">mean</span>(x),</span>
-<span id="cb98-8"><a href="bayesian-multilevel-regression-in-stan.html#cb98-8" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span></span>
-<span id="cb98-9"><a href="bayesian-multilevel-regression-in-stan.html#cb98-9" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb98-10"><a href="bayesian-multilevel-regression-in-stan.html#cb98-10" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb98-11"><a href="bayesian-multilevel-regression-in-stan.html#cb98-11" tabindex="-1"></a>    <span class="at">group_num =</span> <span class="fu">as.numeric</span>(group_id),</span>
-<span id="cb98-12"><a href="bayesian-multilevel-regression-in-stan.html#cb98-12" tabindex="-1"></a>    <span class="at">est_intercept_ri =</span> alpha_group_est,</span>
-<span id="cb98-13"><a href="bayesian-multilevel-regression-in-stan.html#cb98-13" tabindex="-1"></a>    <span class="at">est_intercept_rs =</span> group_effects_matrix[, <span class="dv">1</span>],</span>
-<span id="cb98-14"><a href="bayesian-multilevel-regression-in-stan.html#cb98-14" tabindex="-1"></a>    <span class="at">est_slope_rs =</span> group_effects_matrix[, <span class="dv">2</span>],</span>
-<span id="cb98-15"><a href="bayesian-multilevel-regression-in-stan.html#cb98-15" tabindex="-1"></a>    <span class="at">true_intercept =</span> group_intercepts,</span>
-<span id="cb98-16"><a href="bayesian-multilevel-regression-in-stan.html#cb98-16" tabindex="-1"></a>    <span class="at">true_slope =</span> group_slopes</span>
-<span id="cb98-17"><a href="bayesian-multilevel-regression-in-stan.html#cb98-17" tabindex="-1"></a>  )</span>
-<span id="cb98-18"><a href="bayesian-multilevel-regression-in-stan.html#cb98-18" tabindex="-1"></a></span>
-<span id="cb98-19"><a href="bayesian-multilevel-regression-in-stan.html#cb98-19" tabindex="-1"></a><span class="co"># Shrinkage visualization</span></span>
-<span id="cb98-20"><a href="bayesian-multilevel-regression-in-stan.html#cb98-20" tabindex="-1"></a>p6 <span class="ot">&lt;-</span> group_summary <span class="sc">%&gt;%</span></span>
-<span id="cb98-21"><a href="bayesian-multilevel-regression-in-stan.html#cb98-21" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> n)) <span class="sc">+</span></span>
-<span id="cb98-22"><a href="bayesian-multilevel-regression-in-stan.html#cb98-22" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">y =</span> <span class="fu">abs</span>(est_intercept_ri <span class="sc">-</span> true_intercept)), </span>
-<span id="cb98-23"><a href="bayesian-multilevel-regression-in-stan.html#cb98-23" tabindex="-1"></a>             <span class="at">color =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>, <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
-<span id="cb98-24"><a href="bayesian-multilevel-regression-in-stan.html#cb98-24" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="fu">aes</span>(<span class="at">y =</span> <span class="fu">abs</span>(est_intercept_ri <span class="sc">-</span> true_intercept)), </span>
-<span id="cb98-25"><a href="bayesian-multilevel-regression-in-stan.html#cb98-25" tabindex="-1"></a>              <span class="at">method =</span> <span class="st">&quot;loess&quot;</span>, <span class="at">color =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
-<span id="cb98-26"><a href="bayesian-multilevel-regression-in-stan.html#cb98-26" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Shrinkage Effect: Estimation Error vs. Group Sample Size&quot;</span>,</span>
-<span id="cb98-27"><a href="bayesian-multilevel-regression-in-stan.html#cb98-27" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">&quot;Smaller groups show more shrinkage toward population mean&quot;</span>,</span>
-<span id="cb98-28"><a href="bayesian-multilevel-regression-in-stan.html#cb98-28" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Group Sample Size&quot;</span>, </span>
-<span id="cb98-29"><a href="bayesian-multilevel-regression-in-stan.html#cb98-29" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;Absolute Estimation Error&quot;</span>) <span class="sc">+</span></span>
-<span id="cb98-30"><a href="bayesian-multilevel-regression-in-stan.html#cb98-30" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
-<span id="cb98-31"><a href="bayesian-multilevel-regression-in-stan.html#cb98-31" tabindex="-1"></a></span>
-<span id="cb98-32"><a href="bayesian-multilevel-regression-in-stan.html#cb98-32" tabindex="-1"></a><span class="co"># Correlation structure visualization</span></span>
-<span id="cb98-33"><a href="bayesian-multilevel-regression-in-stan.html#cb98-33" tabindex="-1"></a>posterior_rho <span class="ot">&lt;-</span> rstan<span class="sc">::</span><span class="fu">extract</span>(fit_slopes)<span class="sc">$</span>Rho[, <span class="dv">1</span>, <span class="dv">2</span>]</span>
-<span id="cb98-34"><a href="bayesian-multilevel-regression-in-stan.html#cb98-34" tabindex="-1"></a>p7 <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">rho =</span> posterior_rho) <span class="sc">%&gt;%</span></span>
-<span id="cb98-35"><a href="bayesian-multilevel-regression-in-stan.html#cb98-35" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> rho)) <span class="sc">+</span></span>
-<span id="cb98-36"><a href="bayesian-multilevel-regression-in-stan.html#cb98-36" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">30</span>, <span class="at">fill =</span> <span class="st">&quot;steelblue&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>, <span class="at">color =</span> <span class="st">&quot;white&quot;</span>) <span class="sc">+</span></span>
-<span id="cb98-37"><a href="bayesian-multilevel-regression-in-stan.html#cb98-37" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> rho, <span class="at">color =</span> <span class="st">&quot;red&quot;</span>, <span class="at">linetype =</span> <span class="st">&quot;dashed&quot;</span>, <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb98-38"><a href="bayesian-multilevel-regression-in-stan.html#cb98-38" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="fu">mean</span>(posterior_rho), <span class="at">color =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb98-39"><a href="bayesian-multilevel-regression-in-stan.html#cb98-39" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Posterior Distribution of Intercept-Slope Correlation&quot;</span>,</span>
-<span id="cb98-40"><a href="bayesian-multilevel-regression-in-stan.html#cb98-40" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="fu">paste</span>(<span class="st">&quot;True correlation (red):&quot;</span>, rho, </span>
-<span id="cb98-41"><a href="bayesian-multilevel-regression-in-stan.html#cb98-41" tabindex="-1"></a>                       <span class="st">&quot;| Estimated mean (blue):&quot;</span>, <span class="fu">round</span>(<span class="fu">mean</span>(posterior_rho), <span class="dv">3</span>)),</span>
-<span id="cb98-42"><a href="bayesian-multilevel-regression-in-stan.html#cb98-42" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Correlation&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Density&quot;</span>) <span class="sc">+</span></span>
-<span id="cb98-43"><a href="bayesian-multilevel-regression-in-stan.html#cb98-43" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
-<span id="cb98-44"><a href="bayesian-multilevel-regression-in-stan.html#cb98-44" tabindex="-1"></a></span>
-<span id="cb98-45"><a href="bayesian-multilevel-regression-in-stan.html#cb98-45" tabindex="-1"></a><span class="fu">print</span>(p6 <span class="sc">+</span> p7)</span>
-<span id="cb98-46"><a href="bayesian-multilevel-regression-in-stan.html#cb98-46" tabindex="-1"></a></span>
-<span id="cb98-47"><a href="bayesian-multilevel-regression-in-stan.html#cb98-47" tabindex="-1"></a><span class="co"># Group-specific predictions visualization</span></span>
-<span id="cb98-48"><a href="bayesian-multilevel-regression-in-stan.html#cb98-48" tabindex="-1"></a>pred_data <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(</span>
-<span id="cb98-49"><a href="bayesian-multilevel-regression-in-stan.html#cb98-49" tabindex="-1"></a>  <span class="at">x =</span> <span class="fu">seq</span>(<span class="fu">min</span>(train_data<span class="sc">$</span>x), <span class="fu">max</span>(train_data<span class="sc">$</span>x), <span class="at">length.out =</span> <span class="dv">50</span>),</span>
-<span id="cb98-50"><a href="bayesian-multilevel-regression-in-stan.html#cb98-50" tabindex="-1"></a>  <span class="at">group_id =</span> <span class="fu">factor</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">min</span>(<span class="dv">6</span>, n_groups))  <span class="co"># Show first 6 groups</span></span>
-<span id="cb98-51"><a href="bayesian-multilevel-regression-in-stan.html#cb98-51" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
-<span id="cb98-52"><a href="bayesian-multilevel-regression-in-stan.html#cb98-52" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">group_num =</span> <span class="fu">as.numeric</span>(group_id))</span>
-<span id="cb98-53"><a href="bayesian-multilevel-regression-in-stan.html#cb98-53" tabindex="-1"></a></span>
-<span id="cb98-54"><a href="bayesian-multilevel-regression-in-stan.html#cb98-54" tabindex="-1"></a><span class="co"># Add predictions from random slopes model</span></span>
-<span id="cb98-55"><a href="bayesian-multilevel-regression-in-stan.html#cb98-55" tabindex="-1"></a>group_effects_sample <span class="ot">&lt;-</span> group_effects_matrix[pred_data<span class="sc">$</span>group_num, ]</span>
-<span id="cb98-56"><a href="bayesian-multilevel-regression-in-stan.html#cb98-56" tabindex="-1"></a>pred_data<span class="sc">$</span>y_pred <span class="ot">&lt;-</span> (alpha_pop <span class="sc">+</span> group_effects_sample[, <span class="dv">1</span>]) <span class="sc">+</span> </span>
-<span id="cb98-57"><a href="bayesian-multilevel-regression-in-stan.html#cb98-57" tabindex="-1"></a>                    (beta_pop <span class="sc">+</span> group_effects_sample[, <span class="dv">2</span>]) <span class="sc">*</span> pred_data<span class="sc">$</span>x</span>
-<span id="cb98-58"><a href="bayesian-multilevel-regression-in-stan.html#cb98-58" tabindex="-1"></a></span>
-<span id="cb98-59"><a href="bayesian-multilevel-regression-in-stan.html#cb98-59" tabindex="-1"></a>p8 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb98-60"><a href="bayesian-multilevel-regression-in-stan.html#cb98-60" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> <span class="fu">filter</span>(train_data, <span class="fu">as.numeric</span>(group_id) <span class="sc">&lt;=</span> <span class="dv">6</span>),</span>
-<span id="cb98-61"><a href="bayesian-multilevel-regression-in-stan.html#cb98-61" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">color =</span> group_id), <span class="at">alpha =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
-<span id="cb98-62"><a href="bayesian-multilevel-regression-in-stan.html#cb98-62" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">data =</span> pred_data, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y_pred, <span class="at">color =</span> group_id), </span>
-<span id="cb98-63"><a href="bayesian-multilevel-regression-in-stan.html#cb98-63" tabindex="-1"></a>            <span class="at">size =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
-<span id="cb98-64"><a href="bayesian-multilevel-regression-in-stan.html#cb98-64" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>group_id, <span class="at">ncol =</span> <span class="dv">3</span>, <span class="at">labeller =</span> label_both) <span class="sc">+</span></span>
-<span id="cb98-65"><a href="bayesian-multilevel-regression-in-stan.html#cb98-65" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Group-Specific Predictions: Random Slopes Model&quot;</span>,</span>
-<span id="cb98-66"><a href="bayesian-multilevel-regression-in-stan.html#cb98-66" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">&quot;Points show observed data, lines show group-specific regression&quot;</span>,</span>
-<span id="cb98-67"><a href="bayesian-multilevel-regression-in-stan.html#cb98-67" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Predictor (x)&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Outcome (y)&quot;</span>) <span class="sc">+</span></span>
-<span id="cb98-68"><a href="bayesian-multilevel-regression-in-stan.html#cb98-68" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb98-69"><a href="bayesian-multilevel-regression-in-stan.html#cb98-69" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>) <span class="sc">+</span></span>
-<span id="cb98-70"><a href="bayesian-multilevel-regression-in-stan.html#cb98-70" tabindex="-1"></a>  <span class="fu">scale_color_viridis_d</span>()</span>
-<span id="cb98-71"><a href="bayesian-multilevel-regression-in-stan.html#cb98-71" tabindex="-1"></a></span>
-<span id="cb98-72"><a href="bayesian-multilevel-regression-in-stan.html#cb98-72" tabindex="-1"></a><span class="fu">print</span>(p8)</span></code></pre></div>
+<div class="sourceCode" id="cb125"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb125-1"><a href="bayesian-multilevel-regression-in-stan.html#cb125-1" tabindex="-1"></a><span class="co"># Create comprehensive visualization of group effects</span></span>
+<span id="cb125-2"><a href="bayesian-multilevel-regression-in-stan.html#cb125-2" tabindex="-1"></a>group_summary <span class="ot">&lt;-</span> train_data <span class="sc">%&gt;%</span></span>
+<span id="cb125-3"><a href="bayesian-multilevel-regression-in-stan.html#cb125-3" tabindex="-1"></a>  <span class="fu">group_by</span>(group_id) <span class="sc">%&gt;%</span></span>
+<span id="cb125-4"><a href="bayesian-multilevel-regression-in-stan.html#cb125-4" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb125-5"><a href="bayesian-multilevel-regression-in-stan.html#cb125-5" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">n</span>(),</span>
+<span id="cb125-6"><a href="bayesian-multilevel-regression-in-stan.html#cb125-6" tabindex="-1"></a>    <span class="at">mean_y =</span> <span class="fu">mean</span>(y),</span>
+<span id="cb125-7"><a href="bayesian-multilevel-regression-in-stan.html#cb125-7" tabindex="-1"></a>    <span class="at">mean_x =</span> <span class="fu">mean</span>(x),</span>
+<span id="cb125-8"><a href="bayesian-multilevel-regression-in-stan.html#cb125-8" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span></span>
+<span id="cb125-9"><a href="bayesian-multilevel-regression-in-stan.html#cb125-9" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb125-10"><a href="bayesian-multilevel-regression-in-stan.html#cb125-10" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb125-11"><a href="bayesian-multilevel-regression-in-stan.html#cb125-11" tabindex="-1"></a>    <span class="at">group_num =</span> <span class="fu">as.numeric</span>(group_id),</span>
+<span id="cb125-12"><a href="bayesian-multilevel-regression-in-stan.html#cb125-12" tabindex="-1"></a>    <span class="at">est_intercept_ri =</span> alpha_group_est,</span>
+<span id="cb125-13"><a href="bayesian-multilevel-regression-in-stan.html#cb125-13" tabindex="-1"></a>    <span class="at">est_intercept_rs =</span> group_effects_matrix[, <span class="dv">1</span>],</span>
+<span id="cb125-14"><a href="bayesian-multilevel-regression-in-stan.html#cb125-14" tabindex="-1"></a>    <span class="at">est_slope_rs =</span> group_effects_matrix[, <span class="dv">2</span>],</span>
+<span id="cb125-15"><a href="bayesian-multilevel-regression-in-stan.html#cb125-15" tabindex="-1"></a>    <span class="at">true_intercept =</span> group_intercepts,</span>
+<span id="cb125-16"><a href="bayesian-multilevel-regression-in-stan.html#cb125-16" tabindex="-1"></a>    <span class="at">true_slope =</span> group_slopes</span>
+<span id="cb125-17"><a href="bayesian-multilevel-regression-in-stan.html#cb125-17" tabindex="-1"></a>  )</span>
+<span id="cb125-18"><a href="bayesian-multilevel-regression-in-stan.html#cb125-18" tabindex="-1"></a></span>
+<span id="cb125-19"><a href="bayesian-multilevel-regression-in-stan.html#cb125-19" tabindex="-1"></a><span class="co"># Shrinkage visualization</span></span>
+<span id="cb125-20"><a href="bayesian-multilevel-regression-in-stan.html#cb125-20" tabindex="-1"></a>p6 <span class="ot">&lt;-</span> group_summary <span class="sc">%&gt;%</span></span>
+<span id="cb125-21"><a href="bayesian-multilevel-regression-in-stan.html#cb125-21" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> n)) <span class="sc">+</span></span>
+<span id="cb125-22"><a href="bayesian-multilevel-regression-in-stan.html#cb125-22" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">y =</span> <span class="fu">abs</span>(est_intercept_ri <span class="sc">-</span> true_intercept)), </span>
+<span id="cb125-23"><a href="bayesian-multilevel-regression-in-stan.html#cb125-23" tabindex="-1"></a>             <span class="at">color =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>, <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb125-24"><a href="bayesian-multilevel-regression-in-stan.html#cb125-24" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="fu">aes</span>(<span class="at">y =</span> <span class="fu">abs</span>(est_intercept_ri <span class="sc">-</span> true_intercept)), </span>
+<span id="cb125-25"><a href="bayesian-multilevel-regression-in-stan.html#cb125-25" tabindex="-1"></a>              <span class="at">method =</span> <span class="st">&quot;loess&quot;</span>, <span class="at">color =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb125-26"><a href="bayesian-multilevel-regression-in-stan.html#cb125-26" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Shrinkage Effect: Estimation Error vs. Group Sample Size&quot;</span>,</span>
+<span id="cb125-27"><a href="bayesian-multilevel-regression-in-stan.html#cb125-27" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">&quot;Smaller groups show more shrinkage toward population mean&quot;</span>,</span>
+<span id="cb125-28"><a href="bayesian-multilevel-regression-in-stan.html#cb125-28" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Group Sample Size&quot;</span>, </span>
+<span id="cb125-29"><a href="bayesian-multilevel-regression-in-stan.html#cb125-29" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;Absolute Estimation Error&quot;</span>) <span class="sc">+</span></span>
+<span id="cb125-30"><a href="bayesian-multilevel-regression-in-stan.html#cb125-30" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
+<span id="cb125-31"><a href="bayesian-multilevel-regression-in-stan.html#cb125-31" tabindex="-1"></a></span>
+<span id="cb125-32"><a href="bayesian-multilevel-regression-in-stan.html#cb125-32" tabindex="-1"></a><span class="co"># Correlation structure visualization</span></span>
+<span id="cb125-33"><a href="bayesian-multilevel-regression-in-stan.html#cb125-33" tabindex="-1"></a>posterior_rho <span class="ot">&lt;-</span> rstan<span class="sc">::</span><span class="fu">extract</span>(fit_slopes)<span class="sc">$</span>Rho[, <span class="dv">1</span>, <span class="dv">2</span>]</span>
+<span id="cb125-34"><a href="bayesian-multilevel-regression-in-stan.html#cb125-34" tabindex="-1"></a>p7 <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">rho =</span> posterior_rho) <span class="sc">%&gt;%</span></span>
+<span id="cb125-35"><a href="bayesian-multilevel-regression-in-stan.html#cb125-35" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> rho)) <span class="sc">+</span></span>
+<span id="cb125-36"><a href="bayesian-multilevel-regression-in-stan.html#cb125-36" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">30</span>, <span class="at">fill =</span> <span class="st">&quot;steelblue&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>, <span class="at">color =</span> <span class="st">&quot;white&quot;</span>) <span class="sc">+</span></span>
+<span id="cb125-37"><a href="bayesian-multilevel-regression-in-stan.html#cb125-37" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> rho, <span class="at">color =</span> <span class="st">&quot;red&quot;</span>, <span class="at">linetype =</span> <span class="st">&quot;dashed&quot;</span>, <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb125-38"><a href="bayesian-multilevel-regression-in-stan.html#cb125-38" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="fu">mean</span>(posterior_rho), <span class="at">color =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb125-39"><a href="bayesian-multilevel-regression-in-stan.html#cb125-39" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Posterior Distribution of Intercept-Slope Correlation&quot;</span>,</span>
+<span id="cb125-40"><a href="bayesian-multilevel-regression-in-stan.html#cb125-40" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="fu">paste</span>(<span class="st">&quot;True correlation (red):&quot;</span>, rho, </span>
+<span id="cb125-41"><a href="bayesian-multilevel-regression-in-stan.html#cb125-41" tabindex="-1"></a>                       <span class="st">&quot;| Estimated mean (blue):&quot;</span>, <span class="fu">round</span>(<span class="fu">mean</span>(posterior_rho), <span class="dv">3</span>)),</span>
+<span id="cb125-42"><a href="bayesian-multilevel-regression-in-stan.html#cb125-42" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Correlation&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Density&quot;</span>) <span class="sc">+</span></span>
+<span id="cb125-43"><a href="bayesian-multilevel-regression-in-stan.html#cb125-43" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
+<span id="cb125-44"><a href="bayesian-multilevel-regression-in-stan.html#cb125-44" tabindex="-1"></a></span>
+<span id="cb125-45"><a href="bayesian-multilevel-regression-in-stan.html#cb125-45" tabindex="-1"></a><span class="fu">print</span>(p6 <span class="sc">+</span> p7)</span>
+<span id="cb125-46"><a href="bayesian-multilevel-regression-in-stan.html#cb125-46" tabindex="-1"></a></span>
+<span id="cb125-47"><a href="bayesian-multilevel-regression-in-stan.html#cb125-47" tabindex="-1"></a><span class="co"># Group-specific predictions visualization</span></span>
+<span id="cb125-48"><a href="bayesian-multilevel-regression-in-stan.html#cb125-48" tabindex="-1"></a>pred_data <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(</span>
+<span id="cb125-49"><a href="bayesian-multilevel-regression-in-stan.html#cb125-49" tabindex="-1"></a>  <span class="at">x =</span> <span class="fu">seq</span>(<span class="fu">min</span>(train_data<span class="sc">$</span>x), <span class="fu">max</span>(train_data<span class="sc">$</span>x), <span class="at">length.out =</span> <span class="dv">50</span>),</span>
+<span id="cb125-50"><a href="bayesian-multilevel-regression-in-stan.html#cb125-50" tabindex="-1"></a>  <span class="at">group_id =</span> <span class="fu">factor</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">min</span>(<span class="dv">6</span>, n_groups))  <span class="co"># Show first 6 groups</span></span>
+<span id="cb125-51"><a href="bayesian-multilevel-regression-in-stan.html#cb125-51" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb125-52"><a href="bayesian-multilevel-regression-in-stan.html#cb125-52" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">group_num =</span> <span class="fu">as.numeric</span>(group_id))</span>
+<span id="cb125-53"><a href="bayesian-multilevel-regression-in-stan.html#cb125-53" tabindex="-1"></a></span>
+<span id="cb125-54"><a href="bayesian-multilevel-regression-in-stan.html#cb125-54" tabindex="-1"></a><span class="co"># Add predictions from random slopes model</span></span>
+<span id="cb125-55"><a href="bayesian-multilevel-regression-in-stan.html#cb125-55" tabindex="-1"></a>group_effects_sample <span class="ot">&lt;-</span> group_effects_matrix[pred_data<span class="sc">$</span>group_num, ]</span>
+<span id="cb125-56"><a href="bayesian-multilevel-regression-in-stan.html#cb125-56" tabindex="-1"></a>pred_data<span class="sc">$</span>y_pred <span class="ot">&lt;-</span> (alpha_pop <span class="sc">+</span> group_effects_sample[, <span class="dv">1</span>]) <span class="sc">+</span> </span>
+<span id="cb125-57"><a href="bayesian-multilevel-regression-in-stan.html#cb125-57" tabindex="-1"></a>                    (beta_pop <span class="sc">+</span> group_effects_sample[, <span class="dv">2</span>]) <span class="sc">*</span> pred_data<span class="sc">$</span>x</span>
+<span id="cb125-58"><a href="bayesian-multilevel-regression-in-stan.html#cb125-58" tabindex="-1"></a></span>
+<span id="cb125-59"><a href="bayesian-multilevel-regression-in-stan.html#cb125-59" tabindex="-1"></a>p8 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb125-60"><a href="bayesian-multilevel-regression-in-stan.html#cb125-60" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> <span class="fu">filter</span>(train_data, <span class="fu">as.numeric</span>(group_id) <span class="sc">&lt;=</span> <span class="dv">6</span>),</span>
+<span id="cb125-61"><a href="bayesian-multilevel-regression-in-stan.html#cb125-61" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">color =</span> group_id), <span class="at">alpha =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
+<span id="cb125-62"><a href="bayesian-multilevel-regression-in-stan.html#cb125-62" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">data =</span> pred_data, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y_pred, <span class="at">color =</span> group_id), </span>
+<span id="cb125-63"><a href="bayesian-multilevel-regression-in-stan.html#cb125-63" tabindex="-1"></a>            <span class="at">size =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
+<span id="cb125-64"><a href="bayesian-multilevel-regression-in-stan.html#cb125-64" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>group_id, <span class="at">ncol =</span> <span class="dv">3</span>, <span class="at">labeller =</span> label_both) <span class="sc">+</span></span>
+<span id="cb125-65"><a href="bayesian-multilevel-regression-in-stan.html#cb125-65" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Group-Specific Predictions: Random Slopes Model&quot;</span>,</span>
+<span id="cb125-66"><a href="bayesian-multilevel-regression-in-stan.html#cb125-66" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">&quot;Points show observed data, lines show group-specific regression&quot;</span>,</span>
+<span id="cb125-67"><a href="bayesian-multilevel-regression-in-stan.html#cb125-67" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Predictor (x)&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Outcome (y)&quot;</span>) <span class="sc">+</span></span>
+<span id="cb125-68"><a href="bayesian-multilevel-regression-in-stan.html#cb125-68" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb125-69"><a href="bayesian-multilevel-regression-in-stan.html#cb125-69" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>) <span class="sc">+</span></span>
+<span id="cb125-70"><a href="bayesian-multilevel-regression-in-stan.html#cb125-70" tabindex="-1"></a>  <span class="fu">scale_color_viridis_d</span>()</span>
+<span id="cb125-71"><a href="bayesian-multilevel-regression-in-stan.html#cb125-71" tabindex="-1"></a></span>
+<span id="cb125-72"><a href="bayesian-multilevel-regression-in-stan.html#cb125-72" tabindex="-1"></a><span class="fu">print</span>(p8)</span></code></pre></div>
 </div>
 <div id="conclusion-4" class="section level2 hasAnchor" number="7.4">
 <h2><span class="header-section-number">7.4</span> Conclusion<a href="bayesian-multilevel-regression-in-stan.html#conclusion-4" class="anchor-section" aria-label="Anchor link to header"></a></h2>
