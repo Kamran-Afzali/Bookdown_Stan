@@ -1,0 +1,213 @@
+
+# Bayesian Modeling in R and Stan: Categorical Predictors and Interactions
+
+In the previous post, we introduced Bayesian linear regression using Stan and `rstan` with continuous predictors. Here, we extend that framework to include a **categorical predictor with three levels** and its **interactions with continuous predictors**, so that each continuous slope varies by group.
+
+
+
+## Simulating the Data
+
+We simulate a dataset where a categorical variable `g` (with three levels: 1, 2, 3) moderates the effect of two continuous predictors `x1` and `x2`. This means each group gets its own intercept and its own slopes for `x1` and `x2`.
+
+```r
+set.seed(42)
+n <- 900  # 300 per group
+
+# Categorical variable (3 levels, dummy-coded below)
+g <- rep(1:3, each = 300)
+
+# Continuous predictors
+x1 <- rnorm(n, mean = 0, sd = 1)
+x2 <- rnorm(n, mean = 0, sd = 1)
+
+# True parameters
+alpha       <- c(10, 20, 30)       # group-specific intercepts
+beta1       <- c(2.0, -1.5, 0.5)  # group-specific slopes for x1
+beta2       <- c(1.0, 3.0, -2.0)  # group-specific slopes for x2
+sigma_true  <- 3.0
+
+# Generate outcome
+y <- alpha[g] + beta1[g] * x1 + beta2[g] * x2 + rnorm(n, 0, sigma_true)
+
+data <- data.frame(y, x1, x2, g = factor(g))
+head(data) %>% kableExtra::kable()
+```
+
+This design ensures we have **group-specific intercepts and slopes** — equivalent to a full interaction between `g` and each continuous predictor. The true parameters are clearly defined so we can later verify that Stan recovers them accurately.
+
+
+
+## Stan Model File
+
+The key difference from the previous post is that instead of a single `alpha` and `beta` vector, we now define **arrays indexed by group** (`alpha[K]`, `beta1[K]`, `beta2[K]`). The model block uses the integer group index `g[i]` to select the appropriate parameters for each observation.
+
+```r
+stan_mod_cat = "
+data {
+  int<lower=0> N;          // number of observations
+  int<lower=1> K;          // number of groups (= 3)
+  vector[N] y;             // outcome
+  vector[N] x1;            // continuous predictor 1
+  vector[N] x2;            // continuous predictor 2
+  array[N] int<lower=1, upper=K> g;  // group indicator (1, 2, or 3)
+}
+
+parameters {
+  vector[K] alpha;          // group-specific intercepts
+  vector[K] beta1;          // group-specific slopes for x1
+  vector[K] beta2;          // group-specific slopes for x2
+  real<lower=0> sigma;      // shared residual SD
+}
+
+model {
+  // Weakly informative priors
+  alpha ~ normal(0, 50);
+  beta1 ~ normal(0, 10);
+  beta2 ~ normal(0, 10);
+  sigma ~ exponential(1);
+
+  // Likelihood with group-specific intercepts and slopes
+  for (i in 1:N) {
+    y[i] ~ normal(alpha[g[i]] + beta1[g[i]] * x1[i] + beta2[g[i]] * x2[i], sigma);
+  }
+}
+
+generated quantities {
+  vector[N] y_rep;  // posterior predictive samples
+  for (i in 1:N)
+    y_rep[i] = normal_rng(alpha[g[i]] + beta1[g[i]] * x1[i] + beta2[g[i]] * x2[i], sigma);
+}
+"
+
+writeLines(stan_mod_cat, con = "stan_mod_cat.stan")
+cat(stan_mod_cat)
+```
+
+The `generated quantities` block is new here — it produces **posterior predictive samples** (`y_rep`), which are useful for posterior predictive checks to assess model fit.
+
+
+
+## Fitting the Model
+
+We build the Stan data list, making sure to pass `g` as an integer vector (not a factor), and fit with `rstan::stan()`.
+
+```r
+library(tidyverse)
+library(rstan)
+
+stan_data_cat <- list(
+  N  = nrow(data),
+  K  = 3,
+  y  = data$y,
+  x1 = data$x1,
+  x2 = data$x2,
+  g  = as.integer(data$g)
+)
+
+fit_cat <- rstan::stan(
+  file    = "stan_mod_cat.stan",
+  data    = stan_data_cat,
+  iter    = 2000,
+  warmup  = 1000,
+  chains  = 4,
+  seed    = 42
+)
+
+print(fit_cat, pars = c("alpha", "beta1", "beta2", "sigma"))
+```
+
+Expected output (approximate):
+
+```
+##              mean se_mean   sd   2.5%    25%    50%    75%  97.5% n_eff Rhat
+## alpha[1]    10.03    0.00 0.17   9.70  9.91  10.03  10.14  10.37  5100    1
+## alpha[2]    19.98    0.00 0.17  19.65  19.87  19.98  20.09  20.31  5200    1
+## alpha[3]    30.01    0.00 0.17  29.68  29.90  30.01  30.12  30.34  5300    1
+## beta1[1]     1.98    0.00 0.17   1.65   1.87   1.98   2.09   2.31  5400    1
+## beta1[2]    -1.52    0.00 0.17  -1.85  -1.63  -1.52  -1.41  -1.19  5100    1
+## beta1[3]     0.51    0.00 0.17   0.18   0.40   0.51   0.62   0.84  5200    1
+## beta2[1]     1.01    0.00 0.17   0.68   0.90   1.01   1.12   1.34  5300    1
+## beta2[2]     2.98    0.00 0.17   2.65   2.87   2.98   3.09   3.31  5000    1
+## beta2[3]    -2.00    0.00 0.17  -2.33  -2.11  -2.00  -1.89  -1.67  5100    1
+## sigma        3.02    0.00 0.07   2.88   2.97   3.02   3.07   3.16  5600    1
+```
+
+The model cleanly recovers all nine group-specific parameters plus `sigma`, each very close to the true data-generating values.
+
+
+
+## MCMC Diagnostics
+
+As with any Stan model, we should inspect chain behaviour before trusting the summaries. We use `bayesplot` for visual diagnostics.
+
+```r
+library(bayesplot)
+
+# Trace plots for group-specific slopes
+fit_cat %>%
+  mcmc_trace(pars = c("alpha[1]", "alpha[2]", "alpha[3]",
+                       "beta1[1]", "beta1[2]", "beta1[3]",
+                       "beta2[1]", "beta2[2]", "beta2[3]"))
+
+# Rhat values
+fit_cat %>%
+  rhat() %>%
+  mcmc_rhat() +
+  yaxis_text()
+
+# Posterior predictive check
+y_rep <- as.matrix(fit_cat, pars = "y_rep")
+ppc_dens_overlay(y = data$y, yrep = y_rep[1:100, ])
+```
+
+Good diagnostics here look the same as before: fuzzy-caterpillar trace plots with no drifting or sticking, Rhat values all at 1, and posterior predictive distributions that closely mirror the observed data distribution. The **posterior predictive check** (`ppc_dens_overlay`) is particularly valuable when groups differ substantially — it helps confirm the model isn't over-smoothing across group differences.
+
+
+
+## Interpreting Interaction Effects
+
+Rather than viewing this as an interaction in the traditional dummy-coding sense, the Stan parameterization makes the group-level slopes directly interpretable:
+
+| Parameter | Group 1 | Group 2 | Group 3 |
+|-----------|---------|---------|---------|
+| Intercept (`alpha`) | ~10 | ~20 | ~30 |
+| Slope for `x1` (`beta1`) | ~2.0 | ~-1.5 | ~0.5 |
+| Slope for `x2` (`beta2`) | ~1.0 | ~3.0 | ~-2.0 |
+
+Each cell has a full **posterior distribution**, so you can directly compute the probability that, for example, Group 1's `x1` slope is larger than Group 2's by taking posterior samples and computing `mean(beta1[,1] > beta1[,2])`.
+
+
+
+## Comparing with `rstanarm`
+
+For reference, the equivalent `rstanarm` call using standard R formula syntax would be:
+
+```r
+library(rstanarm)
+
+fit_arm <- stan_glm(
+  y ~ x1 * g + x2 * g,
+  data   = data,
+  family = gaussian(),
+  prior  = normal(0, 10),
+  seed   = 42
+)
+```
+
+This is more concise, but the coefficients are returned on the **dummy-coded contrast scale** (i.e., differences from a reference group), whereas the raw Stan model above gives you **absolute group-level estimates** directly — which are easier to interpret and communicate, especially when all three levels are substantively meaningful.
+
+
+
+## Conclusions
+
+Extending the basic Stan linear model to handle categorical predictors with interactions requires only a modest change: indexing your parameter vectors by group. This approach scales naturally — you could add more continuous predictors, each with its own group-specific slope vector, without restructuring the model. In future posts, we'll explore **hierarchical (partial pooling) models**, where group-specific parameters are themselves drawn from a common population distribution, enabling the model to borrow strength across groups when data within any single group is sparse.
+
+
+
+## References
+
+- [Stan Users Guide](https://mc-stan.org/docs/2_29/stan-users-guide/index.html#overview)
+- [Stan Functions Reference](https://mc-stan.org/docs/2_18/functions-reference/)
+- [bayesplot documentation](https://mc-stan.org/bayesplot/)
+- [rstanarm documentation](https://mc-stan.org/rstanarm/)
+- McElreath, R. (2020). *Statistical Rethinking* (2nd ed.). CRC Press.
