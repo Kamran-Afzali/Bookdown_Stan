@@ -1,0 +1,199 @@
+## Bayesian Mediation with Stan
+
+Here is a polished follow-up chapter you can add after the categorical interactions chapter. It introduces a simple Bayesian mediation model in Stan, shows how to estimate direct and indirect effects, and keeps the same practical, tutorial-style tone. The structure also stays consistent with Stan’s workflow of fitting a generative model and then using posterior draws to compute derived quantities like indirect effects. [mc-stan](https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html)
+
+
+# Bayesian Modeling in R and Stan: Mediation Analysis
+
+In the previous chapter, we extended Bayesian regression in Stan to handle categorical predictors and interactions. In this chapter, we turn to **mediation analysis**, where we ask whether the effect of a predictor \(X\) on an outcome \(Y\) operates partly through an intermediate variable \(M\). The key quantities of interest are the **direct effect** of \(X\) on \(Y\), the **indirect effect** of \(X\) on \(Y\) through \(M\), and the **total effect**. [pmc.ncbi.nlm.nih](https://pmc.ncbi.nlm.nih.gov/articles/PMC5999040/)
+
+## The Mediation Setup
+
+We consider the classic single-mediator model:
+
+- \(X\): the predictor or treatment.
+- \(M\): the mediator.
+- \(Y\): the outcome.
+
+The mediation logic is simple: \(X\) may influence \(M\), and \(M\) may in turn influence \(Y\). If \(X\) also affects \(Y\) directly, then the total effect can be decomposed into a direct path and an indirect path through the mediator. In a linear Gaussian model, this decomposition is especially transparent because the indirect effect is the product of two regression coefficients. [research-portal.uu](https://research-portal.uu.nl/ws/portalfiles/portal/247048134/A_Tutorial_in_Bayesian_Potential_Outcomes_Mediation_Analysis.pdf)
+
+## Simulating the Data
+
+To make the idea concrete, we simulate data from a mediation model with one predictor, one mediator, and one outcome.
+
+```r
+set.seed(42)
+
+n <- 500
+
+# Predictor
+x <- rnorm(n, 0, 1)
+
+# True parameters
+a0 <- 0
+a1 <- 0.8
+
+b0 <- 0
+b1 <- 1.2
+c_prime <- 0.5
+
+sigma_m <- 1.0
+sigma_y <- 1.5
+
+# Mediator
+m <- a0 + a1 * x + rnorm(n, 0, sigma_m)
+
+# Outcome
+y <- b0 + c_prime * x + b1 * m + rnorm(n, 0, sigma_y)
+
+data <- data.frame(x, m, y)
+head(data)
+```
+
+In this data-generating process, the effect of \(X\) on \(M\) is \(a_1\), the effect of \(M\) on \(Y\) is \(b_1\), and the direct effect of \(X\) on \(Y\) is \(c'\). The indirect effect is \(a_1 b_1\), and the total effect is \(c' + a_1 b_1\). [davidakenny](https://davidakenny.net/cm/mediate.htm)
+
+## The Stan Model
+
+We fit the mediation model as two linked regressions: one for the mediator and one for the outcome. The mediator model estimates how \(X\) predicts \(M\), and the outcome model estimates how \(X\) and \(M\) jointly predict \(Y\).
+
+```r
+stan_mod_med <- "
+data {
+  int<lower=1> N;
+  vector[N] x;
+  vector[N] m;
+  vector[N] y;
+}
+
+parameters {
+  real a0;
+  real a1;
+  real b0;
+  real b1;
+  real c_prime;
+  real<lower=0> sigma_m;
+  real<lower=0> sigma_y;
+}
+
+model {
+  a0 ~ normal(0, 10);
+  a1 ~ normal(0, 10);
+  b0 ~ normal(0, 10);
+  b1 ~ normal(0, 10);
+  c_prime ~ normal(0, 10);
+  sigma_m ~ exponential(1);
+  sigma_y ~ exponential(1);
+
+  m ~ normal(a0 + a1 * x, sigma_m);
+  y ~ normal(b0 + c_prime * x + b1 * m, sigma_y);
+}
+
+generated quantities {
+  real indirect = a1 * b1;
+  real total = c_prime + indirect;
+}
+"
+
+writeLines(stan_mod_med, con = "stan_mod_med.stan")
+cat(stan_mod_med)
+```
+
+This parameterization is useful because the mediation effects are defined directly in terms of the regression coefficients. Stan then gives us posterior draws of \(a_1\), \(b_1\), and \(c'\), from which we can compute the indirect and total effects inside `generated quantities`. [mc-stan](https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html)
+
+## Fitting the Model
+
+We now fit the model with `rstan`.
+
+```r
+library(rstan)
+
+stan_data_med <- list(
+  N = nrow(data),
+  x = data$x,
+  m = data$m,
+  y = data$y
+)
+
+fit_med <- rstan::stan(
+  file   = "stan_mod_med.stan",
+  data   = stan_data_med,
+  iter   = 2000,
+  warmup = 1000,
+  chains = 4,
+  seed   = 42
+)
+
+print(fit_med, pars = c("a0", "a1", "b0", "b1", "c_prime", "sigma_m", "sigma_y", "indirect", "total"))
+```
+
+The posterior summaries should recover the true values closely if the model is well specified. Because the model is Bayesian, the direct and indirect effects are estimated with full uncertainty, not just point estimates. [pmc.ncbi.nlm.nih](https://pmc.ncbi.nlm.nih.gov/articles/PMC5999040/)
+
+## Interpreting Effects
+
+The mediation quantities are interpreted as follows:
+
+| Quantity | Meaning |
+|---|---|
+| Direct effect | Effect of \(X\) on \(Y\) not through \(M\). |
+| Indirect effect | Effect of \(X\) on \(Y\) that passes through \(M\). |
+| Total effect | Sum of direct and indirect effects. |
+
+In this linear model, the indirect effect is \(a_1 b_1\), while the direct effect is \(c'\). A useful posterior summary is the probability that the indirect effect is positive, which can be computed as `mean(extract(fit_med)$indirect > 0)`. [healthsci.queensu](https://healthsci.queensu.ca/source/HSPRI/HSPRI_Methods_Shellenberger_May-6-24_Slides.pdf)
+
+## Posterior Effect Estimates
+
+A clean way to report mediation results is to summarize the posterior distribution of each effect.
+
+```r
+post <- rstan::extract(fit_med)
+
+indirect_draws <- post$indirect
+total_draws <- post$total
+direct_draws <- post$c_prime
+
+c(
+  direct_mean = mean(direct_draws),
+  direct_ci_l = quantile(direct_draws, 0.025),
+  direct_ci_u = quantile(direct_draws, 0.975),
+  indirect_mean = mean(indirect_draws),
+  indirect_ci_l = quantile(indirect_draws, 0.025),
+  indirect_ci_u = quantile(indirect_draws, 0.975),
+  total_mean = mean(total_draws),
+  total_ci_l = quantile(total_draws, 0.025),
+  total_ci_u = quantile(total_draws, 0.975)
+)
+```
+
+This gives you posterior means and credible intervals for all three effects. Because these are posterior draws, the intervals have a direct probabilistic interpretation: they describe where the parameter likely lies given the model and data. [research-portal.uu](https://research-portal.uu.nl/ws/portalfiles/portal/247048134/A_Tutorial_in_Bayesian_Potential_Outcomes_Mediation_Analysis.pdf)
+
+## Posterior Diagnostics
+
+As in any Bayesian workflow, we should check convergence and fit before interpreting the effects. Trace plots and \(\widehat{R}\) values help diagnose sampling issues, while posterior predictive checks tell us whether the model reproduces the observed data reasonably well. [mc-stan](https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html)
+
+```r
+library(bayesplot)
+
+fit_med %>%
+  mcmc_trace(pars = c("a1", "b1", "c_prime", "indirect", "total"))
+```
+
+For posterior predictive checks, it is often helpful to compare replicated outcome distributions against the observed outcome distribution. Stan’s posterior predictive workflow is designed exactly for this kind of model checking. [mc-stan](https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html)
+
+## Why Bayesian Mediation Helps
+
+Bayesian mediation analysis is especially useful because the indirect effect is often skewed and can be hard to quantify with normal approximations. Posterior simulation gives you the full distribution of the indirect effect without relying on a delta-method approximation or large-sample normality. It also makes it easy to propagate uncertainty through nonlinear derived quantities like \(a_1 b_1\). That is the main reason mediation is a good fit for Stan. [cran.r-project](https://cran.r-project.org/web/packages/BayesGmed/BayesGmed.pdf)
+
+## Extending the Model
+
+This simple chapter can be extended in several directions:
+
+- Add covariates to both the mediator and outcome models.
+- Allow multiple mediators.
+- Fit multilevel mediation models with varying intercepts or slopes.
+- Use binary or ordinal outcomes with appropriate likelihoods. [econtent.hogrefe](https://econtent.hogrefe.com/doi/10.1027/1614-2241/a000177)
+
+A natural next step after this chapter would be a hierarchical mediation model, where the mediation pathway varies across groups. That would connect nicely to the previous chapter’s theme of group-specific effects and interactions.
+
+## Closing
+
+Mediation analysis in Stan is conceptually straightforward once you view it as two linked regression models. The direct and indirect effects are not separate parameters in the likelihood; instead, they are derived from posterior draws of the regression coefficients, which gives you a flexible and fully Bayesian way to quantify mediation. [pmc.ncbi.nlm.nih](https://pmc.ncbi.nlm.nih.gov/articles/PMC5999040/)
