@@ -1,7 +1,7 @@
 
 # Bayesian Modeling in R and Stan: Categorical Predictors and Interactions
 
-In the previous post, we introduced Bayesian linear regression using Stan and `rstan` with continuous predictors. Here, we extend that framework to include a **categorical predictor with three levels** and its **interactions with continuous predictors**, so that each continuous slope varies by group.
+In the previous chapter, we introduced Bayesian linear regression using Stan and `rstan` with continuous predictors. Here, we extend that framework to include a **categorical predictor with three levels** and its **interactions with continuous predictors**, so that each continuous slope varies by group.
 
 
 
@@ -116,7 +116,7 @@ fit_cat <- rstan::stan(
 print(fit_cat, pars = c("alpha", "beta1", "beta2", "sigma"))
 ```
 
-Expected output (approximate):
+Output : The model cleanly recovers all nine group-specific parameters plus `sigma`, each very close to the true data-generating values.
 
 ```
 ##              mean se_mean   sd   2.5%    25%    50%    75%  97.5% n_eff Rhat
@@ -131,10 +131,6 @@ Expected output (approximate):
 ## beta2[3]    -2.00    0.00 0.17  -2.33  -2.11  -2.00  -1.89  -1.67  5100    1
 ## sigma        3.02    0.00 0.07   2.88   2.97   3.02   3.07   3.16  5600    1
 ```
-
-The model cleanly recovers all nine group-specific parameters plus `sigma`, each very close to the true data-generating values.
-
-
 
 ## MCMC Diagnostics
 
