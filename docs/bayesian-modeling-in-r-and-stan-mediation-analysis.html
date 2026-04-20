@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Page not found | Stan Bookdown</title>
-  <meta name="description" content="Page not found | Stan Bookdown" />
+  <title>Chapter 4 Bayesian Modeling in R and Stan: Mediation Analysis | Stan Bookdown</title>
+  <meta name="description" content="Chapter 4 Bayesian Modeling in R and Stan: Mediation Analysis | Stan Bookdown" />
   <meta name="generator" content="bookdown 0.43 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Page not found | Stan Bookdown" />
+  <meta property="og:title" content="Chapter 4 Bayesian Modeling in R and Stan: Mediation Analysis | Stan Bookdown" />
   <meta property="og:type" content="book" />
   
   
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Page not found | Stan Bookdown" />
+  <meta name="twitter:title" content="Chapter 4 Bayesian Modeling in R and Stan: Mediation Analysis | Stan Bookdown" />
   
   
   
@@ -30,8 +30,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-
-
+<link rel="prev" href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html"/>
+<link rel="next" href="bayesian-regression-models-for-non-normal-data.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -349,19 +349,193 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="page-not-found" class="section level1">
-<h1>Page not found</h1>
-<p>The page you requested cannot be found (perhaps it was moved or renamed).</p>
-<p>You may want to try searching to find the page's new location, or use
-the table of contents to find the page you are looking for.</p>
+<div id="bayesian-modeling-in-r-and-stan-mediation-analysis" class="section level1 hasAnchor" number="4">
+<h1><span class="header-section-number">Chapter 4</span> Bayesian Modeling in R and Stan: Mediation Analysis<a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#bayesian-modeling-in-r-and-stan-mediation-analysis" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>In the previous chapter, we extended Bayesian regression in Stan to handle categorical predictors and interactions. In this chapter, we turn to <strong>mediation analysis</strong>, where we ask whether the effect of a predictor <span class="math inline">\(X\)</span> on an outcome <span class="math inline">\(Y\)</span> operates partly through an intermediate variable <span class="math inline">\(M\)</span>. The key quantities of interest are the <strong>direct effect</strong> of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span>, the <strong>indirect effect</strong> of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span> through <span class="math inline">\(M\)</span>, and the <strong>total effect</strong>. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5999040/">pmc.ncbi.nlm.nih</a></p>
+<div id="the-mediation-setup" class="section level2 hasAnchor" number="4.1">
+<h2><span class="header-section-number">4.1</span> The Mediation Setup<a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#the-mediation-setup" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>We consider the classic single-mediator model:</p>
+<ul>
+<li><span class="math inline">\(X\)</span>: the predictor or treatment.</li>
+<li><span class="math inline">\(M\)</span>: the mediator.</li>
+<li><span class="math inline">\(Y\)</span>: the outcome.</li>
+</ul>
+<p>The mediation logic is simple: <span class="math inline">\(X\)</span> may influence <span class="math inline">\(M\)</span>, and <span class="math inline">\(M\)</span> may in turn influence <span class="math inline">\(Y\)</span>. If <span class="math inline">\(X\)</span> also affects <span class="math inline">\(Y\)</span> directly, then the total effect can be decomposed into a direct path and an indirect path through the mediator. In a linear Gaussian model, this decomposition is especially transparent because the indirect effect is the product of two regression coefficients. <a href="https://research-portal.uu.nl/ws/portalfiles/portal/247048134/A_Tutorial_in_Bayesian_Potential_Outcomes_Mediation_Analysis.pdf">research-portal.uu</a></p>
+</div>
+<div id="simulating-the-data-1" class="section level2 hasAnchor" number="4.2">
+<h2><span class="header-section-number">4.2</span> Simulating the Data<a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#simulating-the-data-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>To make the idea concrete, we simulate data from a mediation model with one predictor, one mediator, and one outcome.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb1-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb1-2"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb1-2" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb1-3" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">500</span></span>
+<span id="cb1-4"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb1-4" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb1-5" tabindex="-1"></a><span class="co"># Predictor</span></span>
+<span id="cb1-6"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb1-6" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb1-7"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb1-7" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb1-8" tabindex="-1"></a><span class="co"># True parameters</span></span>
+<span id="cb1-9"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb1-9" tabindex="-1"></a>a0 <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb1-10"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb1-10" tabindex="-1"></a>a1 <span class="ot">&lt;-</span> <span class="fl">0.8</span></span>
+<span id="cb1-11"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb1-11" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb1-12" tabindex="-1"></a>b0 <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb1-13"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb1-13" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="fl">1.2</span></span>
+<span id="cb1-14"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb1-14" tabindex="-1"></a>c_prime <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb1-15"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb1-15" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb1-16" tabindex="-1"></a>sigma_m <span class="ot">&lt;-</span> <span class="fl">1.0</span></span>
+<span id="cb1-17"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb1-17" tabindex="-1"></a>sigma_y <span class="ot">&lt;-</span> <span class="fl">1.5</span></span>
+<span id="cb1-18"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb1-18" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb1-19" tabindex="-1"></a><span class="co"># Mediator</span></span>
+<span id="cb1-20"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb1-20" tabindex="-1"></a>m <span class="ot">&lt;-</span> a0 <span class="sc">+</span> a1 <span class="sc">*</span> x <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, sigma_m)</span>
+<span id="cb1-21"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb1-21" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb1-22" tabindex="-1"></a><span class="co"># Outcome</span></span>
+<span id="cb1-23"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb1-23" tabindex="-1"></a>y <span class="ot">&lt;-</span> b0 <span class="sc">+</span> c_prime <span class="sc">*</span> x <span class="sc">+</span> b1 <span class="sc">*</span> m <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, sigma_y)</span>
+<span id="cb1-24"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb1-24" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb1-25" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(x, m, y)</span>
+<span id="cb1-26"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb1-26" tabindex="-1"></a><span class="fu">head</span>(data)</span></code></pre></div>
+<p>In this data-generating process, the effect of <span class="math inline">\(X\)</span> on <span class="math inline">\(M\)</span> is <span class="math inline">\(a_1\)</span>, the effect of <span class="math inline">\(M\)</span> on <span class="math inline">\(Y\)</span> is <span class="math inline">\(b_1\)</span>, and the direct effect of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span> is <span class="math inline">\(c&#39;\)</span>. The indirect effect is <span class="math inline">\(a_1 b_1\)</span>, and the total effect is <span class="math inline">\(c&#39; + a_1 b_1\)</span>. <a href="https://davidakenny.net/cm/mediate.htm">davidakenny</a></p>
+</div>
+<div id="the-stan-model" class="section level2 hasAnchor" number="4.3">
+<h2><span class="header-section-number">4.3</span> The Stan Model<a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#the-stan-model" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>We fit the mediation model as two linked regressions: one for the mediator and one for the outcome. The mediator model estimates how <span class="math inline">\(X\)</span> predicts <span class="math inline">\(M\)</span>, and the outcome model estimates how <span class="math inline">\(X\)</span> and <span class="math inline">\(M\)</span> jointly predict <span class="math inline">\(Y\)</span>.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-1" tabindex="-1"></a>stan_mod_med <span class="ot">&lt;-</span> <span class="st">&quot;</span></span>
+<span id="cb2-2"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-2" tabindex="-1"></a><span class="st">data {</span></span>
+<span id="cb2-3"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-3" tabindex="-1"></a><span class="st">  int&lt;lower=1&gt; N;</span></span>
+<span id="cb2-4"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-4" tabindex="-1"></a><span class="st">  vector[N] x;</span></span>
+<span id="cb2-5"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-5" tabindex="-1"></a><span class="st">  vector[N] m;</span></span>
+<span id="cb2-6"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-6" tabindex="-1"></a><span class="st">  vector[N] y;</span></span>
+<span id="cb2-7"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-7" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb2-8"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-8" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-9" tabindex="-1"></a><span class="st">parameters {</span></span>
+<span id="cb2-10"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-10" tabindex="-1"></a><span class="st">  real a0;</span></span>
+<span id="cb2-11"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-11" tabindex="-1"></a><span class="st">  real a1;</span></span>
+<span id="cb2-12"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-12" tabindex="-1"></a><span class="st">  real b0;</span></span>
+<span id="cb2-13"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-13" tabindex="-1"></a><span class="st">  real b1;</span></span>
+<span id="cb2-14"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-14" tabindex="-1"></a><span class="st">  real c_prime;</span></span>
+<span id="cb2-15"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-15" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma_m;</span></span>
+<span id="cb2-16"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-16" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma_y;</span></span>
+<span id="cb2-17"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-17" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb2-18"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-18" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-19" tabindex="-1"></a><span class="st">model {</span></span>
+<span id="cb2-20"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-20" tabindex="-1"></a><span class="st">  a0 ~ normal(0, 10);</span></span>
+<span id="cb2-21"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-21" tabindex="-1"></a><span class="st">  a1 ~ normal(0, 10);</span></span>
+<span id="cb2-22"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-22" tabindex="-1"></a><span class="st">  b0 ~ normal(0, 10);</span></span>
+<span id="cb2-23"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-23" tabindex="-1"></a><span class="st">  b1 ~ normal(0, 10);</span></span>
+<span id="cb2-24"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-24" tabindex="-1"></a><span class="st">  c_prime ~ normal(0, 10);</span></span>
+<span id="cb2-25"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-25" tabindex="-1"></a><span class="st">  sigma_m ~ exponential(1);</span></span>
+<span id="cb2-26"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-26" tabindex="-1"></a><span class="st">  sigma_y ~ exponential(1);</span></span>
+<span id="cb2-27"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-27" tabindex="-1"></a></span>
+<span id="cb2-28"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-28" tabindex="-1"></a><span class="st">  m ~ normal(a0 + a1 * x, sigma_m);</span></span>
+<span id="cb2-29"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-29" tabindex="-1"></a><span class="st">  y ~ normal(b0 + c_prime * x + b1 * m, sigma_y);</span></span>
+<span id="cb2-30"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-30" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb2-31"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-31" tabindex="-1"></a></span>
+<span id="cb2-32"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-32" tabindex="-1"></a><span class="st">generated quantities {</span></span>
+<span id="cb2-33"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-33" tabindex="-1"></a><span class="st">  real indirect = a1 * b1;</span></span>
+<span id="cb2-34"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-34" tabindex="-1"></a><span class="st">  real total = c_prime + indirect;</span></span>
+<span id="cb2-35"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-35" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb2-36"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-36" tabindex="-1"></a><span class="st">&quot;</span></span>
+<span id="cb2-37"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-37" tabindex="-1"></a></span>
+<span id="cb2-38"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-38" tabindex="-1"></a><span class="fu">writeLines</span>(stan_mod_med, <span class="at">con =</span> <span class="st">&quot;stan_mod_med.stan&quot;</span>)</span>
+<span id="cb2-39"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb2-39" tabindex="-1"></a><span class="fu">cat</span>(stan_mod_med)</span></code></pre></div>
+<p>This parameterization is useful because the mediation effects are defined directly in terms of the regression coefficients. Stan then gives us posterior draws of <span class="math inline">\(a_1\)</span>, <span class="math inline">\(b_1\)</span>, and <span class="math inline">\(c&#39;\)</span>, from which we can compute the indirect and total effects inside <code>generated quantities</code>. <a href="https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html">mc-stan</a></p>
+</div>
+<div id="fitting-the-model-1" class="section level2 hasAnchor" number="4.4">
+<h2><span class="header-section-number">4.4</span> Fitting the Model<a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#fitting-the-model-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>We now fit the model with <code>rstan</code>.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb3-1" tabindex="-1"></a><span class="fu">library</span>(rstan)</span>
+<span id="cb3-2"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb3-2" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb3-3" tabindex="-1"></a>stan_data_med <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb3-4"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb3-4" tabindex="-1"></a>  <span class="at">N =</span> <span class="fu">nrow</span>(data),</span>
+<span id="cb3-5"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb3-5" tabindex="-1"></a>  <span class="at">x =</span> data<span class="sc">$</span>x,</span>
+<span id="cb3-6"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb3-6" tabindex="-1"></a>  <span class="at">m =</span> data<span class="sc">$</span>m,</span>
+<span id="cb3-7"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb3-7" tabindex="-1"></a>  <span class="at">y =</span> data<span class="sc">$</span>y</span>
+<span id="cb3-8"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb3-8" tabindex="-1"></a>)</span>
+<span id="cb3-9"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb3-9" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb3-10" tabindex="-1"></a>fit_med <span class="ot">&lt;-</span> rstan<span class="sc">::</span><span class="fu">stan</span>(</span>
+<span id="cb3-11"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb3-11" tabindex="-1"></a>  <span class="at">file   =</span> <span class="st">&quot;stan_mod_med.stan&quot;</span>,</span>
+<span id="cb3-12"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb3-12" tabindex="-1"></a>  <span class="at">data   =</span> stan_data_med,</span>
+<span id="cb3-13"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb3-13" tabindex="-1"></a>  <span class="at">iter   =</span> <span class="dv">2000</span>,</span>
+<span id="cb3-14"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb3-14" tabindex="-1"></a>  <span class="at">warmup =</span> <span class="dv">1000</span>,</span>
+<span id="cb3-15"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb3-15" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">4</span>,</span>
+<span id="cb3-16"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb3-16" tabindex="-1"></a>  <span class="at">seed   =</span> <span class="dv">42</span></span>
+<span id="cb3-17"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb3-17" tabindex="-1"></a>)</span>
+<span id="cb3-18"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb3-18" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb3-19" tabindex="-1"></a><span class="fu">print</span>(fit_med, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;a0&quot;</span>, <span class="st">&quot;a1&quot;</span>, <span class="st">&quot;b0&quot;</span>, <span class="st">&quot;b1&quot;</span>, <span class="st">&quot;c_prime&quot;</span>, <span class="st">&quot;sigma_m&quot;</span>, <span class="st">&quot;sigma_y&quot;</span>, <span class="st">&quot;indirect&quot;</span>, <span class="st">&quot;total&quot;</span>))</span></code></pre></div>
+<p>The posterior summaries should recover the true values closely if the model is well specified. Because the model is Bayesian, the direct and indirect effects are estimated with full uncertainty, not just point estimates. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5999040/">pmc.ncbi.nlm.nih</a></p>
+</div>
+<div id="interpreting-effects" class="section level2 hasAnchor" number="4.5">
+<h2><span class="header-section-number">4.5</span> Interpreting Effects<a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#interpreting-effects" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The mediation quantities are interpreted as follows:</p>
+<table>
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Quantity</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Direct effect</td>
+<td>Effect of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span> not through <span class="math inline">\(M\)</span>.</td>
+</tr>
+<tr class="even">
+<td>Indirect effect</td>
+<td>Effect of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span> that passes through <span class="math inline">\(M\)</span>.</td>
+</tr>
+<tr class="odd">
+<td>Total effect</td>
+<td>Sum of direct and indirect effects.</td>
+</tr>
+</tbody>
+</table>
+<p>In this linear model, the indirect effect is <span class="math inline">\(a_1 b_1\)</span>, while the direct effect is <span class="math inline">\(c&#39;\)</span>. A useful posterior summary is the probability that the indirect effect is positive, which can be computed as <code>mean(extract(fit_med)$indirect &gt; 0)</code>. <a href="https://healthsci.queensu.ca/source/HSPRI/HSPRI_Methods_Shellenberger_May-6-24_Slides.pdf">healthsci.queensu</a></p>
+</div>
+<div id="posterior-effect-estimates" class="section level2 hasAnchor" number="4.6">
+<h2><span class="header-section-number">4.6</span> Posterior Effect Estimates<a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#posterior-effect-estimates" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>A clean way to report mediation results is to summarize the posterior distribution of each effect.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb4-1" tabindex="-1"></a>post <span class="ot">&lt;-</span> rstan<span class="sc">::</span><span class="fu">extract</span>(fit_med)</span>
+<span id="cb4-2"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb4-2" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb4-3" tabindex="-1"></a>indirect_draws <span class="ot">&lt;-</span> post<span class="sc">$</span>indirect</span>
+<span id="cb4-4"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb4-4" tabindex="-1"></a>total_draws <span class="ot">&lt;-</span> post<span class="sc">$</span>total</span>
+<span id="cb4-5"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb4-5" tabindex="-1"></a>direct_draws <span class="ot">&lt;-</span> post<span class="sc">$</span>c_prime</span>
+<span id="cb4-6"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb4-6" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb4-7" tabindex="-1"></a><span class="fu">c</span>(</span>
+<span id="cb4-8"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb4-8" tabindex="-1"></a>  <span class="at">direct_mean =</span> <span class="fu">mean</span>(direct_draws),</span>
+<span id="cb4-9"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb4-9" tabindex="-1"></a>  <span class="at">direct_ci_l =</span> <span class="fu">quantile</span>(direct_draws, <span class="fl">0.025</span>),</span>
+<span id="cb4-10"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb4-10" tabindex="-1"></a>  <span class="at">direct_ci_u =</span> <span class="fu">quantile</span>(direct_draws, <span class="fl">0.975</span>),</span>
+<span id="cb4-11"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb4-11" tabindex="-1"></a>  <span class="at">indirect_mean =</span> <span class="fu">mean</span>(indirect_draws),</span>
+<span id="cb4-12"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb4-12" tabindex="-1"></a>  <span class="at">indirect_ci_l =</span> <span class="fu">quantile</span>(indirect_draws, <span class="fl">0.025</span>),</span>
+<span id="cb4-13"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb4-13" tabindex="-1"></a>  <span class="at">indirect_ci_u =</span> <span class="fu">quantile</span>(indirect_draws, <span class="fl">0.975</span>),</span>
+<span id="cb4-14"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb4-14" tabindex="-1"></a>  <span class="at">total_mean =</span> <span class="fu">mean</span>(total_draws),</span>
+<span id="cb4-15"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb4-15" tabindex="-1"></a>  <span class="at">total_ci_l =</span> <span class="fu">quantile</span>(total_draws, <span class="fl">0.025</span>),</span>
+<span id="cb4-16"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb4-16" tabindex="-1"></a>  <span class="at">total_ci_u =</span> <span class="fu">quantile</span>(total_draws, <span class="fl">0.975</span>)</span>
+<span id="cb4-17"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb4-17" tabindex="-1"></a>)</span></code></pre></div>
+<p>This gives you posterior means and credible intervals for all three effects. Because these are posterior draws, the intervals have a direct probabilistic interpretation: they describe where the parameter likely lies given the model and data. <a href="https://research-portal.uu.nl/ws/portalfiles/portal/247048134/A_Tutorial_in_Bayesian_Potential_Outcomes_Mediation_Analysis.pdf">research-portal.uu</a></p>
+</div>
+<div id="posterior-diagnostics" class="section level2 hasAnchor" number="4.7">
+<h2><span class="header-section-number">4.7</span> Posterior Diagnostics<a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#posterior-diagnostics" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>As in any Bayesian workflow, we should check convergence and fit before interpreting the effects. Trace plots and <span class="math inline">\(\widehat{R}\)</span> values help diagnose sampling issues, while posterior predictive checks tell us whether the model reproduces the observed data reasonably well. <a href="https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html">mc-stan</a></p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb5-1" tabindex="-1"></a><span class="fu">library</span>(bayesplot)</span>
+<span id="cb5-2"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb5-2" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb5-3" tabindex="-1"></a>fit_med <span class="sc">%&gt;%</span></span>
+<span id="cb5-4"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#cb5-4" tabindex="-1"></a>  <span class="fu">mcmc_trace</span>(<span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;a1&quot;</span>, <span class="st">&quot;b1&quot;</span>, <span class="st">&quot;c_prime&quot;</span>, <span class="st">&quot;indirect&quot;</span>, <span class="st">&quot;total&quot;</span>))</span></code></pre></div>
+<p>For posterior predictive checks, it is often helpful to compare replicated outcome distributions against the observed outcome distribution. Stan’s posterior predictive workflow is designed exactly for this kind of model checking. <a href="https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html">mc-stan</a></p>
+</div>
+<div id="why-bayesian-mediation-helps" class="section level2 hasAnchor" number="4.8">
+<h2><span class="header-section-number">4.8</span> Why Bayesian Mediation Helps<a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#why-bayesian-mediation-helps" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Bayesian mediation analysis is particularly useful because the indirect effect is often skewed and does not sit comfortably within normal approximations; posterior simulation instead yields the full distribution of the indirect effect, avoiding reliance on delta-method approximations or large-sample assumptions while naturally propagating uncertainty through nonlinear quantities such as (a_1 b_1). This is largely why mediation aligns well with probabilistic programming frameworks like Stan. Conceptually, mediation in this setting is straightforward once framed as two linked regression models: the direct and indirect effects are not explicit parameters in the likelihood but are derived from posterior draws of regression coefficients, providing a flexible and fully Bayesian characterization of the mediation pathway. From there, the framework extends quite naturally—one may introduce covariates into both mediator and outcome models, accommodate multiple mediators, move to multilevel structures with varying intercepts or slopes, or consider non-Gaussian outcomes such as binary or ordinal responses with appropriate likelihoods. A natural progression is toward hierarchical mediation models, where the mediation pathway itself varies across groups, which also creates a useful conceptual bridge to earlier discussions of group-specific effects and interactions <a href="https://econtent.hogrefe.com/doi/10.1027/1614-2241/a000177">econtent.hogrefe</a>. Mediation analysis in Stan is conceptually straightforward once you view it as two linked regression models. The direct and indirect effects are not separate parameters in the likelihood; instead, they are derived from posterior draws of the regression coefficients, which gives you a flexible and fully Bayesian way to quantify mediation. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5999040/">pmc.ncbi.nlm.nih</a></p>
+
+</div>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-
-
+<a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="bayesian-regression-models-for-non-normal-data.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -392,7 +566,7 @@ gitbook.start({
     "size": 2
   },
   "edit": {
-    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/edit/main/%s",
+    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/edit/main/02c-Stan_mediation.Rmd",
     "text": "Edit"
   },
   "history": {
@@ -400,7 +574,7 @@ gitbook.start({
     "text": null
   },
   "view": {
-    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/blob/main/%s",
+    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/blob/main/02c-Stan_mediation.Rmd",
     "text": null
   },
   "download": null,
@@ -415,6 +589,20 @@ gitbook.start({
 });
 </script>
 
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
 </body>
 
 </html>

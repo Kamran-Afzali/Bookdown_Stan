@@ -1,8 +1,3 @@
-## Bayesian Mediation with Stan
-
-Here is a polished follow-up chapter you can add after the categorical interactions chapter. It introduces a simple Bayesian mediation model in Stan, shows how to estimate direct and indirect effects, and keeps the same practical, tutorial-style tone. The structure also stays consistent with Stan’s workflow of fitting a generative model and then using posterior draws to compute derived quantities like indirect effects. [mc-stan](https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html)
-
-
 # Bayesian Modeling in R and Stan: Mediation Analysis
 
 In the previous chapter, we extended Bayesian regression in Stan to handle categorical predictors and interactions. In this chapter, we turn to **mediation analysis**, where we ask whether the effect of a predictor \(X\) on an outcome \(Y\) operates partly through an intermediate variable \(M\). The key quantities of interest are the **direct effect** of \(X\) on \(Y\), the **indirect effect** of \(X\) on \(Y\) through \(M\), and the **total effect**. [pmc.ncbi.nlm.nih](https://pmc.ncbi.nlm.nih.gov/articles/PMC5999040/)
@@ -181,19 +176,4 @@ For posterior predictive checks, it is often helpful to compare replicated outco
 
 ## Why Bayesian Mediation Helps
 
-Bayesian mediation analysis is especially useful because the indirect effect is often skewed and can be hard to quantify with normal approximations. Posterior simulation gives you the full distribution of the indirect effect without relying on a delta-method approximation or large-sample normality. It also makes it easy to propagate uncertainty through nonlinear derived quantities like \(a_1 b_1\). That is the main reason mediation is a good fit for Stan. [cran.r-project](https://cran.r-project.org/web/packages/BayesGmed/BayesGmed.pdf)
-
-## Extending the Model
-
-This simple chapter can be extended in several directions:
-
-- Add covariates to both the mediator and outcome models.
-- Allow multiple mediators.
-- Fit multilevel mediation models with varying intercepts or slopes.
-- Use binary or ordinal outcomes with appropriate likelihoods. [econtent.hogrefe](https://econtent.hogrefe.com/doi/10.1027/1614-2241/a000177)
-
-A natural next step after this chapter would be a hierarchical mediation model, where the mediation pathway varies across groups. That would connect nicely to the previous chapter’s theme of group-specific effects and interactions.
-
-## Closing
-
-Mediation analysis in Stan is conceptually straightforward once you view it as two linked regression models. The direct and indirect effects are not separate parameters in the likelihood; instead, they are derived from posterior draws of the regression coefficients, which gives you a flexible and fully Bayesian way to quantify mediation. [pmc.ncbi.nlm.nih](https://pmc.ncbi.nlm.nih.gov/articles/PMC5999040/)
+Bayesian mediation analysis is particularly useful because the indirect effect is often skewed and does not sit comfortably within normal approximations; posterior simulation instead yields the full distribution of the indirect effect, avoiding reliance on delta-method approximations or large-sample assumptions while naturally propagating uncertainty through nonlinear quantities such as (a_1 b_1). This is largely why mediation aligns well with probabilistic programming frameworks like Stan. Conceptually, mediation in this setting is straightforward once framed as two linked regression models: the direct and indirect effects are not explicit parameters in the likelihood but are derived from posterior draws of regression coefficients, providing a flexible and fully Bayesian characterization of the mediation pathway. From there, the framework extends quite naturally—one may introduce covariates into both mediator and outcome models, accommodate multiple mediators, move to multilevel structures with varying intercepts or slopes, or consider non-Gaussian outcomes such as binary or ordinal responses with appropriate likelihoods. A natural progression is toward hierarchical mediation models, where the mediation pathway itself varies across groups, which also creates a useful conceptual bridge to earlier discussions of group-specific effects and interactions [econtent.hogrefe](https://econtent.hogrefe.com/doi/10.1027/1614-2241/a000177). Mediation analysis in Stan is conceptually straightforward once you view it as two linked regression models. The direct and indirect effects are not separate parameters in the likelihood; instead, they are derived from posterior draws of the regression coefficients, which gives you a flexible and fully Bayesian way to quantify mediation. [pmc.ncbi.nlm.nih](https://pmc.ncbi.nlm.nih.gov/articles/PMC5999040/)

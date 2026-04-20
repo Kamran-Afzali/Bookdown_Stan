@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Page not found | Stan Bookdown</title>
-  <meta name="description" content="Page not found | Stan Bookdown" />
+  <title>Chapter 3 Bayesian Modeling in R and Stan: Categorical Predictors and Interactions | Stan Bookdown</title>
+  <meta name="description" content="Chapter 3 Bayesian Modeling in R and Stan: Categorical Predictors and Interactions | Stan Bookdown" />
   <meta name="generator" content="bookdown 0.43 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Page not found | Stan Bookdown" />
+  <meta property="og:title" content="Chapter 3 Bayesian Modeling in R and Stan: Categorical Predictors and Interactions | Stan Bookdown" />
   <meta property="og:type" content="book" />
   
   
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Page not found | Stan Bookdown" />
+  <meta name="twitter:title" content="Chapter 3 Bayesian Modeling in R and Stan: Categorical Predictors and Interactions | Stan Bookdown" />
   
   
   
@@ -30,8 +30,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-
-
+<link rel="prev" href="bayesian-modeling-in-r-and-stan.html"/>
+<link rel="next" href="bayesian-modeling-in-r-and-stan-mediation-analysis.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -349,19 +349,211 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="page-not-found" class="section level1">
-<h1>Page not found</h1>
-<p>The page you requested cannot be found (perhaps it was moved or renamed).</p>
-<p>You may want to try searching to find the page's new location, or use
-the table of contents to find the page you are looking for.</p>
+<div id="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions" class="section level1 hasAnchor" number="3">
+<h1><span class="header-section-number">Chapter 3</span> Bayesian Modeling in R and Stan: Categorical Predictors and Interactions<a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>In the previous chapter, we introduced Bayesian linear regression using Stan and <code>rstan</code> with continuous predictors. Here, we extend that framework to include a <strong>categorical predictor with three levels</strong> and its <strong>interactions with continuous predictors</strong>, so that each continuous slope varies by group.</p>
+<div id="simulating-the-data" class="section level2 hasAnchor" number="3.1">
+<h2><span class="header-section-number">3.1</span> Simulating the Data<a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#simulating-the-data" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>We simulate a dataset where a categorical variable <code>g</code> (with three levels: 1, 2, 3) moderates the effect of two continuous predictors <code>x1</code> and <code>x2</code>. This means each group gets its own intercept and its own slopes for <code>x1</code> and <code>x2</code>.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb1-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb1-2"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb1-2" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">900</span>  <span class="co"># 300 per group</span></span>
+<span id="cb1-3"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb1-4" tabindex="-1"></a><span class="co"># Categorical variable (3 levels, dummy-coded below)</span></span>
+<span id="cb1-5"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb1-5" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="at">each =</span> <span class="dv">300</span>)</span>
+<span id="cb1-6"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb1-6" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb1-7" tabindex="-1"></a><span class="co"># Continuous predictors</span></span>
+<span id="cb1-8"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb1-8" tabindex="-1"></a>x1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb1-9"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb1-9" tabindex="-1"></a>x2 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb1-10"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb1-10" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb1-11" tabindex="-1"></a><span class="co"># True parameters</span></span>
+<span id="cb1-12"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb1-12" tabindex="-1"></a>alpha       <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>)       <span class="co"># group-specific intercepts</span></span>
+<span id="cb1-13"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb1-13" tabindex="-1"></a>beta1       <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">2.0</span>, <span class="sc">-</span><span class="fl">1.5</span>, <span class="fl">0.5</span>)  <span class="co"># group-specific slopes for x1</span></span>
+<span id="cb1-14"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb1-14" tabindex="-1"></a>beta2       <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">1.0</span>, <span class="fl">3.0</span>, <span class="sc">-</span><span class="fl">2.0</span>)  <span class="co"># group-specific slopes for x2</span></span>
+<span id="cb1-15"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb1-15" tabindex="-1"></a>sigma_true  <span class="ot">&lt;-</span> <span class="fl">3.0</span></span>
+<span id="cb1-16"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb1-16" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb1-17" tabindex="-1"></a><span class="co"># Generate outcome</span></span>
+<span id="cb1-18"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb1-18" tabindex="-1"></a>y <span class="ot">&lt;-</span> alpha[g] <span class="sc">+</span> beta1[g] <span class="sc">*</span> x1 <span class="sc">+</span> beta2[g] <span class="sc">*</span> x2 <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, sigma_true)</span>
+<span id="cb1-19"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb1-19" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb1-20" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(y, x1, x2, <span class="at">g =</span> <span class="fu">factor</span>(g))</span>
+<span id="cb1-21"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb1-21" tabindex="-1"></a><span class="fu">head</span>(data) <span class="sc">%&gt;%</span> kableExtra<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div>
+<p>This design ensures we have <strong>group-specific intercepts and slopes</strong> — equivalent to a full interaction between <code>g</code> and each continuous predictor. The true parameters are clearly defined so we can later verify that Stan recovers them accurately.</p>
+</div>
+<div id="stan-model-file" class="section level2 hasAnchor" number="3.2">
+<h2><span class="header-section-number">3.2</span> Stan Model File<a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#stan-model-file" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The key difference from the previous post is that instead of a single <code>alpha</code> and <code>beta</code> vector, we now define <strong>arrays indexed by group</strong> (<code>alpha[K]</code>, <code>beta1[K]</code>, <code>beta2[K]</code>). The model block uses the integer group index <code>g[i]</code> to select the appropriate parameters for each observation.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-1" tabindex="-1"></a>stan_mod_cat <span class="ot">=</span> <span class="st">&quot;</span></span>
+<span id="cb2-2"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-2" tabindex="-1"></a><span class="st">data {</span></span>
+<span id="cb2-3"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-3" tabindex="-1"></a><span class="st">  int&lt;lower=0&gt; N;          // number of observations</span></span>
+<span id="cb2-4"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-4" tabindex="-1"></a><span class="st">  int&lt;lower=1&gt; K;          // number of groups (= 3)</span></span>
+<span id="cb2-5"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-5" tabindex="-1"></a><span class="st">  vector[N] y;             // outcome</span></span>
+<span id="cb2-6"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-6" tabindex="-1"></a><span class="st">  vector[N] x1;            // continuous predictor 1</span></span>
+<span id="cb2-7"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-7" tabindex="-1"></a><span class="st">  vector[N] x2;            // continuous predictor 2</span></span>
+<span id="cb2-8"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-8" tabindex="-1"></a><span class="st">  array[N] int&lt;lower=1, upper=K&gt; g;  // group indicator (1, 2, or 3)</span></span>
+<span id="cb2-9"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-9" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb2-10"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-10" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-11" tabindex="-1"></a><span class="st">parameters {</span></span>
+<span id="cb2-12"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-12" tabindex="-1"></a><span class="st">  vector[K] alpha;          // group-specific intercepts</span></span>
+<span id="cb2-13"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-13" tabindex="-1"></a><span class="st">  vector[K] beta1;          // group-specific slopes for x1</span></span>
+<span id="cb2-14"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-14" tabindex="-1"></a><span class="st">  vector[K] beta2;          // group-specific slopes for x2</span></span>
+<span id="cb2-15"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-15" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma;      // shared residual SD</span></span>
+<span id="cb2-16"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-16" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb2-17"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-17" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-18" tabindex="-1"></a><span class="st">model {</span></span>
+<span id="cb2-19"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-19" tabindex="-1"></a><span class="st">  // Weakly informative priors</span></span>
+<span id="cb2-20"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-20" tabindex="-1"></a><span class="st">  alpha ~ normal(0, 50);</span></span>
+<span id="cb2-21"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-21" tabindex="-1"></a><span class="st">  beta1 ~ normal(0, 10);</span></span>
+<span id="cb2-22"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-22" tabindex="-1"></a><span class="st">  beta2 ~ normal(0, 10);</span></span>
+<span id="cb2-23"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-23" tabindex="-1"></a><span class="st">  sigma ~ exponential(1);</span></span>
+<span id="cb2-24"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-24" tabindex="-1"></a></span>
+<span id="cb2-25"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-25" tabindex="-1"></a><span class="st">  // Likelihood with group-specific intercepts and slopes</span></span>
+<span id="cb2-26"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-26" tabindex="-1"></a><span class="st">  for (i in 1:N) {</span></span>
+<span id="cb2-27"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-27" tabindex="-1"></a><span class="st">    y[i] ~ normal(alpha[g[i]] + beta1[g[i]] * x1[i] + beta2[g[i]] * x2[i], sigma);</span></span>
+<span id="cb2-28"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-28" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb2-29"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-29" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb2-30"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-30" tabindex="-1"></a></span>
+<span id="cb2-31"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-31" tabindex="-1"></a><span class="st">generated quantities {</span></span>
+<span id="cb2-32"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-32" tabindex="-1"></a><span class="st">  vector[N] y_rep;  // posterior predictive samples</span></span>
+<span id="cb2-33"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-33" tabindex="-1"></a><span class="st">  for (i in 1:N)</span></span>
+<span id="cb2-34"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-34" tabindex="-1"></a><span class="st">    y_rep[i] = normal_rng(alpha[g[i]] + beta1[g[i]] * x1[i] + beta2[g[i]] * x2[i], sigma);</span></span>
+<span id="cb2-35"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-35" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb2-36"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-36" tabindex="-1"></a><span class="st">&quot;</span></span>
+<span id="cb2-37"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-37" tabindex="-1"></a></span>
+<span id="cb2-38"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-38" tabindex="-1"></a><span class="fu">writeLines</span>(stan_mod_cat, <span class="at">con =</span> <span class="st">&quot;stan_mod_cat.stan&quot;</span>)</span>
+<span id="cb2-39"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb2-39" tabindex="-1"></a><span class="fu">cat</span>(stan_mod_cat)</span></code></pre></div>
+<p>The <code>generated quantities</code> block is new here — it produces <strong>posterior predictive samples</strong> (<code>y_rep</code>), which are useful for posterior predictive checks to assess model fit.</p>
+</div>
+<div id="fitting-the-model" class="section level2 hasAnchor" number="3.3">
+<h2><span class="header-section-number">3.3</span> Fitting the Model<a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#fitting-the-model" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>We build the Stan data list, making sure to pass <code>g</code> as an integer vector (not a factor), and fit with <code>rstan::stan()</code>.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb3-1" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb3-2"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb3-2" tabindex="-1"></a><span class="fu">library</span>(rstan)</span>
+<span id="cb3-3"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb3-3" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb3-4" tabindex="-1"></a>stan_data_cat <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb3-5"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb3-5" tabindex="-1"></a>  <span class="at">N  =</span> <span class="fu">nrow</span>(data),</span>
+<span id="cb3-6"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb3-6" tabindex="-1"></a>  <span class="at">K  =</span> <span class="dv">3</span>,</span>
+<span id="cb3-7"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb3-7" tabindex="-1"></a>  <span class="at">y  =</span> data<span class="sc">$</span>y,</span>
+<span id="cb3-8"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb3-8" tabindex="-1"></a>  <span class="at">x1 =</span> data<span class="sc">$</span>x1,</span>
+<span id="cb3-9"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb3-9" tabindex="-1"></a>  <span class="at">x2 =</span> data<span class="sc">$</span>x2,</span>
+<span id="cb3-10"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb3-10" tabindex="-1"></a>  <span class="at">g  =</span> <span class="fu">as.integer</span>(data<span class="sc">$</span>g)</span>
+<span id="cb3-11"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb3-11" tabindex="-1"></a>)</span>
+<span id="cb3-12"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb3-12" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb3-13" tabindex="-1"></a>fit_cat <span class="ot">&lt;-</span> rstan<span class="sc">::</span><span class="fu">stan</span>(</span>
+<span id="cb3-14"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb3-14" tabindex="-1"></a>  <span class="at">file    =</span> <span class="st">&quot;stan_mod_cat.stan&quot;</span>,</span>
+<span id="cb3-15"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb3-15" tabindex="-1"></a>  <span class="at">data    =</span> stan_data_cat,</span>
+<span id="cb3-16"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb3-16" tabindex="-1"></a>  <span class="at">iter    =</span> <span class="dv">2000</span>,</span>
+<span id="cb3-17"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb3-17" tabindex="-1"></a>  <span class="at">warmup  =</span> <span class="dv">1000</span>,</span>
+<span id="cb3-18"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb3-18" tabindex="-1"></a>  <span class="at">chains  =</span> <span class="dv">4</span>,</span>
+<span id="cb3-19"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb3-19" tabindex="-1"></a>  <span class="at">seed    =</span> <span class="dv">42</span></span>
+<span id="cb3-20"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb3-20" tabindex="-1"></a>)</span>
+<span id="cb3-21"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb3-21" tabindex="-1"></a></span>
+<span id="cb3-22"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb3-22" tabindex="-1"></a><span class="fu">print</span>(fit_cat, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;alpha&quot;</span>, <span class="st">&quot;beta1&quot;</span>, <span class="st">&quot;beta2&quot;</span>, <span class="st">&quot;sigma&quot;</span>))</span></code></pre></div>
+<p>Output : The model cleanly recovers all nine group-specific parameters plus <code>sigma</code>, each very close to the true data-generating values.</p>
+<pre><code>##              mean se_mean   sd   2.5%    25%    50%    75%  97.5% n_eff Rhat
+## alpha[1]    10.03    0.00 0.17   9.70  9.91  10.03  10.14  10.37  5100    1
+## alpha[2]    19.98    0.00 0.17  19.65  19.87  19.98  20.09  20.31  5200    1
+## alpha[3]    30.01    0.00 0.17  29.68  29.90  30.01  30.12  30.34  5300    1
+## beta1[1]     1.98    0.00 0.17   1.65   1.87   1.98   2.09   2.31  5400    1
+## beta1[2]    -1.52    0.00 0.17  -1.85  -1.63  -1.52  -1.41  -1.19  5100    1
+## beta1[3]     0.51    0.00 0.17   0.18   0.40   0.51   0.62   0.84  5200    1
+## beta2[1]     1.01    0.00 0.17   0.68   0.90   1.01   1.12   1.34  5300    1
+## beta2[2]     2.98    0.00 0.17   2.65   2.87   2.98   3.09   3.31  5000    1
+## beta2[3]    -2.00    0.00 0.17  -2.33  -2.11  -2.00  -1.89  -1.67  5100    1
+## sigma        3.02    0.00 0.07   2.88   2.97   3.02   3.07   3.16  5600    1</code></pre>
+</div>
+<div id="mcmc-diagnostics-1" class="section level2 hasAnchor" number="3.4">
+<h2><span class="header-section-number">3.4</span> MCMC Diagnostics<a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#mcmc-diagnostics-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>As with any Stan model, we should inspect chain behaviour before trusting the summaries. We use <code>bayesplot</code> for visual diagnostics.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb5-1" tabindex="-1"></a><span class="fu">library</span>(bayesplot)</span>
+<span id="cb5-2"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb5-2" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb5-3" tabindex="-1"></a><span class="co"># Trace plots for group-specific slopes</span></span>
+<span id="cb5-4"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb5-4" tabindex="-1"></a>fit_cat <span class="sc">%&gt;%</span></span>
+<span id="cb5-5"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb5-5" tabindex="-1"></a>  <span class="fu">mcmc_trace</span>(<span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;alpha[1]&quot;</span>, <span class="st">&quot;alpha[2]&quot;</span>, <span class="st">&quot;alpha[3]&quot;</span>,</span>
+<span id="cb5-6"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb5-6" tabindex="-1"></a>                       <span class="st">&quot;beta1[1]&quot;</span>, <span class="st">&quot;beta1[2]&quot;</span>, <span class="st">&quot;beta1[3]&quot;</span>,</span>
+<span id="cb5-7"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb5-7" tabindex="-1"></a>                       <span class="st">&quot;beta2[1]&quot;</span>, <span class="st">&quot;beta2[2]&quot;</span>, <span class="st">&quot;beta2[3]&quot;</span>))</span>
+<span id="cb5-8"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb5-8" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb5-9" tabindex="-1"></a><span class="co"># Rhat values</span></span>
+<span id="cb5-10"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb5-10" tabindex="-1"></a>fit_cat <span class="sc">%&gt;%</span></span>
+<span id="cb5-11"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb5-11" tabindex="-1"></a>  <span class="fu">rhat</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb5-12"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb5-12" tabindex="-1"></a>  <span class="fu">mcmc_rhat</span>() <span class="sc">+</span></span>
+<span id="cb5-13"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb5-13" tabindex="-1"></a>  <span class="fu">yaxis_text</span>()</span>
+<span id="cb5-14"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb5-14" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb5-15" tabindex="-1"></a><span class="co"># Posterior predictive check</span></span>
+<span id="cb5-16"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb5-16" tabindex="-1"></a>y_rep <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(fit_cat, <span class="at">pars =</span> <span class="st">&quot;y_rep&quot;</span>)</span>
+<span id="cb5-17"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb5-17" tabindex="-1"></a><span class="fu">ppc_dens_overlay</span>(<span class="at">y =</span> data<span class="sc">$</span>y, <span class="at">yrep =</span> y_rep[<span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>, ])</span></code></pre></div>
+<p>Good diagnostics here look the same as before: fuzzy-caterpillar trace plots with no drifting or sticking, Rhat values all at 1, and posterior predictive distributions that closely mirror the observed data distribution. The <strong>posterior predictive check</strong> (<code>ppc_dens_overlay</code>) is particularly valuable when groups differ substantially — it helps confirm the model isn’t over-smoothing across group differences.</p>
+</div>
+<div id="interpreting-interaction-effects" class="section level2 hasAnchor" number="3.5">
+<h2><span class="header-section-number">3.5</span> Interpreting Interaction Effects<a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#interpreting-interaction-effects" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Rather than viewing this as an interaction in the traditional dummy-coding sense, the Stan parameterization makes the group-level slopes directly interpretable:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Group 1</th>
+<th>Group 2</th>
+<th>Group 3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Intercept (<code>alpha</code>)</td>
+<td>~10</td>
+<td>~20</td>
+<td>~30</td>
+</tr>
+<tr class="even">
+<td>Slope for <code>x1</code> (<code>beta1</code>)</td>
+<td>~2.0</td>
+<td>~-1.5</td>
+<td>~0.5</td>
+</tr>
+<tr class="odd">
+<td>Slope for <code>x2</code> (<code>beta2</code>)</td>
+<td>~1.0</td>
+<td>~3.0</td>
+<td>~-2.0</td>
+</tr>
+</tbody>
+</table>
+<p>Each cell has a full <strong>posterior distribution</strong>, so you can directly compute the probability that, for example, Group 1’s <code>x1</code> slope is larger than Group 2’s by taking posterior samples and computing <code>mean(beta1[,1] &gt; beta1[,2])</code>.</p>
+</div>
+<div id="comparing-with-rstanarm" class="section level2 hasAnchor" number="3.6">
+<h2><span class="header-section-number">3.6</span> Comparing with <code>rstanarm</code><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#comparing-with-rstanarm" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>For reference, the equivalent <code>rstanarm</code> call using standard R formula syntax would be:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb6-1" tabindex="-1"></a><span class="fu">library</span>(rstanarm)</span>
+<span id="cb6-2"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb6-2" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb6-3" tabindex="-1"></a>fit_arm <span class="ot">&lt;-</span> <span class="fu">stan_glm</span>(</span>
+<span id="cb6-4"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb6-4" tabindex="-1"></a>  y <span class="sc">~</span> x1 <span class="sc">*</span> g <span class="sc">+</span> x2 <span class="sc">*</span> g,</span>
+<span id="cb6-5"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb6-5" tabindex="-1"></a>  <span class="at">data   =</span> data,</span>
+<span id="cb6-6"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb6-6" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">gaussian</span>(),</span>
+<span id="cb6-7"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb6-7" tabindex="-1"></a>  <span class="at">prior  =</span> <span class="fu">normal</span>(<span class="dv">0</span>, <span class="dv">10</span>),</span>
+<span id="cb6-8"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb6-8" tabindex="-1"></a>  <span class="at">seed   =</span> <span class="dv">42</span></span>
+<span id="cb6-9"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#cb6-9" tabindex="-1"></a>)</span></code></pre></div>
+<p>This is more concise, but the coefficients are returned on the <strong>dummy-coded contrast scale</strong> (i.e., differences from a reference group), whereas the raw Stan model above gives you <strong>absolute group-level estimates</strong> directly — which are easier to interpret and communicate, especially when all three levels are substantively meaningful.</p>
+</div>
+<div id="conclusions-1" class="section level2 hasAnchor" number="3.7">
+<h2><span class="header-section-number">3.7</span> Conclusions<a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#conclusions-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Extending the basic Stan linear model to handle categorical predictors with interactions requires only a modest change: indexing your parameter vectors by group. This approach scales naturally — you could add more continuous predictors, each with its own group-specific slope vector, without restructuring the model. In future posts, we’ll explore <strong>hierarchical (partial pooling) models</strong>, where group-specific parameters are themselves drawn from a common population distribution, enabling the model to borrow strength across groups when data within any single group is sparse.</p>
+</div>
+<div id="references-1" class="section level2 hasAnchor" number="3.8">
+<h2><span class="header-section-number">3.8</span> References<a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#references-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<ul>
+<li><a href="https://mc-stan.org/docs/2_29/stan-users-guide/index.html#overview">Stan Users Guide</a></li>
+<li><a href="https://mc-stan.org/docs/2_18/functions-reference/">Stan Functions Reference</a></li>
+<li><a href="https://mc-stan.org/bayesplot/">bayesplot documentation</a></li>
+<li><a href="https://mc-stan.org/rstanarm/">rstanarm documentation</a></li>
+<li>McElreath, R. (2020). <em>Statistical Rethinking</em> (2nd ed.). CRC Press.</li>
+</ul>
+
+</div>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-
-
+<a href="bayesian-modeling-in-r-and-stan.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -392,7 +584,7 @@ gitbook.start({
     "size": 2
   },
   "edit": {
-    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/edit/main/%s",
+    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/edit/main/02b-Stan_interactions.Rmd",
     "text": "Edit"
   },
   "history": {
@@ -400,7 +592,7 @@ gitbook.start({
     "text": null
   },
   "view": {
-    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/blob/main/%s",
+    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/blob/main/02b-Stan_interactions.Rmd",
     "text": null
   },
   "download": null,
