@@ -146,3 +146,15 @@ closing
 fitting-the-model-2
 references-9
 stan-implementation
+bayesian-zero-inflated-count-models-in-stan
+why-standard-count-models-fall-short
+the-zero-inflation-framework
+simulating-zero-inflated-data-in-r
+stan-model-zero-inflated-poisson
+stan-model-zero-inflated-negative-binomial
+fitting-the-zinb-model-in-r
+reading-the-output
+model-comparison-zip-vs.-zinb-vs.-nb
+practical-guidance-and-caveats
+references-10
+conclusion-11
