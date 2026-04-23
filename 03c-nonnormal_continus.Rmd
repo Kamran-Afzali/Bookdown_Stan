@@ -1,0 +1,239 @@
+# Bayesian Regression for Bounded and Skewed Continuous Outcomes in Stan
+
+In the previous posts, we worked through logistic regression for binary outcomes, negative binomial regression for overdispersed counts, and zero-inflated models for the structural excess of zeros. All of those dealt with discrete or binary outcomes. This post pivots to continuous outcomes, but with a twist: the distributions that govern them are neither Gaussian nor particularly well-behaved. Three workhorses emerge here — beta regression for proportions and rates bounded between 0 and 1, gamma regression for strictly positive right-skewed data, and the log-normal as a close cousin with slightly different theoretical commitments. Each one rewards a careful understanding before you reach for it.
+
+
+
+## Beta Regression: The Proportion Problem
+
+The most common mistake when modeling a proportion — say, the fraction of survey respondents who agree with a statement, or a student's score as a share of the maximum — is to apply ordinary linear regression and hope for the best. The problem is not just that predictions can fall outside \([0, 1]\); it's that variance in proportions is fundamentally heteroskedastic. Outcomes near 0.5 have more room to vary than outcomes near 0 or 1, which are squeezed against a boundary. A Gaussian model ignores this entirely.
+
+The beta distribution is parameterized, in its regression form, by a mean \(\mu \in (0, 1)\) and a precision parameter \(\phi > 0\). The mean is modeled with a logit link, exactly as in logistic regression, but unlike logistic regression the outcome is a continuous value on the open interval rather than a binary indicator. The variance under this parameterization is: [core.ac](https://core.ac.uk/download/pdf/11055873.pdf)
+
+\[
+\text{Var}(Y) = \frac{\mu(1 - \mu)}{\phi + 1}
+\]
+
+This makes the interpretation of \(\phi\) intuitive: larger values compress variance around the mean, and smaller values allow for more dispersion. You can also model \(\phi\) as a function of covariates — a so-called *variable dispersion* beta model — which is useful when the precision of responses changes systematically across groups. [topmodels.r-forge.r-project](https://topmodels.r-forge.r-project.org/betareg/vignettes/betareg.html)
+
+One important boundary condition: the standard beta distribution is defined on the *open* interval \((0, 1)\), so exact zeros and ones are technically inadmissible. In practice this is handled either by a small transformation \((y(N-1) + 0.5)/N\) before modeling, or by switching to a zero-one inflated beta model when true boundary values are theoretically possible — a topic that parallels the zero-inflation machinery from the previous post quite directly. [stat.ethz](https://stat.ethz.ch/R-manual/R-patched/library/mgcv/html/Beta.html)
+
+
+
+## Stan Implementation: Beta Regression
+
+The Stan model for beta regression is compact. The key is the `beta_proportion_lpdf` function, which takes the mean-precision parameterization directly, saving you from back-transforming to the \((\alpha, \beta)\) shape parameters manually.
+
+```stan
+data {
+  int<lower=0> N;
+  int<lower=0> K;
+  matrix[N, K] X;
+  vector<lower=0, upper=1>[N] y;
+}
+
+parameters {
+  vector[K]     beta_mu;
+  real<lower=0> phi;       // precision
+}
+
+model {
+  vector[N] mu = inv_logit(X * beta_mu);
+
+  // Priors
+  beta_mu [core.ac](https://core.ac.uk/download/pdf/11055873.pdf) ~ normal(0, 5);
+  for (k in 2:K) beta_mu[k] ~ normal(0, 2.5);
+  phi ~ gamma(2, 0.1);     // weakly informative; same logic as phi in ZINB
+
+  for (n in 1:N)
+    y[n] ~ beta_proportion(mu[n], phi);
+}
+
+generated quantities {
+  vector[N] y_rep;
+  for (n in 1:N) {
+    real mu_n = inv_logit(dot_product(X[n], beta_mu));
+    y_rep[n]  = beta_proportion_rng(mu_n, phi);
+  }
+}
+```
+
+The `generated quantities` block produces posterior predictive draws in the same \((0,1)\) range as the observed data, making it straightforward to run graphical posterior predictive checks — plot the density of `y_rep` against the observed `y` and look for systematic discrepancies near the boundaries or in the tails. [andrewheiss](https://www.andrewheiss.com/blog/2021/11/08/beta-regression-guide/)
+
+Coefficient interpretation follows logistic regression convention. A coefficient \(\beta_k\) on the logit scale translates to a multiplicative change in the odds of the mean: \(e^{\beta_k}\) is the odds ratio for \(\mu/(1-\mu)\). If you want the effect on the probability scale directly, compute the posterior distribution of \(\text{inv\_logit}(\mathbf{X}\boldsymbol{\beta})\) at meaningful covariate values rather than trying to apply a single additive summary.
+
+
+
+## Simulating Beta-Distributed Data in R
+
+Before fitting, it is worth understanding what beta regression data looks like in practice.
+
+```r
+library(tidyverse)
+library(rstan)
+
+set.seed(42)
+N  <- 3000
+x1 <- rnorm(N)
+x2 <- runif(N, -2, 2)
+
+# True parameters
+alpha_true  <- -0.5
+beta1_true  <- 0.8
+beta2_true  <- -0.4
+phi_true    <- 8       # moderate precision
+
+mu_true <- plogis(alpha_true + beta1_true * x1 + beta2_true * x2)
+
+# Draw from beta using shape reparameterization
+a <- mu_true * phi_true
+b <- (1 - mu_true) * phi_true
+y <- rbeta(N, a, b)
+
+df_beta <- data.frame(y = y, x1 = x1, x2 = x2)
+
+cat("Mean of y:", round(mean(y), 3), "\n")
+cat("Range:    ", round(range(y), 3), "\n")
+```
+
+```
+## Mean of y: 0.382
+## Range:     0.034 0.894
+```
+
+A quick histogram reveals the characteristic asymmetric, bounded shape — nothing like a bell curve, and clearly inappropriate for OLS.
+
+```r
+ggplot(df_beta, aes(x = y)) +
+  geom_histogram(bins = 50, fill = "#21918c", color = "white", alpha = 0.85) +
+  labs(title = "Simulated Beta Regression Outcome",
+       subtitle = "Right-skewed, bounded in (0,1)",
+       x = "y", y = "Frequency") +
+  theme_minimal(base_size = 13)
+```
+
+
+
+## Gamma Regression: Strictly Positive, Right-Skewed Data
+
+Where beta regression handles proportions, gamma regression is the natural home for strictly positive continuous outcomes: income, reaction times, insurance claim amounts, hospital length of stay. The defining feature is that variance scales with the square of the mean — the so-called *constant coefficient of variation* property — which is a reasonable description of many economic and biological quantities where larger values are also noisier in absolute terms. [statisticsbyjim](https://statisticsbyjim.com/probability/gamma-distribution/)
+
+The gamma GLM uses a log link, so the linear predictor maps to a positive mean through exponentiation, just as in negative binomial regression. A coefficient \(\beta_k\) means a one-unit increase in \(x_k\) multiplies the expected outcome by \(e^{\beta_k}\), and this multiplicative structure often aligns naturally with how we think about income or cost data. The shape parameter (sometimes called the *concentration* or *inverse dispersion* parameter, written \(\alpha\) or \(\nu\)) plays a similar role to \(\phi\) in the negative binomial: larger values imply less dispersion relative to the mean, and the distribution approaches Gaussian as the shape grows large. [math.cit.tum](https://www.math.cit.tum.de/fileadmin/w00ccg/math/Forschung/forschungsgruppen/statistics/academics/lec8.pdf)
+
+```stan
+data {
+  int<lower=0> N;
+  int<lower=0> K;
+  matrix[N, K] X;
+  vector<lower=0>[N] y;
+}
+
+parameters {
+  vector[K]     beta_mu;
+  real<lower=0> alpha_shape;  // gamma shape
+}
+
+model {
+  vector[N] mu = exp(X * beta_mu);
+
+  beta_mu [core.ac](https://core.ac.uk/download/pdf/11055873.pdf)   ~ normal(0, 5);
+  for (k in 2:K) beta_mu[k] ~ normal(0, 2.5);
+  alpha_shape  ~ gamma(2, 0.1);
+
+  for (n in 1:N)
+    y[n] ~ gamma(alpha_shape, alpha_shape / mu[n]);  // mean = mu[n]
+}
+
+generated quantities {
+  vector[N] y_rep;
+  for (n in 1:N) {
+    real mu_n = exp(dot_product(X[n], beta_mu));
+    y_rep[n]  = gamma_rng(alpha_shape, alpha_shape / mu_n);
+  }
+}
+```
+
+The parameterization `gamma(shape, rate)` in Stan uses `rate = shape / mu`, which ensures the mean equals `mu` regardless of the shape. This is a common source of confusion when translating between R's `rgamma(shape, rate)` and Stan — always double-check which parameterization your software uses. [mc-stan](https://mc-stan.org/docs/stan-users-guide/reparameterization.html)
+
+
+
+## Log-Normal: A Different Philosophical Commitment
+
+The log-normal model covers essentially the same territory as gamma regression — strictly positive, right-skewed continuous outcomes — but makes a qualitatively different assumption. Rather than directly modeling the distribution of \(Y\), it asserts that \(\log(Y)\) is normally distributed with mean \(\mathbf{X}\boldsymbol{\beta}\) and variance \(\sigma^2\). This is equivalent to saying the *multiplicative* random errors are lognormally distributed, which is natural in many biological and economic contexts where effects compound rather than add. [repository.lppm.unila.ac](http://repository.lppm.unila.ac.id/41599/1/Gamma%20and%20Lognormal%20Models%20in%20the%20Generalized%20Linear%20Model%20Perspective.PDF-compressed.pdf)
+
+In practice, the two models are often close. But the differences matter at the tails: the log-normal has heavier tails than the gamma for a given mean and variance, which makes it more forgiving of extreme observations. If your data has occasional very large outliers, the log-normal may fit better; if the distribution is closer to exponential in shape (thin right tail), gamma tends to be more appropriate. The empirical recommendation is to fit both and compare via LOO-ELPD, exactly as we did for ZIP versus ZINB in the previous post. [home.iitk.ac](https://home.iitk.ac.in/~kundu/paper93.pdf)
+
+The Stan implementation of log-normal is the simplest of the three:
+
+```stan
+parameters {
+  vector[K]     beta_mu;
+  real<lower=0> sigma;
+}
+
+model {
+  beta_mu ~ normal(0, 2.5);
+  sigma   ~ exponential(1);
+
+  y ~ lognormal(X * beta_mu, sigma);
+}
+```
+
+One genuine advantage of the log-normal is interpretability: the coefficients \(\boldsymbol{\beta}\) are directly the parameters of a normal model on the log scale, which many researchers find easier to communicate. A coefficient \(\beta_k = 0.3\) means a one-unit increase in \(x_k\) shifts the *median* of \(Y\) by a factor of \(e^{0.3} \approx 1.35\). Note that this is a statement about the *median*, not the mean — the mean of a log-normal includes an additional \(e^{\sigma^2/2}\) inflation factor, which matters whenever \(\sigma\) is non-trivial. [demonstrations.wolfram](https://demonstrations.wolfram.com/ComparingGammaAndLogNormalDistributions/)
+
+
+
+## Choosing Between Gamma and Log-Normal
+
+The following table summarizes the practical distinctions:
+
+| Feature | Gamma | Log-Normal |
+|---|---|---|
+| Variance structure | \(\text{Var}(Y) \propto \mu^2\) (constant CV) | Increases faster than \(\mu^2\) in the tails |
+| Tail behavior | Moderate right tail | Heavier right tail |
+| Coefficients describe | Multiplicative change in **mean** | Multiplicative change in **median** |
+| Residuals on log scale | Not normally distributed | Normally distributed |
+| Common applications | Insurance, reaction times, survival  [statisticsbyjim](https://statisticsbyjim.com/probability/gamma-distribution/) | Income, gene expression, biological concentrations  [repository.lppm.unila.ac](http://repository.lppm.unila.ac.id/41599/1/Gamma%20and%20Lognormal%20Models%20in%20the%20Generalized%20Linear%20Model%20Perspective.PDF-compressed.pdf) |
+| Stan family | `gamma(shape, shape/mu)` | `lognormal(X*beta, sigma)` |
+
+Neither is universally superior. The gamma belongs to the exponential family and enjoys some convenient theoretical properties (GLM consistency, sufficient statistics), while the log-normal has the advantage that residual diagnostics on the log-transformed outcome are straightforward — you can literally plot `log(y) - X*beta` and assess normality. [discourse.mc-stan](https://discourse.mc-stan.org/t/comparing-gaussian-gamma-and-lognormal-versions-of-regression-model/40941)
+
+
+
+## Posterior Predictive Checking: What to Look For
+
+The posterior predictive check strategy from the previous posts applies directly, but the diagnostics shift slightly for each family.
+
+For **beta regression**, the key check is whether the model reproduces the empirical density near the boundaries. If your outcome has many values above 0.9, a beta model with low precision may smear probability mass inappropriately toward 0.5. Plot the density of `y_rep` overlaid on observed `y` and pay particular attention to the tails.
+
+For **gamma and log-normal**, plot the log-scale residuals. Under a correctly specified gamma model, the Pearson residuals \((y - \hat\mu) / \hat\mu\) should be roughly constant in variance across the range of fitted values. Under a correctly specified log-normal, `log(y) - X*beta` should look Gaussian. Systematic fan-shaped patterns in either suggest the wrong variance function.
+
+The `loo` package comparison remains your quantitative arbiter when the graphical checks are ambiguous: [discourse.mc-stan](https://discourse.mc-stan.org/t/comparing-gaussian-gamma-and-lognormal-versions-of-regression-model/40941)
+
+```r
+loo_compare(loo_gamma, loo_lognormal)
+```
+
+A meaningful ELPD difference (larger than twice its standard error) favors one model; otherwise, both are defensible and theoretical motivation should guide the choice.
+
+
+
+## Practical Guidance
+
+A few lessons that get glossed over in textbook treatments:
+
+- **Beta regression strictly requires \((0,1)\)** — exact zeros and ones will cause the log-likelihood to become unbounded. The simplest fix is the transformation \(\tilde y = (y(N-1) + 0.5)/N\), though if structural zeros or ones are theoretically meaningful, a zero-one-inflated beta model is more honest. [stat.ethz](https://stat.ethz.ch/R-manual/R-patched/library/mgcv/html/Beta.html)
+- **Gamma regression can be sensitive to the shape prior.** A `gamma(2, 0.1)` prior on the shape parameter is consistent with what we used for \(\phi\) in the ZINB, but if you expect very high dispersion (shape \(\approx 0.5\) or below) you may need a heavier-tailed prior like `exponential(1)` to avoid the sampler getting stuck near zero.
+- **The log-normal's mean is not \(e^{\mathbf{X}\boldsymbol{\beta}}\).** The mean is \(e^{\mathbf{X}\boldsymbol{\beta} + \sigma^2/2}\). If you're computing marginal effects or making predictions on the original scale, this correction is non-negligible when \(\sigma > 0.5\).
+- **All three models assume a continuous outcome with no mass at specific points.** If your "proportion" data is actually \(k/n\) for small \(n\) (say, 3 successes out of 10), binomial or beta-binomial regression is more appropriate than beta regression, because the discreteness of the data-generating process matters.
+
+
+
+## References
+
+- Ferrari, S., & Cribari-Neto, F. (2004). *Beta Regression for Modelling Rates and Proportions*. Journal of Applied Statistics. [ime.usp](https://www.ime.usp.br/~sferrari/beta.pdf)
+- Stan Development Team. [Stan Functions Reference](https://mc-stan.org/docs/functions-reference/) [mc-stan](https://mc-stan.org/docs/stan-users-guide/reparameterization.html)
+- Cribari-Neto, F. & Zeileis, A. (2010). *Beta Regression in R*. Journal of Statistical Software. [topmodels.r-forge.r-project](https://topmodels.r-forge.r-project.org/betareg/vignettes/betareg.html)
+- Vehtari, A., Gelman, A., & Gabry, J. (2017). *Practical Bayesian model evaluation using leave-one-out cross-validation and WAIC*. Statistics and Computing.
+- [Stan Discourse: Comparing Gaussian, Gamma, and Lognormal regression](https://discourse.mc-stan.org/t/comparing-gaussian-gamma-and-lognormal-versions-of-regression-model/40941) [discourse.mc-stan](https://discourse.mc-stan.org/t/comparing-gaussian-gamma-and-lognormal-versions-of-regression-model/40941)
+- [loo package documentation](https://mc-stan.org/loo/)

@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Page not found | Stan Bookdown</title>
-  <meta name="description" content="Page not found | Stan Bookdown" />
+  <title>Chapter 7 Bayesian Regression for Bounded and Skewed Continuous Outcomes in Stan | Stan Bookdown</title>
+  <meta name="description" content="Chapter 7 Bayesian Regression for Bounded and Skewed Continuous Outcomes in Stan | Stan Bookdown" />
   <meta name="generator" content="bookdown 0.43 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Page not found | Stan Bookdown" />
+  <meta property="og:title" content="Chapter 7 Bayesian Regression for Bounded and Skewed Continuous Outcomes in Stan | Stan Bookdown" />
   <meta property="og:type" content="book" />
   
   
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Page not found | Stan Bookdown" />
+  <meta name="twitter:title" content="Chapter 7 Bayesian Regression for Bounded and Skewed Continuous Outcomes in Stan | Stan Bookdown" />
   
   
   
@@ -30,8 +30,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-
-
+<link rel="prev" href="bayesian-zero-inflated-count-models-in-stan.html"/>
+<link rel="next" href="robust-t-regression.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -375,19 +375,238 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="page-not-found" class="section level1">
-<h1>Page not found</h1>
-<p>The page you requested cannot be found (perhaps it was moved or renamed).</p>
-<p>You may want to try searching to find the page's new location, or use
-the table of contents to find the page you are looking for.</p>
+<div id="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan" class="section level1 hasAnchor" number="7">
+<h1><span class="header-section-number">Chapter 7</span> Bayesian Regression for Bounded and Skewed Continuous Outcomes in Stan<a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>In the previous posts, we worked through logistic regression for binary outcomes, negative binomial regression for overdispersed counts, and zero-inflated models for the structural excess of zeros. All of those dealt with discrete or binary outcomes. This post pivots to continuous outcomes, but with a twist: the distributions that govern them are neither Gaussian nor particularly well-behaved. Three workhorses emerge here — beta regression for proportions and rates bounded between 0 and 1, gamma regression for strictly positive right-skewed data, and the log-normal as a close cousin with slightly different theoretical commitments. Each one rewards a careful understanding before you reach for it.</p>
+<div id="beta-regression-the-proportion-problem" class="section level2 hasAnchor" number="7.1">
+<h2><span class="header-section-number">7.1</span> Beta Regression: The Proportion Problem<a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#beta-regression-the-proportion-problem" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The most common mistake when modeling a proportion — say, the fraction of survey respondents who agree with a statement, or a student’s score as a share of the maximum — is to apply ordinary linear regression and hope for the best. The problem is not just that predictions can fall outside <span class="math inline">\([0, 1]\)</span>; it’s that variance in proportions is fundamentally heteroskedastic. Outcomes near 0.5 have more room to vary than outcomes near 0 or 1, which are squeezed against a boundary. A Gaussian model ignores this entirely.</p>
+<p>The beta distribution is parameterized, in its regression form, by a mean <span class="math inline">\(\mu \in (0, 1)\)</span> and a precision parameter <span class="math inline">\(\phi &gt; 0\)</span>. The mean is modeled with a logit link, exactly as in logistic regression, but unlike logistic regression the outcome is a continuous value on the open interval rather than a binary indicator. The variance under this parameterization is: <a href="https://core.ac.uk/download/pdf/11055873.pdf">core.ac</a></p>
+<p><span class="math display">\[
+\text{Var}(Y) = \frac{\mu(1 - \mu)}{\phi + 1}
+\]</span></p>
+<p>This makes the interpretation of <span class="math inline">\(\phi\)</span> intuitive: larger values compress variance around the mean, and smaller values allow for more dispersion. You can also model <span class="math inline">\(\phi\)</span> as a function of covariates — a so-called <em>variable dispersion</em> beta model — which is useful when the precision of responses changes systematically across groups. <a href="https://topmodels.r-forge.r-project.org/betareg/vignettes/betareg.html">topmodels.r-forge.r-project</a></p>
+<p>One important boundary condition: the standard beta distribution is defined on the <em>open</em> interval <span class="math inline">\((0, 1)\)</span>, so exact zeros and ones are technically inadmissible. In practice this is handled either by a small transformation <span class="math inline">\((y(N-1) + 0.5)/N\)</span> before modeling, or by switching to a zero-one inflated beta model when true boundary values are theoretically possible — a topic that parallels the zero-inflation machinery from the previous post quite directly. <a href="https://stat.ethz.ch/R-manual/R-patched/library/mgcv/html/Beta.html">stat.ethz</a></p>
+</div>
+<div id="stan-implementation-beta-regression" class="section level2 hasAnchor" number="7.2">
+<h2><span class="header-section-number">7.2</span> Stan Implementation: Beta Regression<a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#stan-implementation-beta-regression" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The Stan model for beta regression is compact. The key is the <code>beta_proportion_lpdf</code> function, which takes the mean-precision parameterization directly, saving you from back-transforming to the <span class="math inline">\((\alpha, \beta)\)</span> shape parameters manually.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode stan"><code class="sourceCode stan"><span id="cb1-1"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-1" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb1-2"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-2" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;</span>
+<span id="cb1-3"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-3" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; K;</span>
+<span id="cb1-4"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-4" tabindex="-1"></a>  <span class="dt">matrix</span>[N, K] X;</span>
+<span id="cb1-5"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-5" tabindex="-1"></a>  <span class="dt">vector</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt;[N] y;</span>
+<span id="cb1-6"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-6" tabindex="-1"></a>}</span>
+<span id="cb1-7"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-7" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-8" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb1-9"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-9" tabindex="-1"></a>  <span class="dt">vector</span>[K]     beta_mu;</span>
+<span id="cb1-10"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-10" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; phi;       <span class="co">// precision</span></span>
+<span id="cb1-11"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-11" tabindex="-1"></a>}</span>
+<span id="cb1-12"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-12" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-13" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb1-14"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-14" tabindex="-1"></a>  <span class="dt">vector</span>[N] mu = inv_logit(X * beta_mu);</span>
+<span id="cb1-15"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-15" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-16" tabindex="-1"></a>  <span class="co">// Priors</span></span>
+<span id="cb1-17"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-17" tabindex="-1"></a>  beta_mu [core.ac](https:<span class="co">//core.ac.uk/download/pdf/11055873.pdf) ~ normal(0, 5);</span></span>
+<span id="cb1-18"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-18" tabindex="-1"></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">2</span>:K) beta_mu[k] ~ normal(<span class="dv">0</span>, <span class="fl">2.5</span>);</span>
+<span id="cb1-19"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-19" tabindex="-1"></a>  phi ~ gamma(<span class="dv">2</span>, <span class="fl">0.1</span>);     <span class="co">// weakly informative; same logic as phi in ZINB</span></span>
+<span id="cb1-20"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-20" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-21" tabindex="-1"></a>  <span class="cf">for</span> (n <span class="cf">in</span> <span class="dv">1</span>:N)</span>
+<span id="cb1-22"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-22" tabindex="-1"></a>    y[n] ~ beta_proportion(mu[n], phi);</span>
+<span id="cb1-23"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-23" tabindex="-1"></a>}</span>
+<span id="cb1-24"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-24" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-25" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb1-26"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-26" tabindex="-1"></a>  <span class="dt">vector</span>[N] y_rep;</span>
+<span id="cb1-27"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-27" tabindex="-1"></a>  <span class="cf">for</span> (n <span class="cf">in</span> <span class="dv">1</span>:N) {</span>
+<span id="cb1-28"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-28" tabindex="-1"></a>    <span class="dt">real</span> mu_n = inv_logit(dot_product(X[n], beta_mu));</span>
+<span id="cb1-29"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-29" tabindex="-1"></a>    y_rep[n]  = beta_proportion_rng(mu_n, phi);</span>
+<span id="cb1-30"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-30" tabindex="-1"></a>  }</span>
+<span id="cb1-31"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb1-31" tabindex="-1"></a>}</span></code></pre></div>
+<p>The <code>generated quantities</code> block produces posterior predictive draws in the same <span class="math inline">\((0,1)\)</span> range as the observed data, making it straightforward to run graphical posterior predictive checks — plot the density of <code>y_rep</code> against the observed <code>y</code> and look for systematic discrepancies near the boundaries or in the tails. <a href="https://www.andrewheiss.com/blog/2021/11/08/beta-regression-guide/">andrewheiss</a></p>
+<p>Coefficient interpretation follows logistic regression convention. A coefficient <span class="math inline">\(\beta_k\)</span> on the logit scale translates to a multiplicative change in the odds of the mean: <span class="math inline">\(e^{\beta_k}\)</span> is the odds ratio for <span class="math inline">\(\mu/(1-\mu)\)</span>. If you want the effect on the probability scale directly, compute the posterior distribution of <span class="math inline">\(\text{inv\_logit}(\mathbf{X}\boldsymbol{\beta})\)</span> at meaningful covariate values rather than trying to apply a single additive summary.</p>
+</div>
+<div id="simulating-beta-distributed-data-in-r" class="section level2 hasAnchor" number="7.3">
+<h2><span class="header-section-number">7.3</span> Simulating Beta-Distributed Data in R<a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#simulating-beta-distributed-data-in-r" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Before fitting, it is worth understanding what beta regression data looks like in practice.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb2-1" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb2-2"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb2-2" tabindex="-1"></a><span class="fu">library</span>(rstan)</span>
+<span id="cb2-3"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb2-3" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb2-4" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb2-5"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb2-5" tabindex="-1"></a>N  <span class="ot">&lt;-</span> <span class="dv">3000</span></span>
+<span id="cb2-6"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb2-6" tabindex="-1"></a>x1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(N)</span>
+<span id="cb2-7"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb2-7" tabindex="-1"></a>x2 <span class="ot">&lt;-</span> <span class="fu">runif</span>(N, <span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>)</span>
+<span id="cb2-8"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb2-8" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb2-9" tabindex="-1"></a><span class="co"># True parameters</span></span>
+<span id="cb2-10"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb2-10" tabindex="-1"></a>alpha_true  <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">0.5</span></span>
+<span id="cb2-11"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb2-11" tabindex="-1"></a>beta1_true  <span class="ot">&lt;-</span> <span class="fl">0.8</span></span>
+<span id="cb2-12"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb2-12" tabindex="-1"></a>beta2_true  <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">0.4</span></span>
+<span id="cb2-13"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb2-13" tabindex="-1"></a>phi_true    <span class="ot">&lt;-</span> <span class="dv">8</span>       <span class="co"># moderate precision</span></span>
+<span id="cb2-14"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb2-14" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb2-15" tabindex="-1"></a>mu_true <span class="ot">&lt;-</span> <span class="fu">plogis</span>(alpha_true <span class="sc">+</span> beta1_true <span class="sc">*</span> x1 <span class="sc">+</span> beta2_true <span class="sc">*</span> x2)</span>
+<span id="cb2-16"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb2-16" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb2-17" tabindex="-1"></a><span class="co"># Draw from beta using shape reparameterization</span></span>
+<span id="cb2-18"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb2-18" tabindex="-1"></a>a <span class="ot">&lt;-</span> mu_true <span class="sc">*</span> phi_true</span>
+<span id="cb2-19"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb2-19" tabindex="-1"></a>b <span class="ot">&lt;-</span> (<span class="dv">1</span> <span class="sc">-</span> mu_true) <span class="sc">*</span> phi_true</span>
+<span id="cb2-20"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb2-20" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rbeta</span>(N, a, b)</span>
+<span id="cb2-21"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb2-21" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb2-22" tabindex="-1"></a>df_beta <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">y =</span> y, <span class="at">x1 =</span> x1, <span class="at">x2 =</span> x2)</span>
+<span id="cb2-23"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb2-23" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb2-24" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Mean of y:&quot;</span>, <span class="fu">round</span>(<span class="fu">mean</span>(y), <span class="dv">3</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-25"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb2-25" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Range:    &quot;</span>, <span class="fu">round</span>(<span class="fu">range</span>(y), <span class="dv">3</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## Mean of y: 0.382
+## Range:     0.034 0.894</code></pre>
+<p>A quick histogram reveals the characteristic asymmetric, bounded shape — nothing like a bell curve, and clearly inappropriate for OLS.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb4-1" tabindex="-1"></a><span class="fu">ggplot</span>(df_beta, <span class="fu">aes</span>(<span class="at">x =</span> y)) <span class="sc">+</span></span>
+<span id="cb4-2"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb4-2" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">50</span>, <span class="at">fill =</span> <span class="st">&quot;#21918c&quot;</span>, <span class="at">color =</span> <span class="st">&quot;white&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.85</span>) <span class="sc">+</span></span>
+<span id="cb4-3"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb4-3" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Simulated Beta Regression Outcome&quot;</span>,</span>
+<span id="cb4-4"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb4-4" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">&quot;Right-skewed, bounded in (0,1)&quot;</span>,</span>
+<span id="cb4-5"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb4-5" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;y&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Frequency&quot;</span>) <span class="sc">+</span></span>
+<span id="cb4-6"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb4-6" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>)</span></code></pre></div>
+</div>
+<div id="gamma-regression-strictly-positive-right-skewed-data" class="section level2 hasAnchor" number="7.4">
+<h2><span class="header-section-number">7.4</span> Gamma Regression: Strictly Positive, Right-Skewed Data<a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#gamma-regression-strictly-positive-right-skewed-data" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Where beta regression handles proportions, gamma regression is the natural home for strictly positive continuous outcomes: income, reaction times, insurance claim amounts, hospital length of stay. The defining feature is that variance scales with the square of the mean — the so-called <em>constant coefficient of variation</em> property — which is a reasonable description of many economic and biological quantities where larger values are also noisier in absolute terms. <a href="https://statisticsbyjim.com/probability/gamma-distribution/">statisticsbyjim</a></p>
+<p>The gamma GLM uses a log link, so the linear predictor maps to a positive mean through exponentiation, just as in negative binomial regression. A coefficient <span class="math inline">\(\beta_k\)</span> means a one-unit increase in <span class="math inline">\(x_k\)</span> multiplies the expected outcome by <span class="math inline">\(e^{\beta_k}\)</span>, and this multiplicative structure often aligns naturally with how we think about income or cost data. The shape parameter (sometimes called the <em>concentration</em> or <em>inverse dispersion</em> parameter, written <span class="math inline">\(\alpha\)</span> or <span class="math inline">\(\nu\)</span>) plays a similar role to <span class="math inline">\(\phi\)</span> in the negative binomial: larger values imply less dispersion relative to the mean, and the distribution approaches Gaussian as the shape grows large. <a href="https://www.math.cit.tum.de/fileadmin/w00ccg/math/Forschung/forschungsgruppen/statistics/academics/lec8.pdf">math.cit.tum</a></p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode stan"><code class="sourceCode stan"><span id="cb5-1"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-1" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb5-2"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-2" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;</span>
+<span id="cb5-3"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-3" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; K;</span>
+<span id="cb5-4"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-4" tabindex="-1"></a>  <span class="dt">matrix</span>[N, K] X;</span>
+<span id="cb5-5"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-5" tabindex="-1"></a>  <span class="dt">vector</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt;[N] y;</span>
+<span id="cb5-6"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-6" tabindex="-1"></a>}</span>
+<span id="cb5-7"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-7" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-8" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb5-9"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-9" tabindex="-1"></a>  <span class="dt">vector</span>[K]     beta_mu;</span>
+<span id="cb5-10"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-10" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; alpha_shape;  <span class="co">// gamma shape</span></span>
+<span id="cb5-11"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-11" tabindex="-1"></a>}</span>
+<span id="cb5-12"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-12" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-13" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb5-14"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-14" tabindex="-1"></a>  <span class="dt">vector</span>[N] mu = exp(X * beta_mu);</span>
+<span id="cb5-15"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-15" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-16" tabindex="-1"></a>  beta_mu [core.ac](https:<span class="co">//core.ac.uk/download/pdf/11055873.pdf)   ~ normal(0, 5);</span></span>
+<span id="cb5-17"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-17" tabindex="-1"></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">2</span>:K) beta_mu[k] ~ normal(<span class="dv">0</span>, <span class="fl">2.5</span>);</span>
+<span id="cb5-18"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-18" tabindex="-1"></a>  alpha_shape  ~ gamma(<span class="dv">2</span>, <span class="fl">0.1</span>);</span>
+<span id="cb5-19"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-19" tabindex="-1"></a></span>
+<span id="cb5-20"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-20" tabindex="-1"></a>  <span class="cf">for</span> (n <span class="cf">in</span> <span class="dv">1</span>:N)</span>
+<span id="cb5-21"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-21" tabindex="-1"></a>    y[n] ~ gamma(alpha_shape, alpha_shape / mu[n]);  <span class="co">// mean = mu[n]</span></span>
+<span id="cb5-22"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-22" tabindex="-1"></a>}</span>
+<span id="cb5-23"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-23" tabindex="-1"></a></span>
+<span id="cb5-24"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-24" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb5-25"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-25" tabindex="-1"></a>  <span class="dt">vector</span>[N] y_rep;</span>
+<span id="cb5-26"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-26" tabindex="-1"></a>  <span class="cf">for</span> (n <span class="cf">in</span> <span class="dv">1</span>:N) {</span>
+<span id="cb5-27"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-27" tabindex="-1"></a>    <span class="dt">real</span> mu_n = exp(dot_product(X[n], beta_mu));</span>
+<span id="cb5-28"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-28" tabindex="-1"></a>    y_rep[n]  = gamma_rng(alpha_shape, alpha_shape / mu_n);</span>
+<span id="cb5-29"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-29" tabindex="-1"></a>  }</span>
+<span id="cb5-30"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb5-30" tabindex="-1"></a>}</span></code></pre></div>
+<p>The parameterization <code>gamma(shape, rate)</code> in Stan uses <code>rate = shape / mu</code>, which ensures the mean equals <code>mu</code> regardless of the shape. This is a common source of confusion when translating between R’s <code>rgamma(shape, rate)</code> and Stan — always double-check which parameterization your software uses. <a href="https://mc-stan.org/docs/stan-users-guide/reparameterization.html">mc-stan</a></p>
+</div>
+<div id="log-normal-a-different-philosophical-commitment" class="section level2 hasAnchor" number="7.5">
+<h2><span class="header-section-number">7.5</span> Log-Normal: A Different Philosophical Commitment<a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#log-normal-a-different-philosophical-commitment" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The log-normal model covers essentially the same territory as gamma regression — strictly positive, right-skewed continuous outcomes — but makes a qualitatively different assumption. Rather than directly modeling the distribution of <span class="math inline">\(Y\)</span>, it asserts that <span class="math inline">\(\log(Y)\)</span> is normally distributed with mean <span class="math inline">\(\mathbf{X}\boldsymbol{\beta}\)</span> and variance <span class="math inline">\(\sigma^2\)</span>. This is equivalent to saying the <em>multiplicative</em> random errors are lognormally distributed, which is natural in many biological and economic contexts where effects compound rather than add. <a href="http://repository.lppm.unila.ac.id/41599/1/Gamma%20and%20Lognormal%20Models%20in%20the%20Generalized%20Linear%20Model%20Perspective.PDF-compressed.pdf">repository.lppm.unila.ac</a></p>
+<p>In practice, the two models are often close. But the differences matter at the tails: the log-normal has heavier tails than the gamma for a given mean and variance, which makes it more forgiving of extreme observations. If your data has occasional very large outliers, the log-normal may fit better; if the distribution is closer to exponential in shape (thin right tail), gamma tends to be more appropriate. The empirical recommendation is to fit both and compare via LOO-ELPD, exactly as we did for ZIP versus ZINB in the previous post. <a href="https://home.iitk.ac.in/~kundu/paper93.pdf">home.iitk.ac</a></p>
+<p>The Stan implementation of log-normal is the simplest of the three:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode stan"><code class="sourceCode stan"><span id="cb6-1"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb6-1" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb6-2"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb6-2" tabindex="-1"></a>  <span class="dt">vector</span>[K]     beta_mu;</span>
+<span id="cb6-3"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb6-3" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma;</span>
+<span id="cb6-4"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb6-4" tabindex="-1"></a>}</span>
+<span id="cb6-5"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb6-5" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb6-6" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb6-7"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb6-7" tabindex="-1"></a>  beta_mu ~ normal(<span class="dv">0</span>, <span class="fl">2.5</span>);</span>
+<span id="cb6-8"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb6-8" tabindex="-1"></a>  sigma   ~ exponential(<span class="dv">1</span>);</span>
+<span id="cb6-9"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb6-9" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb6-10" tabindex="-1"></a>  y ~ lognormal(X * beta_mu, sigma);</span>
+<span id="cb6-11"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb6-11" tabindex="-1"></a>}</span></code></pre></div>
+<p>One genuine advantage of the log-normal is interpretability: the coefficients <span class="math inline">\(\boldsymbol{\beta}\)</span> are directly the parameters of a normal model on the log scale, which many researchers find easier to communicate. A coefficient <span class="math inline">\(\beta_k = 0.3\)</span> means a one-unit increase in <span class="math inline">\(x_k\)</span> shifts the <em>median</em> of <span class="math inline">\(Y\)</span> by a factor of <span class="math inline">\(e^{0.3} \approx 1.35\)</span>. Note that this is a statement about the <em>median</em>, not the mean — the mean of a log-normal includes an additional <span class="math inline">\(e^{\sigma^2/2}\)</span> inflation factor, which matters whenever <span class="math inline">\(\sigma\)</span> is non-trivial. <a href="https://demonstrations.wolfram.com/ComparingGammaAndLogNormalDistributions/">demonstrations.wolfram</a></p>
+</div>
+<div id="choosing-between-gamma-and-log-normal" class="section level2 hasAnchor" number="7.6">
+<h2><span class="header-section-number">7.6</span> Choosing Between Gamma and Log-Normal<a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#choosing-between-gamma-and-log-normal" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The following table summarizes the practical distinctions:</p>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Feature</th>
+<th>Gamma</th>
+<th>Log-Normal</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Variance structure</td>
+<td><span class="math inline">\(\text{Var}(Y) \propto \mu^2\)</span> (constant CV)</td>
+<td>Increases faster than <span class="math inline">\(\mu^2\)</span> in the tails</td>
+</tr>
+<tr class="even">
+<td>Tail behavior</td>
+<td>Moderate right tail</td>
+<td>Heavier right tail</td>
+</tr>
+<tr class="odd">
+<td>Coefficients describe</td>
+<td>Multiplicative change in <strong>mean</strong></td>
+<td>Multiplicative change in <strong>median</strong></td>
+</tr>
+<tr class="even">
+<td>Residuals on log scale</td>
+<td>Not normally distributed</td>
+<td>Normally distributed</td>
+</tr>
+<tr class="odd">
+<td>Common applications</td>
+<td>Insurance, reaction times, survival <a href="https://statisticsbyjim.com/probability/gamma-distribution/">statisticsbyjim</a></td>
+<td>Income, gene expression, biological concentrations <a href="http://repository.lppm.unila.ac.id/41599/1/Gamma%20and%20Lognormal%20Models%20in%20the%20Generalized%20Linear%20Model%20Perspective.PDF-compressed.pdf">repository.lppm.unila.ac</a></td>
+</tr>
+<tr class="even">
+<td>Stan family</td>
+<td><code>gamma(shape, shape/mu)</code></td>
+<td><code>lognormal(X*beta, sigma)</code></td>
+</tr>
+</tbody>
+</table>
+<p>Neither is universally superior. The gamma belongs to the exponential family and enjoys some convenient theoretical properties (GLM consistency, sufficient statistics), while the log-normal has the advantage that residual diagnostics on the log-transformed outcome are straightforward — you can literally plot <code>log(y) - X*beta</code> and assess normality. <a href="https://discourse.mc-stan.org/t/comparing-gaussian-gamma-and-lognormal-versions-of-regression-model/40941">discourse.mc-stan</a></p>
+</div>
+<div id="posterior-predictive-checking-what-to-look-for" class="section level2 hasAnchor" number="7.7">
+<h2><span class="header-section-number">7.7</span> Posterior Predictive Checking: What to Look For<a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#posterior-predictive-checking-what-to-look-for" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The posterior predictive check strategy from the previous posts applies directly, but the diagnostics shift slightly for each family.</p>
+<p>For <strong>beta regression</strong>, the key check is whether the model reproduces the empirical density near the boundaries. If your outcome has many values above 0.9, a beta model with low precision may smear probability mass inappropriately toward 0.5. Plot the density of <code>y_rep</code> overlaid on observed <code>y</code> and pay particular attention to the tails.</p>
+<p>For <strong>gamma and log-normal</strong>, plot the log-scale residuals. Under a correctly specified gamma model, the Pearson residuals <span class="math inline">\((y - \hat\mu) / \hat\mu\)</span> should be roughly constant in variance across the range of fitted values. Under a correctly specified log-normal, <code>log(y) - X*beta</code> should look Gaussian. Systematic fan-shaped patterns in either suggest the wrong variance function.</p>
+<p>The <code>loo</code> package comparison remains your quantitative arbiter when the graphical checks are ambiguous: <a href="https://discourse.mc-stan.org/t/comparing-gaussian-gamma-and-lognormal-versions-of-regression-model/40941">discourse.mc-stan</a></p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#cb7-1" tabindex="-1"></a><span class="fu">loo_compare</span>(loo_gamma, loo_lognormal)</span></code></pre></div>
+<p>A meaningful ELPD difference (larger than twice its standard error) favors one model; otherwise, both are defensible and theoretical motivation should guide the choice.</p>
+</div>
+<div id="practical-guidance" class="section level2 hasAnchor" number="7.8">
+<h2><span class="header-section-number">7.8</span> Practical Guidance<a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#practical-guidance" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>A few lessons that get glossed over in textbook treatments:</p>
+<ul>
+<li><strong>Beta regression strictly requires <span class="math inline">\((0,1)\)</span></strong> — exact zeros and ones will cause the log-likelihood to become unbounded. The simplest fix is the transformation <span class="math inline">\(\tilde y = (y(N-1) + 0.5)/N\)</span>, though if structural zeros or ones are theoretically meaningful, a zero-one-inflated beta model is more honest. <a href="https://stat.ethz.ch/R-manual/R-patched/library/mgcv/html/Beta.html">stat.ethz</a></li>
+<li><strong>Gamma regression can be sensitive to the shape prior.</strong> A <code>gamma(2, 0.1)</code> prior on the shape parameter is consistent with what we used for <span class="math inline">\(\phi\)</span> in the ZINB, but if you expect very high dispersion (shape <span class="math inline">\(\approx 0.5\)</span> or below) you may need a heavier-tailed prior like <code>exponential(1)</code> to avoid the sampler getting stuck near zero.</li>
+<li><strong>The log-normal’s mean is not <span class="math inline">\(e^{\mathbf{X}\boldsymbol{\beta}}\)</span>.</strong> The mean is <span class="math inline">\(e^{\mathbf{X}\boldsymbol{\beta} + \sigma^2/2}\)</span>. If you’re computing marginal effects or making predictions on the original scale, this correction is non-negligible when <span class="math inline">\(\sigma &gt; 0.5\)</span>.</li>
+<li><strong>All three models assume a continuous outcome with no mass at specific points.</strong> If your “proportion” data is actually <span class="math inline">\(k/n\)</span> for small <span class="math inline">\(n\)</span> (say, 3 successes out of 10), binomial or beta-binomial regression is more appropriate than beta regression, because the discreteness of the data-generating process matters.</li>
+</ul>
+</div>
+<div id="references-4" class="section level2 hasAnchor" number="7.9">
+<h2><span class="header-section-number">7.9</span> References<a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#references-4" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<ul>
+<li>Ferrari, S., &amp; Cribari-Neto, F. (2004). <em>Beta Regression for Modelling Rates and Proportions</em>. Journal of Applied Statistics. <a href="https://www.ime.usp.br/~sferrari/beta.pdf">ime.usp</a></li>
+<li>Stan Development Team. <a href="https://mc-stan.org/docs/functions-reference/">Stan Functions Reference</a> <a href="https://mc-stan.org/docs/stan-users-guide/reparameterization.html">mc-stan</a></li>
+<li>Cribari-Neto, F. &amp; Zeileis, A. (2010). <em>Beta Regression in R</em>. Journal of Statistical Software. <a href="https://topmodels.r-forge.r-project.org/betareg/vignettes/betareg.html">topmodels.r-forge.r-project</a></li>
+<li>Vehtari, A., Gelman, A., &amp; Gabry, J. (2017). <em>Practical Bayesian model evaluation using leave-one-out cross-validation and WAIC</em>. Statistics and Computing.</li>
+<li><a href="https://discourse.mc-stan.org/t/comparing-gaussian-gamma-and-lognormal-versions-of-regression-model/40941">Stan Discourse: Comparing Gaussian, Gamma, and Lognormal regression</a> <a href="https://discourse.mc-stan.org/t/comparing-gaussian-gamma-and-lognormal-versions-of-regression-model/40941">discourse.mc-stan</a></li>
+<li><a href="https://mc-stan.org/loo/">loo package documentation</a></li>
+</ul>
+
+</div>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-
-
+<a href="bayesian-zero-inflated-count-models-in-stan.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="robust-t-regression.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -418,7 +637,7 @@ gitbook.start({
     "size": 2
   },
   "edit": {
-    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/edit/main/%s",
+    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/edit/main/03c-nonnormal_continus.Rmd",
     "text": "Edit"
   },
   "history": {
@@ -426,7 +645,7 @@ gitbook.start({
     "text": null
   },
   "view": {
-    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/blob/main/%s",
+    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/blob/main/03c-nonnormal_continus.Rmd",
     "text": null
   },
   "download": null,

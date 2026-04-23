@@ -158,3 +158,13 @@ model-comparison-zip-vs.-zinb-vs.-nb
 practical-guidance-and-caveats
 references-10
 conclusion-11
+bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan
+beta-regression-the-proportion-problem
+stan-implementation-beta-regression
+simulating-beta-distributed-data-in-r
+gamma-regression-strictly-positive-right-skewed-data
+log-normal-a-different-philosophical-commitment
+choosing-between-gamma-and-log-normal
+posterior-predictive-checking-what-to-look-for
+practical-guidance
+references-11
