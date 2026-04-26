@@ -168,3 +168,8 @@ choosing-between-gamma-and-log-normal
 posterior-predictive-checking-what-to-look-for
 practical-guidance
 references-11
+bayesian-regression-models-for-categorical-outcomes
+ordinal-regression
+categorical-multinomial-regression
+model-checking
+conclusion-12

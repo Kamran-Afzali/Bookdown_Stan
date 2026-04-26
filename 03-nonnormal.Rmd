@@ -1,575 +1,247 @@
 # Bayesian Regression Models for Non-Normal Data
 
-
-Our last post covered how to do bayesian regression for normally distributed data in R using STAN. In this post, we'll take a look at how to fit a regression model adapted to non-normal model in STAN using two common distributions seen in empirical data, namely, binomial and negative-binomial. As mentioned before in Bayesian modelling we use a set of sampling methods known as Markov Chain Monte Carlo (MCMC), we define a statistical model and find probabilistic estimates for the parameters. 
-
+Our last post covered how to do Bayesian regression for normally distributed data in R using STAN. In this post, we’ll look at how to fit regression models for non-normal data in STAN using two common distributions seen in empirical data, namely the binomial and the negative binomial. In Bayesian modeling, we define a statistical model, choose prior distributions for the unknown parameters, and use sampling methods such as Markov Chain Monte Carlo (MCMC) to estimate the posterior distribution. [github](https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations/d6233c6f668e1d3cd2c1601df6fdca55335c6cc9)
 
 ## Logistic Regression
 
-The likelihood of a binary outcome, such as pass or fail, is estimated using logistic models (but this model can be extended to include more than two outcomes). This is accomplished by using the logit function to convert a standard regression. The main parameter that we focus on here describes odds of the outcome derived from probabilities and transformed using a logit function.  The following is the code for a logistic regression model with one predictor and an intercept.
+The likelihood of a binary outcome, such as pass or fail, is commonly modeled using logistic regression. This is done by linking the probability of success to a linear predictor through the logit function, which keeps the fitted probabilities between 0 and 1. In practice, the coefficients describe changes in log-odds, and exponentiating them gives odds ratios. [mc-stan](https://mc-stan.org/docs/2_19/functions-reference/bernoulli-logit-distribution.html)
 
-
+The following code simulates data for a logistic regression model with one predictor and an intercept.
 
 ```r
 library(tidyverse)
-```
-
-
-```r
 library(kableExtra)
-library(arm) 
-library(emdbook) 
 library(rstan)
-library(rstanarm) 
 
 set.seed(1234)
- x1 = rnorm(10000)           
 
- z = 1 + 2*x1       
- pr = 1/(1+exp(-z))         
- y = rbinom(10000,1,pr)     
+x1 <- rnorm(10000)
+z  <- 1 + 2 * x1
+pr <- 1 / (1 + exp(-z))
+y  <- rbinom(10000, 1, pr)
 
- df = data.frame(y=y,x1=x1)
- 
+df <- data.frame(y = y, x1 = x1)
 
- 
-head(df)%>%kableExtra::kable()
+head(df) %>% kableExtra::kable()
 ```
 
-<table>
- <thead>
-  <tr>
-   <th style="text-align:right;"> y </th>
-   <th style="text-align:right;"> x1 </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> -1.2070657 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0.2774292 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 1.0844412 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> -2.3456977 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 0.4291247 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 0.5060559 </td>
-  </tr>
-</tbody>
-</table>
-
-
+As a quick check, we can fit the same model with `glm()` using a binomial family. Since the data were simulated from a logistic model with intercept 1 and slope 2, the estimates should be close to those values. [mc-stan](https://mc-stan.org/docs/2_19/functions-reference/bernoulli-logit-distribution.html)
 
 ```r
- glm( y~x1,data=df,family="binomial")%>%summary()%>%pluck(coefficients)%>%kableExtra::kable()
+glm(y ~ x1, data = df, family = "binomial") %>%
+  summary() %>%
+  pluck(coefficients) %>%
+  kableExtra::kable()
 ```
 
-<table>
- <thead>
-  <tr>
-   <th style="text-align:left;">   </th>
-   <th style="text-align:right;"> Estimate </th>
-   <th style="text-align:right;"> Std. Error </th>
-   <th style="text-align:right;"> z value </th>
-   <th style="text-align:right;"> Pr(&gt;|z|) </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;"> (Intercept) </td>
-   <td style="text-align:right;"> 1.036922 </td>
-   <td style="text-align:right;"> 0.0294863 </td>
-   <td style="text-align:right;"> 35.16621 </td>
-   <td style="text-align:right;"> 0 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> x1 </td>
-   <td style="text-align:right;"> 1.979352 </td>
-   <td style="text-align:right;"> 0.0417219 </td>
-   <td style="text-align:right;"> 47.44162 </td>
-   <td style="text-align:right;"> 0 </td>
-  </tr>
-</tbody>
-</table>
-
-
-
-
-
+Now let’s fit the Bayesian version in STAN. Here we add weakly informative priors to stabilize estimation and make the model more appropriate as a default teaching example. Weakly informative priors are commonly recommended for logistic-type models, especially when predictors are reasonably scaled. [projecteuclid](https://projecteuclid.org/journals/annals-of-applied-statistics/volume-2/issue-4/A-weakly-informative-default-prior-distribution-for-logistic-and-other/10.1214/08-AOAS191.full)
 
 ```r
-   model_stan = "
-   data {
+model_stan <- "
+data {
   int<lower=0> N;
   vector[N] x;
-  int<lower=0,upper=1> y[N];
+  array[N] int<lower=0,upper=1> y;
 }
 parameters {
   real alpha;
   real beta;
 }
 model {
+  alpha ~ normal(0, 5);
+  beta  ~ normal(0, 2.5);
+
   y ~ bernoulli_logit(alpha + beta * x);
 }
-   "
+generated quantities {
+  array[N] int y_rep;
+  for (n in 1:N) {
+    y_rep[n] = bernoulli_logit_rng(alpha + beta * x[n]);
+  }
+}
+"
 writeLines(model_stan, con = "model_stan.stan")
-   cat(model_stan)
+cat(model_stan)
 ```
-
-```
-## 
-##    data {
-##   int<lower=0> N;
-##   vector[N] x;
-##   int<lower=0,upper=1> y[N];
-## }
-## parameters {
-##   real alpha;
-##   real beta;
-## }
-## model {
-##   y ~ bernoulli_logit(alpha + beta * x);
-## }
-## 
-```
-
 
 ```r
 stan_data <- list(
-  N = 10000,
+  N = nrow(df),
   x = df$x1,
   y = df$y
 )
 
 fit_rstan <- rstan::stan(
   file = "model_stan.stan",
-  data = stan_data
+  data = stan_data,
+  chains = 4,
+  iter = 2000,
+  warmup = 1000,
+  seed = 1234
 )
 ```
-
 
 ```r
 fit_rstan
 ```
 
-```
-## Inference for Stan model: anon_model.
-## 4 chains, each with iter=2000; warmup=1000; thin=1; 
-## post-warmup draws per chain=1000, total post-warmup draws=4000.
-## 
-##           mean se_mean   sd     2.5%      25%      50%      75%    97.5% n_eff
-## alpha     1.04    0.00 0.03     0.98     1.02     1.04     1.06     1.10  1936
-## beta      1.98    0.00 0.04     1.90     1.95     1.98     2.01     2.06  1804
-## lp__  -4339.45    0.03 1.05 -4342.29 -4339.80 -4339.12 -4338.74 -4338.49  1479
-##       Rhat
-## alpha    1
-## beta     1
-## lp__     1
-## 
-## Samples were drawn using NUTS(diag_e) at Tue Jun 21 14:03:59 2022.
-## For each parameter, n_eff is a crude measure of effective sample size,
-## and Rhat is the potential scale reduction factor on split chains (at 
-## convergence, Rhat=1).
-```
+The posterior means should be close to the true values used to generate the data. When checking the fit, it is also good practice to look at convergence diagnostics such as `Rhat`, effective sample size, and posterior predictive checks based on `y_rep`. Posterior predictive checks help assess whether the model can reproduce data that look like the observed sample. [mc-stan](https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html)
 
-This also can be expanded to several predictors. Below you can find the code as well as some recommendations for making sense of priors.
-
-
-
+This can also be expanded to several predictors. Below is the code for a logistic regression with three predictors and an intercept.
 
 ```r
 set.seed(1234)
- x1 = rnorm(10000)           
- x2 = rnorm(10000)
- x3 = rnorm(10000)
- z = 1 + 2*x1 + 3*x2 - 1*x3       
- pr = 1/(1+exp(-z))         
- y = rbinom(10000,1,pr)     
 
- df2 = data.frame(y=y,x1=x1,x2=x2,x3=x3)
- 
+x1 <- rnorm(10000)
+x2 <- rnorm(10000)
+x3 <- rnorm(10000)
 
- 
-head(df2)%>%kableExtra::kable()
+z  <- 1 + 2 * x1 + 3 * x2 - 1 * x3
+pr <- 1 / (1 + exp(-z))
+y  <- rbinom(10000, 1, pr)
+
+df2 <- data.frame(y = y, x1 = x1, x2 = x2, x3 = x3)
+
+head(df2) %>% kableExtra::kable()
 ```
 
-<table>
- <thead>
-  <tr>
-   <th style="text-align:right;"> y </th>
-   <th style="text-align:right;"> x1 </th>
-   <th style="text-align:right;"> x2 </th>
-   <th style="text-align:right;"> x3 </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> -1.2070657 </td>
-   <td style="text-align:right;"> -1.8168975 </td>
-   <td style="text-align:right;"> -1.6878627 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 0.2774292 </td>
-   <td style="text-align:right;"> 0.6271668 </td>
-   <td style="text-align:right;"> -0.9552011 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 1.0844412 </td>
-   <td style="text-align:right;"> 0.5180921 </td>
-   <td style="text-align:right;"> -0.6480572 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> -2.3456977 </td>
-   <td style="text-align:right;"> 0.1409218 </td>
-   <td style="text-align:right;"> 0.2610342 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 0.4291247 </td>
-   <td style="text-align:right;"> 1.4572719 </td>
-   <td style="text-align:right;"> -1.2196940 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 0.5060559 </td>
-   <td style="text-align:right;"> -0.4935965 </td>
-   <td style="text-align:right;"> -1.5501888 </td>
-  </tr>
-</tbody>
-</table>
-
-
-
-
 ```r
- glm( y~x1+x2+x3,data=df2,family="binomial")%>%summary()%>%pluck(coefficients)%>%kableExtra::kable()
+glm(y ~ x1 + x2 + x3, data = df2, family = "binomial") %>%
+  summary() %>%
+  pluck(coefficients) %>%
+  kableExtra::kable()
 ```
 
-<table>
- <thead>
-  <tr>
-   <th style="text-align:left;">   </th>
-   <th style="text-align:right;"> Estimate </th>
-   <th style="text-align:right;"> Std. Error </th>
-   <th style="text-align:right;"> z value </th>
-   <th style="text-align:right;"> Pr(&gt;|z|) </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;"> (Intercept) </td>
-   <td style="text-align:right;"> 1.0108545 </td>
-   <td style="text-align:right;"> 0.0367817 </td>
-   <td style="text-align:right;"> 27.48253 </td>
-   <td style="text-align:right;"> 0 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> x1 </td>
-   <td style="text-align:right;"> 1.9471836 </td>
-   <td style="text-align:right;"> 0.0494298 </td>
-   <td style="text-align:right;"> 39.39289 </td>
-   <td style="text-align:right;"> 0 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> x2 </td>
-   <td style="text-align:right;"> 2.9598129 </td>
-   <td style="text-align:right;"> 0.0641890 </td>
-   <td style="text-align:right;"> 46.11088 </td>
-   <td style="text-align:right;"> 0 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> x3 </td>
-   <td style="text-align:right;"> -0.9448316 </td>
-   <td style="text-align:right;"> 0.0372918 </td>
-   <td style="text-align:right;"> -25.33619 </td>
-   <td style="text-align:right;"> 0 </td>
-  </tr>
-</tbody>
-</table>
-
-
-
+The STAN model now uses a predictor matrix and a coefficient vector.
 
 ```r
-model_stan2 ="
-
-
+model_stan2 <- "
 data {
-  int<lower=0> N;   // number of observations
-  int<lower=0> K;   // number of predictors
-  matrix[N, K] X;   // predictor matrix
-  int<lower=0,upper=1> y[N];      // outcome vector
+  int<lower=0> N;
+  int<lower=1> K;
+  matrix[N, K] X;
+  array[N] int<lower=0,upper=1> y;
 }
 parameters {
-  real alpha;           // intercept
-  vector[K] beta;       // coefficients for predictors
+  real alpha;
+  vector[K] beta;
 }
 model {
-  y ~ bernoulli_logit(alpha + X * beta); 
+  alpha ~ normal(0, 5);
+  beta  ~ normal(0, 2.5);
+
+  y ~ bernoulli_logit(alpha + X * beta);
 }
-
+generated quantities {
+  array[N] int y_rep;
+  for (n in 1:N) {
+    y_rep[n] = bernoulli_logit_rng(alpha + X[n] * beta);
+  }
+}
 "
-
 writeLines(model_stan2, con = "model_stan2.stan")
 cat(model_stan2)
 ```
 
-```
-## 
-## 
-## 
-## data {
-##   int<lower=0> N;   // number of observations
-##   int<lower=0> K;   // number of predictors
-##   matrix[N, K] X;   // predictor matrix
-##   int<lower=0,upper=1> y[N];      // outcome vector
-## }
-## parameters {
-##   real alpha;           // intercept
-##   vector[K] beta;       // coefficients for predictors
-## }
-## model {
-##   y ~ bernoulli_logit(alpha + X * beta); 
-## }
-```
-
-
-
-
 ```r
-predictors <- df2[,2:4]
+predictors <- as.matrix(df2[, c("x1", "x2", "x3")])
 
 stan_data2 <- list(
-  N = 10000,
-  K = 3,
+  N = nrow(df2),
+  K = ncol(predictors),
   X = predictors,
   y = df2$y
 )
 
-
 fit_rstan2 <- rstan::stan(
   file = "model_stan2.stan",
-  data = stan_data2
+  data = stan_data2,
+  chains = 4,
+  iter = 2000,
+  warmup = 1000,
+  seed = 1234
 )
 ```
-
-```
-## Trying to compile a simple C file
-```
-
 
 ```r
 fit_rstan2
 ```
 
-```
-## Inference for Stan model: anon_model.
-## 4 chains, each with iter=2000; warmup=1000; thin=1; 
-## post-warmup draws per chain=1000, total post-warmup draws=4000.
-## 
-##             mean se_mean   sd     2.5%      25%      50%      75%    97.5%
-## alpha       1.01    0.00 0.04     0.94     0.99     1.01     1.04     1.08
-## beta[1]     1.95    0.00 0.05     1.85     1.92     1.95     1.98     2.05
-## beta[2]     2.96    0.00 0.06     2.84     2.92     2.96     3.00     3.09
-## beta[3]    -0.95    0.00 0.04    -1.02    -0.97    -0.95    -0.92    -0.87
-## lp__    -3006.39    0.03 1.38 -3009.82 -3007.07 -3006.08 -3005.37 -3004.68
-##         n_eff Rhat
-## alpha    2845    1
-## beta[1]  2338    1
-## beta[2]  2221    1
-## beta[3]  2160    1
-## lp__     1788    1
-## 
-## Samples were drawn using NUTS(diag_e) at Tue Jun 21 14:05:38 2022.
-## For each parameter, n_eff is a crude measure of effective sample size,
-## and Rhat is the potential scale reduction factor on split chains (at 
-## convergence, Rhat=1).
-```
+Again, the posterior means should be close to the true simulated coefficients. In applied work, it is worth centering or scaling predictors before fitting the model, because prior interpretation is much clearer when coefficients operate on comparable scales. This is especially important when using weakly informative priors. [github](https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations/d6233c6f668e1d3cd2c1601df6fdca55335c6cc9)
 
+## Negative Binomial
 
+The Poisson distribution is a popular choice for modeling count data, but it assumes that the variance is equal to the mean. When the variance exceeds the mean, the data are said to be overdispersed, and the negative binomial distribution is often a better choice. In STAN, the `neg_binomial_2(mu, phi)` parameterization uses `mu` as the mean and `phi` as a positive overdispersion parameter; as `phi` becomes large, the model approaches a Poisson distribution. [mc-stan](https://mc-stan.org/docs/2_24/functions-reference/nbalt.html)
 
-## Negative Binomial 
-
-
-
-The Poisson distribution, which assumes that the variance is equal to the mean, is a popular choice for modelling count data. The data are said to be overdispersed when the variance exceeds the mean, the Negative Binomial distribution can be used in this case. Note that the negative binomial distribution is a probability distribution of discrete random variables. 
- 
-Let's say we have a response variable y that has a negative binomial distribution and is influenced by a collection of k explanatory variables X. The negative binomial distribution to model this data has two parameters: 
-The μ or the expected value that need to be positive so a log link function can be used to map the linear predictor (the explanatory variables times the regression parameters) and ϕ which is the overdispersion parameter, where a small value means a large deviation from a Poisson distribution, as ϕ gets larger the negative binomial looks more and more like a Poisson distribution.
-
-Let’s simulate some data and fit a STAN model to them:
-
-
+Let’s simulate some data from a negative binomial regression model and fit a STAN model to them.
 
 ```r
-N<-100000
-df3 <-data.frame(x1=runif(N,-2,2),x2=runif(N,-2,2))
-#the model
-X<-model.matrix(~x1*x2,df3)
-K<-dim(X)[2] #number of regression params
-#the regression slopes
-betas<-runif(K,-1,1)
-#the overdispersion for the simulated data
-phi<-5
-#simulate the response
-y_nb<-rnbinom(N,size=phi,mu=exp(X%*%betas))
+library(MASS)
+
+set.seed(1234)
+
+N <- 10000
+df3 <- data.frame(
+  x1 = runif(N, -2, 2),
+  x2 = runif(N, -2, 2)
+)
+
+X <- model.matrix(~ x1 * x2, df3)
+K <- ncol(X)
+
+betas <- runif(K, -1, 1)
+phi   <- 5
+
+mu   <- exp(X %*% betas)
+y_nb <- rnbinom(N, size = phi, mu = mu)
+
 hist(y_nb)
 ```
 
-![](/images/stan2_hist-1.png)
-
+As a frequentist comparison, we can fit a negative binomial model using `glm.nb()`.
 
 ```r
-MASS::glm.nb(y_nb ~ X[,2:K])%>%summary()%>%pluck(coefficients)%>%kableExtra::kable()
+MASS::glm.nb(y_nb ~ x1 * x2, data = df3) %>%
+  summary() %>%
+  pluck(coefficients) %>%
+  kableExtra::kable()
 ```
 
-<table>
- <thead>
-  <tr>
-   <th style="text-align:left;">   </th>
-   <th style="text-align:right;"> Estimate </th>
-   <th style="text-align:right;"> Std. Error </th>
-   <th style="text-align:right;"> z value </th>
-   <th style="text-align:right;"> Pr(&gt;|z|) </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;"> (Intercept) </td>
-   <td style="text-align:right;"> 0.0788902 </td>
-   <td style="text-align:right;"> 0.0039192 </td>
-   <td style="text-align:right;"> 20.12938 </td>
-   <td style="text-align:right;"> 0 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> X[, 2:K]x1 </td>
-   <td style="text-align:right;"> -0.0815968 </td>
-   <td style="text-align:right;"> 0.0032703 </td>
-   <td style="text-align:right;"> -24.95109 </td>
-   <td style="text-align:right;"> 0 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> X[, 2:K]x2 </td>
-   <td style="text-align:right;"> 0.7941334 </td>
-   <td style="text-align:right;"> 0.0031740 </td>
-   <td style="text-align:right;"> 250.20341 </td>
-   <td style="text-align:right;"> 0 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> X[, 2:K]x1:x2 </td>
-   <td style="text-align:right;"> 0.4301282 </td>
-   <td style="text-align:right;"> 0.0026264 </td>
-   <td style="text-align:right;"> 163.77308 </td>
-   <td style="text-align:right;"> 0 </td>
-  </tr>
-</tbody>
-</table>
+Now we fit the Bayesian version in STAN. One important correction here is that the dispersion parameter must be constrained to be positive. Since `phi` in `neg_binomial_2(mu, phi)` is defined on the positive real line, it should be declared with a lower bound in the parameters block. [mc-stan](https://mc-stan.org/docs/2_20/functions-reference/nbalt.html)
 
-
-```
+```r
+stan_mod <- "
 data {
-  int N; //the number of observations
-  int K; //the number of columns in the model matrix
-  int y[N]; //the response
-  matrix[N,K] X; //the model matrix
+  int<lower=1> N;
+  int<lower=1> K;
+  array[N] int<lower=0> y;
+  matrix[N, K] X;
 }
 parameters {
-  vector[K] beta; //the regression parameters
-  real phi; //the overdispersion parameters
+  vector[K] beta;
+  real<lower=0> phi;
 }
 transformed parameters {
-  vector[N] mu;//the linear predictor
-  mu <- exp(X*beta); //using the log link 
+  vector[N] mu;
+  mu = exp(X * beta);
 }
-model {  
-  beta[1] ~ cauchy(0,10); //prior for the intercept following Gelman 2008
+model {
+  beta [aimspress](https://www.aimspress.com/article/doi/10.3934/math.2024883) ~ normal(0, 5);
+  beta[2:K] ~ normal(0, 2.5);
+  phi ~ exponential(1);
 
-  for(i in 2:K)
-   beta[i] ~ cauchy(0,2.5);//prior for the slopes following Gelman 2008
-  
-  y ~ neg_binomial_2(mu,phi);
+  y ~ neg_binomial_2(mu, phi);
 }
 generated quantities {
- vector[N] y_rep;
- for(n in 1:N){
-  y_rep[n] <- neg_binomial_2_rng(mu[n],phi); //posterior draws to get posterior predictive checks
- }
-}
-
-```
-
-
-```r
-stan_mod = "data {
-  int N; //the number of observations
-  int K; //the number of columns in the model matrix
-  int y[N]; //the response
-  matrix[N,K] X; //the model matrix
-}
-parameters {
-  vector[K] beta; //the regression parameters
-  real phi; //the overdispersion parameters
-}
-transformed parameters {
-  vector[N] mu;//the linear predictor
-  mu <- exp(X*beta); //using the log link 
-}
-model {  
-  beta[1] ~ cauchy(0,10); //prior for the intercept following Gelman 2008
-
-  for(i in 2:K)
-   beta[i] ~ cauchy(0,2.5);//prior for the slopes following Gelman 2008
-  
-  y ~ neg_binomial_2(mu,phi);
+  array[N] int y_rep;
+  for (n in 1:N) {
+    y_rep[n] = neg_binomial_2_rng(mu[n], phi);
+  }
 }
 "
 writeLines(stan_mod, con = "stan_mod.stan")
-
 cat(stan_mod)
 ```
-
-```
-## data {
-##   int N; //the number of observations
-##   int K; //the number of columns in the model matrix
-##   int y[N]; //the response
-##   matrix[N,K] X; //the model matrix
-## }
-## parameters {
-##   vector[K] beta; //the regression parameters
-##   real phi; //the overdispersion parameters
-## }
-## transformed parameters {
-##   vector[N] mu;//the linear predictor
-##   mu <- exp(X*beta); //using the log link 
-## }
-## model {  
-##   beta[1] ~ cauchy(0,10); //prior for the intercept following Gelman 2008
-## 
-##   for(i in 2:K)
-##    beta[i] ~ cauchy(0,2.5);//prior for the slopes following Gelman 2008
-##   
-##   y ~ neg_binomial_2(mu,phi);
-## }
-```
-
 
 ```r
 stan_data3 <- list(
@@ -580,34 +252,26 @@ stan_data3 <- list(
 )
 ```
 
-
 ```r
 fit_rstan3 <- rstan::stan(
   file = "stan_mod.stan",
-  data = stan_data3
+  data = stan_data3,
+  chains = 4,
+  iter = 2000,
+  warmup = 1000,
+  seed = 1234
 )
 ```
 
 ```r
-fit_rstan3%>%summary()
+fit_rstan3 %>% summary()
 ```
 
-```
-## $summary
-##                     mean      se_mean           sd          2.5%           25%
-## beta[1]     7.899069e-02 6.825217e-05 0.0039010484  7.162531e-02  7.635923e-02
-## beta[2]    -8.157657e-02 5.689044e-05 0.0032236243 -8.786688e-02 -8.376046e-02
-## beta[3]     7.941039e-01 5.618629e-05 0.0031476117  7.880475e-01  7.919520e-01
-## beta[4]     4.301036e-01 4.552321e-05 0.0026265744  4.248578e-01  4.283603e-01
-## phi         4.908958e+00 2.039012e-03 0.0831883094  4.745765e+00  4.854542e+00
-
-```
-
-
+The posterior means should recover the simulated regression coefficients and the dispersion parameter reasonably well. As before, it is useful to examine convergence diagnostics and posterior predictive checks, since a good Bayesian workflow does not stop at parameter estimation alone. Prior predictive and posterior predictive checks are both recommended for assessing whether the priors and likelihood imply realistic data patterns. [mc-stan](https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html)
 
 ## Conclusion
 
-This tutorial provided only a quick overview of how to fit logistic and negative binomial regression models with the Bayesian software STAN using the rstan library/API and to extract a collection of useful summaries from the models. Future postings will address the question of outliers and the use of robust linear models.
+This tutorial provided a quick overview of how to fit logistic and negative binomial regression models with the Bayesian software STAN using the `rstan` interface. The key ideas are to choose a likelihood appropriate for the outcome, use sensible weakly informative priors, constrain parameters to their valid domains, and check model fit using predictive diagnostics rather than relying only on coefficient summaries. [mc-stan](https://mc-stan.org/docs/2_24/functions-reference/nbalt.html)
 
 ## References
 
