@@ -1,6 +1,6 @@
 # Bayesian Regression for Bounded and Skewed Continuous Outcomes in Stan
 
-In the previous posts, we worked through logistic regression for binary outcomes, negative binomial regression for overdispersed counts, and zero-inflated models for the structural excess of zeros. All of those dealt with discrete or binary outcomes. This post pivots to continuous outcomes, but with a twist: the distributions that govern them are neither Gaussian nor particularly well-behaved. Three workhorses emerge here — beta regression for proportions and rates bounded between 0 and 1, gamma regression for strictly positive right-skewed data, and the log-normal as a close cousin with slightly different theoretical commitments. Each one rewards a careful understanding before you reach for it.
+In the previous posts, we worked through logistic regression for binary outcomes, negative binomial regression for overdispersed counts, and zero-inflated models for the structural excess of zeros. All of those dealt with discrete or binary outcomes. This post moves to continuous outcomes, the case in which the distributions are not Gaussian. Three models are presented here — beta regression for proportions and rates bounded between 0 and 1, gamma regression for strictly positive right-skewed data, and the log-normal as a close cousin with slightly different theoretical assumptions. Each one rewards a careful understanding before you reach for it.
 
 
 
@@ -41,7 +41,7 @@ model {
   vector[N] mu = inv_logit(X * beta_mu);
 
   // Priors
-  beta_mu [core.ac](https://core.ac.uk/download/pdf/11055873.pdf) ~ normal(0, 5);
+  beta_mu ~ normal(0, 5);
   for (k in 2:K) beta_mu[k] ~ normal(0, 2.5);
   phi ~ gamma(2, 0.1);     // weakly informative; same logic as phi in ZINB
 
@@ -136,7 +136,7 @@ parameters {
 model {
   vector[N] mu = exp(X * beta_mu);
 
-  beta_mu [core.ac](https://core.ac.uk/download/pdf/11055873.pdf)   ~ normal(0, 5);
+  beta_mu   ~ normal(0, 5);
   for (k in 2:K) beta_mu[k] ~ normal(0, 2.5);
   alpha_shape  ~ gamma(2, 0.1);
 
