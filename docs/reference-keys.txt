@@ -173,3 +173,9 @@ ordinal-regression
 categorical-multinomial-regression
 model-checking
 conclusion-12
+simulating-ordinal-data
+stan-model-single-predictor
+extending-to-multiple-predictors
+simulating-multinomial-data
+stan-model-single-predictor-1
+extending-to-multiple-predictors-1
