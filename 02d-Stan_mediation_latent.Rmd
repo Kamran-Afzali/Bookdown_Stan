@@ -1,0 +1,263 @@
+# Bayesian Modeling in R and Stan: Mediation with an Unobserved Confounder
+
+In the previous chapter, we extended Bayesian regression in Stan to handle categorical predictors and interactions. Here we turn to **mediation analysis** — the question of whether the effect of a predictor \(X\) on an outcome \(Y\) operates partly through an intermediate variable \(M\) — and we immediately confront the assumption that makes most applied mediation analyses uncomfortable: the absence of unmeasured confounders. [pmc.ncbi.nlm.nih](https://pmc.ncbi.nlm.nih.gov/articles/PMC5999040/)
+
+The three quantities of interest are the **direct effect** of \(X\) on \(Y\), the **indirect effect** of \(X\) on \(Y\) through \(M\), and their sum, the **total effect**. In a linear Gaussian model these decompose cleanly as products and sums of regression coefficients. But that clean decomposition rests on a causal assumption — no unmeasured variable simultaneously drives both \(M\) and \(Y\) — that is almost never defensible without explicit modeling. [research-portal.uu](https://research-portal.uu.nl/ws/portalfiles/portal/247048134/A_Tutorial_in_Bayesian_Potential_Outcomes_Mediation_Analysis.pdf) This chapter builds the standard mediation model, then extends it by introducing a **latent confounder** \(U\) that is unobserved but estimable — individual by individual — from the residual covariance structure that \(U\) induces across both equations.
+
+
+
+## The Mediation Setup
+
+The single-mediator model has three nodes:
+
+- \(X\): the predictor or treatment
+- \(M\): the mediator
+- \(Y\): the outcome
+
+The logic is that \(X\) may influence \(M\), and \(M\) in turn may influence \(Y\). If \(X\) also acts on \(Y\) directly, the total effect decomposes into a **direct path** \(c'\) and an **indirect path** \(a_1 b_1\) through the mediator. In a linear model this decomposition is exact:
+
+\[
+\text{Total effect} = c' + a_1 b_1
+\]
+
+What makes Bayesian estimation attractive here is that the indirect effect \(a_1 b_1\) is a **nonlinear function** of two uncertain coefficients. Classical delta-method approximations struggle with the resulting skewness; posterior simulation handles it naturally by propagating uncertainty through the product directly. [pmc.ncbi.nlm.nih](https://pmc.ncbi.nlm.nih.gov/articles/PMC5999040/)
+
+
+
+## Introducing the Unobserved Confounder
+
+Now suppose there exists a variable \(U\) — perhaps an unmeasured personality trait, a latent disease burden, or an unrecorded environmental exposure — that influences both \(M\) and \(Y\). This is the most structurally damaging form of unmeasured confounding in mediation, because it opens a **backdoor path** between \(M\) and \(Y\) that conditioning on \(X\) alone cannot close.  Ignoring \(U\) causes the naive estimate of \(b_1\) — the mediator's effect on the outcome — to absorb part of \(U\)'s influence, biasing the indirect effect even when \(X\) is randomized. [pmc.ncbi.nlm.nih](https://pmc.ncbi.nlm.nih.gov/articles/PMC8672797/)
+
+The extended structural equations are:
+
+\[
+M_i = a_0 + a_1 X_i + \gamma_m U_i + \varepsilon_i^M, \quad \varepsilon_i^M \sim \mathcal{N}(0, \sigma_m^2)
+\]
+
+\[
+Y_i = b_0 + c' X_i + b_1 M_i + \gamma_y U_i + \varepsilon_i^Y, \quad \varepsilon_i^Y \sim \mathcal{N}(0, \sigma_y^2)
+\]
+
+\[
+U_i \sim \mathcal{N}(0, 1)
+\]
+
+The parameters \(\gamma_m\) and \(\gamma_y\) are the **loadings** of \(U\) onto each equation. Identification rests on a classic result from factor-analytic theory: when an unmeasured variable leaves a signature in the **residual covariance** between two observed outcomes, that signature can be used to recover the latent variable — provided both loadings are nonzero. [discourse.mc-stan](https://discourse.mc-stan.org/t/latent-mediation/34024)
+
+
+
+## The DAG
+
+```r
+library(ggdag)
+library(ggplot2)
+
+dag <- dagify(
+  M ~ X + U,
+  Y ~ X + M + U,
+  latent  = "U",
+  exposure = "X",
+  outcome  = "Y",
+  coords = list(
+    x = c(X = 0, M = 1, Y = 2, U = 1),
+    y = c(X = 0, M = 0, Y = 0, U = 1)
+  )
+)
+
+ggdag(dag, text = TRUE, use_labels = "name") +
+  theme_dag() +
+  ggtitle("Mediation DAG with Latent Confounder U")
+```
+
+The dashed node \(U\) with arrows into both \(M\) and \(Y\) encodes the assumption that the confounder is real but unobserved. In the DAG language, \(U\) is a **common cause** of \(M\) and \(Y\), and no observed set of variables d-separates it from the paths we care about.  That is exactly why it must be modeled rather than ignored. [cran.r-project](https://cran.r-project.org/web/packages/ggdag/vignettes/intro-to-dags.html)
+
+
+
+## Simulating the Data
+
+We generate data under the full structural model, then deliberately withhold \(U\) from the data object passed to Stan.
+
+```r
+set.seed(42)
+n <- 500
+
+# Structural parameters
+a0 <- 0;    a1      <- 0.8
+b0 <- 0;    b1      <- 1.2;   c_prime <- 0.5
+gamma_m <- 0.7              # loading of U on M
+gamma_y <- 1.0              # loading of U on Y
+sigma_m <- 1.0;  sigma_y <- 1.5
+
+x <- rnorm(n, 0, 1)
+u <- rnorm(n, 0, 1)         # the unobserved confounder
+
+m <- a0 + a1 * x + gamma_m * u + rnorm(n, 0, sigma_m)
+y <- b0 + c_prime * x + b1 * m + gamma_y * u + rnorm(n, 0, sigma_y)
+
+data <- data.frame(x, m, y) # U is intentionally absent
+```
+
+Under this process the true indirect effect is \(a_1 b_1 = 0.96\) and the true total effect is \(c' + a_1 b_1 = 1.46\). A naive model that omits \(U\) will misattribute \(U\)'s influence on \(Y\) to \(b_1\), inflating the apparent indirect effect. [pmc.ncbi.nlm.nih](https://pmc.ncbi.nlm.nih.gov/articles/PMC8672797/)
+
+
+
+## The Stan Model
+
+The Stan program treats \(U\) as a vector of \(N\) individual-level parameters — a continuous latent variable declared in the `parameters` block with a standard normal prior. Both the mediator and outcome likelihoods condition on \(U\), so Stan's sampler triangulates each \(U_i\) from the **joint residual pattern** in \(M\) and \(Y\). [discourse.mc-stan](https://discourse.mc-stan.org/t/latent-mediation/34024)
+
+```r
+stan_mod_latent <- "
+data {
+  int<lower=1> N;
+  vector[N] x;
+  vector[N] m;
+  vector[N] y;
+}
+
+parameters {
+  real a0;
+  real a1;
+  real b0;
+  real b1;
+  real c_prime;
+  real gamma_m;
+  real gamma_y;
+  real<lower=0> sigma_m;
+  real<lower=0> sigma_y;
+  vector[N] u;            // individual-level latent confounder
+}
+
+model {
+  // Priors on structural parameters
+  a0      ~ normal(0, 10);
+  a1      ~ normal(0, 10);
+  b0      ~ normal(0, 10);
+  b1      ~ normal(0, 10);
+  c_prime ~ normal(0, 10);
+  gamma_m ~ normal(0, 10);
+  gamma_y ~ normal(0, 10);
+  sigma_m ~ exponential(1);
+  sigma_y ~ exponential(1);
+
+  // Standard normal prior on latent confounder — required for scale identification
+  u ~ normal(0, 1);
+
+  // Mediator model: X and U jointly predict M
+  m ~ normal(a0 + a1 * x + gamma_m * u, sigma_m);
+
+  // Outcome model: X, M, and U jointly predict Y
+  y ~ normal(b0 + c_prime * x + b1 * m + gamma_y * u, sigma_y);
+}
+
+generated quantities {
+  real indirect = a1 * b1;
+  real total    = c_prime + indirect;
+  vector[N] u_hat = u;    // store individual posterior draws for export
+}
+"
+
+writeLines(stan_mod_latent, con = "stan_mod_latent.stan")
+```
+
+The prior `u ~ normal(0, 1)` does more than regularize — it **anchors the scale** of \(U\). Without it, the model could rescale \(U\) arbitrarily while compensating with \(\gamma_m\) and \(\gamma_y\), making the parameters jointly non-identifiable. This is the same constraint imposed in confirmatory factor analysis when fixing the factor variance to unity. [tandfonline](https://www.tandfonline.com/doi/full/10.1080/10705511.2025.2503789)
+
+
+
+## Fitting the Model
+
+```r
+library(rstan)
+options(mc.cores = parallel::detectCores())
+
+stan_data_latent <- list(
+  N = nrow(data),
+  x = data$x,
+  m = data$m,
+  y = data$y
+)
+
+fit_latent <- rstan::stan(
+  file    = "stan_mod_latent.stan",
+  data    = stan_data_latent,
+  iter    = 2000,
+  warmup  = 1000,
+  chains  = 4,
+  seed    = 42,
+  control = list(adapt_delta = 0.95)
+)
+
+print(fit_latent, pars = c("a1", "b1", "c_prime",
+                            "gamma_m", "gamma_y",
+                            "sigma_m", "sigma_y",
+                            "indirect", "total"))
+```
+
+We raise `adapt_delta` to 0.95 because a posterior with \(N\) continuous latent variables can develop **Neal's funnel geometry** in the \((U_i, \gamma)\) subspace, where the curvature of the posterior changes dramatically with the global scale parameters.  The higher step-size acceptance target forces the sampler to take smaller, more careful steps in those regions, reducing divergent transitions at the cost of slightly longer run times. [mc-stan](https://mc-stan.org/docs/2_18/stan-users-guide/latent-discrete-parameterization.html)
+
+
+
+## Extracting and Evaluating Individual \(U\) Estimates
+
+Once sampling is complete, each individual has a full posterior distribution over their latent \(U_i\) value. The posterior mean is a **shrinkage estimate** in the spirit of empirical Bayes: individuals whose residual pattern in both \(M\) and \(Y\) is consistent with a high-\(U\) profile are pulled toward positive values, while the prior pulls all estimates back toward zero. The degree of shrinkage is inversely related to how informative the data are about each person's \(U_i\).
+
+```r
+post <- rstan::extract(fit_latent)
+
+u_hat  <- colMeans(post$u_hat)
+u_ci_l <- apply(post$u_hat, 2, quantile, 0.025)
+u_ci_u <- apply(post$u_hat, 2, quantile, 0.975)
+
+u_summary <- data.frame(
+  individual = 1:n,
+  u_true     = u,           # available here only because we simulated
+  u_hat      = u_hat,
+  u_ci_l     = u_ci_l,
+  u_ci_u     = u_ci_u
+)
+
+# In simulation, we can verify recovery
+cor(u_summary$u_true, u_summary$u_hat)
+```
+
+A correlation of 0.5–0.8 between `u_true` and `u_hat` is realistic for this signal-to-noise ratio. Importantly, a low correlation is itself meaningful: it tells you that the observed data carry little information about \(U\), which is a finding about **identifiability**, not a bug in the sampler. [pmc.ncbi.nlm.nih](https://pmc.ncbi.nlm.nih.gov/articles/PMC8672797/)
+
+
+
+## Visualizing Latent \(U\) Recovery
+
+```r
+library(ggplot2)
+
+ggplot(u_summary, aes(x = u_true, y = u_hat)) +
+  geom_point(alpha = 0.3, size = 1.2, color = "steelblue") +
+  geom_errorbar(aes(ymin = u_ci_l, ymax = u_ci_u),
+                alpha = 0.15, color = "gray50") +
+  geom_abline(slope = 1, intercept = 0,
+              linetype = "dashed", color = "tomato") +
+  labs(
+    title = "True vs. Posterior Mean of Latent Confounder U",
+    x     = "True U  (simulation ground truth)",
+    y     = "Posterior Mean of U"
+  ) +
+  theme_minimal()
+```
+
+The dashed 45° line marks perfect recovery. Points below it reflect prior-induced shrinkage — a desirable property that prevents the model from overfitting to noise in individuals whose residual signature is ambiguous. The width of the credible intervals communicates posterior uncertainty, which is heterogeneous across individuals depending on their leverage in the joint likelihood.
+
+
+
+## Identifiability at a Glance
+
+| Condition | Consequence |
+|---|---|
+| Both \(\gamma_m \neq 0\) and \(\gamma_y \neq 0\) | \(U\) is identified from residual covariance; individual estimates are informative |
+| Only one loading nonzero | \(U\) is absorbed into \(\sigma_m\) or \(\sigma_y\); prior dominates the posterior |
+| Sign of \(\gamma_m \cdot \gamma_y\) unconstrained | Risk of label switching between \(+U\) and \(-U\) solutions across chains |
+
+The practical implication is that you should always inspect the posteriors of \(\gamma_m\) and \(\gamma_y\) before interpreting individual \(U_i\) estimates. If both posteriors are tightly concentrated away from zero, the individual estimates are genuinely data-informed. If one collapses onto its prior, the latent confounder is not recoverable from this data alone and you are effectively doing a **sensitivity analysis** rather than estimation. [tandfonline](https://www.tandfonline.com/doi/full/10.1080/10705511.2025.2503789)
+
+
+
+## Why This Matters Beyond the Simulation
+
+The framework developed here extends naturally in several directions. You can place an informative prior on \(\gamma_m\) or \(\gamma_y\) when domain knowledge constrains the direction or magnitude of the confounding — this is precisely the kind of sensitivity analysis that makes Bayesian latent-variable models more useful than frequentist alternatives that simply flag the problem without quantifying it.  You can also allow \(U\) to vary across groups in a hierarchical model, making it a **random effect** in the multilevel sense. And in non-Gaussian settings — binary mediators, count outcomes — the same latent-variable logic applies with appropriate likelihoods, though the posterior geometry becomes more demanding. The fundamental insight remains: unmeasured confounders leave detectable traces in the joint distribution of observed variables, and Stan's probabilistic programming framework is well suited to extracting those traces in a principled, fully Bayesian way. [pmc.ncbi.nlm.nih](https://pmc.ncbi.nlm.nih.gov/articles/PMC5999040/) [pmc.ncbi.nlm.nih](https://pmc.ncbi.nlm.nih.gov/articles/PMC8672797/)

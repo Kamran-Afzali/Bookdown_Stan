@@ -179,3 +179,14 @@ extending-to-multiple-predictors
 simulating-multinomial-data
 stan-model-single-predictor-1
 extending-to-multiple-predictors-1
+bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder
+the-mediation-setup-1
+introducing-the-unobserved-confounder
+the-dag
+simulating-the-data-2
+the-stan-model-1
+extracting-and-evaluating-individual-u-estimates
+visualizing-latent-u-recovery
+identifiability-at-a-glance
+why-this-matters-beyond-the-simulation
+fitting-the-model-3

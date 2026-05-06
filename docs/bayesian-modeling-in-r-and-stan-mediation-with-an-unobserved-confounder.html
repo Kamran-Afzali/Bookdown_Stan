@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Page not found | Stan Bookdown</title>
-  <meta name="description" content="Page not found | Stan Bookdown" />
+  <title>Chapter 5 Bayesian Modeling in R and Stan: Mediation with an Unobserved Confounder | Stan Bookdown</title>
+  <meta name="description" content="Chapter 5 Bayesian Modeling in R and Stan: Mediation with an Unobserved Confounder | Stan Bookdown" />
   <meta name="generator" content="bookdown 0.43 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Page not found | Stan Bookdown" />
+  <meta property="og:title" content="Chapter 5 Bayesian Modeling in R and Stan: Mediation with an Unobserved Confounder | Stan Bookdown" />
   <meta property="og:type" content="book" />
   
   
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Page not found | Stan Bookdown" />
+  <meta name="twitter:title" content="Chapter 5 Bayesian Modeling in R and Stan: Mediation with an Unobserved Confounder | Stan Bookdown" />
   
   
   
@@ -30,8 +30,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-
-
+<link rel="prev" href="bayesian-modeling-in-r-and-stan-mediation-analysis.html"/>
+<link rel="next" href="bayesian-regression-models-for-non-normal-data.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -404,19 +404,249 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="page-not-found" class="section level1">
-<h1>Page not found</h1>
-<p>The page you requested cannot be found (perhaps it was moved or renamed).</p>
-<p>You may want to try searching to find the page's new location, or use
-the table of contents to find the page you are looking for.</p>
+<div id="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder" class="section level1 hasAnchor" number="5">
+<h1><span class="header-section-number">Chapter 5</span> Bayesian Modeling in R and Stan: Mediation with an Unobserved Confounder<a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>In the previous chapter, we extended Bayesian regression in Stan to handle categorical predictors and interactions. Here we turn to <strong>mediation analysis</strong> — the question of whether the effect of a predictor <span class="math inline">\(X\)</span> on an outcome <span class="math inline">\(Y\)</span> operates partly through an intermediate variable <span class="math inline">\(M\)</span> — and we immediately confront the assumption that makes most applied mediation analyses uncomfortable: the absence of unmeasured confounders. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5999040/">pmc.ncbi.nlm.nih</a></p>
+<p>The three quantities of interest are the <strong>direct effect</strong> of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span>, the <strong>indirect effect</strong> of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span> through <span class="math inline">\(M\)</span>, and their sum, the <strong>total effect</strong>. In a linear Gaussian model these decompose cleanly as products and sums of regression coefficients. But that clean decomposition rests on a causal assumption — no unmeasured variable simultaneously drives both <span class="math inline">\(M\)</span> and <span class="math inline">\(Y\)</span> — that is almost never defensible without explicit modeling. <a href="https://research-portal.uu.nl/ws/portalfiles/portal/247048134/A_Tutorial_in_Bayesian_Potential_Outcomes_Mediation_Analysis.pdf">research-portal.uu</a> This chapter builds the standard mediation model, then extends it by introducing a <strong>latent confounder</strong> <span class="math inline">\(U\)</span> that is unobserved but estimable — individual by individual — from the residual covariance structure that <span class="math inline">\(U\)</span> induces across both equations.</p>
+<div id="the-mediation-setup-1" class="section level2 hasAnchor" number="5.1">
+<h2><span class="header-section-number">5.1</span> The Mediation Setup<a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#the-mediation-setup-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The single-mediator model has three nodes:</p>
+<ul>
+<li><span class="math inline">\(X\)</span>: the predictor or treatment</li>
+<li><span class="math inline">\(M\)</span>: the mediator</li>
+<li><span class="math inline">\(Y\)</span>: the outcome</li>
+</ul>
+<p>The logic is that <span class="math inline">\(X\)</span> may influence <span class="math inline">\(M\)</span>, and <span class="math inline">\(M\)</span> in turn may influence <span class="math inline">\(Y\)</span>. If <span class="math inline">\(X\)</span> also acts on <span class="math inline">\(Y\)</span> directly, the total effect decomposes into a <strong>direct path</strong> <span class="math inline">\(c&#39;\)</span> and an <strong>indirect path</strong> <span class="math inline">\(a_1 b_1\)</span> through the mediator. In a linear model this decomposition is exact:</p>
+<p><span class="math display">\[
+\text{Total effect} = c&#39; + a_1 b_1
+\]</span></p>
+<p>What makes Bayesian estimation attractive here is that the indirect effect <span class="math inline">\(a_1 b_1\)</span> is a <strong>nonlinear function</strong> of two uncertain coefficients. Classical delta-method approximations struggle with the resulting skewness; posterior simulation handles it naturally by propagating uncertainty through the product directly. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5999040/">pmc.ncbi.nlm.nih</a></p>
+</div>
+<div id="introducing-the-unobserved-confounder" class="section level2 hasAnchor" number="5.2">
+<h2><span class="header-section-number">5.2</span> Introducing the Unobserved Confounder<a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#introducing-the-unobserved-confounder" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Now suppose there exists a variable <span class="math inline">\(U\)</span> — perhaps an unmeasured personality trait, a latent disease burden, or an unrecorded environmental exposure — that influences both <span class="math inline">\(M\)</span> and <span class="math inline">\(Y\)</span>. This is the most structurally damaging form of unmeasured confounding in mediation, because it opens a <strong>backdoor path</strong> between <span class="math inline">\(M\)</span> and <span class="math inline">\(Y\)</span> that conditioning on <span class="math inline">\(X\)</span> alone cannot close. Ignoring <span class="math inline">\(U\)</span> causes the naive estimate of <span class="math inline">\(b_1\)</span> — the mediator’s effect on the outcome — to absorb part of <span class="math inline">\(U\)</span>’s influence, biasing the indirect effect even when <span class="math inline">\(X\)</span> is randomized. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8672797/">pmc.ncbi.nlm.nih</a></p>
+<p>The extended structural equations are:</p>
+<p><span class="math display">\[
+M_i = a_0 + a_1 X_i + \gamma_m U_i + \varepsilon_i^M, \quad \varepsilon_i^M \sim \mathcal{N}(0, \sigma_m^2)
+\]</span></p>
+<p><span class="math display">\[
+Y_i = b_0 + c&#39; X_i + b_1 M_i + \gamma_y U_i + \varepsilon_i^Y, \quad \varepsilon_i^Y \sim \mathcal{N}(0, \sigma_y^2)
+\]</span></p>
+<p><span class="math display">\[
+U_i \sim \mathcal{N}(0, 1)
+\]</span></p>
+<p>The parameters <span class="math inline">\(\gamma_m\)</span> and <span class="math inline">\(\gamma_y\)</span> are the <strong>loadings</strong> of <span class="math inline">\(U\)</span> onto each equation. Identification rests on a classic result from factor-analytic theory: when an unmeasured variable leaves a signature in the <strong>residual covariance</strong> between two observed outcomes, that signature can be used to recover the latent variable — provided both loadings are nonzero. <a href="https://discourse.mc-stan.org/t/latent-mediation/34024">discourse.mc-stan</a></p>
+</div>
+<div id="the-dag" class="section level2 hasAnchor" number="5.3">
+<h2><span class="header-section-number">5.3</span> The DAG<a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#the-dag" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb1-1" tabindex="-1"></a><span class="fu">library</span>(ggdag)</span>
+<span id="cb1-2"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb1-2" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-3"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb1-4" tabindex="-1"></a>dag <span class="ot">&lt;-</span> <span class="fu">dagify</span>(</span>
+<span id="cb1-5"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb1-5" tabindex="-1"></a>  M <span class="sc">~</span> X <span class="sc">+</span> U,</span>
+<span id="cb1-6"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb1-6" tabindex="-1"></a>  Y <span class="sc">~</span> X <span class="sc">+</span> M <span class="sc">+</span> U,</span>
+<span id="cb1-7"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb1-7" tabindex="-1"></a>  <span class="at">latent  =</span> <span class="st">&quot;U&quot;</span>,</span>
+<span id="cb1-8"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb1-8" tabindex="-1"></a>  <span class="at">exposure =</span> <span class="st">&quot;X&quot;</span>,</span>
+<span id="cb1-9"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb1-9" tabindex="-1"></a>  <span class="at">outcome  =</span> <span class="st">&quot;Y&quot;</span>,</span>
+<span id="cb1-10"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb1-10" tabindex="-1"></a>  <span class="at">coords =</span> <span class="fu">list</span>(</span>
+<span id="cb1-11"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb1-11" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">c</span>(<span class="at">X =</span> <span class="dv">0</span>, <span class="at">M =</span> <span class="dv">1</span>, <span class="at">Y =</span> <span class="dv">2</span>, <span class="at">U =</span> <span class="dv">1</span>),</span>
+<span id="cb1-12"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb1-12" tabindex="-1"></a>    <span class="at">y =</span> <span class="fu">c</span>(<span class="at">X =</span> <span class="dv">0</span>, <span class="at">M =</span> <span class="dv">0</span>, <span class="at">Y =</span> <span class="dv">0</span>, <span class="at">U =</span> <span class="dv">1</span>)</span>
+<span id="cb1-13"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb1-13" tabindex="-1"></a>  )</span>
+<span id="cb1-14"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb1-14" tabindex="-1"></a>)</span>
+<span id="cb1-15"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb1-15" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb1-16" tabindex="-1"></a><span class="fu">ggdag</span>(dag, <span class="at">text =</span> <span class="cn">TRUE</span>, <span class="at">use_labels =</span> <span class="st">&quot;name&quot;</span>) <span class="sc">+</span></span>
+<span id="cb1-17"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb1-17" tabindex="-1"></a>  <span class="fu">theme_dag</span>() <span class="sc">+</span></span>
+<span id="cb1-18"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb1-18" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">&quot;Mediation DAG with Latent Confounder U&quot;</span>)</span></code></pre></div>
+<p>The dashed node <span class="math inline">\(U\)</span> with arrows into both <span class="math inline">\(M\)</span> and <span class="math inline">\(Y\)</span> encodes the assumption that the confounder is real but unobserved. In the DAG language, <span class="math inline">\(U\)</span> is a <strong>common cause</strong> of <span class="math inline">\(M\)</span> and <span class="math inline">\(Y\)</span>, and no observed set of variables d-separates it from the paths we care about. That is exactly why it must be modeled rather than ignored. <a href="https://cran.r-project.org/web/packages/ggdag/vignettes/intro-to-dags.html">cran.r-project</a></p>
+</div>
+<div id="simulating-the-data-2" class="section level2 hasAnchor" number="5.4">
+<h2><span class="header-section-number">5.4</span> Simulating the Data<a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#simulating-the-data-2" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>We generate data under the full structural model, then deliberately withhold <span class="math inline">\(U\)</span> from the data object passed to Stan.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb2-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb2-2"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb2-2" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">500</span></span>
+<span id="cb2-3"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb2-3" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb2-4" tabindex="-1"></a><span class="co"># Structural parameters</span></span>
+<span id="cb2-5"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb2-5" tabindex="-1"></a>a0 <span class="ot">&lt;-</span> <span class="dv">0</span>;    a1      <span class="ot">&lt;-</span> <span class="fl">0.8</span></span>
+<span id="cb2-6"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb2-6" tabindex="-1"></a>b0 <span class="ot">&lt;-</span> <span class="dv">0</span>;    b1      <span class="ot">&lt;-</span> <span class="fl">1.2</span>;   c_prime <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb2-7"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb2-7" tabindex="-1"></a>gamma_m <span class="ot">&lt;-</span> <span class="fl">0.7</span>              <span class="co"># loading of U on M</span></span>
+<span id="cb2-8"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb2-8" tabindex="-1"></a>gamma_y <span class="ot">&lt;-</span> <span class="fl">1.0</span>              <span class="co"># loading of U on Y</span></span>
+<span id="cb2-9"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb2-9" tabindex="-1"></a>sigma_m <span class="ot">&lt;-</span> <span class="fl">1.0</span>;  sigma_y <span class="ot">&lt;-</span> <span class="fl">1.5</span></span>
+<span id="cb2-10"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb2-10" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb2-11" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb2-12"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb2-12" tabindex="-1"></a>u <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="dv">1</span>)         <span class="co"># the unobserved confounder</span></span>
+<span id="cb2-13"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb2-13" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb2-14" tabindex="-1"></a>m <span class="ot">&lt;-</span> a0 <span class="sc">+</span> a1 <span class="sc">*</span> x <span class="sc">+</span> gamma_m <span class="sc">*</span> u <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, sigma_m)</span>
+<span id="cb2-15"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb2-15" tabindex="-1"></a>y <span class="ot">&lt;-</span> b0 <span class="sc">+</span> c_prime <span class="sc">*</span> x <span class="sc">+</span> b1 <span class="sc">*</span> m <span class="sc">+</span> gamma_y <span class="sc">*</span> u <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, sigma_y)</span>
+<span id="cb2-16"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb2-16" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb2-17" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(x, m, y) <span class="co"># U is intentionally absent</span></span></code></pre></div>
+<p>Under this process the true indirect effect is <span class="math inline">\(a_1 b_1 = 0.96\)</span> and the true total effect is <span class="math inline">\(c&#39; + a_1 b_1 = 1.46\)</span>. A naive model that omits <span class="math inline">\(U\)</span> will misattribute <span class="math inline">\(U\)</span>’s influence on <span class="math inline">\(Y\)</span> to <span class="math inline">\(b_1\)</span>, inflating the apparent indirect effect. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8672797/">pmc.ncbi.nlm.nih</a></p>
+</div>
+<div id="the-stan-model-1" class="section level2 hasAnchor" number="5.5">
+<h2><span class="header-section-number">5.5</span> The Stan Model<a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#the-stan-model-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The Stan program treats <span class="math inline">\(U\)</span> as a vector of <span class="math inline">\(N\)</span> individual-level parameters — a continuous latent variable declared in the <code>parameters</code> block with a standard normal prior. Both the mediator and outcome likelihoods condition on <span class="math inline">\(U\)</span>, so Stan’s sampler triangulates each <span class="math inline">\(U_i\)</span> from the <strong>joint residual pattern</strong> in <span class="math inline">\(M\)</span> and <span class="math inline">\(Y\)</span>. <a href="https://discourse.mc-stan.org/t/latent-mediation/34024">discourse.mc-stan</a></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-1" tabindex="-1"></a>stan_mod_latent <span class="ot">&lt;-</span> <span class="st">&quot;</span></span>
+<span id="cb3-2"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-2" tabindex="-1"></a><span class="st">data {</span></span>
+<span id="cb3-3"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-3" tabindex="-1"></a><span class="st">  int&lt;lower=1&gt; N;</span></span>
+<span id="cb3-4"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-4" tabindex="-1"></a><span class="st">  vector[N] x;</span></span>
+<span id="cb3-5"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-5" tabindex="-1"></a><span class="st">  vector[N] m;</span></span>
+<span id="cb3-6"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-6" tabindex="-1"></a><span class="st">  vector[N] y;</span></span>
+<span id="cb3-7"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-7" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb3-8"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-8" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-9" tabindex="-1"></a><span class="st">parameters {</span></span>
+<span id="cb3-10"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-10" tabindex="-1"></a><span class="st">  real a0;</span></span>
+<span id="cb3-11"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-11" tabindex="-1"></a><span class="st">  real a1;</span></span>
+<span id="cb3-12"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-12" tabindex="-1"></a><span class="st">  real b0;</span></span>
+<span id="cb3-13"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-13" tabindex="-1"></a><span class="st">  real b1;</span></span>
+<span id="cb3-14"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-14" tabindex="-1"></a><span class="st">  real c_prime;</span></span>
+<span id="cb3-15"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-15" tabindex="-1"></a><span class="st">  real gamma_m;</span></span>
+<span id="cb3-16"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-16" tabindex="-1"></a><span class="st">  real gamma_y;</span></span>
+<span id="cb3-17"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-17" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma_m;</span></span>
+<span id="cb3-18"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-18" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma_y;</span></span>
+<span id="cb3-19"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-19" tabindex="-1"></a><span class="st">  vector[N] u;            // individual-level latent confounder</span></span>
+<span id="cb3-20"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-20" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb3-21"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-21" tabindex="-1"></a></span>
+<span id="cb3-22"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-22" tabindex="-1"></a><span class="st">model {</span></span>
+<span id="cb3-23"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-23" tabindex="-1"></a><span class="st">  // Priors on structural parameters</span></span>
+<span id="cb3-24"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-24" tabindex="-1"></a><span class="st">  a0      ~ normal(0, 10);</span></span>
+<span id="cb3-25"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-25" tabindex="-1"></a><span class="st">  a1      ~ normal(0, 10);</span></span>
+<span id="cb3-26"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-26" tabindex="-1"></a><span class="st">  b0      ~ normal(0, 10);</span></span>
+<span id="cb3-27"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-27" tabindex="-1"></a><span class="st">  b1      ~ normal(0, 10);</span></span>
+<span id="cb3-28"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-28" tabindex="-1"></a><span class="st">  c_prime ~ normal(0, 10);</span></span>
+<span id="cb3-29"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-29" tabindex="-1"></a><span class="st">  gamma_m ~ normal(0, 10);</span></span>
+<span id="cb3-30"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-30" tabindex="-1"></a><span class="st">  gamma_y ~ normal(0, 10);</span></span>
+<span id="cb3-31"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-31" tabindex="-1"></a><span class="st">  sigma_m ~ exponential(1);</span></span>
+<span id="cb3-32"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-32" tabindex="-1"></a><span class="st">  sigma_y ~ exponential(1);</span></span>
+<span id="cb3-33"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-33" tabindex="-1"></a></span>
+<span id="cb3-34"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-34" tabindex="-1"></a><span class="st">  // Standard normal prior on latent confounder — required for scale identification</span></span>
+<span id="cb3-35"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-35" tabindex="-1"></a><span class="st">  u ~ normal(0, 1);</span></span>
+<span id="cb3-36"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-36" tabindex="-1"></a></span>
+<span id="cb3-37"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-37" tabindex="-1"></a><span class="st">  // Mediator model: X and U jointly predict M</span></span>
+<span id="cb3-38"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-38" tabindex="-1"></a><span class="st">  m ~ normal(a0 + a1 * x + gamma_m * u, sigma_m);</span></span>
+<span id="cb3-39"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-39" tabindex="-1"></a></span>
+<span id="cb3-40"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-40" tabindex="-1"></a><span class="st">  // Outcome model: X, M, and U jointly predict Y</span></span>
+<span id="cb3-41"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-41" tabindex="-1"></a><span class="st">  y ~ normal(b0 + c_prime * x + b1 * m + gamma_y * u, sigma_y);</span></span>
+<span id="cb3-42"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-42" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb3-43"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-43" tabindex="-1"></a></span>
+<span id="cb3-44"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-44" tabindex="-1"></a><span class="st">generated quantities {</span></span>
+<span id="cb3-45"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-45" tabindex="-1"></a><span class="st">  real indirect = a1 * b1;</span></span>
+<span id="cb3-46"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-46" tabindex="-1"></a><span class="st">  real total    = c_prime + indirect;</span></span>
+<span id="cb3-47"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-47" tabindex="-1"></a><span class="st">  vector[N] u_hat = u;    // store individual posterior draws for export</span></span>
+<span id="cb3-48"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-48" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb3-49"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-49" tabindex="-1"></a><span class="st">&quot;</span></span>
+<span id="cb3-50"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-50" tabindex="-1"></a></span>
+<span id="cb3-51"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb3-51" tabindex="-1"></a><span class="fu">writeLines</span>(stan_mod_latent, <span class="at">con =</span> <span class="st">&quot;stan_mod_latent.stan&quot;</span>)</span></code></pre></div>
+<p>The prior <code>u ~ normal(0, 1)</code> does more than regularize — it <strong>anchors the scale</strong> of <span class="math inline">\(U\)</span>. Without it, the model could rescale <span class="math inline">\(U\)</span> arbitrarily while compensating with <span class="math inline">\(\gamma_m\)</span> and <span class="math inline">\(\gamma_y\)</span>, making the parameters jointly non-identifiable. This is the same constraint imposed in confirmatory factor analysis when fixing the factor variance to unity. <a href="https://www.tandfonline.com/doi/full/10.1080/10705511.2025.2503789">tandfonline</a></p>
+</div>
+<div id="fitting-the-model-2" class="section level2 hasAnchor" number="5.6">
+<h2><span class="header-section-number">5.6</span> Fitting the Model<a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#fitting-the-model-2" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb4-1" tabindex="-1"></a><span class="fu">library</span>(rstan)</span>
+<span id="cb4-2"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb4-2" tabindex="-1"></a><span class="fu">options</span>(<span class="at">mc.cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>())</span>
+<span id="cb4-3"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb4-3" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb4-4" tabindex="-1"></a>stan_data_latent <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb4-5"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb4-5" tabindex="-1"></a>  <span class="at">N =</span> <span class="fu">nrow</span>(data),</span>
+<span id="cb4-6"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb4-6" tabindex="-1"></a>  <span class="at">x =</span> data<span class="sc">$</span>x,</span>
+<span id="cb4-7"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb4-7" tabindex="-1"></a>  <span class="at">m =</span> data<span class="sc">$</span>m,</span>
+<span id="cb4-8"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb4-8" tabindex="-1"></a>  <span class="at">y =</span> data<span class="sc">$</span>y</span>
+<span id="cb4-9"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb4-9" tabindex="-1"></a>)</span>
+<span id="cb4-10"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb4-10" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb4-11" tabindex="-1"></a>fit_latent <span class="ot">&lt;-</span> rstan<span class="sc">::</span><span class="fu">stan</span>(</span>
+<span id="cb4-12"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb4-12" tabindex="-1"></a>  <span class="at">file    =</span> <span class="st">&quot;stan_mod_latent.stan&quot;</span>,</span>
+<span id="cb4-13"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb4-13" tabindex="-1"></a>  <span class="at">data    =</span> stan_data_latent,</span>
+<span id="cb4-14"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb4-14" tabindex="-1"></a>  <span class="at">iter    =</span> <span class="dv">2000</span>,</span>
+<span id="cb4-15"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb4-15" tabindex="-1"></a>  <span class="at">warmup  =</span> <span class="dv">1000</span>,</span>
+<span id="cb4-16"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb4-16" tabindex="-1"></a>  <span class="at">chains  =</span> <span class="dv">4</span>,</span>
+<span id="cb4-17"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb4-17" tabindex="-1"></a>  <span class="at">seed    =</span> <span class="dv">42</span>,</span>
+<span id="cb4-18"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb4-18" tabindex="-1"></a>  <span class="at">control =</span> <span class="fu">list</span>(<span class="at">adapt_delta =</span> <span class="fl">0.95</span>)</span>
+<span id="cb4-19"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb4-19" tabindex="-1"></a>)</span>
+<span id="cb4-20"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb4-20" tabindex="-1"></a></span>
+<span id="cb4-21"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb4-21" tabindex="-1"></a><span class="fu">print</span>(fit_latent, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;a1&quot;</span>, <span class="st">&quot;b1&quot;</span>, <span class="st">&quot;c_prime&quot;</span>,</span>
+<span id="cb4-22"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb4-22" tabindex="-1"></a>                            <span class="st">&quot;gamma_m&quot;</span>, <span class="st">&quot;gamma_y&quot;</span>,</span>
+<span id="cb4-23"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb4-23" tabindex="-1"></a>                            <span class="st">&quot;sigma_m&quot;</span>, <span class="st">&quot;sigma_y&quot;</span>,</span>
+<span id="cb4-24"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb4-24" tabindex="-1"></a>                            <span class="st">&quot;indirect&quot;</span>, <span class="st">&quot;total&quot;</span>))</span></code></pre></div>
+<p>We raise <code>adapt_delta</code> to 0.95 because a posterior with <span class="math inline">\(N\)</span> continuous latent variables can develop <strong>Neal’s funnel geometry</strong> in the <span class="math inline">\((U_i, \gamma)\)</span> subspace, where the curvature of the posterior changes dramatically with the global scale parameters. The higher step-size acceptance target forces the sampler to take smaller, more careful steps in those regions, reducing divergent transitions at the cost of slightly longer run times. <a href="https://mc-stan.org/docs/2_18/stan-users-guide/latent-discrete-parameterization.html">mc-stan</a></p>
+</div>
+<div id="extracting-and-evaluating-individual-u-estimates" class="section level2 hasAnchor" number="5.7">
+<h2><span class="header-section-number">5.7</span> Extracting and Evaluating Individual <span class="math inline">\(U\)</span> Estimates<a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#extracting-and-evaluating-individual-u-estimates" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Once sampling is complete, each individual has a full posterior distribution over their latent <span class="math inline">\(U_i\)</span> value. The posterior mean is a <strong>shrinkage estimate</strong> in the spirit of empirical Bayes: individuals whose residual pattern in both <span class="math inline">\(M\)</span> and <span class="math inline">\(Y\)</span> is consistent with a high-<span class="math inline">\(U\)</span> profile are pulled toward positive values, while the prior pulls all estimates back toward zero. The degree of shrinkage is inversely related to how informative the data are about each person’s <span class="math inline">\(U_i\)</span>.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb5-1" tabindex="-1"></a>post <span class="ot">&lt;-</span> rstan<span class="sc">::</span><span class="fu">extract</span>(fit_latent)</span>
+<span id="cb5-2"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb5-2" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb5-3" tabindex="-1"></a>u_hat  <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(post<span class="sc">$</span>u_hat)</span>
+<span id="cb5-4"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb5-4" tabindex="-1"></a>u_ci_l <span class="ot">&lt;-</span> <span class="fu">apply</span>(post<span class="sc">$</span>u_hat, <span class="dv">2</span>, quantile, <span class="fl">0.025</span>)</span>
+<span id="cb5-5"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb5-5" tabindex="-1"></a>u_ci_u <span class="ot">&lt;-</span> <span class="fu">apply</span>(post<span class="sc">$</span>u_hat, <span class="dv">2</span>, quantile, <span class="fl">0.975</span>)</span>
+<span id="cb5-6"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb5-6" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb5-7" tabindex="-1"></a>u_summary <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb5-8"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb5-8" tabindex="-1"></a>  <span class="at">individual =</span> <span class="dv">1</span><span class="sc">:</span>n,</span>
+<span id="cb5-9"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb5-9" tabindex="-1"></a>  <span class="at">u_true     =</span> u,           <span class="co"># available here only because we simulated</span></span>
+<span id="cb5-10"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb5-10" tabindex="-1"></a>  <span class="at">u_hat      =</span> u_hat,</span>
+<span id="cb5-11"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb5-11" tabindex="-1"></a>  <span class="at">u_ci_l     =</span> u_ci_l,</span>
+<span id="cb5-12"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb5-12" tabindex="-1"></a>  <span class="at">u_ci_u     =</span> u_ci_u</span>
+<span id="cb5-13"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb5-13" tabindex="-1"></a>)</span>
+<span id="cb5-14"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb5-14" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb5-15" tabindex="-1"></a><span class="co"># In simulation, we can verify recovery</span></span>
+<span id="cb5-16"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb5-16" tabindex="-1"></a><span class="fu">cor</span>(u_summary<span class="sc">$</span>u_true, u_summary<span class="sc">$</span>u_hat)</span></code></pre></div>
+<p>A correlation of 0.5–0.8 between <code>u_true</code> and <code>u_hat</code> is realistic for this signal-to-noise ratio. Importantly, a low correlation is itself meaningful: it tells you that the observed data carry little information about <span class="math inline">\(U\)</span>, which is a finding about <strong>identifiability</strong>, not a bug in the sampler. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8672797/">pmc.ncbi.nlm.nih</a></p>
+</div>
+<div id="visualizing-latent-u-recovery" class="section level2 hasAnchor" number="5.8">
+<h2><span class="header-section-number">5.8</span> Visualizing Latent <span class="math inline">\(U\)</span> Recovery<a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#visualizing-latent-u-recovery" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb6-1" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb6-2"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb6-2" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb6-3" tabindex="-1"></a><span class="fu">ggplot</span>(u_summary, <span class="fu">aes</span>(<span class="at">x =</span> u_true, <span class="at">y =</span> u_hat)) <span class="sc">+</span></span>
+<span id="cb6-4"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb6-4" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.3</span>, <span class="at">size =</span> <span class="fl">1.2</span>, <span class="at">color =</span> <span class="st">&quot;steelblue&quot;</span>) <span class="sc">+</span></span>
+<span id="cb6-5"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb6-5" tabindex="-1"></a>  <span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> u_ci_l, <span class="at">ymax =</span> u_ci_u),</span>
+<span id="cb6-6"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb6-6" tabindex="-1"></a>                <span class="at">alpha =</span> <span class="fl">0.15</span>, <span class="at">color =</span> <span class="st">&quot;gray50&quot;</span>) <span class="sc">+</span></span>
+<span id="cb6-7"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb6-7" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="dv">1</span>, <span class="at">intercept =</span> <span class="dv">0</span>,</span>
+<span id="cb6-8"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb6-8" tabindex="-1"></a>              <span class="at">linetype =</span> <span class="st">&quot;dashed&quot;</span>, <span class="at">color =</span> <span class="st">&quot;tomato&quot;</span>) <span class="sc">+</span></span>
+<span id="cb6-9"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb6-9" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb6-10"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb6-10" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;True vs. Posterior Mean of Latent Confounder U&quot;</span>,</span>
+<span id="cb6-11"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb6-11" tabindex="-1"></a>    <span class="at">x     =</span> <span class="st">&quot;True U  (simulation ground truth)&quot;</span>,</span>
+<span id="cb6-12"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb6-12" tabindex="-1"></a>    <span class="at">y     =</span> <span class="st">&quot;Posterior Mean of U&quot;</span></span>
+<span id="cb6-13"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb6-13" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb6-14"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#cb6-14" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div>
+<p>The dashed 45° line marks perfect recovery. Points below it reflect prior-induced shrinkage — a desirable property that prevents the model from overfitting to noise in individuals whose residual signature is ambiguous. The width of the credible intervals communicates posterior uncertainty, which is heterogeneous across individuals depending on their leverage in the joint likelihood.</p>
+</div>
+<div id="identifiability-at-a-glance" class="section level2 hasAnchor" number="5.9">
+<h2><span class="header-section-number">5.9</span> Identifiability at a Glance<a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#identifiability-at-a-glance" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<table>
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Condition</th>
+<th>Consequence</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Both <span class="math inline">\(\gamma_m \neq 0\)</span> and <span class="math inline">\(\gamma_y \neq 0\)</span></td>
+<td><span class="math inline">\(U\)</span> is identified from residual covariance; individual estimates are informative</td>
+</tr>
+<tr class="even">
+<td>Only one loading nonzero</td>
+<td><span class="math inline">\(U\)</span> is absorbed into <span class="math inline">\(\sigma_m\)</span> or <span class="math inline">\(\sigma_y\)</span>; prior dominates the posterior</td>
+</tr>
+<tr class="odd">
+<td>Sign of <span class="math inline">\(\gamma_m \cdot \gamma_y\)</span> unconstrained</td>
+<td>Risk of label switching between <span class="math inline">\(+U\)</span> and <span class="math inline">\(-U\)</span> solutions across chains</td>
+</tr>
+</tbody>
+</table>
+<p>The practical implication is that you should always inspect the posteriors of <span class="math inline">\(\gamma_m\)</span> and <span class="math inline">\(\gamma_y\)</span> before interpreting individual <span class="math inline">\(U_i\)</span> estimates. If both posteriors are tightly concentrated away from zero, the individual estimates are genuinely data-informed. If one collapses onto its prior, the latent confounder is not recoverable from this data alone and you are effectively doing a <strong>sensitivity analysis</strong> rather than estimation. <a href="https://www.tandfonline.com/doi/full/10.1080/10705511.2025.2503789">tandfonline</a></p>
+</div>
+<div id="why-this-matters-beyond-the-simulation" class="section level2 hasAnchor" number="5.10">
+<h2><span class="header-section-number">5.10</span> Why This Matters Beyond the Simulation<a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#why-this-matters-beyond-the-simulation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The framework developed here extends naturally in several directions. You can place an informative prior on <span class="math inline">\(\gamma_m\)</span> or <span class="math inline">\(\gamma_y\)</span> when domain knowledge constrains the direction or magnitude of the confounding — this is precisely the kind of sensitivity analysis that makes Bayesian latent-variable models more useful than frequentist alternatives that simply flag the problem without quantifying it. You can also allow <span class="math inline">\(U\)</span> to vary across groups in a hierarchical model, making it a <strong>random effect</strong> in the multilevel sense. And in non-Gaussian settings — binary mediators, count outcomes — the same latent-variable logic applies with appropriate likelihoods, though the posterior geometry becomes more demanding. The fundamental insight remains: unmeasured confounders leave detectable traces in the joint distribution of observed variables, and Stan’s probabilistic programming framework is well suited to extracting those traces in a principled, fully Bayesian way. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5999040/">pmc.ncbi.nlm.nih</a> <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8672797/">pmc.ncbi.nlm.nih</a></p>
+
+</div>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-
-
+<a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="bayesian-regression-models-for-non-normal-data.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -447,7 +677,7 @@ gitbook.start({
     "size": 2
   },
   "edit": {
-    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/edit/main/%s",
+    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/edit/main/02d-Stan_mediation_latent.Rmd",
     "text": "Edit"
   },
   "history": {
@@ -455,7 +685,7 @@ gitbook.start({
     "text": null
   },
   "view": {
-    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/blob/main/%s",
+    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/blob/main/02d-Stan_mediation_latent.Rmd",
     "text": null
   },
   "download": null,
