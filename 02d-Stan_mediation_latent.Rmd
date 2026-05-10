@@ -1,6 +1,6 @@
 # Bayesian Modeling in R and Stan: Mediation with an Unobserved Confounder
 
-In the previous chapter, we extended Bayesian regression in Stan to handle categorical predictors and interactions. Here we turn to **mediation analysis** — the question of whether the effect of a predictor \(X\) on an outcome \(Y\) operates partly through an intermediate variable \(M\) — and we immediately confront the assumption that makes most applied mediation analyses uncomfortable: the absence of unmeasured confounders. [pmc.ncbi.nlm.nih](https://pmc.ncbi.nlm.nih.gov/articles/PMC5999040/)
+In the previous chapter, we extended Bayesian regression in Stan to handle categorical predictors and interactions. Here we turn to **mediation analysis** — the question of whether the effect of a predictor \(X\) on an outcome \(Y\) operates partly through an intermediate variable \(M\) — and we immediately confront the assumption of absence of unmeasured confounders. [pmc.ncbi.nlm.nih](https://pmc.ncbi.nlm.nih.gov/articles/PMC5999040/)
 
 The three quantities of interest are the **direct effect** of \(X\) on \(Y\), the **indirect effect** of \(X\) on \(Y\) through \(M\), and their sum, the **total effect**. In a linear Gaussian model these decompose cleanly as products and sums of regression coefficients. But that clean decomposition rests on a causal assumption — no unmeasured variable simultaneously drives both \(M\) and \(Y\) — that is almost never defensible without explicit modeling. [research-portal.uu](https://research-portal.uu.nl/ws/portalfiles/portal/247048134/A_Tutorial_in_Bayesian_Potential_Outcomes_Mediation_Analysis.pdf) This chapter builds the standard mediation model, then extends it by introducing a **latent confounder** \(U\) that is unobserved but estimable — individual by individual — from the residual covariance structure that \(U\) induces across both equations.
 
@@ -48,7 +48,7 @@ The parameters \(\gamma_m\) and \(\gamma_y\) are the **loadings** of \(U\) onto 
 
 ## The DAG
 
-```r
+```{r}
 library(ggdag)
 library(ggplot2)
 
@@ -246,7 +246,7 @@ The dashed 45° line marks perfect recovery. Points below it reflect prior-induc
 
 
 
-## Identifiability at a Glance
+## Identifiability and future directions
 
 | Condition | Consequence |
 |---|---|
@@ -254,10 +254,4 @@ The dashed 45° line marks perfect recovery. Points below it reflect prior-induc
 | Only one loading nonzero | \(U\) is absorbed into \(\sigma_m\) or \(\sigma_y\); prior dominates the posterior |
 | Sign of \(\gamma_m \cdot \gamma_y\) unconstrained | Risk of label switching between \(+U\) and \(-U\) solutions across chains |
 
-The practical implication is that you should always inspect the posteriors of \(\gamma_m\) and \(\gamma_y\) before interpreting individual \(U_i\) estimates. If both posteriors are tightly concentrated away from zero, the individual estimates are genuinely data-informed. If one collapses onto its prior, the latent confounder is not recoverable from this data alone and you are effectively doing a **sensitivity analysis** rather than estimation. [tandfonline](https://www.tandfonline.com/doi/full/10.1080/10705511.2025.2503789)
-
-
-
-## Why This Matters Beyond the Simulation
-
-The framework developed here extends naturally in several directions. You can place an informative prior on \(\gamma_m\) or \(\gamma_y\) when domain knowledge constrains the direction or magnitude of the confounding — this is precisely the kind of sensitivity analysis that makes Bayesian latent-variable models more useful than frequentist alternatives that simply flag the problem without quantifying it.  You can also allow \(U\) to vary across groups in a hierarchical model, making it a **random effect** in the multilevel sense. And in non-Gaussian settings — binary mediators, count outcomes — the same latent-variable logic applies with appropriate likelihoods, though the posterior geometry becomes more demanding. The fundamental insight remains: unmeasured confounders leave detectable traces in the joint distribution of observed variables, and Stan's probabilistic programming framework is well suited to extracting those traces in a principled, fully Bayesian way. [pmc.ncbi.nlm.nih](https://pmc.ncbi.nlm.nih.gov/articles/PMC5999040/) [pmc.ncbi.nlm.nih](https://pmc.ncbi.nlm.nih.gov/articles/PMC8672797/)
+The practical implication is that you should always inspect the posteriors of \(\gamma_m\) and \(\gamma_y\) before interpreting individual \(U_i\) estimates. If both posteriors are tightly concentrated away from zero, the individual estimates are genuinely data-informed. If one collapses onto its prior, the latent confounder is not recoverable from this data alone and you are effectively doing a **sensitivity analysis** rather than estimation. [tandfonline](https://www.tandfonline.com/doi/full/10.1080/10705511.2025.2503789) It is also possible to place an informative prior on \(\gamma_m\) or \(\gamma_y\) when domain knowledge constrains the direction or magnitude of the confounding — this is precisely the kind of sensitivity analysis that makes Bayesian latent-variable models more useful than frequentist alternatives that simply flag the problem without quantifying it.  You can also allow \(U\) to vary across groups in a hierarchical model, making it a **random effect** in the multilevel sense. And in non-Gaussian settings — binary mediators, count outcomes — the same latent-variable logic applies with appropriate likelihoods, though the posterior geometry becomes more demanding. The fundamental insight remains: unmeasured confounders leave detectable traces in the joint distribution of observed variables, and Stan's probabilistic programming framework is well suited to extracting those traces in a principled, fully Bayesian way. [pmc.ncbi.nlm.nih](https://pmc.ncbi.nlm.nih.gov/articles/PMC5999040/) [pmc.ncbi.nlm.nih](https://pmc.ncbi.nlm.nih.gov/articles/PMC8672797/)

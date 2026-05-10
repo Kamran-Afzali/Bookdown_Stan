@@ -190,3 +190,4 @@ visualizing-latent-u-recovery
 identifiability-at-a-glance
 why-this-matters-beyond-the-simulation
 fitting-the-model-3
+identifiability-and-future-directions
