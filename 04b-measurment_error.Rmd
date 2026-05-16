@@ -1,8 +1,8 @@
 # Measurement Error as a Latent Variable
 
-In applied mental-health research, we often pretend our predictors are cleaner than they really are. A depression score, an anxiety checklist, a wearable-derived sleep measure, or a self-reported stress scale may all be noisy proxies for the underlying constructs we actually care about, and if we ignore that noise, regression coefficients can be attenuated, distorted, or even biased in direction depending on the error structure and covariate correlations.[^2][^1]
+In applied mental-health research, we often pretend our predictors are cleaner than they really are. A depression score, an anxiety checklist, a wearable-derived sleep measure, or a self-reported stress scale may all be noisy proxies for the underlying constructs we actually care about, and if we ignore that noise, regression coefficients can be attenuated, distorted, or even biased in direction depending on the error structure and covariate correlations.
 
-A Bayesian framework gives us a natural way to handle this: instead of treating the observed predictors as truth, we treat the **true latent predictors** as unknown quantities and estimate them jointly with the outcome model. This idea is standard in Bayesian measurement-error modeling, where the latent true value is handled as missing data and the observed measurement is modeled conditionally on it.[^1][^2]
+A Bayesian framework gives us a natural way to handle this: instead of treating the observed predictors as truth, we treat the **true latent predictors** as unknown quantities and estimate them jointly with the outcome model. This idea is standard in Bayesian measurement-error modeling, where the latent true value is handled as missing data and the observed measurement is modeled conditionally on it.
 
 ### Why this matters
 
@@ -20,7 +20,7 @@ But what we actually observe are noisy versions:
 - a clinician-rated stress impression
 - a smartphone-based sleep proxy
 
-When those proxies are noisy, plugging them directly into a regression can underestimate the effects of the true predictors, especially under classical error, and can also bias the coefficients of other correlated predictors in the model. That general bias mechanism is well documented in measurement-error models and in latent-predictor settings.[^2][^1]
+When those proxies are noisy, plugging them directly into a regression can underestimate the effects of the true predictors, especially under classical error, and can also bias the coefficients of other correlated predictors in the model. That general bias mechanism is well documented in measurement-error models and in latent-predictor settings.
 
 ## The formal setup
 
@@ -45,7 +45,7 @@ $$
 X_{ij} = \lambda_j \theta_{i, g(j)} + \nu_{ij}
 $$
 
-where $g(j)$ tells us which latent construct indicator $j$ belongs to, $\lambda_j$ is the loading, and $\nu_{ij}$ is measurement error. This follows the same broad logic as Bayesian latent-variable and measurement-error models that combine a structural model, a measurement model, and a prior model for the latent quantities.[^1][^2]
+where $g(j)$ tells us which latent construct indicator $j$ belongs to, $\lambda_j$ is the loading, and $\nu_{ij}$ is measurement error. This follows the same broad logic as Bayesian latent-variable and measurement-error models that combine a structural model, a measurement model, and a prior model for the latent quantities.
 
 A convenient prior for the latent predictors is multivariate normal:
 
@@ -53,7 +53,7 @@ $$
 \boldsymbol{\theta}_i \sim \mathcal{N}(\mathbf{0}, \Sigma_\theta)
 $$
 
-This allows the true mental-health constructs themselves to correlate, which is usually realistic because stress, sleep disruption, and isolation tend to co-occur. Modeling those latent predictors jointly is a standard extension in latent-predictor frameworks.[^2]
+This allows the true mental-health constructs themselves to correlate, which is usually realistic because stress, sleep disruption, and isolation tend to co-occur. Modeling those latent predictors jointly is a standard extension in latent-predictor frameworks.
 
 ## Scenario 1: Uncorrelated measurement error
 
@@ -90,7 +90,7 @@ ggdag(dag_uncorr, text = TRUE, use_labels = "name") +
   ggtitle("Mental Health Model with Uncorrelated Measurement Error")
 ```
 
-The interpretation is simple: each observed measure is noisy only because of its own instrument-specific error. Once we condition on the latent construct, one indicator tells us nothing further about another indicator. That conditional-independence structure is exactly the simplifying assumption used in many Bayesian measurement and latent-variable models.[^1][^2]
+The interpretation is simple: each observed measure is noisy only because of its own instrument-specific error. Once we condition on the latent construct, one indicator tells us nothing further about another indicator. That conditional-independence structure is exactly the simplifying assumption used in many Bayesian measurement and latent-variable models.
 
 ### Model equations
 
@@ -116,11 +116,11 @@ $$
 \text{lonely\_item}_i = \lambda_5 \theta_{i3} + \nu_{i5}, \quad \nu_{i5} \sim \mathcal{N}(0,\tau_5^2)
 $$
 
-This is the cleanest version to fit and the easiest to explain. It is often a good starting point when the main concern is attenuation from noisy predictors rather than residual dependence between instruments.[^2][^1]
+This is the cleanest version to fit and the easiest to explain. It is often a good starting point when the main concern is attenuation from noisy predictors rather than residual dependence between instruments.
 
 ## Scenario 2: Correlated measurement error
 
-Now suppose two sleep indicators share method artifacts. Maybe both the wearable and smartphone proxy are sensitive to device non-wear, irregular charging, or common preprocessing choices. Then even after conditioning on true sleep disruption, they may still covary.[^2]
+Now suppose two sleep indicators share method artifacts. Maybe both the wearable and smartphone proxy are sensitive to device non-wear, irregular charging, or common preprocessing choices. Then even after conditioning on true sleep disruption, they may still covary.
 
 The DAG for that case is:
 
@@ -151,7 +151,7 @@ ggdag(dag_corr, text = TRUE, use_labels = "name") +
   ggtitle("Mental Health Model with Correlated Measurement Error")
 ```
 
-A correlated-error formulation can also be written directly through a residual covariance matrix, but the DAG above is often more intuitive because it shows the shared error source explicitly as a latent method factor. That kind of extra dependence is not captured by the simple independent-error model and can otherwise be misread as stronger signal in the latent construct itself.[^2]
+A correlated-error formulation can also be written directly through a residual covariance matrix, but the DAG above is often more intuitive because it shows the shared error source explicitly as a latent method factor. That kind of extra dependence is not captured by the simple independent-error model and can otherwise be misread as stronger signal in the latent construct itself.
 
 ### Model equations
 
@@ -169,7 +169,7 @@ $$
 \eta_i \sim \mathcal{N}(0,1)
 $$
 
-where $\eta_i$ is a latent method factor that induces correlated error. This is often a more stable way to think about correlated measurement error than simply adding an unexplained covariance term, because it tells a story about why the indicators are tied together beyond the construct.[^2]
+where $\eta_i$ is a latent method factor that induces correlated error. This is often a more stable way to think about correlated measurement error than simply adding an unexplained covariance term, because it tells a story about why the indicators are tied together beyond the construct.
 
 ## Simulating a mental-health example
 
@@ -213,7 +213,7 @@ dat <- data.frame(
 )
 ```
 
-This data-generating setup mirrors the standard Bayesian measurement-error principle: the true predictors generate the observed noisy proxies, and the outcome depends on the true predictors rather than on the imperfect measurements themselves.[^1][^2]
+This data-generating setup mirrors the standard Bayesian measurement-error principle: the true predictors generate the observed noisy proxies, and the outcome depends on the true predictors rather than on the imperfect measurements themselves.
 
 ## Stan model: uncorrelated error
 
@@ -232,7 +232,7 @@ data {
 }
 parameters {
   real beta0;
-  vector[^3] beta;
+  vector beta;
   real<lower=0> sigma_y;
 
   vector[N] theta_stress;
@@ -251,8 +251,8 @@ parameters {
   real<lower=0> tau_sp;
   real<lower=0> tau_li;
 
-  cholesky_factor_corr[^3] L_Omega;
-  vector<lower=0>[^3] L_sigma;
+  cholesky_factor_corr L_Omega;
+  vector<lower=0> L_sigma;
 }
 transformed parameters {
   matrix[3,3] L_Sigma;
@@ -295,19 +295,19 @@ model {
   lonely_item ~ normal(lambda_li * theta_iso,    tau_li);
 
   y ~ normal(beta0
-             + beta[^1] * theta_stress
-             + beta[^2] * theta_sleep
-             + beta[^3] * theta_iso, sigma_y);
+             + beta * theta_stress
+             + beta * theta_sleep
+             + beta * theta_iso, sigma_y);
 }
 generated quantities {
-  corr_matrix[^3] Omega;
+  corr_matrix Omega;
   Omega = multiply_lower_tri_self_transpose(L_Omega);
 }
 "
 writeLines(stan_me_uncorr, "stan_me_uncorr.stan")
 ```
 
-This is a direct extension of the Stan measurement-error idea in which the true values are promoted from data to parameters and then linked to observed measurements through a measurement model.  It also borrows the latent-predictor logic of jointly estimating structural and measurement components rather than plugging in noisy scale scores as if they were exact.[^1][^2]
+This is a direct extension of the Stan measurement-error idea in which the true values are promoted from data to parameters and then linked to observed measurements through a measurement model.  It also borrows the latent-predictor logic of jointly estimating structural and measurement components rather than plugging in noisy scale scores as if they were exact.
 
 ### Fitting in R
 
@@ -342,7 +342,7 @@ print(fit_uncorr, pars = c(
 ))
 ```
 
-The posterior for `beta` now reflects uncertainty about the true stress, sleep, and isolation constructs instead of pretending the observed proxies are exact. That is the main inferential advantage of Bayesian measurement-error modeling.[^1]
+The posterior for `beta` now reflects uncertainty about the true stress, sleep, and isolation constructs instead of pretending the observed proxies are exact. That is the main inferential advantage of Bayesian measurement-error modeling.
 
 ## Stan model: correlated error
 
@@ -361,7 +361,7 @@ data {
 }
 parameters {
   real beta0;
-  vector[^3] beta;
+  vector beta;
   real<lower=0> sigma_y;
 
   vector[N] theta_stress;
@@ -384,8 +384,8 @@ parameters {
   real<lower=0> tau_sp;
   real<lower=0> tau_li;
 
-  cholesky_factor_corr[^3] L_Omega;
-  vector<lower=0>[^3] L_sigma;
+  cholesky_factor_corr L_Omega;
+  vector<lower=0> L_sigma;
 }
 transformed parameters {
   matrix[3,3] L_Sigma;
@@ -433,44 +433,41 @@ model {
   lonely_item ~ normal(lambda_li * theta_iso, tau_li);
 
   y ~ normal(beta0
-             + beta[^1] * theta_stress
-             + beta[^2] * theta_sleep
-             + beta[^3] * theta_iso, sigma_y);
+             + beta * theta_stress
+             + beta * theta_sleep
+             + beta * theta_iso, sigma_y);
 }
 "
 writeLines(stan_me_corr, "stan_me_corr.stan")
 ```
 
-This version is useful when two indicators share method variance that is not part of the underlying construct. In practice, that can happen with common platform artifacts, common rater tendencies, or repeated self-report formats.[^2]
+This version is useful when two indicators share method variance that is not part of the underlying construct. In practice, that can happen with common platform artifacts, common rater tendencies, or repeated self-report formats.
 
 ## How to think about the two scenarios
 
 ### Uncorrelated error
 
-Use this when the indicators are noisy, but their noise is plausibly instrument-specific. For example, a clinician impression and a short stress self-report may both imperfectly measure stress without sharing the same residual artifact.[^1][^2]
+Use this when the indicators are noisy, but their noise is plausibly instrument-specific. For example, a clinician impression and a short stress self-report may both imperfectly measure stress without sharing the same residual artifact.
 
 ### Correlated error
 
-Use this when two or more indicators share method bias. In mental-health data, common examples are two digital phenotyping variables from the same phone pipeline, two subscales from the same short questionnaire, or two ratings from the same informant.[^2]
+Use this when two or more indicators share method bias. In mental-health data, common examples are two digital phenotyping variables from the same phone pipeline, two subscales from the same short questionnaire, or two ratings from the same informant.
 
-Ignoring correlated measurement error can make a latent trait look stronger or cleaner than it really is, because the model may mistake method covariance for construct signal. That is one reason latent-variable measurement models often outperform simple plug-in scores when several noisy predictors are involved.[^2]
+Ignoring correlated measurement error can make a latent trait look stronger or cleaner than it really is, because the model may mistake method covariance for construct signal. That is one reason latent-variable measurement models often outperform simple plug-in scores when several noisy predictors are involved.
 
 ## What changes in interpretation
 
-Once the model is fit, the posterior means of the latent predictors are not “true scores” in some magical sense. They are **shrinkage estimates** that combine prior structure, cross-indicator information, and the outcome model, just as Bayesian latent-variable and measurement-error frameworks intend.[^1][^2]
+Once the model is fit, the posterior means of the latent predictors are not “true scores” in some magical sense. They are **shrinkage estimates** that combine prior structure, cross-indicator information, and the outcome model, just as Bayesian latent-variable and measurement-error frameworks intend.
 
-That is actually a feature, not a bug. A participant with a very high stress self-report but a moderate clinician score and modest depression outcome will not be forced into an extreme stress estimate; the posterior will compromise, and that compromise is exactly what principled uncertainty propagation is supposed to do.[^1]
+That is actually a feature, not a bug. A participant with a very high stress self-report but a moderate clinician score and modest depression outcome will not be forced into an extreme stress estimate; the posterior will compromise, and that compromise is exactly what principled uncertainty propagation is supposed to do.
 
 ## Practical cautions
 
-Identification matters here. In latent-variable models, scale constraints are needed, so in practice you usually either fix one loading per factor to 1 or fix the latent variance and estimate the loadings, because otherwise the model can rescale the latent variable and the loadings together.[^2]
+Identification matters here. In latent-variable models, scale constraints are needed, so in practice you usually either fix one loading per factor to 1 or fix the latent variance and estimate the loadings, because otherwise the model can rescale the latent variable and the loadings together.
 
-Also, do not oversell what the model learns. It estimates latent predictors under assumptions about normality, conditional independence, and measurement structure; it does not discover truth from noise without those assumptions. That is the same broader lesson seen across Bayesian latent-variable and measurement-error modeling.[^1][^2]
+Also, do not oversell what the model learns. It estimates latent predictors under assumptions about normality, conditional independence, and measurement structure; it does not discover truth from noise without those assumptions. That is the same broader lesson seen across Bayesian latent-variable and measurement-error modeling.
 
-If you want, I can turn this into a polished Quarto/R Markdown chapter with rendered DAGs, simulated results, posterior plots, and a short comparison against a naive regression that ignores measurement error.
-<span style="display:none">[^10][^11][^12][^13][^14][^15][^16][^17][^4][^5][^6][^7][^8][^9]</span>
 
-<div align="center">⁂</div>
 
 [^1]: https://easystats.github.io/bayestestR/articles/mediation.html
 
