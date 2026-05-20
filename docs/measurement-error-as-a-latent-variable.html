@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 11 Measurement Error as a Latent Variable | Stan Bookdown</title>
+  <meta name="description" content="Chapter 11 Measurement Error as a Latent Variable | Stan Bookdown" />
+  <meta name="generator" content="bookdown 0.43 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 11 Measurement Error as a Latent Variable | Stan Bookdown" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 11 Measurement Error as a Latent Variable | Stan Bookdown" />
+  
+  
+  
+
+<meta name="author" content="Kamran Afzali" />
+
+
+<meta name="date" content="2026-05-20" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="robust-t-regression.html"/>
+<link rel="next" href="bayesian-regularized-regression.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Stan</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Choosing the Right Bayesian Model</a></li>
+<li class="chapter" data-level="2" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html"><i class="fa fa-check"></i><b>2</b> Bayesian Modeling in R and Stan</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#what-is-stan"><i class="fa fa-check"></i><b>2.1</b> What is <code>stan</code>?</a></li>
+<li class="chapter" data-level="2.2" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#model-file"><i class="fa fa-check"></i><b>2.2</b> Model file</a></li>
+<li class="chapter" data-level="2.3" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#fit-the-model"><i class="fa fa-check"></i><b>2.3</b> Fit the model</a></li>
+<li class="chapter" data-level="2.4" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#mcmc-diagnostics"><i class="fa fa-check"></i><b>2.4</b> MCMC diagnostics</a></li>
+<li class="chapter" data-level="2.5" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#conclusions"><i class="fa fa-check"></i><b>2.5</b> Conclusions</a></li>
+<li class="chapter" data-level="2.6" data-path="bayesian-modeling-in-r-and-stan.html"><a href="bayesian-modeling-in-r-and-stan.html#references"><i class="fa fa-check"></i><b>2.6</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html"><i class="fa fa-check"></i><b>3</b> Bayesian Modeling in R and Stan: Categorical Predictors and Interactions</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#simulating-the-data"><i class="fa fa-check"></i><b>3.1</b> Simulating the Data</a></li>
+<li class="chapter" data-level="3.2" data-path="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#stan-model-file"><i class="fa fa-check"></i><b>3.2</b> Stan Model File</a></li>
+<li class="chapter" data-level="3.3" data-path="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#fitting-the-model"><i class="fa fa-check"></i><b>3.3</b> Fitting the Model</a></li>
+<li class="chapter" data-level="3.4" data-path="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#mcmc-diagnostics-1"><i class="fa fa-check"></i><b>3.4</b> MCMC Diagnostics</a></li>
+<li class="chapter" data-level="3.5" data-path="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#interpreting-interaction-effects"><i class="fa fa-check"></i><b>3.5</b> Interpreting Interaction Effects</a></li>
+<li class="chapter" data-level="3.6" data-path="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#comparing-with-rstanarm"><i class="fa fa-check"></i><b>3.6</b> Comparing with <code>rstanarm</code></a></li>
+<li class="chapter" data-level="3.7" data-path="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#conclusions-1"><i class="fa fa-check"></i><b>3.7</b> Conclusions</a></li>
+<li class="chapter" data-level="3.8" data-path="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html"><a href="bayesian-modeling-in-r-and-stan-categorical-predictors-and-interactions.html#references-1"><i class="fa fa-check"></i><b>3.8</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="bayesian-modeling-in-r-and-stan-mediation-analysis.html"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html"><i class="fa fa-check"></i><b>4</b> Bayesian Modeling in R and Stan: Mediation Analysis</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="bayesian-modeling-in-r-and-stan-mediation-analysis.html"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#the-mediation-setup"><i class="fa fa-check"></i><b>4.1</b> The Mediation Setup</a></li>
+<li class="chapter" data-level="4.2" data-path="bayesian-modeling-in-r-and-stan-mediation-analysis.html"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#simulating-the-data-1"><i class="fa fa-check"></i><b>4.2</b> Simulating the Data</a></li>
+<li class="chapter" data-level="4.3" data-path="bayesian-modeling-in-r-and-stan-mediation-analysis.html"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#the-stan-model"><i class="fa fa-check"></i><b>4.3</b> The Stan Model</a></li>
+<li class="chapter" data-level="4.4" data-path="bayesian-modeling-in-r-and-stan-mediation-analysis.html"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#fitting-the-model-1"><i class="fa fa-check"></i><b>4.4</b> Fitting the Model</a></li>
+<li class="chapter" data-level="4.5" data-path="bayesian-modeling-in-r-and-stan-mediation-analysis.html"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#interpreting-effects"><i class="fa fa-check"></i><b>4.5</b> Interpreting Effects</a></li>
+<li class="chapter" data-level="4.6" data-path="bayesian-modeling-in-r-and-stan-mediation-analysis.html"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#posterior-effect-estimates"><i class="fa fa-check"></i><b>4.6</b> Posterior Effect Estimates</a></li>
+<li class="chapter" data-level="4.7" data-path="bayesian-modeling-in-r-and-stan-mediation-analysis.html"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#posterior-diagnostics"><i class="fa fa-check"></i><b>4.7</b> Posterior Diagnostics</a></li>
+<li class="chapter" data-level="4.8" data-path="bayesian-modeling-in-r-and-stan-mediation-analysis.html"><a href="bayesian-modeling-in-r-and-stan-mediation-analysis.html#why-bayesian-mediation-helps"><i class="fa fa-check"></i><b>4.8</b> Why Bayesian Mediation Helps</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html"><i class="fa fa-check"></i><b>5</b> Bayesian Modeling in R and Stan: Mediation with an Unobserved Confounder</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#the-mediation-setup-1"><i class="fa fa-check"></i><b>5.1</b> The Mediation Setup</a></li>
+<li class="chapter" data-level="5.2" data-path="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#introducing-the-unobserved-confounder"><i class="fa fa-check"></i><b>5.2</b> Introducing the Unobserved Confounder</a></li>
+<li class="chapter" data-level="5.3" data-path="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#the-dag"><i class="fa fa-check"></i><b>5.3</b> The DAG</a></li>
+<li class="chapter" data-level="5.4" data-path="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#simulating-the-data-2"><i class="fa fa-check"></i><b>5.4</b> Simulating the Data</a></li>
+<li class="chapter" data-level="5.5" data-path="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#the-stan-model-1"><i class="fa fa-check"></i><b>5.5</b> The Stan Model</a></li>
+<li class="chapter" data-level="5.6" data-path="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#fitting-the-model-2"><i class="fa fa-check"></i><b>5.6</b> Fitting the Model</a></li>
+<li class="chapter" data-level="5.7" data-path="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#extracting-and-evaluating-individual-u-estimates"><i class="fa fa-check"></i><b>5.7</b> Extracting and Evaluating Individual <span class="math inline">\(U\)</span> Estimates</a></li>
+<li class="chapter" data-level="5.8" data-path="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#visualizing-latent-u-recovery"><i class="fa fa-check"></i><b>5.8</b> Visualizing Latent <span class="math inline">\(U\)</span> Recovery</a></li>
+<li class="chapter" data-level="5.9" data-path="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html"><a href="bayesian-modeling-in-r-and-stan-mediation-with-an-unobserved-confounder.html#identifiability-and-future-directions"><i class="fa fa-check"></i><b>5.9</b> Identifiability and future directions</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="bayesian-regression-models-for-non-normal-data.html"><a href="bayesian-regression-models-for-non-normal-data.html"><i class="fa fa-check"></i><b>6</b> Bayesian Regression Models for Non-Normal Data</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="bayesian-regression-models-for-non-normal-data.html"><a href="bayesian-regression-models-for-non-normal-data.html#logistic-regression"><i class="fa fa-check"></i><b>6.1</b> Logistic Regression</a></li>
+<li class="chapter" data-level="6.2" data-path="bayesian-regression-models-for-non-normal-data.html"><a href="bayesian-regression-models-for-non-normal-data.html#negative-binomial"><i class="fa fa-check"></i><b>6.2</b> Negative Binomial</a></li>
+<li class="chapter" data-level="6.3" data-path="bayesian-regression-models-for-non-normal-data.html"><a href="bayesian-regression-models-for-non-normal-data.html#conclusion"><i class="fa fa-check"></i><b>6.3</b> Conclusion</a></li>
+<li class="chapter" data-level="6.4" data-path="bayesian-regression-models-for-non-normal-data.html"><a href="bayesian-regression-models-for-non-normal-data.html#references-2"><i class="fa fa-check"></i><b>6.4</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="bayesian-zero-inflated-count-models-in-stan.html"><a href="bayesian-zero-inflated-count-models-in-stan.html"><i class="fa fa-check"></i><b>7</b> Bayesian Zero-Inflated Count Models in Stan</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="bayesian-zero-inflated-count-models-in-stan.html"><a href="bayesian-zero-inflated-count-models-in-stan.html#why-standard-count-models-fall-short"><i class="fa fa-check"></i><b>7.1</b> Why Standard Count Models Fall Short</a></li>
+<li class="chapter" data-level="7.2" data-path="bayesian-zero-inflated-count-models-in-stan.html"><a href="bayesian-zero-inflated-count-models-in-stan.html#the-zero-inflation-framework"><i class="fa fa-check"></i><b>7.2</b> The Zero-Inflation Framework</a></li>
+<li class="chapter" data-level="7.3" data-path="bayesian-zero-inflated-count-models-in-stan.html"><a href="bayesian-zero-inflated-count-models-in-stan.html#simulating-zero-inflated-data-in-r"><i class="fa fa-check"></i><b>7.3</b> Simulating Zero-Inflated Data in R</a></li>
+<li class="chapter" data-level="7.4" data-path="bayesian-zero-inflated-count-models-in-stan.html"><a href="bayesian-zero-inflated-count-models-in-stan.html#stan-model-zero-inflated-poisson"><i class="fa fa-check"></i><b>7.4</b> Stan Model: Zero-Inflated Poisson</a></li>
+<li class="chapter" data-level="7.5" data-path="bayesian-zero-inflated-count-models-in-stan.html"><a href="bayesian-zero-inflated-count-models-in-stan.html#stan-model-zero-inflated-negative-binomial"><i class="fa fa-check"></i><b>7.5</b> Stan Model: Zero-Inflated Negative Binomial</a></li>
+<li class="chapter" data-level="7.6" data-path="bayesian-zero-inflated-count-models-in-stan.html"><a href="bayesian-zero-inflated-count-models-in-stan.html#fitting-the-zinb-model-in-r"><i class="fa fa-check"></i><b>7.6</b> Fitting the ZINB Model in R</a></li>
+<li class="chapter" data-level="7.7" data-path="bayesian-zero-inflated-count-models-in-stan.html"><a href="bayesian-zero-inflated-count-models-in-stan.html#reading-the-output"><i class="fa fa-check"></i><b>7.7</b> Reading the Output</a></li>
+<li class="chapter" data-level="7.8" data-path="bayesian-zero-inflated-count-models-in-stan.html"><a href="bayesian-zero-inflated-count-models-in-stan.html#model-comparison-zip-vs.-zinb-vs.-nb"><i class="fa fa-check"></i><b>7.8</b> Model Comparison: ZIP vs. ZINB vs. NB</a></li>
+<li class="chapter" data-level="7.9" data-path="bayesian-zero-inflated-count-models-in-stan.html"><a href="bayesian-zero-inflated-count-models-in-stan.html#practical-guidance-and-caveats"><i class="fa fa-check"></i><b>7.9</b> Practical Guidance and Caveats</a></li>
+<li class="chapter" data-level="7.10" data-path="bayesian-zero-inflated-count-models-in-stan.html"><a href="bayesian-zero-inflated-count-models-in-stan.html#conclusion-1"><i class="fa fa-check"></i><b>7.10</b> Conclusion</a></li>
+<li class="chapter" data-level="7.11" data-path="bayesian-zero-inflated-count-models-in-stan.html"><a href="bayesian-zero-inflated-count-models-in-stan.html#references-3"><i class="fa fa-check"></i><b>7.11</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html"><i class="fa fa-check"></i><b>8</b> Bayesian Regression for Bounded and Skewed Continuous Outcomes in Stan</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#beta-regression-the-proportion-problem"><i class="fa fa-check"></i><b>8.1</b> Beta Regression: The Proportion Problem</a></li>
+<li class="chapter" data-level="8.2" data-path="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#stan-implementation-beta-regression"><i class="fa fa-check"></i><b>8.2</b> Stan Implementation: Beta Regression</a></li>
+<li class="chapter" data-level="8.3" data-path="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#simulating-beta-distributed-data-in-r"><i class="fa fa-check"></i><b>8.3</b> Simulating Beta-Distributed Data in R</a></li>
+<li class="chapter" data-level="8.4" data-path="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#gamma-regression-strictly-positive-right-skewed-data"><i class="fa fa-check"></i><b>8.4</b> Gamma Regression: Strictly Positive, Right-Skewed Data</a></li>
+<li class="chapter" data-level="8.5" data-path="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#log-normal-a-different-philosophical-commitment"><i class="fa fa-check"></i><b>8.5</b> Log-Normal: A Different Philosophical Commitment</a></li>
+<li class="chapter" data-level="8.6" data-path="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#choosing-between-gamma-and-log-normal"><i class="fa fa-check"></i><b>8.6</b> Choosing Between Gamma and Log-Normal</a></li>
+<li class="chapter" data-level="8.7" data-path="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#posterior-predictive-checking-what-to-look-for"><i class="fa fa-check"></i><b>8.7</b> Posterior Predictive Checking: What to Look For</a></li>
+<li class="chapter" data-level="8.8" data-path="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#practical-guidance"><i class="fa fa-check"></i><b>8.8</b> Practical Guidance</a></li>
+<li class="chapter" data-level="8.9" data-path="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html"><a href="bayesian-regression-for-bounded-and-skewed-continuous-outcomes-in-stan.html#references-4"><i class="fa fa-check"></i><b>8.9</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="bayesian-regression-models-for-categorical-outcomes.html"><a href="bayesian-regression-models-for-categorical-outcomes.html"><i class="fa fa-check"></i><b>9</b> Bayesian Regression Models for Categorical Outcomes</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="bayesian-regression-models-for-categorical-outcomes.html"><a href="bayesian-regression-models-for-categorical-outcomes.html#ordinal-regression"><i class="fa fa-check"></i><b>9.1</b> Ordinal Regression</a>
+<ul>
+<li class="chapter" data-level="9.1.1" data-path="bayesian-regression-models-for-categorical-outcomes.html"><a href="bayesian-regression-models-for-categorical-outcomes.html#simulating-ordinal-data"><i class="fa fa-check"></i><b>9.1.1</b> Simulating Ordinal Data</a></li>
+<li class="chapter" data-level="9.1.2" data-path="bayesian-regression-models-for-categorical-outcomes.html"><a href="bayesian-regression-models-for-categorical-outcomes.html#stan-model-single-predictor"><i class="fa fa-check"></i><b>9.1.2</b> Stan Model — Single Predictor</a></li>
+<li class="chapter" data-level="9.1.3" data-path="bayesian-regression-models-for-categorical-outcomes.html"><a href="bayesian-regression-models-for-categorical-outcomes.html#extending-to-multiple-predictors"><i class="fa fa-check"></i><b>9.1.3</b> Extending to Multiple Predictors</a></li>
+</ul></li>
+<li class="chapter" data-level="9.2" data-path="bayesian-regression-models-for-categorical-outcomes.html"><a href="bayesian-regression-models-for-categorical-outcomes.html#categorical-multinomial-regression"><i class="fa fa-check"></i><b>9.2</b> Categorical / Multinomial Regression</a>
+<ul>
+<li class="chapter" data-level="9.2.1" data-path="bayesian-regression-models-for-categorical-outcomes.html"><a href="bayesian-regression-models-for-categorical-outcomes.html#simulating-multinomial-data"><i class="fa fa-check"></i><b>9.2.1</b> Simulating Multinomial Data</a></li>
+<li class="chapter" data-level="9.2.2" data-path="bayesian-regression-models-for-categorical-outcomes.html"><a href="bayesian-regression-models-for-categorical-outcomes.html#stan-model-single-predictor-1"><i class="fa fa-check"></i><b>9.2.2</b> Stan Model — Single Predictor</a></li>
+<li class="chapter" data-level="9.2.3" data-path="bayesian-regression-models-for-categorical-outcomes.html"><a href="bayesian-regression-models-for-categorical-outcomes.html#extending-to-multiple-predictors-1"><i class="fa fa-check"></i><b>9.2.3</b> Extending to Multiple Predictors</a></li>
+</ul></li>
+<li class="chapter" data-level="9.3" data-path="bayesian-regression-models-for-categorical-outcomes.html"><a href="bayesian-regression-models-for-categorical-outcomes.html#model-checking"><i class="fa fa-check"></i><b>9.3</b> Model Checking</a></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="robust-t-regression.html"><a href="robust-t-regression.html"><i class="fa fa-check"></i><b>10</b> Robust t-regression</a>
+<ul>
+<li class="chapter" data-level="10.1" data-path="robust-t-regression.html"><a href="robust-t-regression.html#introduction"><i class="fa fa-check"></i><b>10.1</b> Introduction</a></li>
+<li class="chapter" data-level="10.2" data-path="robust-t-regression.html"><a href="robust-t-regression.html#concepts-and-code"><i class="fa fa-check"></i><b>10.2</b> Concepts and code</a></li>
+<li class="chapter" data-level="10.3" data-path="robust-t-regression.html"><a href="robust-t-regression.html#conclusion-2"><i class="fa fa-check"></i><b>10.3</b> Conclusion</a></li>
+<li class="chapter" data-level="10.4" data-path="robust-t-regression.html"><a href="robust-t-regression.html#references-5"><i class="fa fa-check"></i><b>10.4</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="measurement-error-as-a-latent-variable.html"><a href="measurement-error-as-a-latent-variable.html"><i class="fa fa-check"></i><b>11</b> Measurement Error as a Latent Variable</a>
+<ul>
+<li class="chapter" data-level="11.1" data-path="measurement-error-as-a-latent-variable.html"><a href="measurement-error-as-a-latent-variable.html#why-this-matters"><i class="fa fa-check"></i><b>11.1</b> Why This Matters</a></li>
+<li class="chapter" data-level="11.2" data-path="measurement-error-as-a-latent-variable.html"><a href="measurement-error-as-a-latent-variable.html#the-formal-setup"><i class="fa fa-check"></i><b>11.2</b> The Formal Setup</a></li>
+<li class="chapter" data-level="11.3" data-path="measurement-error-as-a-latent-variable.html"><a href="measurement-error-as-a-latent-variable.html#scenario-1-uncorrelated-measurement-error"><i class="fa fa-check"></i><b>11.3</b> Scenario 1: Uncorrelated Measurement Error</a>
+<ul>
+<li class="chapter" data-level="11.3.1" data-path="measurement-error-as-a-latent-variable.html"><a href="measurement-error-as-a-latent-variable.html#measurement-equations"><i class="fa fa-check"></i><b>11.3.1</b> Measurement Equations</a></li>
+</ul></li>
+<li class="chapter" data-level="11.4" data-path="measurement-error-as-a-latent-variable.html"><a href="measurement-error-as-a-latent-variable.html#scenario-2-correlated-measurement-error"><i class="fa fa-check"></i><b>11.4</b> Scenario 2: Correlated Measurement Error</a>
+<ul>
+<li class="chapter" data-level="11.4.1" data-path="measurement-error-as-a-latent-variable.html"><a href="measurement-error-as-a-latent-variable.html#measurement-equations-1"><i class="fa fa-check"></i><b>11.4.1</b> Measurement Equations</a></li>
+</ul></li>
+<li class="chapter" data-level="11.5" data-path="measurement-error-as-a-latent-variable.html"><a href="measurement-error-as-a-latent-variable.html#simulating-a-mental-health-example"><i class="fa fa-check"></i><b>11.5</b> Simulating a Mental-Health Example</a></li>
+<li class="chapter" data-level="11.6" data-path="measurement-error-as-a-latent-variable.html"><a href="measurement-error-as-a-latent-variable.html#stan-model-uncorrelated-error"><i class="fa fa-check"></i><b>11.6</b> Stan Model: Uncorrelated Error</a>
+<ul>
+<li class="chapter" data-level="11.6.1" data-path="measurement-error-as-a-latent-variable.html"><a href="measurement-error-as-a-latent-variable.html#fitting-in-r"><i class="fa fa-check"></i><b>11.6.1</b> Fitting in R</a></li>
+</ul></li>
+<li class="chapter" data-level="11.7" data-path="measurement-error-as-a-latent-variable.html"><a href="measurement-error-as-a-latent-variable.html#stan-model-correlated-error"><i class="fa fa-check"></i><b>11.7</b> Stan Model: Correlated Error</a></li>
+<li class="chapter" data-level="11.8" data-path="measurement-error-as-a-latent-variable.html"><a href="measurement-error-as-a-latent-variable.html#choosing-between-the-two-scenarios"><i class="fa fa-check"></i><b>11.8</b> Choosing Between the Two Scenarios</a></li>
+<li class="chapter" data-level="11.9" data-path="measurement-error-as-a-latent-variable.html"><a href="measurement-error-as-a-latent-variable.html#what-changes-in-interpretation"><i class="fa fa-check"></i><b>11.9</b> What Changes in Interpretation</a></li>
+<li class="chapter" data-level="11.10" data-path="measurement-error-as-a-latent-variable.html"><a href="measurement-error-as-a-latent-variable.html#practical-cautions"><i class="fa fa-check"></i><b>11.10</b> Practical Cautions</a></li>
+</ul></li>
+<li class="chapter" data-level="12" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html"><i class="fa fa-check"></i><b>12</b> Bayesian Regularized Regression</a>
+<ul>
+<li class="chapter" data-level="12.1" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#introduction-1"><i class="fa fa-check"></i><b>12.1</b> Introduction</a></li>
+<li class="chapter" data-level="12.2" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#ridge-regression-and-gaussian-priors"><i class="fa fa-check"></i><b>12.2</b> Ridge Regression and Gaussian Priors</a></li>
+<li class="chapter" data-level="12.3" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#lasso-regression-and-laplace-priors"><i class="fa fa-check"></i><b>12.3</b> LASSO Regression and Laplace Priors</a></li>
+<li class="chapter" data-level="12.4" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#hierarchical-shrinkage-and-adaptive-priors"><i class="fa fa-check"></i><b>12.4</b> Hierarchical Shrinkage and Adaptive Priors</a></li>
+<li class="chapter" data-level="12.5" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#implementation"><i class="fa fa-check"></i><b>12.5</b> Implementation</a>
+<ul>
+<li class="chapter" data-level="12.5.1" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#bayesian-ridge-regression"><i class="fa fa-check"></i><b>12.5.1</b> Bayesian Ridge Regression</a></li>
+<li class="chapter" data-level="12.5.2" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#bayesian-lasso-regression"><i class="fa fa-check"></i><b>12.5.2</b> Bayesian LASSO Regression</a></li>
+<li class="chapter" data-level="12.5.3" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#hierarchical-shrinkage-horseshoe-prior"><i class="fa fa-check"></i><b>12.5.3</b> Hierarchical Shrinkage (Horseshoe Prior)</a></li>
+</ul></li>
+<li class="chapter" data-level="12.6" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#empirical-comparison-and-model-evaluation"><i class="fa fa-check"></i><b>12.6</b> Empirical Comparison and Model Evaluation</a></li>
+<li class="chapter" data-level="12.7" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#understanding-posterior-behavior"><i class="fa fa-check"></i><b>12.7</b> Understanding Posterior Behavior</a></li>
+<li class="chapter" data-level="12.8" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#choosing-among-regularization-methods"><i class="fa fa-check"></i><b>12.8</b> Choosing Among Regularization Methods</a></li>
+<li class="chapter" data-level="12.9" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#conclusion-3"><i class="fa fa-check"></i><b>12.9</b> Conclusion</a></li>
+<li class="chapter" data-level="12.10" data-path="bayesian-regularized-regression.html"><a href="bayesian-regularized-regression.html#references-6"><i class="fa fa-check"></i><b>12.10</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="13" data-path="bayesian-quantile-regression.html"><a href="bayesian-quantile-regression.html"><i class="fa fa-check"></i><b>13</b> Bayesian Quantile Regression</a>
+<ul>
+<li class="chapter" data-level="13.1" data-path="bayesian-quantile-regression.html"><a href="bayesian-quantile-regression.html#introduction-2"><i class="fa fa-check"></i><b>13.1</b> Introduction</a></li>
+<li class="chapter" data-level="13.2" data-path="bayesian-quantile-regression.html"><a href="bayesian-quantile-regression.html#model-specification"><i class="fa fa-check"></i><b>13.2</b> Model Specification</a>
+<ul>
+<li class="chapter" data-level="13.2.1" data-path="bayesian-quantile-regression.html"><a href="bayesian-quantile-regression.html#using-bayesqr-package"><i class="fa fa-check"></i><b>13.2.1</b> Using bayesQR package</a></li>
+<li class="chapter" data-level="13.2.2" data-path="bayesian-quantile-regression.html"><a href="bayesian-quantile-regression.html#using-brms-package"><i class="fa fa-check"></i><b>13.2.2</b> Using brms package</a></li>
+<li class="chapter" data-level="13.2.3" data-path="bayesian-quantile-regression.html"><a href="bayesian-quantile-regression.html#backend-stan-model"><i class="fa fa-check"></i><b>13.2.3</b> Backend stan model</a></li>
+</ul></li>
+<li class="chapter" data-level="13.3" data-path="bayesian-quantile-regression.html"><a href="bayesian-quantile-regression.html#conclusion-4"><i class="fa fa-check"></i><b>13.3</b> Conclusion</a></li>
+<li class="chapter" data-level="13.4" data-path="bayesian-quantile-regression.html"><a href="bayesian-quantile-regression.html#references-7"><i class="fa fa-check"></i><b>13.4</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="14" data-path="bayesian-multilevel-regression-in-stan.html"><a href="bayesian-multilevel-regression-in-stan.html"><i class="fa fa-check"></i><b>14</b> Bayesian Multilevel Regression in Stan</a>
+<ul>
+<li class="chapter" data-level="14.1" data-path="bayesian-multilevel-regression-in-stan.html"><a href="bayesian-multilevel-regression-in-stan.html#introduction-3"><i class="fa fa-check"></i><b>14.1</b> Introduction</a></li>
+<li class="chapter" data-level="14.2" data-path="bayesian-multilevel-regression-in-stan.html"><a href="bayesian-multilevel-regression-in-stan.html#implementation-in-r"><i class="fa fa-check"></i><b>14.2</b> Implementation in R</a>
+<ul>
+<li class="chapter" data-level="14.2.1" data-path="bayesian-multilevel-regression-in-stan.html"><a href="bayesian-multilevel-regression-in-stan.html#random-intercepts-model-modeling-baseline-differences"><i class="fa fa-check"></i><b>14.2.1</b> Random Intercepts Model: Modeling Baseline Differences</a></li>
+<li class="chapter" data-level="14.2.2" data-path="bayesian-multilevel-regression-in-stan.html"><a href="bayesian-multilevel-regression-in-stan.html#random-slopes-model-capturing-varying-effects"><i class="fa fa-check"></i><b>14.2.2</b> Random Slopes Model: Capturing Varying Effects</a></li>
+<li class="chapter" data-level="14.2.3" data-path="bayesian-multilevel-regression-in-stan.html"><a href="bayesian-multilevel-regression-in-stan.html#model-comparison-and-visualization"><i class="fa fa-check"></i><b>14.2.3</b> Model Comparison and Visualization</a></li>
+</ul></li>
+<li class="chapter" data-level="14.3" data-path="bayesian-multilevel-regression-in-stan.html"><a href="bayesian-multilevel-regression-in-stan.html#visualization-and-interpretation"><i class="fa fa-check"></i><b>14.3</b> Visualization and Interpretation</a></li>
+<li class="chapter" data-level="14.4" data-path="bayesian-multilevel-regression-in-stan.html"><a href="bayesian-multilevel-regression-in-stan.html#conclusion-5"><i class="fa fa-check"></i><b>14.4</b> Conclusion</a></li>
+<li class="chapter" data-level="14.5" data-path="bayesian-multilevel-regression-in-stan.html"><a href="bayesian-multilevel-regression-in-stan.html#references-8"><i class="fa fa-check"></i><b>14.5</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="15" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html"><i class="fa fa-check"></i><b>15</b> Gaussian Process Regression (GPR)</a>
+<ul>
+<li class="chapter" data-level="15.1" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#introduction-4"><i class="fa fa-check"></i><b>15.1</b> Introduction</a></li>
+<li class="chapter" data-level="15.2" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#challenges"><i class="fa fa-check"></i><b>15.2</b> Challenges</a></li>
+<li class="chapter" data-level="15.3" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#gpfit-package"><i class="fa fa-check"></i><b>15.3</b> GPfit package</a></li>
+<li class="chapter" data-level="15.4" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#bayesian-gpr"><i class="fa fa-check"></i><b>15.4</b> Bayesian GPR</a></li>
+<li class="chapter" data-level="15.5" data-path="gaussian-process-regression-gpr.html"><a href="gaussian-process-regression-gpr.html#references-9"><i class="fa fa-check"></i><b>15.5</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="16" data-path="bayesian-gaussian-mixture-models.html"><a href="bayesian-gaussian-mixture-models.html"><i class="fa fa-check"></i><b>16</b> Bayesian Gaussian Mixture Models</a>
+<ul>
+<li class="chapter" data-level="16.1" data-path="bayesian-gaussian-mixture-models.html"><a href="bayesian-gaussian-mixture-models.html#single-varaible-example"><i class="fa fa-check"></i><b>16.1</b> Single varaible example</a></li>
+<li class="chapter" data-level="16.2" data-path="bayesian-gaussian-mixture-models.html"><a href="bayesian-gaussian-mixture-models.html#example-with-multiple-variable"><i class="fa fa-check"></i><b>16.2</b> Example with multiple variable</a></li>
+<li class="chapter" data-level="16.3" data-path="bayesian-gaussian-mixture-models.html"><a href="bayesian-gaussian-mixture-models.html#conclusion-6"><i class="fa fa-check"></i><b>16.3</b> Conclusion</a></li>
+<li class="chapter" data-level="16.4" data-path="bayesian-gaussian-mixture-models.html"><a href="bayesian-gaussian-mixture-models.html#references-10"><i class="fa fa-check"></i><b>16.4</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="17" data-path="bayesian-canonical-correlation-analysis-in-stan.html"><a href="bayesian-canonical-correlation-analysis-in-stan.html"><i class="fa fa-check"></i><b>17</b> Bayesian Canonical Correlation Analysis in Stan</a>
+<ul>
+<li class="chapter" data-level="17.1" data-path="bayesian-canonical-correlation-analysis-in-stan.html"><a href="bayesian-canonical-correlation-analysis-in-stan.html#introduction-5"><i class="fa fa-check"></i><b>17.1</b> Introduction</a>
+<ul>
+<li class="chapter" data-level="17.1.1" data-path="bayesian-canonical-correlation-analysis-in-stan.html"><a href="bayesian-canonical-correlation-analysis-in-stan.html#canonical-correlation-analysis"><i class="fa fa-check"></i><b>17.1.1</b> Canonical Correlation Analysis</a></li>
+<li class="chapter" data-level="17.1.2" data-path="bayesian-canonical-correlation-analysis-in-stan.html"><a href="bayesian-canonical-correlation-analysis-in-stan.html#stan-model"><i class="fa fa-check"></i><b>17.1.2</b> Stan Model</a></li>
+<li class="chapter" data-level="17.1.3" data-path="bayesian-canonical-correlation-analysis-in-stan.html"><a href="bayesian-canonical-correlation-analysis-in-stan.html#model-validation-on-test-set"><i class="fa fa-check"></i><b>17.1.3</b> Model validation on test set</a></li>
+</ul></li>
+<li class="chapter" data-level="17.2" data-path="bayesian-canonical-correlation-analysis-in-stan.html"><a href="bayesian-canonical-correlation-analysis-in-stan.html#conclusion-7"><i class="fa fa-check"></i><b>17.2</b> Conclusion</a></li>
+<li class="chapter" data-level="17.3" data-path="bayesian-canonical-correlation-analysis-in-stan.html"><a href="bayesian-canonical-correlation-analysis-in-stan.html#references-11"><i class="fa fa-check"></i><b>17.3</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="18" data-path="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><i class="fa fa-check"></i><b>18</b> Bayesian Seasonal Decomposition in Stan and RStan</a>
+<ul>
+<li class="chapter" data-level="18.1" data-path="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#simulating-seasonal-time-series-data"><i class="fa fa-check"></i><b>18.1</b> Simulating Seasonal Time Series Data*</a></li>
+<li class="chapter" data-level="18.2" data-path="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#bayesian-seasonal-decomposition-model-in-stan"><i class="fa fa-check"></i><b>18.2</b> Bayesian Seasonal Decomposition Model in Stan</a></li>
+<li class="chapter" data-level="18.3" data-path="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#fitting-the-model-in-r"><i class="fa fa-check"></i><b>18.3</b> Fitting the Model in R</a></li>
+<li class="chapter" data-level="18.4" data-path="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#extracting-and-visualizing-components"><i class="fa fa-check"></i><b>18.4</b> Extracting and Visualizing Components</a></li>
+<li class="chapter" data-level="18.5" data-path="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#extensions-and-applications"><i class="fa fa-check"></i><b>18.5</b> Extensions and Applications</a></li>
+<li class="chapter" data-level="18.6" data-path="bayesian-seasonal-decomposition-in-stan-and-rstan.html"><a href="bayesian-seasonal-decomposition-in-stan-and-rstan.html#conclusion-8"><i class="fa fa-check"></i><b>18.6</b> Conclusion</a></li>
+</ul></li>
+<li class="chapter" data-level="19" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><i class="fa fa-check"></i><b>19</b> Bayesian Exponential Smoothing and Holt-Winters Models in Stan and RStan</a>
+<ul>
+<li class="chapter" data-level="19.1" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#bayesian-simple-exponential-smoothing-ses"><i class="fa fa-check"></i><b>19.1</b> Bayesian Simple Exponential Smoothing (SES)</a>
+<ul>
+<li class="chapter" data-level="19.1.1" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#stan-model-1"><i class="fa fa-check"></i><b>19.1.1</b> Stan Model</a></li>
+<li class="chapter" data-level="19.1.2" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#fitting-in-r-1"><i class="fa fa-check"></i><b>19.1.2</b> Fitting in R</a></li>
+<li class="chapter" data-level="19.1.3" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#visualization"><i class="fa fa-check"></i><b>19.1.3</b> Visualization</a></li>
+</ul></li>
+<li class="chapter" data-level="19.2" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#bayesian-holt-winters-models"><i class="fa fa-check"></i><b>19.2</b> Bayesian Holt-Winters Models</a>
+<ul>
+<li class="chapter" data-level="19.2.1" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#without-seasonality-additive-trend"><i class="fa fa-check"></i><b>19.2.1</b> Without Seasonality (Additive Trend)</a></li>
+<li class="chapter" data-level="19.2.2" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#stan-model-2"><i class="fa fa-check"></i><b>19.2.2</b> Stan Model</a></li>
+<li class="chapter" data-level="19.2.3" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#visualization-1"><i class="fa fa-check"></i><b>19.2.3</b> Visualization</a></li>
+<li class="chapter" data-level="19.2.4" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#with-seasonality-additive-seasonal-component"><i class="fa fa-check"></i><b>19.2.4</b> With Seasonality (Additive Seasonal Component)</a></li>
+<li class="chapter" data-level="19.2.5" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#fit"><i class="fa fa-check"></i><b>19.2.5</b> Fit</a></li>
+<li class="chapter" data-level="19.2.6" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#visualization-2"><i class="fa fa-check"></i><b>19.2.6</b> Visualization</a></li>
+</ul></li>
+<li class="chapter" data-level="19.3" data-path="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html"><a href="bayesian-exponential-smoothing-and-holt-winters-models-in-stan-and-rstan.html#conclusion-9"><i class="fa fa-check"></i><b>19.3</b> Conclusion</a></li>
+</ul></li>
+<li class="chapter" data-level="20" data-path="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html"><a href="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html"><i class="fa fa-check"></i><b>20</b> Bayesian AR, ARMA, and ARIMA Models in Stan and RStan</a>
+<ul>
+<li class="chapter" data-level="20.1" data-path="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html"><a href="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html#bayesian-ar1-model"><i class="fa fa-check"></i><b>20.1</b> Bayesian AR(1) Model</a></li>
+<li class="chapter" data-level="20.2" data-path="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html"><a href="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html#bayesian-arma11-model"><i class="fa fa-check"></i><b>20.2</b> Bayesian ARMA(1,1) Model</a></li>
+<li class="chapter" data-level="20.3" data-path="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html"><a href="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html#bayesian-arima111-model"><i class="fa fa-check"></i><b>20.3</b> Bayesian ARIMA(1,1,1) Model</a></li>
+<li class="chapter" data-level="20.4" data-path="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html"><a href="bayesian-ar-arma-and-arima-models-in-stan-and-rstan.html#conclusion-10"><i class="fa fa-check"></i><b>20.4</b> Conclusion</a></li>
+</ul></li>
+<li class="chapter" data-level="21" data-path="bayesian-structural-time-series-models.html"><a href="bayesian-structural-time-series-models.html"><i class="fa fa-check"></i><b>21</b> 14 Bayesian Structural Time Series Models</a>
+<ul>
+<li class="chapter" data-level="21.1" data-path="bayesian-structural-time-series-models.html"><a href="bayesian-structural-time-series-models.html#introduction-6"><i class="fa fa-check"></i><b>21.1</b> Introduction</a></li>
+<li class="chapter" data-level="21.2" data-path="bayesian-structural-time-series-models.html"><a href="bayesian-structural-time-series-models.html#stan-implementation"><i class="fa fa-check"></i><b>21.2</b> Stan Implementation</a>
+<ul>
+<li class="chapter" data-level="21.2.1" data-path="bayesian-structural-time-series-models.html"><a href="bayesian-structural-time-series-models.html#stan-implementation-basic-bsts-model"><i class="fa fa-check"></i><b>21.2.1</b> Stan Implementation: Basic BSTS Model</a></li>
+<li class="chapter" data-level="21.2.2" data-path="bayesian-structural-time-series-models.html"><a href="bayesian-structural-time-series-models.html#stan-implementation-time-varying-trend-volatility"><i class="fa fa-check"></i><b>21.2.2</b> Stan Implementation: Time-Varying Trend Volatility</a></li>
+</ul></li>
+<li class="chapter" data-level="21.3" data-path="bayesian-structural-time-series-models.html"><a href="bayesian-structural-time-series-models.html#model-comparison-and-selection"><i class="fa fa-check"></i><b>21.3</b> Model Comparison and Selection</a></li>
+<li class="chapter" data-level="21.4" data-path="bayesian-structural-time-series-models.html"><a href="bayesian-structural-time-series-models.html#conclusion-11"><i class="fa fa-check"></i><b>21.4</b> Conclusion</a></li>
+</ul></li>
+<li class="chapter" data-level="22" data-path="bayesian-structural-time-series-models-1.html"><a href="bayesian-structural-time-series-models-1.html"><i class="fa fa-check"></i><b>22</b> 14 Bayesian Structural Time Series Models</a>
+<ul>
+<li class="chapter" data-level="22.1" data-path="bayesian-structural-time-series-models-1.html"><a href="bayesian-structural-time-series-models-1.html#introduction-7"><i class="fa fa-check"></i><b>22.1</b> Introduction</a></li>
+<li class="chapter" data-level="22.2" data-path="bayesian-structural-time-series-models-1.html"><a href="bayesian-structural-time-series-models-1.html#stan-implementation-1"><i class="fa fa-check"></i><b>22.2</b> Stan Implementation</a>
+<ul>
+<li class="chapter" data-level="22.2.1" data-path="bayesian-structural-time-series-models-1.html"><a href="bayesian-structural-time-series-models-1.html#stan-implementation-basic-bsts-model-1"><i class="fa fa-check"></i><b>22.2.1</b> Stan Implementation: Basic BSTS Model</a></li>
+<li class="chapter" data-level="22.2.2" data-path="bayesian-structural-time-series-models-1.html"><a href="bayesian-structural-time-series-models-1.html#stan-implementation-time-varying-trend-volatility-1"><i class="fa fa-check"></i><b>22.2.2</b> Stan Implementation: Time-Varying Trend Volatility</a></li>
+</ul></li>
+<li class="chapter" data-level="22.3" data-path="bayesian-structural-time-series-models-1.html"><a href="bayesian-structural-time-series-models-1.html#model-comparison-and-selection-1"><i class="fa fa-check"></i><b>22.3</b> Model Comparison and Selection</a></li>
+<li class="chapter" data-level="22.4" data-path="bayesian-structural-time-series-models-1.html"><a href="bayesian-structural-time-series-models-1.html#conclusion-12"><i class="fa fa-check"></i><b>22.4</b> Conclusion</a></li>
+</ul></li>
+<li class="chapter" data-level="23" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html"><i class="fa fa-check"></i><b>23</b> Model Comparison and Selection in Bayesian Analysis</a>
+<ul>
+<li class="chapter" data-level="23.1" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#introduction-8"><i class="fa fa-check"></i><b>23.1</b> Introduction</a></li>
+<li class="chapter" data-level="23.2" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#posterior-predictive-checks"><i class="fa fa-check"></i><b>23.2</b> Posterior Predictive Checks</a></li>
+<li class="chapter" data-level="23.3" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#information-criteria-waic-and-loo-cv"><i class="fa fa-check"></i><b>23.3</b> Information Criteria: WAIC and LOO-CV</a>
+<ul>
+<li class="chapter" data-level="23.3.1" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#waic-watanabe-akaike-information-criterion"><i class="fa fa-check"></i><b>23.3.1</b> WAIC (Watanabe-Akaike Information Criterion)</a></li>
+<li class="chapter" data-level="23.3.2" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#loo-cv-leave-one-out-cross-validation"><i class="fa fa-check"></i><b>23.3.2</b> LOO-CV (Leave-One-Out Cross-Validation)</a></li>
+</ul></li>
+<li class="chapter" data-level="23.4" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#bayes-factors-vs.-information-criteria"><i class="fa fa-check"></i><b>23.4</b> Bayes Factors vs. Information Criteria</a></li>
+<li class="chapter" data-level="23.5" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#summary-of-bayesian-model-comparison-methods"><i class="fa fa-check"></i><b>23.5</b> Summary of Bayesian Model Comparison Methods</a></li>
+<li class="chapter" data-level="23.6" data-path="model-comparison-and-selection-in-bayesian-analysis.html"><a href="model-comparison-and-selection-in-bayesian-analysis.html#practical-example-comparing-models-in-r"><i class="fa fa-check"></i><b>23.6</b> Practical Example: Comparing Models in R</a></li>
+</ul></li>
+<li class="chapter" data-level="24" data-path="appendix.html"><a href="appendix.html"><i class="fa fa-check"></i><b>24</b> Appendix</a>
+<ul>
+<li class="chapter" data-level="24.1" data-path="appendix.html"><a href="appendix.html#main-stan-distributions-cheatsheet"><i class="fa fa-check"></i><b>24.1</b> Main Stan Distributions Cheatsheet</a></li>
+<li class="chapter" data-level="24.2" data-path="appendix.html"><a href="appendix.html#main-stan-functions-cheatsheet"><i class="fa fa-check"></i><b>24.2</b> Main Stan Functions Cheatsheet</a></li>
+<li class="chapter" data-level="24.3" data-path="appendix.html"><a href="appendix.html#why-non-distribution-functions"><i class="fa fa-check"></i><b>24.3</b> Why Non-Distribution Functions?</a></li>
+<li class="chapter" data-level="24.4" data-path="appendix.html"><a href="appendix.html#stan-functions-cheatsheet"><i class="fa fa-check"></i><b>24.4</b> Stan Functions Cheatsheet</a>
+<ul>
+<li class="chapter" data-level="24.4.1" data-path="appendix.html"><a href="appendix.html#mathematical-functions"><i class="fa fa-check"></i><b>24.4.1</b> 1. Mathematical Functions</a></li>
+<li class="chapter" data-level="24.4.2" data-path="appendix.html"><a href="appendix.html#transformation-functions"><i class="fa fa-check"></i><b>24.4.2</b> 2. Transformation Functions</a></li>
+<li class="chapter" data-level="24.4.3" data-path="appendix.html"><a href="appendix.html#matrix-and-vector-operations"><i class="fa fa-check"></i><b>24.4.3</b> 3. Matrix and Vector Operations</a></li>
+<li class="chapter" data-level="24.4.4" data-path="appendix.html"><a href="appendix.html#utility-functions"><i class="fa fa-check"></i><b>24.4.4</b> 4. Utility Functions</a></li>
+<li class="chapter" data-level="24.4.5" data-path="appendix.html"><a href="appendix.html#specialized-solvers"><i class="fa fa-check"></i><b>24.4.5</b> 5. Specialized Solvers</a></li>
+</ul></li>
+<li class="chapter" data-level="24.5" data-path="appendix.html"><a href="appendix.html#example-hierarchical-linear-regression"><i class="fa fa-check"></i><b>24.5</b> Example: Hierarchical Linear Regression</a></li>
+<li class="chapter" data-level="24.6" data-path="appendix.html"><a href="appendix.html#tips-for-using-stan-functions"><i class="fa fa-check"></i><b>24.6</b> Tips for Using Stan Functions</a></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Stan Bookdown</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="measurement-error-as-a-latent-variable" class="section level1 hasAnchor" number="11">
+<h1><span class="header-section-number">Chapter 11</span> Measurement Error as a Latent Variable<a href="measurement-error-as-a-latent-variable.html#measurement-error-as-a-latent-variable" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>In applied mental-health research, we routinely treat our predictors as cleaner than they really are. A depression score, an anxiety checklist, a wearable-derived sleep measure, or a self-reported stress scale are all noisy proxies for the underlying constructs we actually care about. Ignoring that noise has consequences: regression coefficients can be attenuated, distorted, or even biased in direction depending on the error structure and the correlations among covariates.</p>
+<p>A Bayesian framework offers a principled solution. Instead of treating observed predictors as ground truth, we treat the <strong>true latent predictors</strong> as unknown quantities and estimate them jointly with the outcome model. This idea is standard in Bayesian measurement-error modeling, where the latent true value is handled as missing data and each observed measurement is modeled conditionally on it.</p>
+<div id="why-this-matters" class="section level2 hasAnchor" number="11.1">
+<h2><span class="header-section-number">11.1</span> Why This Matters<a href="measurement-error-as-a-latent-variable.html#why-this-matters" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Suppose we want to predict depressive symptom severity at six months using several baseline predictors:</p>
+<ul>
+<li>latent chronic stress</li>
+<li>latent sleep disruption</li>
+<li>latent social isolation</li>
+</ul>
+<p>But what we actually observe are noisy proxies:</p>
+<ul>
+<li>a short self-report stress questionnaire</li>
+<li>a wearable-derived sleep score</li>
+<li>a single-item loneliness measure</li>
+<li>a clinician-rated stress impression</li>
+<li>a smartphone-based sleep proxy</li>
+</ul>
+<p>When those proxies are noisy, plugging them directly into a regression can underestimate the effects of the true predictors — especially under classical measurement error — and can also bias the coefficients of other correlated predictors. That general bias mechanism is well documented in measurement-error and latent-predictor settings.</p>
+</div>
+<div id="the-formal-setup" class="section level2 hasAnchor" number="11.2">
+<h2><span class="header-section-number">11.2</span> The Formal Setup<a href="measurement-error-as-a-latent-variable.html#the-formal-setup" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Let <span class="math inline">\(Y_i\)</span> be depressive symptom severity for person <span class="math inline">\(i\)</span>. Let the true latent predictors be:</p>
+<p><span class="math display">\[
+\theta_{i1} = \text{chronic stress}, \quad
+\theta_{i2} = \text{sleep disruption}, \quad
+\theta_{i3} = \text{social isolation}
+\]</span></p>
+<p>The outcome model is:</p>
+<p><span class="math display">\[
+Y_i = \beta_0 + \beta_1 \theta_{i1} + \beta_2 \theta_{i2} + \beta_3 \theta_{i3} + \varepsilon_i^Y,
+\quad \varepsilon_i^Y \sim \mathcal{N}(0,\sigma_Y^2)
+\]</span></p>
+<p>Instead of observing <span class="math inline">\(\theta_{ik}\)</span> directly, we observe multiple noisy indicators <span class="math inline">\(X_{ij}\)</span>. A basic Gaussian measurement model is:</p>
+<p><span class="math display">\[
+X_{ij} = \lambda_j \theta_{i,g(j)} + \nu_{ij}
+\]</span></p>
+<p>where <span class="math inline">\(g(j)\)</span> maps indicator <span class="math inline">\(j\)</span> to its latent construct, <span class="math inline">\(\lambda_j\)</span> is the factor loading, and <span class="math inline">\(\nu_{ij}\)</span> is instrument-specific measurement error. A convenient prior for the latent predictors is multivariate normal:</p>
+<p><span class="math display">\[
+\boldsymbol{\theta}_i \sim \mathcal{N}(\mathbf{0}, \Sigma_\theta)
+\]</span></p>
+<p>This allows the true mental-health constructs to correlate with one another — a realistic assumption, since stress, sleep disruption, and social isolation tend to co-occur.</p>
+</div>
+<div id="scenario-1-uncorrelated-measurement-error" class="section level2 hasAnchor" number="11.3">
+<h2><span class="header-section-number">11.3</span> Scenario 1: Uncorrelated Measurement Error<a href="measurement-error-as-a-latent-variable.html#scenario-1-uncorrelated-measurement-error" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>In the simplest case, each indicator has its own independent error term. The DAG looks like this:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="measurement-error-as-a-latent-variable.html#cb1-1" tabindex="-1"></a><span class="fu">library</span>(ggdag)</span>
+<span id="cb1-2"><a href="measurement-error-as-a-latent-variable.html#cb1-2" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-3"><a href="measurement-error-as-a-latent-variable.html#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="measurement-error-as-a-latent-variable.html#cb1-4" tabindex="-1"></a>dag_uncorr <span class="ot">&lt;-</span> <span class="fu">dagify</span>(</span>
+<span id="cb1-5"><a href="measurement-error-as-a-latent-variable.html#cb1-5" tabindex="-1"></a>  Y           <span class="sc">~</span> theta_stress <span class="sc">+</span> theta_sleep <span class="sc">+</span> theta_iso,</span>
+<span id="cb1-6"><a href="measurement-error-as-a-latent-variable.html#cb1-6" tabindex="-1"></a>  stress_self <span class="sc">~</span> theta_stress,</span>
+<span id="cb1-7"><a href="measurement-error-as-a-latent-variable.html#cb1-7" tabindex="-1"></a>  stress_clin <span class="sc">~</span> theta_stress,</span>
+<span id="cb1-8"><a href="measurement-error-as-a-latent-variable.html#cb1-8" tabindex="-1"></a>  sleep_watch <span class="sc">~</span> theta_sleep,</span>
+<span id="cb1-9"><a href="measurement-error-as-a-latent-variable.html#cb1-9" tabindex="-1"></a>  sleep_phone <span class="sc">~</span> theta_sleep,</span>
+<span id="cb1-10"><a href="measurement-error-as-a-latent-variable.html#cb1-10" tabindex="-1"></a>  lonely_item <span class="sc">~</span> theta_iso,</span>
+<span id="cb1-11"><a href="measurement-error-as-a-latent-variable.html#cb1-11" tabindex="-1"></a>  <span class="at">outcome =</span> <span class="st">&quot;Y&quot;</span>,</span>
+<span id="cb1-12"><a href="measurement-error-as-a-latent-variable.html#cb1-12" tabindex="-1"></a>  <span class="at">latent  =</span> <span class="fu">c</span>(<span class="st">&quot;theta_stress&quot;</span>, <span class="st">&quot;theta_sleep&quot;</span>, <span class="st">&quot;theta_iso&quot;</span>),</span>
+<span id="cb1-13"><a href="measurement-error-as-a-latent-variable.html#cb1-13" tabindex="-1"></a>  <span class="at">coords  =</span> <span class="fu">list</span>(</span>
+<span id="cb1-14"><a href="measurement-error-as-a-latent-variable.html#cb1-14" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">c</span>(<span class="at">theta_stress =</span> <span class="dv">0</span>,    <span class="at">theta_sleep =</span> <span class="dv">1</span>,   <span class="at">theta_iso =</span> <span class="dv">2</span>,</span>
+<span id="cb1-15"><a href="measurement-error-as-a-latent-variable.html#cb1-15" tabindex="-1"></a>          <span class="at">stress_self  =</span> <span class="sc">-</span><span class="fl">0.2</span>, <span class="at">stress_clin =</span> <span class="fl">0.2</span>,</span>
+<span id="cb1-16"><a href="measurement-error-as-a-latent-variable.html#cb1-16" tabindex="-1"></a>          <span class="at">sleep_watch  =</span>  <span class="fl">0.8</span>, <span class="at">sleep_phone =</span> <span class="fl">1.2</span>,</span>
+<span id="cb1-17"><a href="measurement-error-as-a-latent-variable.html#cb1-17" tabindex="-1"></a>          <span class="at">lonely_item  =</span>  <span class="dv">2</span>,   <span class="at">Y =</span> <span class="dv">1</span>),</span>
+<span id="cb1-18"><a href="measurement-error-as-a-latent-variable.html#cb1-18" tabindex="-1"></a>    <span class="at">y =</span> <span class="fu">c</span>(<span class="at">theta_stress =</span> <span class="dv">1</span>, <span class="at">theta_sleep =</span> <span class="dv">1</span>, <span class="at">theta_iso =</span> <span class="dv">1</span>,</span>
+<span id="cb1-19"><a href="measurement-error-as-a-latent-variable.html#cb1-19" tabindex="-1"></a>          <span class="at">stress_self  =</span> <span class="dv">0</span>, <span class="at">stress_clin =</span> <span class="dv">0</span>,</span>
+<span id="cb1-20"><a href="measurement-error-as-a-latent-variable.html#cb1-20" tabindex="-1"></a>          <span class="at">sleep_watch  =</span> <span class="dv">0</span>, <span class="at">sleep_phone =</span> <span class="dv">0</span>,</span>
+<span id="cb1-21"><a href="measurement-error-as-a-latent-variable.html#cb1-21" tabindex="-1"></a>          <span class="at">lonely_item  =</span> <span class="dv">0</span>, <span class="at">Y =</span> <span class="dv">2</span>)</span>
+<span id="cb1-22"><a href="measurement-error-as-a-latent-variable.html#cb1-22" tabindex="-1"></a>  )</span>
+<span id="cb1-23"><a href="measurement-error-as-a-latent-variable.html#cb1-23" tabindex="-1"></a>)</span>
+<span id="cb1-24"><a href="measurement-error-as-a-latent-variable.html#cb1-24" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="measurement-error-as-a-latent-variable.html#cb1-25" tabindex="-1"></a><span class="fu">ggdag</span>(dag_uncorr, <span class="at">text =</span> <span class="cn">TRUE</span>, <span class="at">use_labels =</span> <span class="st">&quot;name&quot;</span>) <span class="sc">+</span></span>
+<span id="cb1-26"><a href="measurement-error-as-a-latent-variable.html#cb1-26" tabindex="-1"></a>  <span class="fu">theme_dag</span>() <span class="sc">+</span></span>
+<span id="cb1-27"><a href="measurement-error-as-a-latent-variable.html#cb1-27" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">&quot;Mental Health Model with Uncorrelated Measurement Error&quot;</span>)</span></code></pre></div>
+<p>The interpretation is clean: each observed measure is noisy only because of its own instrument-specific error. Once we condition on the latent construct, one indicator carries no additional information about another. That conditional-independence assumption is the simplifying structure that makes single-factor measurement models tractable.</p>
+<div id="measurement-equations" class="section level3 hasAnchor" number="11.3.1">
+<h3><span class="header-section-number">11.3.1</span> Measurement Equations<a href="measurement-error-as-a-latent-variable.html#measurement-equations" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p><span class="math display">\[
+\text{stress\_self}_i = \lambda_1 \theta_{i1} + \nu_{i1}, \quad \nu_{i1} \sim \mathcal{N}(0,\tau_1^2)
+\]</span></p>
+<p><span class="math display">\[
+\text{stress\_clin}_i = \lambda_2 \theta_{i1} + \nu_{i2}, \quad \nu_{i2} \sim \mathcal{N}(0,\tau_2^2)
+\]</span></p>
+<p><span class="math display">\[
+\text{sleep\_watch}_i = \lambda_3 \theta_{i2} + \nu_{i3}, \quad \nu_{i3} \sim \mathcal{N}(0,\tau_3^2)
+\]</span></p>
+<p><span class="math display">\[
+\text{sleep\_phone}_i = \lambda_4 \theta_{i2} + \nu_{i4}, \quad \nu_{i4} \sim \mathcal{N}(0,\tau_4^2)
+\]</span></p>
+<p><span class="math display">\[
+\text{lonely\_item}_i = \lambda_5 \theta_{i3} + \nu_{i5}, \quad \nu_{i5} \sim \mathcal{N}(0,\tau_5^2)
+\]</span></p>
+<p>This is the cleanest version to fit and the easiest to communicate. It is generally the right starting point when the primary concern is attenuation from noisy predictors rather than residual dependence between instruments.</p>
+</div>
+</div>
+<div id="scenario-2-correlated-measurement-error" class="section level2 hasAnchor" number="11.4">
+<h2><span class="header-section-number">11.4</span> Scenario 2: Correlated Measurement Error<a href="measurement-error-as-a-latent-variable.html#scenario-2-correlated-measurement-error" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Now suppose the two sleep indicators share method artifacts. Both the wearable and the smartphone proxy may be sensitive to device non-wear, irregular charging, or common preprocessing pipelines. Even after conditioning on true sleep disruption, these indicators may still covary — not because of the construct, but because of shared method variance.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="measurement-error-as-a-latent-variable.html#cb2-1" tabindex="-1"></a>dag_corr <span class="ot">&lt;-</span> <span class="fu">dagify</span>(</span>
+<span id="cb2-2"><a href="measurement-error-as-a-latent-variable.html#cb2-2" tabindex="-1"></a>  Y           <span class="sc">~</span> theta_stress <span class="sc">+</span> theta_sleep <span class="sc">+</span> theta_iso,</span>
+<span id="cb2-3"><a href="measurement-error-as-a-latent-variable.html#cb2-3" tabindex="-1"></a>  stress_self <span class="sc">~</span> theta_stress,</span>
+<span id="cb2-4"><a href="measurement-error-as-a-latent-variable.html#cb2-4" tabindex="-1"></a>  stress_clin <span class="sc">~</span> theta_stress,</span>
+<span id="cb2-5"><a href="measurement-error-as-a-latent-variable.html#cb2-5" tabindex="-1"></a>  sleep_watch <span class="sc">~</span> theta_sleep <span class="sc">+</span> e_sleep_method,</span>
+<span id="cb2-6"><a href="measurement-error-as-a-latent-variable.html#cb2-6" tabindex="-1"></a>  sleep_phone <span class="sc">~</span> theta_sleep <span class="sc">+</span> e_sleep_method,</span>
+<span id="cb2-7"><a href="measurement-error-as-a-latent-variable.html#cb2-7" tabindex="-1"></a>  lonely_item <span class="sc">~</span> theta_iso,</span>
+<span id="cb2-8"><a href="measurement-error-as-a-latent-variable.html#cb2-8" tabindex="-1"></a>  <span class="at">latent =</span> <span class="fu">c</span>(<span class="st">&quot;theta_stress&quot;</span>, <span class="st">&quot;theta_sleep&quot;</span>, <span class="st">&quot;theta_iso&quot;</span>, <span class="st">&quot;e_sleep_method&quot;</span>),</span>
+<span id="cb2-9"><a href="measurement-error-as-a-latent-variable.html#cb2-9" tabindex="-1"></a>  <span class="at">coords =</span> <span class="fu">list</span>(</span>
+<span id="cb2-10"><a href="measurement-error-as-a-latent-variable.html#cb2-10" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">c</span>(<span class="at">theta_stress =</span> <span class="dv">0</span>,   <span class="at">theta_sleep =</span> <span class="dv">1</span>,   <span class="at">theta_iso =</span> <span class="dv">2</span>,</span>
+<span id="cb2-11"><a href="measurement-error-as-a-latent-variable.html#cb2-11" tabindex="-1"></a>          <span class="at">e_sleep_method =</span> <span class="dv">1</span>,</span>
+<span id="cb2-12"><a href="measurement-error-as-a-latent-variable.html#cb2-12" tabindex="-1"></a>          <span class="at">stress_self =</span> <span class="sc">-</span><span class="fl">0.2</span>, <span class="at">stress_clin =</span> <span class="fl">0.2</span>,</span>
+<span id="cb2-13"><a href="measurement-error-as-a-latent-variable.html#cb2-13" tabindex="-1"></a>          <span class="at">sleep_watch =</span>  <span class="fl">0.8</span>, <span class="at">sleep_phone =</span> <span class="fl">1.2</span>,</span>
+<span id="cb2-14"><a href="measurement-error-as-a-latent-variable.html#cb2-14" tabindex="-1"></a>          <span class="at">lonely_item =</span>  <span class="dv">2</span>,   <span class="at">Y =</span> <span class="dv">1</span>),</span>
+<span id="cb2-15"><a href="measurement-error-as-a-latent-variable.html#cb2-15" tabindex="-1"></a>    <span class="at">y =</span> <span class="fu">c</span>(<span class="at">theta_stress =</span> <span class="dv">1</span>, <span class="at">theta_sleep =</span> <span class="fl">1.4</span>, <span class="at">theta_iso =</span> <span class="dv">1</span>,</span>
+<span id="cb2-16"><a href="measurement-error-as-a-latent-variable.html#cb2-16" tabindex="-1"></a>          <span class="at">e_sleep_method =</span> <span class="fl">0.8</span>,</span>
+<span id="cb2-17"><a href="measurement-error-as-a-latent-variable.html#cb2-17" tabindex="-1"></a>          <span class="at">stress_self =</span> <span class="dv">0</span>, <span class="at">stress_clin =</span> <span class="dv">0</span>,</span>
+<span id="cb2-18"><a href="measurement-error-as-a-latent-variable.html#cb2-18" tabindex="-1"></a>          <span class="at">sleep_watch =</span> <span class="dv">0</span>, <span class="at">sleep_phone =</span> <span class="dv">0</span>,</span>
+<span id="cb2-19"><a href="measurement-error-as-a-latent-variable.html#cb2-19" tabindex="-1"></a>          <span class="at">lonely_item =</span> <span class="dv">0</span>, <span class="at">Y =</span> <span class="fl">2.2</span>)</span>
+<span id="cb2-20"><a href="measurement-error-as-a-latent-variable.html#cb2-20" tabindex="-1"></a>  )</span>
+<span id="cb2-21"><a href="measurement-error-as-a-latent-variable.html#cb2-21" tabindex="-1"></a>)</span>
+<span id="cb2-22"><a href="measurement-error-as-a-latent-variable.html#cb2-22" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="measurement-error-as-a-latent-variable.html#cb2-23" tabindex="-1"></a><span class="fu">ggdag</span>(dag_corr, <span class="at">text =</span> <span class="cn">TRUE</span>, <span class="at">use_labels =</span> <span class="st">&quot;name&quot;</span>) <span class="sc">+</span></span>
+<span id="cb2-24"><a href="measurement-error-as-a-latent-variable.html#cb2-24" tabindex="-1"></a>  <span class="fu">theme_dag</span>() <span class="sc">+</span></span>
+<span id="cb2-25"><a href="measurement-error-as-a-latent-variable.html#cb2-25" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">&quot;Mental Health Model with Correlated Measurement Error&quot;</span>)</span></code></pre></div>
+<p>This shared-error source can also be encoded as a residual covariance directly, but the DAG representation is often more intuitive: it makes the causal story explicit rather than absorbing the covariance into an unexplained term.</p>
+<div id="measurement-equations-1" class="section level3 hasAnchor" number="11.4.1">
+<h3><span class="header-section-number">11.4.1</span> Measurement Equations<a href="measurement-error-as-a-latent-variable.html#measurement-equations-1" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>For the sleep indicators, a latent method factor <span class="math inline">\(\eta_i\)</span> induces the additional covariance:</p>
+<p><span class="math display">\[
+\text{sleep\_watch}_i = \lambda_3 \theta_{i2} + \delta_1 \eta_i + \nu_{i3}
+\]</span></p>
+<p><span class="math display">\[
+\text{sleep\_phone}_i = \lambda_4 \theta_{i2} + \delta_2 \eta_i + \nu_{i4}
+\]</span></p>
+<p><span class="math display">\[
+\eta_i \sim \mathcal{N}(0,1)
+\]</span></p>
+<p>This formulation is generally more stable and more interpretable than simply adding an unconstrained covariance term, because it narrates <em>why</em> the indicators covary beyond the construct itself.</p>
+</div>
+</div>
+<div id="simulating-a-mental-health-example" class="section level2 hasAnchor" number="11.5">
+<h2><span class="header-section-number">11.5</span> Simulating a Mental-Health Example<a href="measurement-error-as-a-latent-variable.html#simulating-a-mental-health-example" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>We simulate a study with three correlated latent predictors and five noisy indicators. The outcome is continuous depression severity at follow-up.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="measurement-error-as-a-latent-variable.html#cb3-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb3-2"><a href="measurement-error-as-a-latent-variable.html#cb3-2" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">600</span></span>
+<span id="cb3-3"><a href="measurement-error-as-a-latent-variable.html#cb3-3" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="measurement-error-as-a-latent-variable.html#cb3-4" tabindex="-1"></a>Sigma_theta <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(</span>
+<span id="cb3-5"><a href="measurement-error-as-a-latent-variable.html#cb3-5" tabindex="-1"></a>  <span class="fl">1.00</span>, <span class="fl">0.45</span>, <span class="fl">0.35</span>,</span>
+<span id="cb3-6"><a href="measurement-error-as-a-latent-variable.html#cb3-6" tabindex="-1"></a>  <span class="fl">0.45</span>, <span class="fl">1.00</span>, <span class="fl">0.30</span>,</span>
+<span id="cb3-7"><a href="measurement-error-as-a-latent-variable.html#cb3-7" tabindex="-1"></a>  <span class="fl">0.35</span>, <span class="fl">0.30</span>, <span class="fl">1.00</span></span>
+<span id="cb3-8"><a href="measurement-error-as-a-latent-variable.html#cb3-8" tabindex="-1"></a>), <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-9"><a href="measurement-error-as-a-latent-variable.html#cb3-9" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="measurement-error-as-a-latent-variable.html#cb3-10" tabindex="-1"></a><span class="fu">library</span>(MASS)</span>
+<span id="cb3-11"><a href="measurement-error-as-a-latent-variable.html#cb3-11" tabindex="-1"></a>theta        <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">mvrnorm</span>(n, <span class="at">mu =</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">3</span>), <span class="at">Sigma =</span> Sigma_theta)</span>
+<span id="cb3-12"><a href="measurement-error-as-a-latent-variable.html#cb3-12" tabindex="-1"></a>theta_stress <span class="ot">&lt;-</span> theta[, <span class="dv">1</span>]</span>
+<span id="cb3-13"><a href="measurement-error-as-a-latent-variable.html#cb3-13" tabindex="-1"></a>theta_sleep  <span class="ot">&lt;-</span> theta[, <span class="dv">2</span>]</span>
+<span id="cb3-14"><a href="measurement-error-as-a-latent-variable.html#cb3-14" tabindex="-1"></a>theta_iso    <span class="ot">&lt;-</span> theta[, <span class="dv">3</span>]</span>
+<span id="cb3-15"><a href="measurement-error-as-a-latent-variable.html#cb3-15" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="measurement-error-as-a-latent-variable.html#cb3-16" tabindex="-1"></a>beta0   <span class="ot">&lt;-</span> <span class="fl">0.0</span>;  beta1 <span class="ot">&lt;-</span> <span class="fl">0.9</span>;  beta2 <span class="ot">&lt;-</span> <span class="fl">0.7</span>;  beta3 <span class="ot">&lt;-</span> <span class="fl">0.8</span></span>
+<span id="cb3-17"><a href="measurement-error-as-a-latent-variable.html#cb3-17" tabindex="-1"></a>sigma_y <span class="ot">&lt;-</span> <span class="fl">1.2</span></span>
+<span id="cb3-18"><a href="measurement-error-as-a-latent-variable.html#cb3-18" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="measurement-error-as-a-latent-variable.html#cb3-19" tabindex="-1"></a><span class="co"># Uncorrelated measurement error</span></span>
+<span id="cb3-20"><a href="measurement-error-as-a-latent-variable.html#cb3-20" tabindex="-1"></a>stress_self <span class="ot">&lt;-</span> <span class="fl">1.0</span> <span class="sc">*</span> theta_stress <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.9</span>)</span>
+<span id="cb3-21"><a href="measurement-error-as-a-latent-variable.html#cb3-21" tabindex="-1"></a>stress_clin <span class="ot">&lt;-</span> <span class="fl">0.8</span> <span class="sc">*</span> theta_stress <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.7</span>)</span>
+<span id="cb3-22"><a href="measurement-error-as-a-latent-variable.html#cb3-22" tabindex="-1"></a>sleep_watch <span class="ot">&lt;-</span> <span class="fl">1.0</span> <span class="sc">*</span> theta_sleep  <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.8</span>)</span>
+<span id="cb3-23"><a href="measurement-error-as-a-latent-variable.html#cb3-23" tabindex="-1"></a>sleep_phone <span class="ot">&lt;-</span> <span class="fl">0.7</span> <span class="sc">*</span> theta_sleep  <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">1.0</span>)</span>
+<span id="cb3-24"><a href="measurement-error-as-a-latent-variable.html#cb3-24" tabindex="-1"></a>lonely_item <span class="ot">&lt;-</span> <span class="fl">1.0</span> <span class="sc">*</span> theta_iso    <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">1.1</span>)</span>
+<span id="cb3-25"><a href="measurement-error-as-a-latent-variable.html#cb3-25" tabindex="-1"></a></span>
+<span id="cb3-26"><a href="measurement-error-as-a-latent-variable.html#cb3-26" tabindex="-1"></a>y <span class="ot">&lt;-</span> beta0 <span class="sc">+</span> beta1 <span class="sc">*</span> theta_stress <span class="sc">+</span> beta2 <span class="sc">*</span> theta_sleep <span class="sc">+</span> beta3 <span class="sc">*</span> theta_iso <span class="sc">+</span></span>
+<span id="cb3-27"><a href="measurement-error-as-a-latent-variable.html#cb3-27" tabindex="-1"></a>     <span class="fu">rnorm</span>(n, <span class="dv">0</span>, sigma_y)</span>
+<span id="cb3-28"><a href="measurement-error-as-a-latent-variable.html#cb3-28" tabindex="-1"></a></span>
+<span id="cb3-29"><a href="measurement-error-as-a-latent-variable.html#cb3-29" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(y, stress_self, stress_clin, sleep_watch, sleep_phone, lonely_item)</span></code></pre></div>
+<p>This data-generating process mirrors the core Bayesian measurement-error principle: the true predictors generate the observed noisy proxies, and the outcome depends on the true predictors — not on the imperfect measurements.</p>
+</div>
+<div id="stan-model-uncorrelated-error" class="section level2 hasAnchor" number="11.6">
+<h2><span class="header-section-number">11.6</span> Stan Model: Uncorrelated Error<a href="measurement-error-as-a-latent-variable.html#stan-model-uncorrelated-error" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The following Stan model estimates the latent predictors and the regression coefficients simultaneously.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="measurement-error-as-a-latent-variable.html#cb4-1" tabindex="-1"></a>stan_me_uncorr <span class="ot">&lt;-</span> <span class="st">&quot;</span></span>
+<span id="cb4-2"><a href="measurement-error-as-a-latent-variable.html#cb4-2" tabindex="-1"></a><span class="st">data {</span></span>
+<span id="cb4-3"><a href="measurement-error-as-a-latent-variable.html#cb4-3" tabindex="-1"></a><span class="st">  int&lt;lower=1&gt; N;</span></span>
+<span id="cb4-4"><a href="measurement-error-as-a-latent-variable.html#cb4-4" tabindex="-1"></a><span class="st">  vector[N] y;</span></span>
+<span id="cb4-5"><a href="measurement-error-as-a-latent-variable.html#cb4-5" tabindex="-1"></a><span class="st">  vector[N] stress_self;</span></span>
+<span id="cb4-6"><a href="measurement-error-as-a-latent-variable.html#cb4-6" tabindex="-1"></a><span class="st">  vector[N] stress_clin;</span></span>
+<span id="cb4-7"><a href="measurement-error-as-a-latent-variable.html#cb4-7" tabindex="-1"></a><span class="st">  vector[N] sleep_watch;</span></span>
+<span id="cb4-8"><a href="measurement-error-as-a-latent-variable.html#cb4-8" tabindex="-1"></a><span class="st">  vector[N] sleep_phone;</span></span>
+<span id="cb4-9"><a href="measurement-error-as-a-latent-variable.html#cb4-9" tabindex="-1"></a><span class="st">  vector[N] lonely_item;</span></span>
+<span id="cb4-10"><a href="measurement-error-as-a-latent-variable.html#cb4-10" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb4-11"><a href="measurement-error-as-a-latent-variable.html#cb4-11" tabindex="-1"></a><span class="st">parameters {</span></span>
+<span id="cb4-12"><a href="measurement-error-as-a-latent-variable.html#cb4-12" tabindex="-1"></a><span class="st">  real            beta0;</span></span>
+<span id="cb4-13"><a href="measurement-error-as-a-latent-variable.html#cb4-13" tabindex="-1"></a><span class="st">  vector[3]       beta;           // FIXED: was vector beta; — dimension required</span></span>
+<span id="cb4-14"><a href="measurement-error-as-a-latent-variable.html#cb4-14" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt;   sigma_y;</span></span>
+<span id="cb4-15"><a href="measurement-error-as-a-latent-variable.html#cb4-15" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="measurement-error-as-a-latent-variable.html#cb4-16" tabindex="-1"></a><span class="st">  vector[N] theta_stress;</span></span>
+<span id="cb4-17"><a href="measurement-error-as-a-latent-variable.html#cb4-17" tabindex="-1"></a><span class="st">  vector[N] theta_sleep;</span></span>
+<span id="cb4-18"><a href="measurement-error-as-a-latent-variable.html#cb4-18" tabindex="-1"></a><span class="st">  vector[N] theta_iso;</span></span>
+<span id="cb4-19"><a href="measurement-error-as-a-latent-variable.html#cb4-19" tabindex="-1"></a></span>
+<span id="cb4-20"><a href="measurement-error-as-a-latent-variable.html#cb4-20" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; lambda_ss;</span></span>
+<span id="cb4-21"><a href="measurement-error-as-a-latent-variable.html#cb4-21" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; lambda_sc;</span></span>
+<span id="cb4-22"><a href="measurement-error-as-a-latent-variable.html#cb4-22" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; lambda_sw;</span></span>
+<span id="cb4-23"><a href="measurement-error-as-a-latent-variable.html#cb4-23" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; lambda_sp;</span></span>
+<span id="cb4-24"><a href="measurement-error-as-a-latent-variable.html#cb4-24" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; lambda_li;</span></span>
+<span id="cb4-25"><a href="measurement-error-as-a-latent-variable.html#cb4-25" tabindex="-1"></a></span>
+<span id="cb4-26"><a href="measurement-error-as-a-latent-variable.html#cb4-26" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; tau_ss;</span></span>
+<span id="cb4-27"><a href="measurement-error-as-a-latent-variable.html#cb4-27" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; tau_sc;</span></span>
+<span id="cb4-28"><a href="measurement-error-as-a-latent-variable.html#cb4-28" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; tau_sw;</span></span>
+<span id="cb4-29"><a href="measurement-error-as-a-latent-variable.html#cb4-29" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; tau_sp;</span></span>
+<span id="cb4-30"><a href="measurement-error-as-a-latent-variable.html#cb4-30" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; tau_li;</span></span>
+<span id="cb4-31"><a href="measurement-error-as-a-latent-variable.html#cb4-31" tabindex="-1"></a></span>
+<span id="cb4-32"><a href="measurement-error-as-a-latent-variable.html#cb4-32" tabindex="-1"></a><span class="st">  cholesky_factor_corr[3] L_Omega;   // FIXED: missing dimension [3]</span></span>
+<span id="cb4-33"><a href="measurement-error-as-a-latent-variable.html#cb4-33" tabindex="-1"></a><span class="st">  vector&lt;lower=0&gt;[3]      L_sigma;   // FIXED: missing dimension [3]</span></span>
+<span id="cb4-34"><a href="measurement-error-as-a-latent-variable.html#cb4-34" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb4-35"><a href="measurement-error-as-a-latent-variable.html#cb4-35" tabindex="-1"></a><span class="st">transformed parameters {</span></span>
+<span id="cb4-36"><a href="measurement-error-as-a-latent-variable.html#cb4-36" tabindex="-1"></a><span class="st">  matrix[3,3] L_Sigma = diag_pre_multiply(L_sigma, L_Omega);</span></span>
+<span id="cb4-37"><a href="measurement-error-as-a-latent-variable.html#cb4-37" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb4-38"><a href="measurement-error-as-a-latent-variable.html#cb4-38" tabindex="-1"></a><span class="st">model {</span></span>
+<span id="cb4-39"><a href="measurement-error-as-a-latent-variable.html#cb4-39" tabindex="-1"></a><span class="st">  beta0   ~ normal(0, 2);</span></span>
+<span id="cb4-40"><a href="measurement-error-as-a-latent-variable.html#cb4-40" tabindex="-1"></a><span class="st">  beta    ~ normal(0, 1.5);</span></span>
+<span id="cb4-41"><a href="measurement-error-as-a-latent-variable.html#cb4-41" tabindex="-1"></a><span class="st">  sigma_y ~ exponential(1);</span></span>
+<span id="cb4-42"><a href="measurement-error-as-a-latent-variable.html#cb4-42" tabindex="-1"></a></span>
+<span id="cb4-43"><a href="measurement-error-as-a-latent-variable.html#cb4-43" tabindex="-1"></a><span class="st">  lambda_ss ~ normal(1, 0.5);</span></span>
+<span id="cb4-44"><a href="measurement-error-as-a-latent-variable.html#cb4-44" tabindex="-1"></a><span class="st">  lambda_sc ~ normal(1, 0.5);</span></span>
+<span id="cb4-45"><a href="measurement-error-as-a-latent-variable.html#cb4-45" tabindex="-1"></a><span class="st">  lambda_sw ~ normal(1, 0.5);</span></span>
+<span id="cb4-46"><a href="measurement-error-as-a-latent-variable.html#cb4-46" tabindex="-1"></a><span class="st">  lambda_sp ~ normal(1, 0.5);</span></span>
+<span id="cb4-47"><a href="measurement-error-as-a-latent-variable.html#cb4-47" tabindex="-1"></a><span class="st">  lambda_li ~ normal(1, 0.5);</span></span>
+<span id="cb4-48"><a href="measurement-error-as-a-latent-variable.html#cb4-48" tabindex="-1"></a></span>
+<span id="cb4-49"><a href="measurement-error-as-a-latent-variable.html#cb4-49" tabindex="-1"></a><span class="st">  tau_ss ~ exponential(1);</span></span>
+<span id="cb4-50"><a href="measurement-error-as-a-latent-variable.html#cb4-50" tabindex="-1"></a><span class="st">  tau_sc ~ exponential(1);</span></span>
+<span id="cb4-51"><a href="measurement-error-as-a-latent-variable.html#cb4-51" tabindex="-1"></a><span class="st">  tau_sw ~ exponential(1);</span></span>
+<span id="cb4-52"><a href="measurement-error-as-a-latent-variable.html#cb4-52" tabindex="-1"></a><span class="st">  tau_sp ~ exponential(1);</span></span>
+<span id="cb4-53"><a href="measurement-error-as-a-latent-variable.html#cb4-53" tabindex="-1"></a><span class="st">  tau_li ~ exponential(1);</span></span>
+<span id="cb4-54"><a href="measurement-error-as-a-latent-variable.html#cb4-54" tabindex="-1"></a></span>
+<span id="cb4-55"><a href="measurement-error-as-a-latent-variable.html#cb4-55" tabindex="-1"></a><span class="st">  L_sigma ~ exponential(1);</span></span>
+<span id="cb4-56"><a href="measurement-error-as-a-latent-variable.html#cb4-56" tabindex="-1"></a><span class="st">  L_Omega ~ lkj_corr_cholesky(2);</span></span>
+<span id="cb4-57"><a href="measurement-error-as-a-latent-variable.html#cb4-57" tabindex="-1"></a></span>
+<span id="cb4-58"><a href="measurement-error-as-a-latent-variable.html#cb4-58" tabindex="-1"></a><span class="st">  // Joint prior on latent predictors</span></span>
+<span id="cb4-59"><a href="measurement-error-as-a-latent-variable.html#cb4-59" tabindex="-1"></a><span class="st">  for (i in 1:N) {</span></span>
+<span id="cb4-60"><a href="measurement-error-as-a-latent-variable.html#cb4-60" tabindex="-1"></a><span class="st">    [theta_stress[i], theta_sleep[i], theta_iso[i]]&#39; ~</span></span>
+<span id="cb4-61"><a href="measurement-error-as-a-latent-variable.html#cb4-61" tabindex="-1"></a><span class="st">      multi_normal_cholesky(rep_vector(0, 3), L_Sigma);</span></span>
+<span id="cb4-62"><a href="measurement-error-as-a-latent-variable.html#cb4-62" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb4-63"><a href="measurement-error-as-a-latent-variable.html#cb4-63" tabindex="-1"></a></span>
+<span id="cb4-64"><a href="measurement-error-as-a-latent-variable.html#cb4-64" tabindex="-1"></a><span class="st">  // Measurement model</span></span>
+<span id="cb4-65"><a href="measurement-error-as-a-latent-variable.html#cb4-65" tabindex="-1"></a><span class="st">  stress_self ~ normal(lambda_ss * theta_stress, tau_ss);</span></span>
+<span id="cb4-66"><a href="measurement-error-as-a-latent-variable.html#cb4-66" tabindex="-1"></a><span class="st">  stress_clin ~ normal(lambda_sc * theta_stress, tau_sc);</span></span>
+<span id="cb4-67"><a href="measurement-error-as-a-latent-variable.html#cb4-67" tabindex="-1"></a><span class="st">  sleep_watch ~ normal(lambda_sw * theta_sleep,  tau_sw);</span></span>
+<span id="cb4-68"><a href="measurement-error-as-a-latent-variable.html#cb4-68" tabindex="-1"></a><span class="st">  sleep_phone ~ normal(lambda_sp * theta_sleep,  tau_sp);</span></span>
+<span id="cb4-69"><a href="measurement-error-as-a-latent-variable.html#cb4-69" tabindex="-1"></a><span class="st">  lonely_item ~ normal(lambda_li * theta_iso,    tau_li);</span></span>
+<span id="cb4-70"><a href="measurement-error-as-a-latent-variable.html#cb4-70" tabindex="-1"></a></span>
+<span id="cb4-71"><a href="measurement-error-as-a-latent-variable.html#cb4-71" tabindex="-1"></a><span class="st">  // Outcome model — FIXED: was beta * theta_..., now indexed correctly</span></span>
+<span id="cb4-72"><a href="measurement-error-as-a-latent-variable.html#cb4-72" tabindex="-1"></a><span class="st">  y ~ normal(beta0</span></span>
+<span id="cb4-73"><a href="measurement-error-as-a-latent-variable.html#cb4-73" tabindex="-1"></a><span class="st">             + beta[1] * theta_stress</span></span>
+<span id="cb4-74"><a href="measurement-error-as-a-latent-variable.html#cb4-74" tabindex="-1"></a><span class="st">             + beta[2] * theta_sleep</span></span>
+<span id="cb4-75"><a href="measurement-error-as-a-latent-variable.html#cb4-75" tabindex="-1"></a><span class="st">             + beta[3] * theta_iso,</span></span>
+<span id="cb4-76"><a href="measurement-error-as-a-latent-variable.html#cb4-76" tabindex="-1"></a><span class="st">             sigma_y);</span></span>
+<span id="cb4-77"><a href="measurement-error-as-a-latent-variable.html#cb4-77" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb4-78"><a href="measurement-error-as-a-latent-variable.html#cb4-78" tabindex="-1"></a><span class="st">generated quantities {</span></span>
+<span id="cb4-79"><a href="measurement-error-as-a-latent-variable.html#cb4-79" tabindex="-1"></a><span class="st">  corr_matrix[3] Omega                          // FIXED: missing dimension [3]</span></span>
+<span id="cb4-80"><a href="measurement-error-as-a-latent-variable.html#cb4-80" tabindex="-1"></a><span class="st">    = multiply_lower_tri_self_transpose(L_Omega);</span></span>
+<span id="cb4-81"><a href="measurement-error-as-a-latent-variable.html#cb4-81" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb4-82"><a href="measurement-error-as-a-latent-variable.html#cb4-82" tabindex="-1"></a><span class="st">&quot;</span></span>
+<span id="cb4-83"><a href="measurement-error-as-a-latent-variable.html#cb4-83" tabindex="-1"></a><span class="fu">writeLines</span>(stan_me_uncorr, <span class="st">&quot;stan_me_uncorr.stan&quot;</span>)</span></code></pre></div>
+<p>The posterior for each <code>beta[k]</code> now reflects genuine uncertainty about the true construct, rather than assuming the observed proxy is exact. That is the central inferential advantage of Bayesian measurement-error modeling: uncertainty about the latent predictor propagates through to uncertainty about its regression coefficient.</p>
+<div id="fitting-in-r" class="section level3 hasAnchor" number="11.6.1">
+<h3><span class="header-section-number">11.6.1</span> Fitting in R<a href="measurement-error-as-a-latent-variable.html#fitting-in-r" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="measurement-error-as-a-latent-variable.html#cb5-1" tabindex="-1"></a><span class="fu">library</span>(rstan)</span>
+<span id="cb5-2"><a href="measurement-error-as-a-latent-variable.html#cb5-2" tabindex="-1"></a><span class="fu">options</span>(<span class="at">mc.cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>())</span>
+<span id="cb5-3"><a href="measurement-error-as-a-latent-variable.html#cb5-3" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="measurement-error-as-a-latent-variable.html#cb5-4" tabindex="-1"></a>stan_data <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb5-5"><a href="measurement-error-as-a-latent-variable.html#cb5-5" tabindex="-1"></a>  <span class="at">N           =</span> <span class="fu">nrow</span>(dat),</span>
+<span id="cb5-6"><a href="measurement-error-as-a-latent-variable.html#cb5-6" tabindex="-1"></a>  <span class="at">y           =</span> dat<span class="sc">$</span>y,</span>
+<span id="cb5-7"><a href="measurement-error-as-a-latent-variable.html#cb5-7" tabindex="-1"></a>  <span class="at">stress_self =</span> dat<span class="sc">$</span>stress_self,</span>
+<span id="cb5-8"><a href="measurement-error-as-a-latent-variable.html#cb5-8" tabindex="-1"></a>  <span class="at">stress_clin =</span> dat<span class="sc">$</span>stress_clin,</span>
+<span id="cb5-9"><a href="measurement-error-as-a-latent-variable.html#cb5-9" tabindex="-1"></a>  <span class="at">sleep_watch =</span> dat<span class="sc">$</span>sleep_watch,</span>
+<span id="cb5-10"><a href="measurement-error-as-a-latent-variable.html#cb5-10" tabindex="-1"></a>  <span class="at">sleep_phone =</span> dat<span class="sc">$</span>sleep_phone,</span>
+<span id="cb5-11"><a href="measurement-error-as-a-latent-variable.html#cb5-11" tabindex="-1"></a>  <span class="at">lonely_item =</span> dat<span class="sc">$</span>lonely_item</span>
+<span id="cb5-12"><a href="measurement-error-as-a-latent-variable.html#cb5-12" tabindex="-1"></a>)</span>
+<span id="cb5-13"><a href="measurement-error-as-a-latent-variable.html#cb5-13" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="measurement-error-as-a-latent-variable.html#cb5-14" tabindex="-1"></a>fit_uncorr <span class="ot">&lt;-</span> <span class="fu">stan</span>(</span>
+<span id="cb5-15"><a href="measurement-error-as-a-latent-variable.html#cb5-15" tabindex="-1"></a>  <span class="at">file    =</span> <span class="st">&quot;stan_me_uncorr.stan&quot;</span>,</span>
+<span id="cb5-16"><a href="measurement-error-as-a-latent-variable.html#cb5-16" tabindex="-1"></a>  <span class="at">data    =</span> stan_data,</span>
+<span id="cb5-17"><a href="measurement-error-as-a-latent-variable.html#cb5-17" tabindex="-1"></a>  <span class="at">iter    =</span> <span class="dv">2000</span>,</span>
+<span id="cb5-18"><a href="measurement-error-as-a-latent-variable.html#cb5-18" tabindex="-1"></a>  <span class="at">warmup  =</span> <span class="dv">1000</span>,</span>
+<span id="cb5-19"><a href="measurement-error-as-a-latent-variable.html#cb5-19" tabindex="-1"></a>  <span class="at">chains  =</span> <span class="dv">4</span>,</span>
+<span id="cb5-20"><a href="measurement-error-as-a-latent-variable.html#cb5-20" tabindex="-1"></a>  <span class="at">seed    =</span> <span class="dv">123</span>,</span>
+<span id="cb5-21"><a href="measurement-error-as-a-latent-variable.html#cb5-21" tabindex="-1"></a>  <span class="at">control =</span> <span class="fu">list</span>(<span class="at">adapt_delta =</span> <span class="fl">0.95</span>)</span>
+<span id="cb5-22"><a href="measurement-error-as-a-latent-variable.html#cb5-22" tabindex="-1"></a>)</span>
+<span id="cb5-23"><a href="measurement-error-as-a-latent-variable.html#cb5-23" tabindex="-1"></a></span>
+<span id="cb5-24"><a href="measurement-error-as-a-latent-variable.html#cb5-24" tabindex="-1"></a><span class="fu">print</span>(fit_uncorr, <span class="at">pars =</span> <span class="fu">c</span>(</span>
+<span id="cb5-25"><a href="measurement-error-as-a-latent-variable.html#cb5-25" tabindex="-1"></a>  <span class="st">&quot;beta&quot;</span>, <span class="st">&quot;sigma_y&quot;</span>,</span>
+<span id="cb5-26"><a href="measurement-error-as-a-latent-variable.html#cb5-26" tabindex="-1"></a>  <span class="st">&quot;lambda_ss&quot;</span>, <span class="st">&quot;lambda_sc&quot;</span>, <span class="st">&quot;lambda_sw&quot;</span>, <span class="st">&quot;lambda_sp&quot;</span>, <span class="st">&quot;lambda_li&quot;</span>,</span>
+<span id="cb5-27"><a href="measurement-error-as-a-latent-variable.html#cb5-27" tabindex="-1"></a>  <span class="st">&quot;tau_ss&quot;</span>,    <span class="st">&quot;tau_sc&quot;</span>,    <span class="st">&quot;tau_sw&quot;</span>,    <span class="st">&quot;tau_sp&quot;</span>,    <span class="st">&quot;tau_li&quot;</span></span>
+<span id="cb5-28"><a href="measurement-error-as-a-latent-variable.html#cb5-28" tabindex="-1"></a>))</span></code></pre></div>
+</div>
+</div>
+<div id="stan-model-correlated-error" class="section level2 hasAnchor" number="11.7">
+<h2><span class="header-section-number">11.7</span> Stan Model: Correlated Error<a href="measurement-error-as-a-latent-variable.html#stan-model-correlated-error" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Now we add a latent method factor for the two sleep indicators. The fixes from the uncorrelated model apply here as well, plus a <code>generated quantities</code> block is added.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="measurement-error-as-a-latent-variable.html#cb6-1" tabindex="-1"></a>stan_me_corr <span class="ot">&lt;-</span> <span class="st">&quot;</span></span>
+<span id="cb6-2"><a href="measurement-error-as-a-latent-variable.html#cb6-2" tabindex="-1"></a><span class="st">data {</span></span>
+<span id="cb6-3"><a href="measurement-error-as-a-latent-variable.html#cb6-3" tabindex="-1"></a><span class="st">  int&lt;lower=1&gt; N;</span></span>
+<span id="cb6-4"><a href="measurement-error-as-a-latent-variable.html#cb6-4" tabindex="-1"></a><span class="st">  vector[N] y;</span></span>
+<span id="cb6-5"><a href="measurement-error-as-a-latent-variable.html#cb6-5" tabindex="-1"></a><span class="st">  vector[N] stress_self;</span></span>
+<span id="cb6-6"><a href="measurement-error-as-a-latent-variable.html#cb6-6" tabindex="-1"></a><span class="st">  vector[N] stress_clin;</span></span>
+<span id="cb6-7"><a href="measurement-error-as-a-latent-variable.html#cb6-7" tabindex="-1"></a><span class="st">  vector[N] sleep_watch;</span></span>
+<span id="cb6-8"><a href="measurement-error-as-a-latent-variable.html#cb6-8" tabindex="-1"></a><span class="st">  vector[N] sleep_phone;</span></span>
+<span id="cb6-9"><a href="measurement-error-as-a-latent-variable.html#cb6-9" tabindex="-1"></a><span class="st">  vector[N] lonely_item;</span></span>
+<span id="cb6-10"><a href="measurement-error-as-a-latent-variable.html#cb6-10" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb6-11"><a href="measurement-error-as-a-latent-variable.html#cb6-11" tabindex="-1"></a><span class="st">parameters {</span></span>
+<span id="cb6-12"><a href="measurement-error-as-a-latent-variable.html#cb6-12" tabindex="-1"></a><span class="st">  real          beta0;</span></span>
+<span id="cb6-13"><a href="measurement-error-as-a-latent-variable.html#cb6-13" tabindex="-1"></a><span class="st">  vector[3]     beta;             // FIXED: dimension required</span></span>
+<span id="cb6-14"><a href="measurement-error-as-a-latent-variable.html#cb6-14" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; sigma_y;</span></span>
+<span id="cb6-15"><a href="measurement-error-as-a-latent-variable.html#cb6-15" tabindex="-1"></a></span>
+<span id="cb6-16"><a href="measurement-error-as-a-latent-variable.html#cb6-16" tabindex="-1"></a><span class="st">  vector[N] theta_stress;</span></span>
+<span id="cb6-17"><a href="measurement-error-as-a-latent-variable.html#cb6-17" tabindex="-1"></a><span class="st">  vector[N] theta_sleep;</span></span>
+<span id="cb6-18"><a href="measurement-error-as-a-latent-variable.html#cb6-18" tabindex="-1"></a><span class="st">  vector[N] theta_iso;</span></span>
+<span id="cb6-19"><a href="measurement-error-as-a-latent-variable.html#cb6-19" tabindex="-1"></a><span class="st">  vector[N] eta_sleep_method;</span></span>
+<span id="cb6-20"><a href="measurement-error-as-a-latent-variable.html#cb6-20" tabindex="-1"></a></span>
+<span id="cb6-21"><a href="measurement-error-as-a-latent-variable.html#cb6-21" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; lambda_ss;</span></span>
+<span id="cb6-22"><a href="measurement-error-as-a-latent-variable.html#cb6-22" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; lambda_sc;</span></span>
+<span id="cb6-23"><a href="measurement-error-as-a-latent-variable.html#cb6-23" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; lambda_sw;</span></span>
+<span id="cb6-24"><a href="measurement-error-as-a-latent-variable.html#cb6-24" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; lambda_sp;</span></span>
+<span id="cb6-25"><a href="measurement-error-as-a-latent-variable.html#cb6-25" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; lambda_li;</span></span>
+<span id="cb6-26"><a href="measurement-error-as-a-latent-variable.html#cb6-26" tabindex="-1"></a></span>
+<span id="cb6-27"><a href="measurement-error-as-a-latent-variable.html#cb6-27" tabindex="-1"></a><span class="st">  real delta_sw;</span></span>
+<span id="cb6-28"><a href="measurement-error-as-a-latent-variable.html#cb6-28" tabindex="-1"></a><span class="st">  real delta_sp;</span></span>
+<span id="cb6-29"><a href="measurement-error-as-a-latent-variable.html#cb6-29" tabindex="-1"></a></span>
+<span id="cb6-30"><a href="measurement-error-as-a-latent-variable.html#cb6-30" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; tau_ss;</span></span>
+<span id="cb6-31"><a href="measurement-error-as-a-latent-variable.html#cb6-31" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; tau_sc;</span></span>
+<span id="cb6-32"><a href="measurement-error-as-a-latent-variable.html#cb6-32" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; tau_sw;</span></span>
+<span id="cb6-33"><a href="measurement-error-as-a-latent-variable.html#cb6-33" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; tau_sp;</span></span>
+<span id="cb6-34"><a href="measurement-error-as-a-latent-variable.html#cb6-34" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; tau_li;</span></span>
+<span id="cb6-35"><a href="measurement-error-as-a-latent-variable.html#cb6-35" tabindex="-1"></a></span>
+<span id="cb6-36"><a href="measurement-error-as-a-latent-variable.html#cb6-36" tabindex="-1"></a><span class="st">  cholesky_factor_corr[3] L_Omega;  // FIXED: missing dimension [3]</span></span>
+<span id="cb6-37"><a href="measurement-error-as-a-latent-variable.html#cb6-37" tabindex="-1"></a><span class="st">  vector&lt;lower=0&gt;[3]      L_sigma;  // FIXED: missing dimension [3]</span></span>
+<span id="cb6-38"><a href="measurement-error-as-a-latent-variable.html#cb6-38" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb6-39"><a href="measurement-error-as-a-latent-variable.html#cb6-39" tabindex="-1"></a><span class="st">transformed parameters {</span></span>
+<span id="cb6-40"><a href="measurement-error-as-a-latent-variable.html#cb6-40" tabindex="-1"></a><span class="st">  matrix[3,3] L_Sigma = diag_pre_multiply(L_sigma, L_Omega);</span></span>
+<span id="cb6-41"><a href="measurement-error-as-a-latent-variable.html#cb6-41" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb6-42"><a href="measurement-error-as-a-latent-variable.html#cb6-42" tabindex="-1"></a><span class="st">model {</span></span>
+<span id="cb6-43"><a href="measurement-error-as-a-latent-variable.html#cb6-43" tabindex="-1"></a><span class="st">  beta0   ~ normal(0, 2);</span></span>
+<span id="cb6-44"><a href="measurement-error-as-a-latent-variable.html#cb6-44" tabindex="-1"></a><span class="st">  beta    ~ normal(0, 1.5);</span></span>
+<span id="cb6-45"><a href="measurement-error-as-a-latent-variable.html#cb6-45" tabindex="-1"></a><span class="st">  sigma_y ~ exponential(1);</span></span>
+<span id="cb6-46"><a href="measurement-error-as-a-latent-variable.html#cb6-46" tabindex="-1"></a></span>
+<span id="cb6-47"><a href="measurement-error-as-a-latent-variable.html#cb6-47" tabindex="-1"></a><span class="st">  lambda_ss ~ normal(1, 0.5);</span></span>
+<span id="cb6-48"><a href="measurement-error-as-a-latent-variable.html#cb6-48" tabindex="-1"></a><span class="st">  lambda_sc ~ normal(1, 0.5);</span></span>
+<span id="cb6-49"><a href="measurement-error-as-a-latent-variable.html#cb6-49" tabindex="-1"></a><span class="st">  lambda_sw ~ normal(1, 0.5);</span></span>
+<span id="cb6-50"><a href="measurement-error-as-a-latent-variable.html#cb6-50" tabindex="-1"></a><span class="st">  lambda_sp ~ normal(1, 0.5);</span></span>
+<span id="cb6-51"><a href="measurement-error-as-a-latent-variable.html#cb6-51" tabindex="-1"></a><span class="st">  lambda_li ~ normal(1, 0.5);</span></span>
+<span id="cb6-52"><a href="measurement-error-as-a-latent-variable.html#cb6-52" tabindex="-1"></a></span>
+<span id="cb6-53"><a href="measurement-error-as-a-latent-variable.html#cb6-53" tabindex="-1"></a><span class="st">  delta_sw ~ normal(0, 0.7);</span></span>
+<span id="cb6-54"><a href="measurement-error-as-a-latent-variable.html#cb6-54" tabindex="-1"></a><span class="st">  delta_sp ~ normal(0, 0.7);</span></span>
+<span id="cb6-55"><a href="measurement-error-as-a-latent-variable.html#cb6-55" tabindex="-1"></a></span>
+<span id="cb6-56"><a href="measurement-error-as-a-latent-variable.html#cb6-56" tabindex="-1"></a><span class="st">  tau_ss ~ exponential(1);</span></span>
+<span id="cb6-57"><a href="measurement-error-as-a-latent-variable.html#cb6-57" tabindex="-1"></a><span class="st">  tau_sc ~ exponential(1);</span></span>
+<span id="cb6-58"><a href="measurement-error-as-a-latent-variable.html#cb6-58" tabindex="-1"></a><span class="st">  tau_sw ~ exponential(1);</span></span>
+<span id="cb6-59"><a href="measurement-error-as-a-latent-variable.html#cb6-59" tabindex="-1"></a><span class="st">  tau_sp ~ exponential(1);</span></span>
+<span id="cb6-60"><a href="measurement-error-as-a-latent-variable.html#cb6-60" tabindex="-1"></a><span class="st">  tau_li ~ exponential(1);</span></span>
+<span id="cb6-61"><a href="measurement-error-as-a-latent-variable.html#cb6-61" tabindex="-1"></a></span>
+<span id="cb6-62"><a href="measurement-error-as-a-latent-variable.html#cb6-62" tabindex="-1"></a><span class="st">  L_sigma ~ exponential(1);</span></span>
+<span id="cb6-63"><a href="measurement-error-as-a-latent-variable.html#cb6-63" tabindex="-1"></a><span class="st">  L_Omega ~ lkj_corr_cholesky(2);</span></span>
+<span id="cb6-64"><a href="measurement-error-as-a-latent-variable.html#cb6-64" tabindex="-1"></a></span>
+<span id="cb6-65"><a href="measurement-error-as-a-latent-variable.html#cb6-65" tabindex="-1"></a><span class="st">  eta_sleep_method ~ normal(0, 1);</span></span>
+<span id="cb6-66"><a href="measurement-error-as-a-latent-variable.html#cb6-66" tabindex="-1"></a></span>
+<span id="cb6-67"><a href="measurement-error-as-a-latent-variable.html#cb6-67" tabindex="-1"></a><span class="st">  for (i in 1:N) {</span></span>
+<span id="cb6-68"><a href="measurement-error-as-a-latent-variable.html#cb6-68" tabindex="-1"></a><span class="st">    [theta_stress[i], theta_sleep[i], theta_iso[i]]&#39; ~</span></span>
+<span id="cb6-69"><a href="measurement-error-as-a-latent-variable.html#cb6-69" tabindex="-1"></a><span class="st">      multi_normal_cholesky(rep_vector(0, 3), L_Sigma);</span></span>
+<span id="cb6-70"><a href="measurement-error-as-a-latent-variable.html#cb6-70" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb6-71"><a href="measurement-error-as-a-latent-variable.html#cb6-71" tabindex="-1"></a></span>
+<span id="cb6-72"><a href="measurement-error-as-a-latent-variable.html#cb6-72" tabindex="-1"></a><span class="st">  stress_self ~ normal(lambda_ss * theta_stress, tau_ss);</span></span>
+<span id="cb6-73"><a href="measurement-error-as-a-latent-variable.html#cb6-73" tabindex="-1"></a><span class="st">  stress_clin ~ normal(lambda_sc * theta_stress, tau_sc);</span></span>
+<span id="cb6-74"><a href="measurement-error-as-a-latent-variable.html#cb6-74" tabindex="-1"></a><span class="st">  sleep_watch ~ normal(lambda_sw * theta_sleep + delta_sw * eta_sleep_method, tau_sw);</span></span>
+<span id="cb6-75"><a href="measurement-error-as-a-latent-variable.html#cb6-75" tabindex="-1"></a><span class="st">  sleep_phone ~ normal(lambda_sp * theta_sleep + delta_sp * eta_sleep_method, tau_sp);</span></span>
+<span id="cb6-76"><a href="measurement-error-as-a-latent-variable.html#cb6-76" tabindex="-1"></a><span class="st">  lonely_item ~ normal(lambda_li * theta_iso, tau_li);</span></span>
+<span id="cb6-77"><a href="measurement-error-as-a-latent-variable.html#cb6-77" tabindex="-1"></a></span>
+<span id="cb6-78"><a href="measurement-error-as-a-latent-variable.html#cb6-78" tabindex="-1"></a><span class="st">  // FIXED: beta indexed correctly</span></span>
+<span id="cb6-79"><a href="measurement-error-as-a-latent-variable.html#cb6-79" tabindex="-1"></a><span class="st">  y ~ normal(beta0</span></span>
+<span id="cb6-80"><a href="measurement-error-as-a-latent-variable.html#cb6-80" tabindex="-1"></a><span class="st">             + beta[1] * theta_stress</span></span>
+<span id="cb6-81"><a href="measurement-error-as-a-latent-variable.html#cb6-81" tabindex="-1"></a><span class="st">             + beta[2] * theta_sleep</span></span>
+<span id="cb6-82"><a href="measurement-error-as-a-latent-variable.html#cb6-82" tabindex="-1"></a><span class="st">             + beta[3] * theta_iso,</span></span>
+<span id="cb6-83"><a href="measurement-error-as-a-latent-variable.html#cb6-83" tabindex="-1"></a><span class="st">             sigma_y);</span></span>
+<span id="cb6-84"><a href="measurement-error-as-a-latent-variable.html#cb6-84" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb6-85"><a href="measurement-error-as-a-latent-variable.html#cb6-85" tabindex="-1"></a><span class="st">generated quantities {</span></span>
+<span id="cb6-86"><a href="measurement-error-as-a-latent-variable.html#cb6-86" tabindex="-1"></a><span class="st">  // FIXED: block was absent; added with correct dimension</span></span>
+<span id="cb6-87"><a href="measurement-error-as-a-latent-variable.html#cb6-87" tabindex="-1"></a><span class="st">  corr_matrix[3] Omega = multiply_lower_tri_self_transpose(L_Omega);</span></span>
+<span id="cb6-88"><a href="measurement-error-as-a-latent-variable.html#cb6-88" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb6-89"><a href="measurement-error-as-a-latent-variable.html#cb6-89" tabindex="-1"></a><span class="st">&quot;</span></span>
+<span id="cb6-90"><a href="measurement-error-as-a-latent-variable.html#cb6-90" tabindex="-1"></a><span class="fu">writeLines</span>(stan_me_corr, <span class="st">&quot;stan_me_corr.stan&quot;</span>)</span></code></pre></div>
+<p>This version is appropriate when two or more indicators share method variance that is not part of the underlying construct — common examples in mental-health data include two digital phenotyping variables from the same phone pipeline, two subscales from the same questionnaire, or two ratings from the same informant.</p>
+</div>
+<div id="choosing-between-the-two-scenarios" class="section level2 hasAnchor" number="11.8">
+<h2><span class="header-section-number">11.8</span> Choosing Between the Two Scenarios<a href="measurement-error-as-a-latent-variable.html#choosing-between-the-two-scenarios" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Criterion</th>
+<th>Uncorrelated error</th>
+<th>Correlated error</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Indicators share an instrument or pipeline</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td>Residuals independent after conditioning on latent</td>
+<td>✓ Assumed</td>
+<td>✗ Violated</td>
+</tr>
+<tr class="odd">
+<td>Model complexity</td>
+<td>Lower</td>
+<td>Higher</td>
+</tr>
+<tr class="even">
+<td>Risk of ignoring</td>
+<td>Attenuation bias</td>
+<td>Inflated apparent construct signal</td>
+</tr>
+</tbody>
+</table>
+<p>Ignoring correlated measurement error is particularly consequential: the model may absorb shared method variance into the latent construct itself, making a trait appear stronger or cleaner than it truly is. A latent method factor makes that source of dependence explicit and separable.</p>
+</div>
+<div id="what-changes-in-interpretation" class="section level2 hasAnchor" number="11.9">
+<h2><span class="header-section-number">11.9</span> What Changes in Interpretation<a href="measurement-error-as-a-latent-variable.html#what-changes-in-interpretation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Once the model is fit, the posterior means of the latent predictors are not “true scores” in any magical sense. They are <strong>shrinkage estimates</strong> — they combine prior structure, cross-indicator information, and the outcome model, exactly as Bayesian latent-variable frameworks intend.</p>
+<p>That is a feature. A participant with a very high stress self-report but a moderate clinician score and a modest depression outcome will not be forced into an extreme stress estimate. The posterior compromises across those sources of evidence, and that compromise is precisely what principled uncertainty propagation is supposed to produce.</p>
+</div>
+<div id="practical-cautions" class="section level2 hasAnchor" number="11.10">
+<h2><span class="header-section-number">11.10</span> Practical Cautions<a href="measurement-error-as-a-latent-variable.html#practical-cautions" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><strong>Identification.</strong> Latent-variable models require scale constraints. In practice, either fix one loading per factor to 1 and estimate the latent variance freely, or fix the latent variance to 1 and estimate all loadings. Without such a constraint, the model can rescale the latent variable and the loadings in tandem, leaving the likelihood unchanged but the parameters non-identified.</p>
+<p><strong>Assumption dependence.</strong> The model estimates latent predictors under assumptions about normality, conditional independence, and measurement structure. It does not recover truth from noise without those assumptions. That is the same caution that applies across Bayesian latent-variable and measurement-error modeling more broadly: a well-specified model is powerful, but a misspecified one can produce posteriors that are confidently wrong.</p>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="robust-t-regression.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="bayesian-regularized-regression.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+  "sharing": {
+    "github": false,
+    "facebook": true,
+    "twitter": true,
+    "linkedin": false,
+    "weibo": false,
+    "instapaper": false,
+    "vk": false,
+    "whatsapp": false,
+    "all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+  },
+  "fontsettings": {
+    "theme": "white",
+    "family": "sans",
+    "size": 2
+  },
+  "edit": {
+    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/edit/main/04b-measurment_error.Rmd",
+    "text": "Edit"
+  },
+  "history": {
+    "link": null,
+    "text": null
+  },
+  "view": {
+    "link": "https://github.com/Kamran-Afzali/Bookdown_Stan/blob/main/04b-measurment_error.Rmd",
+    "text": null
+  },
+  "download": null,
+  "search": {
+    "engine": "fuse",
+    "options": null
+  },
+  "toc": {
+    "collapse": "subsection"
+  }
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
