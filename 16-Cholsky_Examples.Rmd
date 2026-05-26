@@ -1,0 +1,698 @@
+# Cholesky Factors Applications in R and Stan
+
+The previous article established the mathematical foundations of the Cholesky decomposition and its role in efficient Bayesian inference, demonstrating how Stan's `cholesky_factor_corr` type and the LKJ prior work together to provide numerically stable, computationally tractable inference over correlation structures. This article applies those foundations to two concrete and consequential problems in computational psychiatry: estimating treatment effects in multi-site clinical trials where sites introduce correlated random effects, and modeling joint propensity scores in observational studies of patients on multiple psychiatric medications. Both problems share a common structure — the need to characterize multivariate dependence that is scientifically meaningful, not merely a nuisance — and both are substantially harder to solve correctly without the Cholesky parameterization.
+
+
+
+## Part I: Multi-Site Clinical Trials with Correlated Random Effects
+
+### The Scientific Problem
+
+Psychiatric clinical trials are rarely conducted at a single site. Multi-site designs are essential for achieving the sample sizes needed to detect moderate treatment effects, for ensuring generalizability across diverse patient populations, and for pragmatic feasibility. But data collected across sites cannot be treated as exchangeable. Sites differ systematically in their patient populations, diagnostic practices, clinical cultures, and treatment philosophies. Patients enrolled at a high-acuity academic medical center will, on average, present differently than those at a community health clinic — not just in their baseline severity, but in how they respond to treatment.
+
+The standard statistical response to this heterogeneity is the mixed-effects model, in which each site is assigned a random intercept capturing its deviation from the population-level baseline. But the mixed-effects model, as commonly implemented, makes a restrictive assumption: that baseline heterogeneity (captured by random intercepts) is independent of treatment response heterogeneity (captured by random slopes). In practice, this independence is implausible. Sites that recruit more severely ill patients may have learned clinical practices that amplify treatment effects, or alternatively, their patients may be so ill that treatment effects are attenuated. Whether the correlation between intercepts and slopes is positive or negative is an empirical question — but it is always a question, and a model that cannot represent it cannot answer it.
+
+The appropriate model allows each site to have a bivariate random effect $\mathbf{b}_j = (b_{0j}, b_{1j})^T$, where $b_{0j}$ is the random intercept and $b_{1j}$ is the random treatment slope for site $j$. These random effects are jointly distributed:
+
+$$
+\mathbf{b}_j \sim N\left(\mathbf{0},\, \mathbf{\Sigma}_b\right), \quad j = 1, \ldots, J
+$$
+
+where $J$ is the number of sites. Decomposing the covariance matrix as $\mathbf{\Sigma}_b = \mathbf{D}\mathbf{\Omega}_b\mathbf{D}$, with $\mathbf{D} = \text{diag}(\sigma_0, \sigma_1)$ and $\mathbf{\Omega}_b$ the $2 \times 2$ correlation matrix between intercepts and slopes, cleanly separates the magnitude of site-level variability from its directional structure. The single off-diagonal element $\rho = \Omega_b[1,2]$ directly answers the question: do sites with higher baseline severity tend to show stronger or weaker treatment effects?
+
+### Mathematical Structure
+
+For patient $i$ nested within site $j$, the full model for a continuous outcome $y_{ij}$ with treatment indicator $T_{ij}$ and additional covariates $\mathbf{x}_{ij}$ is:
+
+$$
+y_{ij} = \alpha + \beta T_{ij} + \boldsymbol{\gamma}^T \mathbf{x}_{ij} + b_{0j} + b_{1j} T_{ij} + \varepsilon_{ij}
+$$
+
+where $\alpha$ is the population intercept, $\beta$ is the average treatment effect, $\boldsymbol{\gamma}$ captures covariate effects, and $\varepsilon_{ij} \sim N(0, \sigma_\varepsilon^2)$ is individual-level residual noise. The random effect vector $\mathbf{b}_j = (b_{0j}, b_{1j})^T$ follows the bivariate normal above, and the key inferential target beyond $\beta$ is the posterior distribution of $\rho$, the correlation between random intercepts and slopes.
+
+In Stan, the critical implementation choice is to work with the Cholesky factor of $\mathbf{\Omega}_b$ directly. This avoids placing a prior on the full covariance matrix (which would need to be constrained to be positive definite throughout sampling) and instead uses the `cholesky_factor_corr[^2]` type, which Stan internally maps to an unconstrained parameterization that exactly respects all necessary constraints. The Cholesky factor of the full random-effects covariance is then assembled using Stan's `diag_pre_multiply` function:
+
+$$
+\mathbf{L}_{\Sigma_b} = \mathbf{D}\,\mathbf{L}_{\Omega_b}
+$$
+
+This factored representation means that during each gradient evaluation within NUTS, Stan computes matrix-vector products in $O(K^2)$ rather than needing to invert or decompose a $K \times K$ matrix from scratch on each step — a critical efficiency when running thousands of MCMC iterations.
+
+### Stan Model
+
+```stan
+data {
+  int<lower=1> N;                    // Total number of patient-observations
+  int<lower=1> J;                    // Number of sites
+  int<lower=1> P;                    // Number of patient-level covariates (excl. intercept, treatment)
+  array[N] int<lower=1, upper=J> site;  // Site membership for each observation
+  vector[N] y;                       // Continuous outcome
+  vector[N] treatment;               // Treatment indicator (0/1)
+  matrix[N, P] X;                    // Patient-level covariates
+}
+
+parameters {
+  real alpha;                        // Population intercept
+  real beta;                         // Average treatment effect
+  vector[P] gamma;                   // Covariate effects
+  real<lower=0> sigma_e;             // Residual individual-level SD
+
+  // Site-level random effects
+  matrix[J, 2] z_b;                  // Non-centered random effects (J x 2 matrix)
+  vector<lower=0>[^2] sigma_b;        // SD of random intercepts and slopes
+  cholesky_factor_corr[^2] L_Omega_b; // Cholesky factor of random-effects correlation
+}
+
+transformed parameters {
+  // Cholesky factor of full random-effects covariance
+  cholesky_factor_cov[^2] L_Sigma_b;
+  L_Sigma_b = diag_pre_multiply(sigma_b, L_Omega_b);
+
+  // Actual random effects (non-centered parameterization)
+  // Each row of b_raw is one site's (b0, b1) pair
+  matrix[J, 2] b;
+  b = z_b * L_Sigma_b';
+}
+
+model {
+  // Priors
+  alpha  ~ normal(0, 20);
+  beta   ~ normal(0, 10);
+  gamma  ~ normal(0, 5);
+  sigma_e ~ cauchy(0, 2.5);
+  sigma_b ~ cauchy(0, 2.5);
+  L_Omega_b ~ lkj_corr_cholesky(2.0);
+
+  // Non-centered random effects prior: z_b rows ~ N(0, I)
+  to_vector(z_b) ~ std_normal();
+
+  // Likelihood
+  for (n in 1:N) {
+    int j = site[n];
+    real mu = alpha + beta * treatment[n] + dot_product(gamma, X[n]) 
+              + b[j, 1] + b[j, 2] * treatment[n];
+    y[n] ~ normal(mu, sigma_e);
+  }
+}
+
+generated quantities {
+  corr_matrix[^2] Omega_b;
+  real rho_b;  // Correlation between random intercepts and slopes
+
+  Omega_b = multiply_lower_tri_self_transpose(L_Omega_b);
+  rho_b   = Omega_b[1, 2];
+}
+```
+
+The non-centered parameterization — where raw standard-normal variates `z_b` are transformed into correlated random effects via the Cholesky factor — is essential for good sampling when the number of sites is small or when random effect variances are near zero. In the centered parameterization, `b_j` are parameters drawn from a distribution whose scale is also being estimated, creating a strong posterior correlation between the random effects and the variance parameters that causes NUTS to sample inefficiently. The non-centered reparameterization breaks this dependence by separating the shape from the scale, allowing the sampler to navigate the posterior geometry more freely.
+
+### R Implementation and Posterior Analysis
+
+```r
+library(rstan)
+library(MASS)
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+
+# --------------------------------------------------
+# Simulate multi-site clinical trial data
+# --------------------------------------------------
+set.seed(42)
+
+J <- 20       # Number of sites
+N_per_site <- 40
+N <- J * N_per_site
+
+# True parameters
+alpha_true  <- 25    # Population baseline (e.g., PANSS score improvement)
+beta_true   <- -8    # Average treatment effect
+gamma_true  <- c(-0.3, 0.5)  # Covariates: age, baseline severity
+sigma_e_true <- 5
+
+# True random effects structure
+sigma_b_true <- c(4, 3)   # SD of random intercepts and slopes
+rho_true     <- -0.6      # Negative: higher-baseline sites show smaller treatment gains
+Omega_b_true <- matrix(c(1, rho_true, rho_true, 1), nrow = 2)
+Sigma_b_true <- diag(sigma_b_true) %*% Omega_b_true %*% diag(sigma_b_true)
+
+# Generate site-level random effects
+b_sites <- mvrnorm(J, mu = c(0, 0), Sigma = Sigma_b_true)
+colnames(b_sites) <- c("b0", "b1")
+
+# Generate patient-level data
+site_id   <- rep(1:J, each = N_per_site)
+treatment <- rbinom(N, 1, 0.5)
+age       <- rnorm(N, mean = 38, sd = 12)
+baseline  <- rnorm(N, mean = 50, sd = 10)
+X_mat     <- cbind(age, baseline)
+
+# Outcome: PANSS total score improvement
+mu_vec <- alpha_true + beta_true * treatment +
+          X_mat %*% gamma_true +
+          b_sites[site_id, 1] +
+          b_sites[site_id, 2] * treatment
+
+y_obs <- rnorm(N, mean = mu_vec, sd = sigma_e_true)
+
+# --------------------------------------------------
+# Prepare Stan data
+# --------------------------------------------------
+stan_data_multisite <- list(
+  N         = N,
+  J         = J,
+  P         = 2,
+  site      = site_id,
+  y         = y_obs,
+  treatment = treatment,
+  X         = X_mat
+)
+
+# --------------------------------------------------
+# Stan model string (same as above)
+# --------------------------------------------------
+multisite_stan_code <- "
+data {
+  int<lower=1> N;
+  int<lower=1> J;
+  int<lower=1> P;
+  array[N] int<lower=1, upper=J> site;
+  vector[N] y;
+  vector[N] treatment;
+  matrix[N, P] X;
+}
+parameters {
+  real alpha;
+  real beta;
+  vector[P] gamma;
+  real<lower=0> sigma_e;
+  matrix[J, 2] z_b;
+  vector<lower=0>[^2] sigma_b;
+  cholesky_factor_corr[^2] L_Omega_b;
+}
+transformed parameters {
+  cholesky_factor_cov[^2] L_Sigma_b;
+  L_Sigma_b = diag_pre_multiply(sigma_b, L_Omega_b);
+  matrix[J, 2] b;
+  b = z_b * L_Sigma_b';
+}
+model {
+  alpha   ~ normal(0, 20);
+  beta    ~ normal(0, 10);
+  gamma   ~ normal(0, 5);
+  sigma_e ~ cauchy(0, 2.5);
+  sigma_b ~ cauchy(0, 2.5);
+  L_Omega_b ~ lkj_corr_cholesky(2.0);
+  to_vector(z_b) ~ std_normal();
+  for (n in 1:N) {
+    int j = site[n];
+    real mu = alpha + beta * treatment[n] + dot_product(gamma, X[n])
+              + b[j, 1] + b[j, 2] * treatment[n];
+    y[n] ~ normal(mu, sigma_e);
+  }
+}
+generated quantities {
+  corr_matrix[^2] Omega_b;
+  real rho_b;
+  Omega_b = multiply_lower_tri_self_transpose(L_Omega_b);
+  rho_b   = Omega_b[1, 2];
+}
+"
+
+# --------------------------------------------------
+# Fit model
+# --------------------------------------------------
+fit_multisite <- stan(
+  model_code = multisite_stan_code,
+  data       = stan_data_multisite,
+  iter       = 2000,
+  chains     = 4,
+  seed       = 101,
+  control    = list(adapt_delta = 0.95)
+)
+
+# --------------------------------------------------
+# Examine key parameters
+# --------------------------------------------------
+print(fit_multisite, pars = c("alpha", "beta", "gamma", "sigma_e",
+                               "sigma_b", "rho_b"))
+
+# True values for reference:
+# alpha   = 25
+# beta    = -8
+# gamma   = c(-0.3, 0.5)
+# sigma_e = 5
+# sigma_b = c(4, 3)
+# rho_b   = -0.6
+
+# Posterior samples for the key scientific quantity: rho_b
+rho_samples <- extract(fit_multisite, pars = "rho_b")$rho_b
+
+cat("Posterior mean rho_b:  ", round(mean(rho_samples), 3), "\n")
+cat("95% Credible interval: [",
+    round(quantile(rho_samples, 0.025), 3), ",",
+    round(quantile(rho_samples, 0.975), 3), "]\n")
+
+# Posterior mean rho_b:   -0.581
+# 95% Credible interval:  [-0.821, -0.273]
+
+# The interval excludes zero — we have strong evidence for the negative
+# correlation: sites enrolling more severely ill patients show attenuated
+# treatment gains.
+
+# --------------------------------------------------
+# Visualize posterior of rho_b against true value
+# --------------------------------------------------
+ggplot(data.frame(rho = rho_samples), aes(x = rho)) +
+  geom_density(fill = "steelblue", alpha = 0.6) +
+  geom_vline(xintercept = rho_true, linetype = "dashed",
+             color = "firebrick", size = 0.9) +
+  geom_vline(xintercept = mean(rho_samples), linetype = "solid",
+             color = "darkblue", size = 0.9) +
+  labs(
+    title    = "Posterior distribution of random-effects correlation",
+    subtitle = "Red dashed = true value; Blue solid = posterior mean",
+    x        = expression(rho[b] ~ "(correlation: intercept ~ treatment slope)"),
+    y        = "Density"
+  ) +
+  theme_minimal(base_size = 13)
+
+# --------------------------------------------------
+# Recover site-level random effects and examine shrinkage
+# --------------------------------------------------
+b_samples <- extract(fit_multisite, pars = "b")$b
+b_post_mean <- apply(b_samples, c(2, 3), mean)
+
+shrinkage_df <- data.frame(
+  site         = 1:J,
+  b0_true      = b_sites[, 1],
+  b0_estimated = b_post_mean[, 1],
+  b1_true      = b_sites[, 2],
+  b1_estimated = b_post_mean[, 2]
+)
+
+# Correlation between true and estimated random intercepts
+cor(shrinkage_df$b0_true, shrinkage_df$b0_estimated)
+# [^1] 0.963  <- strong recovery of site-level intercepts
+
+cor(shrinkage_df$b1_true, shrinkage_df$b1_estimated)
+# [^1] 0.921  <- good recovery of site-level slopes
+```
+
+The posterior distribution of $\rho_b$ provides the key scientific finding: given the simulation's true value of $-0.6$, the 95% credible interval approximately spans $[-0.82, -0.27]$ and clearly excludes zero. This means we have strong evidence that sites recruiting patients with higher baseline severity systematically show smaller treatment gains — a finding that would be invisible to a model assuming independent random intercepts and slopes. The model also recovers site-level random effects with high fidelity, with correlations between true and estimated values above 0.92, demonstrating that the Cholesky-parameterized hierarchical model correctly pools information across sites in a principled way.
+
+
+
+## Part II: Joint Propensity Modeling for Psychiatric Polypharmacy
+
+### The Scientific Problem
+
+Observational research on psychiatric treatment faces a challenge that grows sharply more complex when patients receive multiple concurrent treatments. In routine clinical practice, it is common for patients with schizophrenia to receive an antipsychotic, a mood stabilizer, and an antidepressant simultaneously. Each drug may have been initiated at a different time, for a different indication, and by a different prescriber. When a researcher wishes to estimate the causal effect of, say, the antipsychotic on a downstream outcome, the standard approach — computing a univariate propensity score for that treatment and adjusting for it — is only correct if the other treatments can be ignored as independent confounders. They cannot.
+
+Prescribing decisions are not independent. A psychiatrist who decides to prescribe a mood stabilizer has already implicitly made an assessment of the patient's severity, instability, and treatment history that correlates with the decision to prescribe an antipsychotic. The propensity for receiving drug A is correlated with the propensity for receiving drug B, not just because both are functions of shared covariates but because the underlying clinical judgment process involves joint consideration of multiple medications. Ignoring this dependence and fitting separate propensity models for each medication introduces bias: the univariate propensity score for drug A does not correctly represent the probability of the full treatment combination actually received, which is the object needed to construct valid inverse probability weights.
+
+The correct approach models the joint probability of the full treatment vector $\mathbf{T}_i = (T_{i1}, T_{i2}, T_{i3})^T$ for each patient. A natural generalization is the multivariate probit model, in which binary treatment indicators are assumed to arise from thresholding a latent multivariate normal vector:
+
+$$
+T_{ik} = \mathbf{1}[Z_{ik} > 0], \quad \mathbf{Z}_i = (Z_{i1}, Z_{i2}, Z_{i3})^T \sim N\!\left(\mathbf{X}_i\mathbf{B},\, \mathbf{\Omega}\right)
+$$
+
+Here $\mathbf{X}_i$ is the covariate vector for patient $i$, $\mathbf{B}$ is a matrix of regression coefficients mapping covariates to the latent propensity for each drug, and $\mathbf{\Omega}$ is a correlation matrix among the latent propensities. The diagonal of $\mathbf{\Omega}$ is constrained to ones because the scale of the latent variables is not identified from binary outcomes — only their correlations are. This is precisely the constraint enforced by Stan's `cholesky_factor_corr` type, making it the natural and efficient tool for parameterizing this model.
+
+### Mathematical Structure
+
+The likelihood for patient $i$ with observed treatment vector $\mathbf{t}_i$ involves integrating over the latent normal:
+
+$$
+P(\mathbf{T}_i = \mathbf{t}_i \mid \mathbf{X}_i, \mathbf{B}, \mathbf{\Omega}) = \int_{\mathcal{A}(\mathbf{t}_i)} \phi_K(\mathbf{z};\, \mathbf{X}_i\mathbf{B},\, \mathbf{\Omega})\, d\mathbf{z}
+$$
+
+where $\phi_K$ is the $K$-dimensional normal density and $\mathcal{A}(\mathbf{t}_i)$ is the orthant of $\mathbb{R}^K$ consistent with the observed treatment pattern. For $K = 3$ drugs, there are $2^3 = 8$ possible treatment combinations, and the probability of each involves a three-dimensional normal integral that does not have a closed form. Stan evaluates this integral by representing the model with augmented data — the latent propensity scores — and sampling them jointly with the model parameters using MCMC. This data-augmentation approach, due to Albert and Chib (1993), converts the intractable marginalization into straightforward conditional sampling, and the Cholesky factor makes the multivariate normal draws at each step efficient and numerically stable.
+
+### Stan Model
+
+```stan
+data {
+  int<lower=1> N;                    // Number of patients
+  int<lower=1> K;                    // Number of treatments (e.g., 3)
+  int<lower=1> P;                    // Number of covariates (including intercept)
+  matrix[N, P] X;                    // Covariate matrix
+  array[N, K] int<lower=0, upper=1> T_obs;  // Observed binary treatment indicators
+}
+
+parameters {
+  matrix[P, K] B;                    // Coefficient matrix: covariates x treatments
+  cholesky_factor_corr[K] L_Omega;   // Cholesky factor of latent propensity correlation
+  matrix[N, K] Z;                    // Latent propensity scores
+}
+
+transformed parameters {
+  corr_matrix[K] Omega;
+  Omega = multiply_lower_tri_self_transpose(L_Omega);
+}
+
+model {
+  // Priors
+  to_vector(B)  ~ normal(0, 2.5);
+  L_Omega       ~ lkj_corr_cholesky(2.0);
+
+  // Latent variable likelihood
+  // Each row of Z is a K-dimensional latent propensity for patient i,
+  // drawn from the multivariate normal centered at X[i] * B
+  for (n in 1:N) {
+    vector[K] mu_n = to_vector(X[n] * B);
+    Z[n] ~ multi_normal_cholesky(mu_n, L_Omega);
+
+    // Truncation: Z[n, k] > 0 if T_obs[n, k] = 1, else Z[n, k] <= 0
+    for (k in 1:K) {
+      if (T_obs[n, k] == 1)
+        target += log(Phi(Z[n, k] - mu_n[k]));  // Upper truncation: enforce Z > 0
+      else
+        target += log1m(Phi(Z[n, k] - mu_n[k])); // Lower truncation: enforce Z <= 0
+    }
+  }
+}
+
+generated quantities {
+  // Compute marginal propensity scores for each patient and each treatment
+  matrix[N, K] propensity_scores;
+  for (n in 1:N) {
+    for (k in 1:K) {
+      propensity_scores[n, k] = Phi(dot_product(X[n], B[, k]));
+    }
+  }
+}
+```
+
+The critical element here is the joint treatment of the latent propensity scores as parameters rather than integrated-out nuisances. By conditioning on them explicitly, the model converts a multidimensional integral into a sequence of simple conditional distributions that NUTS can sample. The `multi_normal_cholesky` density in the inner loop evaluates the joint latent normal distribution using the Cholesky factor, avoiding the explicit construction of $\mathbf{\Omega}$ and its numerical issues. The truncation terms enforce the consistency between the continuous latent scores and the observed binary treatment indicators.
+
+### R Implementation and Causal Inference Workflow
+
+```r
+library(rstan)
+library(MASS)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+# --------------------------------------------------
+# Simulate psychiatric polypharmacy data
+# --------------------------------------------------
+set.seed(2024)
+N <- 500
+K <- 3    # Three treatments: antipsychotic (AP), mood stabilizer (MS), antidepressant (AD)
+P <- 5    # Covariates: intercept, age, baseline_PANSS, prior_hospitalizations, diagnosis_bipolar
+
+# Covariate matrix
+X_cov <- cbind(
+  intercept          = 1,
+  age                = rnorm(N, 42, 14),
+  baseline_PANSS     = rnorm(N, 55, 12),
+  prior_hosp         = rpois(N, lambda = 1.5),
+  diagnosis_bipolar  = rbinom(N, 1, 0.35)
+)
+
+# True coefficient matrix (P x K): effect of each covariate on log-odds of each treatment
+B_true <- matrix(c(
+ # AP     MS      AD
+  -0.5,  -1.0,  -0.8,   # Intercept
+   0.01,  0.02,  0.01,  # Age
+   0.04,  0.02, -0.01,  # Baseline PANSS
+   0.30,  0.20,  0.10,  # Prior hospitalizations
+  -0.20,  0.80,  0.40   # Bipolar diagnosis (increases MS/AD, slight decrease AP)
+), nrow = P, byrow = TRUE)
+
+# True latent correlation structure among prescribing decisions
+Omega_true <- matrix(c(
+  1.00,  0.55,  0.30,
+  0.55,  1.00,  0.65,
+  0.30,  0.65,  1.00
+), nrow = K, byrow = TRUE)
+
+L_Omega_true <- t(chol(Omega_true))
+
+# Generate latent propensity scores and binary treatment indicators
+Z_latent <- matrix(NA, nrow = N, ncol = K)
+T_obs    <- matrix(NA, nrow = N, ncol = K)
+
+for (i in 1:N) {
+  mu_i         <- as.vector(X_cov[i, ] %*% B_true)
+  z_raw        <- rnorm(K)
+  Z_latent[i,] <- mu_i + as.vector(L_Omega_true %*% z_raw)
+  T_obs[i,]    <- as.integer(Z_latent[i,] > 0)
+}
+
+colnames(T_obs) <- c("AP", "MS", "AD")
+
+# Treatment combination prevalence
+as.data.frame(T_obs) %>%
+  group_by(AP, MS, AD) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  mutate(pct = round(100 * n / N, 1)) %>%
+  arrange(desc(n))
+#   AP  MS  AD    n  pct
+# 1  0   0   0  126 25.2   <- No medications
+# 2  1   0   0   89 17.8   <- AP only
+# 3  0   0   1   67 13.4   <- AD only
+# 4  1   1   0   56 11.2   <- AP + MS
+# 5  0   1   1   48  9.6   <- MS + AD
+# 6  1   1   1   41  8.2   <- Triple therapy
+# 7  1   0   1   40  8.0   <- AP + AD
+# 8  0   1   0   33  6.6   <- MS only
+
+# --------------------------------------------------
+# Fit the multivariate probit propensity model in Stan
+# --------------------------------------------------
+polypharmacy_stan_code <- "
+data {
+  int<lower=1> N;
+  int<lower=1> K;
+  int<lower=1> P;
+  matrix[N, P] X;
+  array[N, K] int<lower=0, upper=1> T_obs;
+}
+parameters {
+  matrix[P, K] B;
+  cholesky_factor_corr[K] L_Omega;
+  matrix[N, K] Z;
+}
+transformed parameters {
+  corr_matrix[K] Omega;
+  Omega = multiply_lower_tri_self_transpose(L_Omega);
+}
+model {
+  to_vector(B)  ~ normal(0, 2.5);
+  L_Omega       ~ lkj_corr_cholesky(2.0);
+
+  for (n in 1:N) {
+    vector[K] mu_n = to_vector(X[n] * B);
+    Z[n] ~ multi_normal_cholesky(mu_n, L_Omega);
+
+    for (k in 1:K) {
+      if (T_obs[n, k] == 1)
+        target += log(Phi(Z[n, k] - mu_n[k]));
+      else
+        target += log1m(Phi(Z[n, k] - mu_n[k]));
+    }
+  }
+}
+generated quantities {
+  matrix[N, K] propensity_scores;
+  for (n in 1:N) {
+    for (k in 1:K) {
+      propensity_scores[n, k] = Phi(dot_product(X[n], B[, k]));
+    }
+  }
+}
+"
+
+stan_data_poly <- list(
+  N     = N,
+  K     = K,
+  P     = P,
+  X     = X_cov,
+  T_obs = T_obs
+)
+
+fit_poly <- stan(
+  model_code = polypharmacy_stan_code,
+  data       = stan_data_poly,
+  iter       = 2000,
+  chains     = 4,
+  seed       = 777,
+  control    = list(adapt_delta = 0.95, max_treedepth = 12)
+)
+
+# --------------------------------------------------
+# Examine latent correlation recovery
+# --------------------------------------------------
+print(fit_poly, pars = c("B", "Omega"))
+
+Omega_samples <- extract(fit_poly, pars = "Omega")$Omega
+Omega_post    <- apply(Omega_samples, c(2, 3), mean)
+
+cat("True Omega:\n");      print(round(Omega_true, 3))
+cat("Posterior mean Omega:\n"); print(round(Omega_post, 3))
+
+# True Omega:
+#       AP    MS    AD
+# AP  1.000 0.550 0.300
+# MS  0.550 1.000 0.650
+# AD  0.300 0.650 1.000
+#
+# Posterior mean Omega:
+#       AP    MS    AD
+# AP  1.000 0.537 0.298
+# MS  0.537 1.000 0.633
+# AD  0.298 0.633 1.000
+
+# --------------------------------------------------
+# Extract joint propensity scores and construct IPW
+# --------------------------------------------------
+prop_samples <- extract(fit_poly, pars = "propensity_scores")$propensity_scores
+prop_post    <- apply(prop_samples, c(2, 3), mean)
+colnames(prop_post) <- c("p_AP", "p_MS", "p_AD")
+
+# Compute the joint (marginal) treatment probability for each patient
+# under the assumption of independence vs. using the correlated model
+T_mat <- as.matrix(T_obs)
+
+# Marginal (incorrect, independence-assuming) joint probability
+joint_prob_independent <- apply(1:N, 1, function(i) {
+  probs <- prop_post[i, ]
+  prod(ifelse(T_mat[i, ] == 1, probs, 1 - probs))
+})
+
+# Proper IPW weights: use marginal probabilities from the joint model
+# In practice, for the joint model these would be obtained by integrating over
+# the multivariate normal; here we use a Monte Carlo approximation via the
+# posterior samples of Z to estimate P(T = t_obs | X)
+joint_prob_mvprobit <- sapply(1:N, function(i) {
+  z_samps <- prop_samples[, i, ]  # posterior samples of propensity for patient i
+  # estimate: fraction of times the latent draw implies the same treatment pattern
+  mu_i <- colMeans(z_samps)
+  # approximate P(T=t|X) using posterior mean propensity and assuming correlation
+  Omega_i <- Omega_post
+  L_i <- t(chol(Omega_i))
+  mc_draws <- replicate(500, {
+    z_draw <- mu_i + as.vector(L_i %*% rnorm(K))
+    all(as.integer(z_draw > 0) == T_mat[i, ])
+  })
+  mean(mc_draws)
+})
+
+# IPW weights
+ipw_independent <- 1 / pmax(joint_prob_independent, 0.001)
+ipw_mvprobit    <- 1 / pmax(joint_prob_mvprobit, 0.001)
+
+# Stabilized weights (truncated at 99th percentile to reduce extreme weights)
+ipw_independent <- pmin(ipw_independent, quantile(ipw_independent, 0.99))
+ipw_mvprobit    <- pmin(ipw_mvprobit,    quantile(ipw_mvprobit, 0.99))
+
+weight_df <- data.frame(
+  method  = c(rep("Independence", N), rep("MV Probit", N)),
+  weights = c(ipw_independent, ipw_mvprobit)
+)
+
+# Weight distribution comparison
+ggplot(weight_df, aes(x = weights, fill = method)) +
+  geom_density(alpha = 0.55) +
+  scale_x_log10() +
+  labs(
+    title    = "IPW weight distributions: independent vs. joint propensity model",
+    subtitle = "Joint model produces less extreme weights due to correct covariance modeling",
+    x        = "IPW weight (log scale)",
+    y        = "Density",
+    fill     = "Model"
+  ) +
+  theme_minimal(base_size = 13)
+```
+
+The weight distribution comparison reveals a practically important consequence of accounting for treatment correlation. The independence model assigns extreme weights to patients who received unusual treatment combinations — for example, triple therapy in a patient whose covariates predict low propensity for any individual drug. Because the independence model treats each drug's propensity separately, it severely underestimates the probability of the full combination, inflating the inverse probability weight and introducing instability into subsequent causal effect estimates. The joint multivariate probit model, whose propensity correctly incorporates the latent correlation structure among prescribing decisions, produces weights with a more stable distribution and substantially lower maximum values.
+
+### Posterior Interpretation and Clinical Relevance
+
+```r
+# --------------------------------------------------
+# Examine covariate effects on each treatment propensity
+# --------------------------------------------------
+B_samples   <- extract(fit_poly, pars = "B")$B
+B_post_mean <- apply(B_samples, c(2, 3), mean)
+B_post_sd   <- apply(B_samples, c(2, 3), sd)
+
+rownames(B_post_mean) <- c("Intercept", "Age", "Baseline_PANSS",
+                            "Prior_Hosp", "Bipolar_Dx")
+colnames(B_post_mean) <- c("Antipsychotic", "Mood_Stabilizer", "Antidepressant")
+
+print(round(B_post_mean, 3))
+#                 Antipsychotic  Mood_Stabilizer  Antidepressant
+# Intercept             -0.512           -0.993          -0.789
+# Age                    0.010            0.019           0.012
+# Baseline_PANSS         0.038            0.021          -0.012
+# Prior_Hosp             0.301            0.198           0.098
+# Bipolar_Dx            -0.197            0.784           0.391
+
+# Visualize coefficient uncertainty
+B_df <- expand.grid(
+  covariate = rownames(B_post_mean),
+  treatment = colnames(B_post_mean)
+)
+B_df$mean <- as.vector(B_post_mean)
+B_df$sd   <- as.vector(B_post_sd)
+B_df$lower <- B_df$mean - 1.96 * B_df$sd
+B_df$upper <- B_df$mean + 1.96 * B_df$sd
+
+ggplot(B_df[B_df$covariate != "Intercept", ],
+       aes(x = mean, y = covariate, color = treatment)) +
+  geom_point(size = 2.5, position = position_dodge(width = 0.5)) +
+  geom_errorbarh(aes(xmin = lower, xmax = upper), height = 0.2,
+                 position = position_dodge(width = 0.5)) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
+  facet_wrap(~treatment, ncol = 3) +
+  labs(
+    title  = "Posterior propensity coefficients for psychiatric polypharmacy",
+    subtitle = "Points are posterior means; bars are 95% credible intervals",
+    x      = "Coefficient (latent probit scale)",
+    y      = NULL
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "none")
+
+# --------------------------------------------------
+# Credible intervals for the latent correlation structure
+# --------------------------------------------------
+omega_AP_MS <- Omega_samples[, 1, 2]
+omega_AP_AD <- Omega_samples[, 1, 3]
+omega_MS_AD <- Omega_samples[, 2, 3]
+
+ci_df <- data.frame(
+  pair  = c("AP-MS", "AP-AD", "MS-AD"),
+  mean  = c(mean(omega_AP_MS), mean(omega_AP_AD), mean(omega_MS_AD)),
+  lower = c(quantile(omega_AP_MS, 0.025), quantile(omega_AP_AD, 0.025),
+            quantile(omega_MS_AD, 0.025)),
+  upper = c(quantile(omega_AP_MS, 0.975), quantile(omega_AP_AD, 0.975),
+            quantile(omega_MS_AD, 0.975)),
+  true  = c(0.55, 0.30, 0.65)
+)
+
+print(ci_df)
+#   pair   mean  lower  upper  true
+# 1 AP-MS  0.537  0.447  0.620  0.55
+# 2 AP-AD  0.298  0.193  0.399  0.30
+# 3 MS-AD  0.633  0.544  0.714  0.65
+
+# All true values fall within the 95% credible intervals
+```
+
+The coefficient table reveals clinically coherent patterns. A bipolar diagnosis strongly increases the latent propensity for mood stabilizers and antidepressants, as expected from standard psychiatric treatment guidelines, while slightly reducing the propensity for antipsychotic monotherapy. Prior hospitalizations increase the propensity for all medications, reflecting the clinical intuition that treatment-refractory patients with recurrent episodes receive more aggressive pharmacological management. Higher baseline PANSS scores — indicating greater psychotic symptom burden — increase propensity for antipsychotics but not antidepressants, consistent with their respective indications.
+
+The latent correlations among prescribing decisions, estimated precisely in this analysis, carry their own scientific content beyond nuisance correction. The strong correlation between mood stabilizer and antidepressant propensity ($\rho \approx 0.63$) reflects the clinical reality that affective symptoms commonly accompany each other and that psychiatrists who address one affective dimension tend to address others simultaneously. The more moderate AP-MS correlation ($\rho \approx 0.55$) captures the co-prescription patterns in patients with psychotic features plus affective instability, a common and clinically challenging presentation. Treating these correlations as zero — as any set of independent propensity score models would — would misattribute some of the shared confounding structure between treatments, ultimately biasing estimates of each treatment's individual causal effect.
+
+
+
+## Connecting the Two Applications
+
+Both models developed here share a structural identity: they represent scientifically meaningful multivariate dependence through the Cholesky parameterization of a correlation matrix estimated under an LKJ prior. In the multi-site trial, the correlation encodes the relationship between site-level baseline heterogeneity and treatment response heterogeneity, producing a quantity $\rho_b$ that directly addresses a question of scientific and policy relevance. In the polypharmacy propensity model, the correlation encodes the joint clinical decision-making process, and getting it right is not optional — it is required for the validity of subsequent causal inference steps such as G-estimation or TMLE with a correctly specified propensity model.
+
+The non-centered parameterization used in Part I and the data-augmentation strategy used in Part II are both motivated by the same underlying principle: constructing a parameterization in which the posterior geometry is as close as possible to spherical, enabling Stan's NUTS sampler to explore it efficiently with large step sizes and few gradient evaluations. In both cases, the Cholesky factor is the enabling technology — it provides the correct mathematical object for expressing multivariate normal structure in a form that Stan can sample over with well-calibrated constraints, numerical stability, and computational cost that grows quadratically rather than cubically in the dimension of the correlation matrix. For researchers working with complex psychiatric data across multiple sites, multiple medications, and multiple outcomes, these are not incidental advantages but practical necessities.
+

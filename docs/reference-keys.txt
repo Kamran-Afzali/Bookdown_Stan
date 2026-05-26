@@ -248,3 +248,16 @@ r-implementation-with-simulated-health-data
 interpretation-for-health-research
 posterior-predictive-checking
 connecting-to-your-research
+cholesky-factors-applications-in-r-and-stan
+part-i-multi-site-clinical-trials-with-correlated-random-effects
+the-scientific-problem
+mathematical-structure
+stan-model-5
+r-implementation-and-posterior-analysis
+part-ii-joint-propensity-modeling-for-psychiatric-polypharmacy
+the-scientific-problem-1
+mathematical-structure-1
+stan-model-6
+r-implementation-and-causal-inference-workflow
+posterior-interpretation-and-clinical-relevance
+connecting-the-two-applications
