@@ -30,7 +30,7 @@ $$
 
 where $\alpha$ is the population intercept, $\beta$ is the average treatment effect, $\boldsymbol{\gamma}$ captures covariate effects, and $\varepsilon_{ij} \sim N(0, \sigma_\varepsilon^2)$ is individual-level residual noise. The random effect vector $\mathbf{b}_j = (b_{0j}, b_{1j})^T$ follows the bivariate normal above, and the key inferential target beyond $\beta$ is the posterior distribution of $\rho$, the correlation between random intercepts and slopes.
 
-In Stan, the critical implementation choice is to work with the Cholesky factor of $\mathbf{\Omega}_b$ directly. This avoids placing a prior on the full covariance matrix (which would need to be constrained to be positive definite throughout sampling) and instead uses the `cholesky_factor_corr[^2]` type, which Stan internally maps to an unconstrained parameterization that exactly respects all necessary constraints. The Cholesky factor of the full random-effects covariance is then assembled using Stan's `diag_pre_multiply` function:
+In Stan, the critical implementation choice is to work with the Cholesky factor of $\mathbf{\Omega}_b$ directly. This avoids placing a prior on the full covariance matrix (which would need to be constrained to be positive definite throughout sampling) and instead uses the `cholesky_factor_corr[2]` type, which Stan internally maps to an unconstrained parameterization that exactly respects all necessary constraints. The Cholesky factor of the full random-effects covariance is then assembled using Stan's `diag_pre_multiply` function:
 
 $$
 \mathbf{L}_{\Sigma_b} = \mathbf{D}\,\mathbf{L}_{\Omega_b}
@@ -59,13 +59,13 @@ parameters {
 
   // Site-level random effects
   matrix[J, 2] z_b;                  // Non-centered random effects (J x 2 matrix)
-  vector<lower=0>[^2] sigma_b;        // SD of random intercepts and slopes
-  cholesky_factor_corr[^2] L_Omega_b; // Cholesky factor of random-effects correlation
+  vector<lower=0>[2] sigma_b;        // SD of random intercepts and slopes
+  cholesky_factor_corr[2] L_Omega_b; // Cholesky factor of random-effects correlation
 }
 
 transformed parameters {
   // Cholesky factor of full random-effects covariance
-  cholesky_factor_cov[^2] L_Sigma_b;
+  cholesky_factor_cov[2] L_Sigma_b;
   L_Sigma_b = diag_pre_multiply(sigma_b, L_Omega_b);
 
   // Actual random effects (non-centered parameterization)
@@ -96,7 +96,7 @@ model {
 }
 
 generated quantities {
-  corr_matrix[^2] Omega_b;
+  corr_matrix[2] Omega_b;
   real rho_b;  // Correlation between random intercepts and slopes
 
   Omega_b = multiply_lower_tri_self_transpose(L_Omega_b);
@@ -187,11 +187,11 @@ parameters {
   vector[P] gamma;
   real<lower=0> sigma_e;
   matrix[J, 2] z_b;
-  vector<lower=0>[^2] sigma_b;
-  cholesky_factor_corr[^2] L_Omega_b;
+  vector<lower=0>[2] sigma_b;
+  cholesky_factor_corr[2] L_Omega_b;
 }
 transformed parameters {
-  cholesky_factor_cov[^2] L_Sigma_b;
+  cholesky_factor_cov[2] L_Sigma_b;
   L_Sigma_b = diag_pre_multiply(sigma_b, L_Omega_b);
   matrix[J, 2] b;
   b = z_b * L_Sigma_b';
@@ -212,7 +212,7 @@ model {
   }
 }
 generated quantities {
-  corr_matrix[^2] Omega_b;
+  corr_matrix[2] Omega_b;
   real rho_b;
   Omega_b = multiply_lower_tri_self_transpose(L_Omega_b);
   rho_b   = Omega_b[1, 2];
@@ -293,10 +293,10 @@ shrinkage_df <- data.frame(
 
 # Correlation between true and estimated random intercepts
 cor(shrinkage_df$b0_true, shrinkage_df$b0_estimated)
-# [^1] 0.963  <- strong recovery of site-level intercepts
+# [1] 0.963  <- strong recovery of site-level intercepts
 
 cor(shrinkage_df$b1_true, shrinkage_df$b1_estimated)
-# [^1] 0.921  <- good recovery of site-level slopes
+# [1] 0.921  <- good recovery of site-level slopes
 ```
 
 The posterior distribution of $\rho_b$ provides the key scientific finding: given the simulation's true value of $-0.6$, the 95% credible interval approximately spans $[-0.82, -0.27]$ and clearly excludes zero. This means we have strong evidence that sites recruiting patients with higher baseline severity systematically show smaller treatment gains — a finding that would be invisible to a model assuming independent random intercepts and slopes. The model also recovers site-level random effects with high fidelity, with correlations between true and estimated values above 0.92, demonstrating that the Cholesky-parameterized hierarchical model correctly pools information across sites in a principled way.
