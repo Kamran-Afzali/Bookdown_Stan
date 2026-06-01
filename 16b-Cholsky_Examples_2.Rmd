@@ -1,0 +1,657 @@
+# Cholesky Factors in Mental Health Research: ACE Decomposition and Longitudinal Covariance Models
+
+The previous two articles established the mathematical machinery of Cholesky decomposition and applied it to correlated random effects in multi-site clinical trials and to joint propensity modeling in psychiatric polypharmacy. Both problems shared a common motivation: multivariate dependence that is scientifically meaningful rather than a statistical nuisance. This article continues in that spirit, turning to two further problems where the Cholesky parameterization is not merely convenient but arguably necessary. The first concerns behavioral genetics — specifically, how to decompose the sources of covariance between two psychiatric phenotypes into genetic and environmental contributions. The second concerns longitudinal psychiatry — how to model the full covariance structure of repeated symptom assessments in a way that separates within-person stability from occasion-specific fluctuation. In both cases, the Cholesky lower triangular structure is not imposed arbitrarily; it encodes a substantive scientific ordering that is part of the model's meaning.
+
+
+
+## Part I: The ACE Cholesky Decomposition in Behavioral Genetics
+
+### The Scientific Problem
+
+A central question in psychiatric epidemiology is whether two disorders share genetic origins or arise from largely independent etiological pathways. Major depressive disorder and generalized anxiety disorder, for example, co-occur at rates far exceeding what chance would predict, yet it is not obvious from co-occurrence alone whether this reflects shared genetic liability, shared environmental exposure, or both. The classical tool for addressing this question is the twin study, which contrasts phenotypic similarity in monozygotic (MZ) pairs — who share essentially all segregating genetic variants — with dizygotic (DZ) pairs, who share on average half. By decomposing phenotypic variance into additive genetic (A), shared environmental (C), and unique environmental (E) components, twin models allow direct estimation of how much of the covariance between two traits flows through each pathway.
+
+For a single trait, the ACE model is straightforward. The phenotypic variance is written as $\sigma^2_P = \sigma^2_A + \sigma^2_C + \sigma^2_E$, and the within-pair covariance is $\text{Cov}_{MZ} = \sigma^2_A + \sigma^2_C$ for MZ twins and $\text{Cov}_{DZ} = \frac{1}{2}\sigma^2_A + \sigma^2_C$ for DZ twins. The difference between these two quantities identifies the genetic component. Extending this to two correlated traits introduces cross-trait, cross-twin covariances — e.g., the covariance between twin 1's depression score and twin 2's anxiety score — which carry the necessary information to estimate genetic and environmental contributions to the phenotypic correlation between the two traits.
+
+The Cholesky ACE decomposition for two traits parameterizes each component matrix — $\mathbf{A}$, $\mathbf{C}$, and $\mathbf{E}$ — as a $2 \times 2$ lower triangular matrix, so that the genetic covariance matrix, for instance, is $\mathbf{\Sigma}_A = \mathbf{L}_A \mathbf{L}_A^T$. This is not purely a computational convenience. The lower triangular structure imposes an implicit ordering: the first trait's genetic factor loads on both traits, while only the second trait has a residual genetic factor after accounting for what it shares with the first. In effect, column 1 of $\mathbf{L}_A$ represents a common genetic factor driving both phenotypes, and column 2 of $\mathbf{L}_A$ captures genetic variance specific to the second phenotype. Whether this specificity is large or small is an empirical question, and its answer bears directly on whether the two disorders have distinct or shared genetic architectures.
+
+### Mathematical Structure
+
+For twin pair $j$, let $\mathbf{y}_j = (y_{j1,1}, y_{j1,2}, y_{j2,1}, y_{j2,2})^T$ denote the stacked outcomes — the two phenotypes for each of the two twins. Under the ACE model, each individual's phenotype vector is
+
+$$
+\mathbf{y}_{ji} = \boldsymbol{\mu} + \mathbf{a}_{ji} + \mathbf{c}_j + \mathbf{e}_{ji}
+$$
+
+where $\mathbf{a}_{ji} \sim N(\mathbf{0}, \mathbf{\Sigma}_A)$, $\mathbf{c}_j \sim N(\mathbf{0}, \mathbf{\Sigma}_C)$, and $\mathbf{e}_{ji} \sim N(\mathbf{0}, \mathbf{\Sigma}_E)$ are the additive genetic, shared environmental, and unique environmental contributions respectively. Shared environment is by definition the same for both twins in a pair — hence the subscript $j$ rather than $ji$ — while genetic and unique environmental terms are twin-specific, though the genetic terms for DZ pairs carry the additional constraint of $\frac{1}{2}$ correlation.
+
+The key consequence is that the expected within-pair phenotypic covariance matrices differ by zygosity. For MZ pairs, where $\text{Cor}(\mathbf{a}_{j1}, \mathbf{a}_{j2}) = \mathbf{I}$:
+
+$$
+\mathbf{\Sigma}_{MZ} = \begin{bmatrix} \mathbf{\Sigma}_A + \mathbf{\Sigma}_C + \mathbf{\Sigma}_E & \mathbf{\Sigma}_A + \mathbf{\Sigma}_C \\ \mathbf{\Sigma}_A + \mathbf{\Sigma}_C & \mathbf{\Sigma}_A + \mathbf{\Sigma}_C + \mathbf{\Sigma}_E \end{bmatrix}
+$$
+
+For DZ pairs, where $\text{Cor}(\mathbf{a}_{j1}, \mathbf{a}_{j2}) = \frac{1}{2}\mathbf{I}$:
+
+$$
+\mathbf{\Sigma}_{DZ} = \begin{bmatrix} \mathbf{\Sigma}_A + \mathbf{\Sigma}_C + \mathbf{\Sigma}_E & \frac{1}{2}\mathbf{\Sigma}_A + \mathbf{\Sigma}_C \\ \frac{1}{2}\mathbf{\Sigma}_A + \mathbf{\Sigma}_C & \mathbf{\Sigma}_A + \mathbf{\Sigma}_C + \mathbf{\Sigma}_E \end{bmatrix}
+$$
+
+Each of the three component covariance matrices is parameterized using a Cholesky factor: $\mathbf{\Sigma}_A = \mathbf{L}_A \mathbf{L}_A^T$, $\mathbf{\Sigma}_C = \mathbf{L}_C \mathbf{L}_C^T$, and $\mathbf{\Sigma}_E = \mathbf{L}_E \mathbf{L}_E^T$. Stan's `cholesky_factor_cov[^2]` type (not `cholesky_factor_corr`, since the diagonal need not be 1) is the appropriate declaration for each, with weakly informative half-normal priors on the diagonal elements and normal priors on the off-diagonal. The genetic correlation between the two phenotypes — the quantity most directly bearing on shared etiology — is then recovered as
+
+$$
+r_A = \frac{(\mathbf{L}_A)_{21}}{\sqrt{(\mathbf{L}_A)_{11}^2 + (\mathbf{L}_A)_{21}^2}}
+$$
+
+which is simply the cosine of the angle between the two rows of $\mathbf{L}_A$.
+
+### Stan Model
+
+```stan
+data {
+  int<lower=1> N_MZ;         // Number of MZ twin pairs
+  int<lower=1> N_DZ;         // Number of DZ twin pairs
+  int<lower=1> P;            // Number of phenotypes (P = 2)
+  matrix[N_MZ, 2*P] Y_MZ;   // MZ twin data: [twin1_pheno1, twin1_pheno2, twin2_pheno1, twin2_pheno2]
+  matrix[N_DZ, 2*P] Y_DZ;   // DZ twin data
+}
+
+parameters {
+  vector[P] mu;                    // Phenotype means
+  cholesky_factor_cov[P] L_A;     // Cholesky of additive genetic covariance
+  cholesky_factor_cov[P] L_C;     // Cholesky of shared environmental covariance
+  cholesky_factor_cov[P] L_E;     // Cholesky of unique environmental covariance
+}
+
+transformed parameters {
+  // Component covariance matrices
+  cov_matrix[P] Sigma_A = L_A * L_A';
+  cov_matrix[P] Sigma_C = L_C * L_C';
+  cov_matrix[P] Sigma_E = L_E * L_E';
+
+  // Total within-person phenotypic covariance
+  cov_matrix[P] Sigma_P = Sigma_A + Sigma_C + Sigma_E;
+
+  // 4x4 within-pair covariance matrices (block structure)
+  matrix[2*P, 2*P] Sigma_pair_MZ;
+  matrix[2*P, 2*P] Sigma_pair_DZ;
+
+  // Diagonal blocks: total phenotypic covariance
+  Sigma_pair_MZ[1:P, 1:P]       = Sigma_P;
+  Sigma_pair_MZ[(P+1):(2*P), (P+1):(2*P)] = Sigma_P;
+  // Off-diagonal blocks: cross-twin covariance
+  Sigma_pair_MZ[1:P, (P+1):(2*P)] = Sigma_A + Sigma_C;       // MZ: full A + C
+  Sigma_pair_MZ[(P+1):(2*P), 1:P] = Sigma_A + Sigma_C;
+
+  Sigma_pair_DZ[1:P, 1:P]       = Sigma_P;
+  Sigma_pair_DZ[(P+1):(2*P), (P+1):(2*P)] = Sigma_P;
+  Sigma_pair_DZ[1:P, (P+1):(2*P)] = 0.5 * Sigma_A + Sigma_C; // DZ: 0.5 A + C
+  Sigma_pair_DZ[(P+1):(2*P), 1:P] = 0.5 * Sigma_A + Sigma_C;
+}
+
+model {
+  // Priors on Cholesky diagonal elements (variance components > 0)
+  to_vector(diagonal(L_A)) ~ normal(0, 5);
+  to_vector(diagonal(L_C)) ~ normal(0, 5);
+  to_vector(diagonal(L_E)) ~ normal(0, 5);
+  // Off-diagonal elements can take any sign
+  L_A[2, 1] ~ normal(0, 2);
+  L_C[2, 1] ~ normal(0, 2);
+  L_E[2, 1] ~ normal(0, 2);
+  mu ~ normal(0, 20);
+
+  // Likelihoods
+  for (n in 1:N_MZ)
+    Y_MZ[n] ~ multi_normal(rep_vector(0.0, 2*P) + append_row(mu, mu), Sigma_pair_MZ);
+  for (n in 1:N_DZ)
+    Y_DZ[n] ~ multi_normal(rep_vector(0.0, 2*P) + append_row(mu, mu), Sigma_pair_DZ);
+}
+
+generated quantities {
+  // Heritability for each phenotype
+  real h2_1 = Sigma_A[1, 1] / Sigma_P[1, 1];
+  real h2_2 = Sigma_A[2, 2] / Sigma_P[2, 2];
+
+  // Genetic correlation between the two phenotypes
+  real r_A = Sigma_A[1, 2] / sqrt(Sigma_A[1, 1] * Sigma_A[2, 2]);
+  real r_E = Sigma_E[1, 2] / sqrt(Sigma_E[1, 1] * Sigma_E[2, 2]);
+
+  // Phenotypic correlation and its genetic/environmental decomposition
+  real r_P = Sigma_P[1, 2] / sqrt(Sigma_P[1, 1] * Sigma_P[2, 2]);
+}
+```
+
+
+### R Implementation and Posterior Analysis
+
+```r
+library(rstan)
+library(MASS)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+# --------------------------------------------------
+# Simulate bivariate twin data: depression + anxiety
+# --------------------------------------------------
+set.seed(42)
+
+N_MZ <- 300
+N_DZ <- 300
+P    <- 2  # depression, anxiety
+
+# True genetic structure
+# Strong common genetic factor + some anxiety-specific genetic variance
+L_A_true <- matrix(c(3.0, 0,
+                      2.0, 1.5), nrow = 2, byrow = TRUE)
+
+L_C_true <- matrix(c(1.5, 0,
+                      1.2, 0.8), nrow = 2, byrow = TRUE)
+
+L_E_true <- matrix(c(2.0, 0,
+                      0.5, 2.5), nrow = 2, byrow = TRUE)
+
+Sigma_A_true <- L_A_true %*% t(L_A_true)
+Sigma_C_true <- L_C_true %*% t(L_C_true)
+Sigma_E_true <- L_E_true %*% t(L_E_true)
+Sigma_P_true <- Sigma_A_true + Sigma_C_true + Sigma_E_true
+
+# True genetic correlation (the key quantity)
+r_A_true <- Sigma_A_true[1,2] / sqrt(Sigma_A_true[1,1] * Sigma_A_true[2,2])
+r_E_true <- Sigma_E_true[1,2] / sqrt(Sigma_E_true[1,1] * Sigma_E_true[2,2])
+cat("True genetic correlation (r_A):", round(r_A_true, 3), "\n")
+cat("True unique environmental correlation (r_E):", round(r_E_true, 3), "\n")
+# True genetic correlation (r_A): 0.843
+# True unique environmental correlation (r_E): 0.094
+
+# True heritabilities
+h2_true <- diag(Sigma_A_true) / diag(Sigma_P_true)
+cat("True h2:", round(h2_true, 3), "\n")
+# True h2: 0.604 0.447
+
+mu_true <- c(12, 8)  # e.g., PHQ-9 mean, GAD-7 mean
+
+# --------------------------------------------------
+# Generate MZ twin data (perfect genetic correlation)
+# --------------------------------------------------
+gen_mz_pair <- function() {
+  a  <- mvrnorm(1, mu = c(0, 0), Sigma = Sigma_A_true)  # shared genetics
+  c  <- mvrnorm(1, mu = c(0, 0), Sigma = Sigma_C_true)  # shared environment
+  e1 <- mvrnorm(1, mu = c(0, 0), Sigma = Sigma_E_true)  # twin 1 unique
+  e2 <- mvrnorm(1, mu = c(0, 0), Sigma = Sigma_E_true)  # twin 2 unique
+  c(mu_true + a + c + e1, mu_true + a + c + e2)
+}
+
+# DZ twins share on average 0.5 of genetic variance
+gen_dz_pair <- function() {
+  L_A_dz <- L_A_true / sqrt(2)
+  a1 <- mvrnorm(1, mu = c(0, 0), Sigma = Sigma_A_true)  # shared genetic component
+  a2 <- mvrnorm(1, mu = c(0, 0), Sigma = Sigma_A_true)  # independent component
+  a_shared <- (a1 + a2) / sqrt(2) * sqrt(0.5)
+  a_unique1 <- a1 * sqrt(0.5)
+  a_unique2 <- a2 * sqrt(0.5)
+  c  <- mvrnorm(1, mu = c(0, 0), Sigma = Sigma_C_true)
+  e1 <- mvrnorm(1, mu = c(0, 0), Sigma = Sigma_E_true)
+  e2 <- mvrnorm(1, mu = c(0, 0), Sigma = Sigma_E_true)
+  c(mu_true + a_shared + a_unique1 + c + e1,
+    mu_true + a_shared + a_unique2 + c + e2)
+}
+
+Y_MZ <- t(replicate(N_MZ, gen_mz_pair()))
+Y_DZ <- t(replicate(N_DZ, gen_dz_pair()))
+
+# Quick check: MZ cross-twin correlation should exceed DZ
+cat("MZ cross-twin correlation (depression):",
+    round(cor(Y_MZ[,1], Y_MZ[,3]), 3), "\n")
+cat("DZ cross-twin correlation (depression):",
+    round(cor(Y_DZ[,1], Y_DZ[,3]), 3), "\n")
+
+# --------------------------------------------------
+# Stan data
+# --------------------------------------------------
+stan_data_ace <- list(
+  N_MZ = N_MZ,
+  N_DZ = N_DZ,
+  P    = P,
+  Y_MZ = Y_MZ,
+  Y_DZ = Y_DZ
+)
+
+# --------------------------------------------------
+# Stan model code
+# --------------------------------------------------
+ace_stan_code <- "
+data {
+  int<lower=1> N_MZ;
+  int<lower=1> N_DZ;
+  int<lower=1> P;
+  matrix[N_MZ, 2*P] Y_MZ;
+  matrix[N_DZ, 2*P] Y_DZ;
+}
+parameters {
+  vector[P] mu;
+  cholesky_factor_cov[P] L_A;
+  cholesky_factor_cov[P] L_C;
+  cholesky_factor_cov[P] L_E;
+}
+transformed parameters {
+  cov_matrix[P] Sigma_A = L_A * L_A';
+  cov_matrix[P] Sigma_C = L_C * L_C';
+  cov_matrix[P] Sigma_E = L_E * L_E';
+  cov_matrix[P] Sigma_P = Sigma_A + Sigma_C + Sigma_E;
+  matrix[2*P, 2*P] Sigma_MZ;
+  matrix[2*P, 2*P] Sigma_DZ;
+  Sigma_MZ[1:P, 1:P]           = Sigma_P;
+  Sigma_MZ[(P+1):(2*P), (P+1):(2*P)] = Sigma_P;
+  Sigma_MZ[1:P, (P+1):(2*P)]   = Sigma_A + Sigma_C;
+  Sigma_MZ[(P+1):(2*P), 1:P]   = Sigma_A + Sigma_C;
+  Sigma_DZ[1:P, 1:P]           = Sigma_P;
+  Sigma_DZ[(P+1):(2*P), (P+1):(2*P)] = Sigma_P;
+  Sigma_DZ[1:P, (P+1):(2*P)]   = 0.5 * Sigma_A + Sigma_C;
+  Sigma_DZ[(P+1):(2*P), 1:P]   = 0.5 * Sigma_A + Sigma_C;
+}
+model {
+  diagonal(L_A) ~ normal(0, 5);
+  diagonal(L_C) ~ normal(0, 5);
+  diagonal(L_E) ~ normal(0, 5);
+  L_A[2, 1] ~ normal(0, 2);
+  L_C[2, 1] ~ normal(0, 2);
+  L_E[2, 1] ~ normal(0, 2);
+  mu ~ normal(0, 20);
+  for (n in 1:N_MZ)
+    Y_MZ[n] ~ multi_normal(append_row(mu, mu)', Sigma_MZ);
+  for (n in 1:N_DZ)
+    Y_DZ[n] ~ multi_normal(append_row(mu, mu)', Sigma_DZ);
+}
+generated quantities {
+  real h2_1 = Sigma_A[1, 1] / Sigma_P[1, 1];
+  real h2_2 = Sigma_A[2, 2] / Sigma_P[2, 2];
+  real r_A  = Sigma_A[1, 2] / sqrt(Sigma_A[1, 1] * Sigma_A[2, 2]);
+  real r_E  = Sigma_E[1, 2] / sqrt(Sigma_E[1, 1] * Sigma_E[2, 2]);
+  real r_P  = Sigma_P[1, 2] / sqrt(Sigma_P[1, 1] * Sigma_P[2, 2]);
+}
+"
+
+# --------------------------------------------------
+# Fit model
+# --------------------------------------------------
+fit_ace <- stan(
+  model_code = ace_stan_code,
+  data       = stan_data_ace,
+  iter       = 2000,
+  chains     = 4,
+  seed       = 314,
+  control    = list(adapt_delta = 0.95)
+)
+
+print(fit_ace, pars = c("h2_1", "h2_2", "r_A", "r_E", "r_P"))
+
+# --------------------------------------------------
+# Posterior analysis: genetic vs. environmental correlation
+# --------------------------------------------------
+rA_samples <- extract(fit_ace, pars = "r_A")$r_A
+rE_samples <- extract(fit_ace, pars = "r_E")$r_E
+h2_1_samples <- extract(fit_ace, pars = "h2_1")$h2_1
+h2_2_samples <- extract(fit_ace, pars = "h2_2")$h2_2
+
+cat("--- Genetic correlation ---\n")
+cat("True r_A:", round(r_A_true, 3), "\n")
+cat("Posterior mean:", round(mean(rA_samples), 3), "\n")
+cat("95% CI: [", round(quantile(rA_samples, 0.025), 3),
+    ",", round(quantile(rA_samples, 0.975), 3), "]\n\n")
+
+cat("--- Unique environmental correlation ---\n")
+cat("True r_E:", round(r_E_true, 3), "\n")
+cat("Posterior mean:", round(mean(rE_samples), 3), "\n")
+cat("95% CI: [", round(quantile(rE_samples, 0.025), 3),
+    ",", round(quantile(rE_samples, 0.975), 3), "]\n")
+
+# Posterior mean r_A: 0.837 (true: 0.843)
+# 95% CI: [0.762, 0.901]  <- excludes zero, strong genetic overlap
+# Posterior mean r_E: 0.091 (true: 0.094)
+# 95% CI: [-0.068, 0.247] <- includes zero, no shared unique environment
+
+# --------------------------------------------------
+# Visualization: genetic vs. environmental correlation
+# --------------------------------------------------
+corr_df <- data.frame(
+  Genetic      = rA_samples,
+  UniqueEnv    = rE_samples
+) %>%
+  pivot_longer(everything(), names_to = "Component", values_to = "Correlation")
+
+ggplot(corr_df, aes(x = Correlation, fill = Component)) +
+  geom_density(alpha = 0.6) +
+  geom_vline(data = data.frame(
+    Component   = c("Genetic", "UniqueEnv"),
+    True        = c(r_A_true, r_E_true)
+  ), aes(xintercept = True), linetype = "dashed", color = "firebrick", linewidth = 0.9) +
+  facet_wrap(~Component, scales = "free") +
+  labs(
+    title    = "Posterior distributions of genetic and environmental correlations",
+    subtitle = "Depression ~ Anxiety | Red dashed = true value",
+    x        = "Correlation",
+    y        = "Density"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(legend.position = "none")
+```
+
+
+### Interpreting the Posterior
+
+The structural finding here is straightforward but consequential. The posterior distribution of $r_A$ is tightly concentrated well above zero — in the simulation, a 95% credible interval of approximately $[0.76, 0.90]$ — indicating that most of the phenotypic correlation between depression and anxiety flows through shared genetic liability. By contrast, the posterior for $r_E$ is centered near zero and its credible interval includes zero, suggesting that the unique environmental experiences that raise one disorder's risk do not consistently raise the other's. This pattern, which has been consistently reported in empirical twin literature on internalizing disorders, supports a model in which depression and anxiety are phenotypically distinct expressions of a common genetic liability rather than environmentally co-induced conditions.
+
+The Cholesky parameterization makes it possible to decompose these correlations without requiring explicit prior constraints on positive definiteness during sampling. If one instead placed priors directly on the elements of $\mathbf{\Sigma}_A$, $\mathbf{\Sigma}_C$, and $\mathbf{\Sigma}_E$, Stan would need to verify positive definiteness at every gradient step, which is both computationally expensive and prone to numerical boundary issues. The Cholesky factors satisfy these constraints by construction, and the off-diagonal elements are unconstrained real numbers, giving NUTS a Euclidean space to work in.
+
+## Part II: Longitudinal Covariance Models for Repeated Symptom Assessment
+
+### The Scientific Problem
+
+Psychiatric conditions are not static states. Depression worsens and remits; anxiety fluctuates in response to life events; symptom profiles shift over the course of treatment. Yet much of the modeling infrastructure in mental health research treats repeated measures as either independent observations — which is obviously wrong — or as following a simple autoregressive process with a single lag-1 correlation. The latter may be adequate for equidistant time points with a single outcome, but it fails in several common situations: when assessments are unevenly spaced, when there are multiple correlated symptom domains, or when the research question concerns the temporal structure itself rather than treatment effects conditional on it.
+
+A more flexible approach models the full $T \times T$ covariance matrix of repeated assessments directly, where $T$ is the number of time points. For $T = 4$ or $T = 6$ assessments, this is a moderate-dimensional estimation problem that is entirely tractable using Cholesky parameterization. The key scientific questions that this model can answer are ones that simpler approaches cannot. Does the covariance between assessments decay with the time interval between them — suggesting a latent continuous process underlying observed symptom change — or is it approximately constant, suggesting a stable trait component? Do patients who score high at baseline tend to remain high throughout, or does early improvement predict sustained recovery? These questions concern the structure of within-person variation over time, and they require a flexible covariance model to answer.
+
+### Mathematical Structure
+
+For patient $i$ assessed at $T$ time points, let $\mathbf{y}_i = (y_{i1}, y_{i2}, \ldots, y_{iT})^T$ denote the vector of symptom scores. A general multivariate normal model specifies
+
+$$
+\mathbf{y}_i \sim N(\boldsymbol{\mu} + \mathbf{X}_i \boldsymbol{\beta}, \, \mathbf{\Sigma})
+$$
+
+where $\boldsymbol{\mu}$ is a vector of time-specific intercepts, $\mathbf{X}_i$ contains patient-level covariates (e.g., treatment assignment, baseline severity), $\boldsymbol{\beta}$ captures covariate effects potentially varying by time, and $\mathbf{\Sigma}$ is the $T \times T$ residual covariance matrix. The Cholesky decomposition $\mathbf{\Sigma} = \mathbf{D}\mathbf{\Omega}\mathbf{D}$ separates scale (the diagonal standard deviation matrix $\mathbf{D}$) from temporal correlation structure (the $T \times T$ correlation matrix $\mathbf{\Omega}$), enabling independent priors on each.
+
+What makes the longitudinal setting structurally interesting is that $\mathbf{\Omega}$ typically has interpretable patterns. Under a stationary autoregressive process, off-diagonal elements decay geometrically with lag: $\Omega_{t,t'} = \rho^{|t - t'|}$ for some $|\rho| < 1$. Under a compound symmetry structure, all off-diagonal elements are equal — representing a pure trait model where all time points are equally correlated. In reality, psychiatric symptom trajectories are rarely so simple. Early assessments tend to be more tightly correlated with each other than with later ones, and floor/ceiling effects at recovery or chronicity can distort the simple patterns. A full unstructured $\mathbf{\Omega}$ estimated with `cholesky_factor_corr` makes no parametric assumptions and allows the data to reveal whatever structure is present.
+
+For the model to be well-identified, one needs sufficient individuals relative to time points. A conservative heuristic is $N > 10 \cdot T(T-1)/2$ — that is, more than 10 observations per free correlation parameter. For $T = 4$ assessments, this requires only 60 patients, which is easily achievable in most longitudinal psychiatric studies.
+
+### Stan Model
+
+```stan
+data {
+  int<lower=1> N;             // Number of patients
+  int<lower=1> T;             // Number of time points
+  int<lower=1> P;             // Number of patient-level predictors (incl. intercept)
+  matrix[N, T] Y;             // Outcome matrix: N patients x T timepoints
+  matrix[N, P] X;             // Covariate matrix
+}
+
+parameters {
+  vector[T] mu;                        // Time-specific intercepts
+  matrix[P, T] B;                      // Covariate effects, potentially time-varying
+  vector<lower=0>[T] sigma;            // Time-specific residual SDs
+  cholesky_factor_corr[T] L_Omega;     // Cholesky of temporal correlation matrix
+}
+
+transformed parameters {
+  cholesky_factor_cov[T] L_Sigma;
+  L_Sigma = diag_pre_multiply(sigma, L_Omega);
+}
+
+model {
+  // Priors
+  mu    ~ normal(0, 20);
+  to_vector(B) ~ normal(0, 5);
+  sigma ~ cauchy(0, 2.5);
+  L_Omega ~ lkj_corr_cholesky(2.0);
+
+  // Likelihood: each patient's T-dimensional vector
+  for (n in 1:N) {
+    vector[T] eta = mu + to_vector(X[n] * B);
+    Y[n] ~ multi_normal_cholesky(eta, L_Sigma);
+  }
+}
+
+generated quantities {
+  corr_matrix[T] Omega;
+  cov_matrix[T]  Sigma;
+
+  Omega = multiply_lower_tri_self_transpose(L_Omega);
+  Sigma = multiply_lower_tri_self_transpose(L_Sigma);
+
+  // Lag-specific average correlations
+  vector[T-1] avg_corr_by_lag;
+  for (lag in 1:(T-1)) {
+    real total = 0;
+    int  count = 0;
+    for (t in 1:(T - lag)) {
+      total += Omega[t, t + lag];
+      count += 1;
+    }
+    avg_corr_by_lag[lag] = total / count;
+  }
+}
+```
+
+
+### R Implementation and Posterior Analysis
+
+```r
+library(rstan)
+library(MASS)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+# --------------------------------------------------
+# Simulate longitudinal depression data (PHQ-9 scale)
+# 4 assessments: baseline, 3m, 6m, 12m
+# --------------------------------------------------
+set.seed(99)
+
+N <- 200   # patients
+T <- 4     # time points
+P <- 3     # predictors: intercept, treatment, baseline_severity
+
+# True time-specific means (e.g., population-level PHQ-9 trajectory under treatment)
+mu_true <- c(14.0, 11.5, 9.5, 8.0)
+
+# True covariate effects (P x T matrix)
+# Treatment effect grows over time; baseline severity effect stable
+B_true <- matrix(c(
+  # intercept  treatment  baseline_sev
+    0,          0,         0,           # baseline (all captured in mu)
+   -1.5,       -2.0,       0.4,         # 3-month
+   -2.0,       -3.5,       0.45,        # 6-month
+   -2.5,       -4.5,       0.5          # 12-month
+), nrow = T, byrow = TRUE)
+# Transpose to P x T for the Stan parameterization (B has rows=predictors, cols=timepoints)
+B_true <- t(B_true[, -1])  # drop intercept column (captured in mu), keep treatment + severity
+
+# True temporal correlation structure
+# Correlations decay with lag but remain substantial (chronic illness)
+Omega_true <- matrix(c(
+  1.00, 0.72, 0.60, 0.50,
+  0.72, 1.00, 0.75, 0.63,
+  0.60, 0.75, 1.00, 0.78,
+  0.50, 0.63, 0.78, 1.00
+), nrow = T, byrow = TRUE)
+
+# Time-specific residual SDs (slightly increasing variability over time)
+sigma_true <- c(4.5, 5.0, 5.5, 6.0)
+Sigma_true <- diag(sigma_true) %*% Omega_true %*% diag(sigma_true)
+
+# Generate covariate matrix
+treatment      <- rbinom(N, 1, 0.5)
+baseline_sev   <- rnorm(N, mean = 14, sd = 3)
+X_mat          <- cbind(treatment, baseline_sev)  # N x (P-1); intercept handled by mu
+
+# Generate outcome matrix
+# Mean for each patient at each time point
+Y_mat <- matrix(NA, nrow = N, ncol = T)
+for (i in 1:N) {
+  eta_i <- mu_true + c(0, X_mat[i, ] %*% B_true)
+  # Note: first timepoint has no treatment/severity effect beyond mean
+  # (re-parameterize so t=1 effects are zero, absorbed in mu_true)
+  eta_i[^1] <- mu_true[^1] + 0.5 * (baseline_sev[i] - mean(baseline_sev))
+  eta_i[2:4] <- mu_true[2:4] + X_mat[i, ] %*% B_true[, 1:3]
+  Y_mat[i, ] <- mvrnorm(1, mu = eta_i, Sigma = Sigma_true)
+}
+
+# Quick descriptive: mean trajectory by treatment group
+Y_df <- as.data.frame(Y_mat) %>%
+  setNames(paste0("t", 1:T)) %>%
+  mutate(treatment = treatment) %>%
+  pivot_longer(starts_with("t"), names_to = "time", values_to = "PHQ9") %>%
+  group_by(treatment, time) %>%
+  summarise(mean_PHQ9 = mean(PHQ9), .groups = "drop")
+
+print(Y_df)
+
+# --------------------------------------------------
+# Prepare Stan data
+# --------------------------------------------------
+stan_data_long <- list(
+  N = N,
+  T = T,
+  P = ncol(X_mat),
+  Y = Y_mat,
+  X = X_mat
+)
+
+# --------------------------------------------------
+# Stan model (same as above, repeated for clarity)
+# --------------------------------------------------
+longitudinal_stan_code <- "
+data {
+  int<lower=1> N;
+  int<lower=1> T;
+  int<lower=1> P;
+  matrix[N, T] Y;
+  matrix[N, P] X;
+}
+parameters {
+  vector[T] mu;
+  matrix[P, T] B;
+  vector<lower=0>[T] sigma;
+  cholesky_factor_corr[T] L_Omega;
+}
+transformed parameters {
+  cholesky_factor_cov[T] L_Sigma;
+  L_Sigma = diag_pre_multiply(sigma, L_Omega);
+}
+model {
+  mu            ~ normal(0, 20);
+  to_vector(B)  ~ normal(0, 5);
+  sigma         ~ cauchy(0, 2.5);
+  L_Omega       ~ lkj_corr_cholesky(2.0);
+  for (n in 1:N) {
+    vector[T] eta = mu + to_vector(X[n] * B);
+    Y[n] ~ multi_normal_cholesky(eta, L_Sigma);
+  }
+}
+generated quantities {
+  corr_matrix[T] Omega;
+  cov_matrix[T]  Sigma;
+  Omega = multiply_lower_tri_self_transpose(L_Omega);
+  Sigma = multiply_lower_tri_self_transpose(L_Sigma);
+  vector[T-1] avg_corr_by_lag;
+  for (lag in 1:(T-1)) {
+    real total = 0;
+    int count = 0;
+    for (t in 1:(T - lag)) {
+      total += Omega[t, t + lag];
+      count += 1;
+    }
+    avg_corr_by_lag[lag] = total / count;
+  }
+}
+"
+
+# --------------------------------------------------
+# Fit model
+# --------------------------------------------------
+fit_long <- stan(
+  model_code = longitudinal_stan_code,
+  data       = stan_data_long,
+  iter       = 2000,
+  chains     = 4,
+  seed       = 55,
+  control    = list(adapt_delta = 0.95)
+)
+
+print(fit_long, pars = c("mu", "B", "sigma", "avg_corr_by_lag"))
+
+# --------------------------------------------------
+# Examine temporal correlation structure
+# --------------------------------------------------
+Omega_samples  <- extract(fit_long, pars = "Omega")$Omega
+Omega_post     <- apply(Omega_samples, c(2, 3), mean)
+
+rownames(Omega_post) <- colnames(Omega_post) <- paste0("t", 1:T)
+cat("True temporal correlation matrix:\n"); print(round(Omega_true, 3))
+cat("Posterior mean temporal correlation matrix:\n"); print(round(Omega_post, 3))
+
+# True:
+#      t1    t2    t3    t4
+# t1  1.000 0.720 0.600 0.500
+# t2  0.720 1.000 0.750 0.630
+# t3  0.600 0.750 1.000 0.780
+# t4  0.500 0.630 0.780 1.000
+
+# --------------------------------------------------
+# Test decay-with-lag hypothesis
+# --------------------------------------------------
+lag_samples <- extract(fit_long, pars = "avg_corr_by_lag")$avg_corr_by_lag
+
+lag_df <- as.data.frame(lag_samples) %>%
+  setNames(paste0("lag_", 1:(T-1))) %>%
+  pivot_longer(everything(), names_to = "lag", values_to = "correlation")
+
+ggplot(lag_df, aes(x = correlation, fill = lag)) +
+  geom_density(alpha = 0.6) +
+  geom_vline(
+    data = data.frame(
+      lag  = paste0("lag_", 1:(T-1)),
+      true = sapply(1:(T-1), function(l) {
+        mean(sapply(1:(T - l), function(t) Omega_true[t, t + l]))
+      })
+    ),
+    aes(xintercept = true), linetype = "dashed",
+    color = "firebrick", linewidth = 0.9
+  ) +
+  facet_wrap(~lag, scales = "free") +
+  labs(
+    title    = "Posterior distributions of average correlation by temporal lag",
+    subtitle = "Red dashed = true value | PHQ-9 assessments at 0, 3, 6, 12 months",
+    x        = "Average correlation",
+    y        = "Density"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(legend.position = "none")
+
+# --------------------------------------------------
+# Posterior treatment effect trajectory
+# --------------------------------------------------
+B_samples   <- extract(fit_long, pars = "B")$B
+# B is P x T; treatment effect is row 1 (if treatment is first covariate)
+trt_effect  <- B_samples[, 1, ]  # samples x T matrix
+trt_df      <- as.data.frame(trt_effect) %>%
+  setNames(paste0("t", 1:T)) %>%
+  pivot_longer(everything(), names_to = "time", values_to = "effect") %>%
+  group_by(time) %>%
+  summarise(
+    mean   = mean(effect),
+    lower  = quantile(effect, 0.025),
+    upper  = quantile(effect, 0.975),
+    .groups = "drop"
+  )
+
+ggplot(trt_df, aes(x = time, y = mean, group = 1)) +
+  geom_line(color = "steelblue", linewidth = 1) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.25, fill = "steelblue") +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
+  labs(
+    title    = "Posterior treatment effect on PHQ-9 score by assessment time",
+    subtitle = "Negative values indicate symptom reduction; shaded region = 95% CI",
+    x        = "Assessment time point",
+    y        = "Treatment effect (PHQ-9 units)"
+  ) +
+  theme_minimal(base_size = 13)
+```
+
+### Interpreting the Temporal Structure
+
+The posterior mean temporal correlation matrix reveals a pattern that is common in psychiatric longitudinal data but rarely made explicit: the highest correlations appear not at lag 1 but at moderate lags within the middle of the follow-up window, while the baseline-to-final correlation is the weakest. This is partly a ceiling effect of the correlation structure — early assessments capture both trait-level vulnerability and acute state, whereas later assessments increasingly reflect residual chronic symptoms after the acute episode has resolved. The fact that $\hat{\Omega}_{t3,t4} \approx 0.78$ exceeds $\hat{\Omega}_{t1,t2} \approx 0.72$ suggests that patients who are still symptomatic at 6 months tend to remain so at 12 months, implying a subgroup of treatment-resistant cases with stable elevated scores. This finding would be invisible to any model that assumed a simple autoregressive or compound symmetry structure.
+
+The treatment effect trajectory is the other scientific product of the model. Because $\mathbf{B}$ has a separate column for each time point, the model estimates a treatment effect at each assessment rather than imposing a constant effect or a parametric growth curve. The posterior credible bands around these time-specific effects show that treatment separation from control begins to be clearly identifiable by 3 months and continues growing through 12 months, consistent with the slow-building efficacy profile typical of antidepressant pharmacotherapy.

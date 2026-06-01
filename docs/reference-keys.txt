@@ -261,3 +261,16 @@ stan-model-6
 r-implementation-and-causal-inference-workflow
 posterior-interpretation-and-clinical-relevance
 connecting-the-two-applications
+cholesky-factors-in-mental-health-research-ace-decomposition-and-longitudinal-covariance-models
+part-i-the-ace-cholesky-decomposition-in-behavioral-genetics
+the-scientific-problem-2
+mathematical-structure-2
+stan-model-7
+r-implementation-and-posterior-analysis-1
+interpreting-the-posterior
+part-ii-longitudinal-covariance-models-for-repeated-symptom-assessment
+the-scientific-problem-3
+mathematical-structure-3
+stan-model-8
+r-implementation-and-posterior-analysis-2
+interpreting-the-temporal-structure
