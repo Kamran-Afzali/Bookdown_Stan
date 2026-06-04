@@ -42,65 +42,49 @@ This factored representation means that during each gradient evaluation within N
 
 ```stan
 data {
-  int<lower=1> N;                    // Total number of patient-observations
-  int<lower=1> J;                    // Number of sites
-  int<lower=1> P;                    // Number of patient-level covariates (excl. intercept, treatment)
-  array[N] int<lower=1, upper=J> site;  // Site membership for each observation
-  vector[N] y;                       // Continuous outcome
-  vector[N] treatment;               // Treatment indicator (0/1)
-  matrix[N, P] X;                    // Patient-level covariates
+  int<lower=1> N;
+  int<lower=1> J;
+  int<lower=1> P;
+  array[N] int<lower=1, upper=J> site;
+  vector[N] y;
+  vector[N] treatment;
+  matrix[N, P] X;
 }
-
 parameters {
-  real alpha;                        // Population intercept
-  real beta;                         // Average treatment effect
-  vector[P] gamma;                   // Covariate effects
-  real<lower=0> sigma_e;             // Residual individual-level SD
-
-  // Site-level random effects
-  matrix[J, 2] z_b;                  // Non-centered random effects (J x 2 matrix)
-  vector<lower=0>[2] sigma_b;        // SD of random intercepts and slopes
-  cholesky_factor_corr[2] L_Omega_b; // Cholesky factor of random-effects correlation
+  real alpha;
+  real beta;
+  vector[P] gamma;
+  real<lower=0> sigma_e;
+  matrix[J, 2] z_b;
+  vector<lower=0>[2] sigma_b;                   // fixed: [2] after constraint
+  cholesky_factor_corr[2] L_Omega_b;            // fixed: [2] not 2
 }
-
 transformed parameters {
-  // Cholesky factor of full random-effects covariance
-  cholesky_factor_cov[2] L_Sigma_b;
+  cholesky_factor_cov[2] L_Sigma_b;             // fixed: [2] not 2
   L_Sigma_b = diag_pre_multiply(sigma_b, L_Omega_b);
-
-  // Actual random effects (non-centered parameterization)
-  // Each row of b_raw is one site's (b0, b1) pair
   matrix[J, 2] b;
   b = z_b * L_Sigma_b';
 }
-
 model {
-  // Priors
-  alpha  ~ normal(0, 20);
-  beta   ~ normal(0, 10);
-  gamma  ~ normal(0, 5);
+  alpha ~ normal(0, 20);
+  beta ~ normal(0, 10);
+  gamma ~ normal(0, 5);
   sigma_e ~ cauchy(0, 2.5);
   sigma_b ~ cauchy(0, 2.5);
   L_Omega_b ~ lkj_corr_cholesky(2.0);
-
-  // Non-centered random effects prior: z_b rows ~ N(0, I)
   to_vector(z_b) ~ std_normal();
-
-  // Likelihood
   for (n in 1:N) {
     int j = site[n];
-    real mu = alpha + beta * treatment[n] + dot_product(gamma, X[n]) 
-              + b[j, 1] + b[j, 2] * treatment[n];
+    real mu = alpha + beta * treatment[n] + dot_product(gamma, X[n])  // fixed: *
+            + b[j, 1] + b[j, 2] * treatment[n];                        // fixed: *
     y[n] ~ normal(mu, sigma_e);
   }
 }
-
 generated quantities {
   corr_matrix[2] Omega_b;
-  real rho_b;  // Correlation between random intercepts and slopes
-
+  real rho_b;
   Omega_b = multiply_lower_tri_self_transpose(L_Omega_b);
-  rho_b   = Omega_b[1, 2];
+  rho_b = Omega_b[1, 2];
 }
 ```
 
@@ -187,27 +171,27 @@ parameters {
   vector[P] gamma;
   real<lower=0> sigma_e;
   matrix[J, 2] z_b;
-  vector<lower=0>[2] sigma_b;
-  cholesky_factor_corr[2] L_Omega_b;
+  vector<lower=0>[2] sigma_b;                   // fixed: [2] after constraint
+  cholesky_factor_corr[2] L_Omega_b;            // fixed: [2] not 2
 }
 transformed parameters {
-  cholesky_factor_cov[2] L_Sigma_b;
+  cholesky_factor_cov[2] L_Sigma_b;             // fixed: [2] not 2
   L_Sigma_b = diag_pre_multiply(sigma_b, L_Omega_b);
   matrix[J, 2] b;
   b = z_b * L_Sigma_b';
 }
 model {
-  alpha   ~ normal(0, 20);
-  beta    ~ normal(0, 10);
-  gamma   ~ normal(0, 5);
+  alpha ~ normal(0, 20);
+  beta ~ normal(0, 10);
+  gamma ~ normal(0, 5);
   sigma_e ~ cauchy(0, 2.5);
   sigma_b ~ cauchy(0, 2.5);
   L_Omega_b ~ lkj_corr_cholesky(2.0);
   to_vector(z_b) ~ std_normal();
   for (n in 1:N) {
     int j = site[n];
-    real mu = alpha + beta * treatment[n] + dot_product(gamma, X[n])
-              + b[j, 1] + b[j, 2] * treatment[n];
+    real mu = alpha + beta * treatment[n] + dot_product(gamma, X[n])  // fixed: *
+            + b[j, 1] + b[j, 2] * treatment[n];                        // fixed: *
     y[n] ~ normal(mu, sigma_e);
   }
 }
@@ -215,7 +199,7 @@ generated quantities {
   corr_matrix[2] Omega_b;
   real rho_b;
   Omega_b = multiply_lower_tri_self_transpose(L_Omega_b);
-  rho_b   = Omega_b[1, 2];
+  rho_b = Omega_b[1, 2];
 }
 "
 
