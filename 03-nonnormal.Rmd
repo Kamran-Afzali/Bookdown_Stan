@@ -226,7 +226,7 @@ transformed parameters {
   mu = exp(X * beta);
 }
 model {
-  beta [aimspress](https://www.aimspress.com/article/doi/10.3934/math.2024883) ~ normal(0, 5);
+  beta ~ normal(0, 5);
   beta[2:K] ~ normal(0, 2.5);
   phi ~ exponential(1);
 
